@@ -1,0 +1,421 @@
+{
+    "profiles": {
+        "PTA": {
+            "groups": {
+                "PTA": [
+                    {
+                        "name": "Fortigate 200D",
+                        "ip": "192.168.0.9",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "ADSL",
+                            "speedDown": "50",
+                            "speedUp": "50"
+                        }
+                    },
+                    {
+                        "name": "Server AD User",
+                        "ip": "192.168.0.12",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "Server ShareFile",
+                        "ip": "192.168.0.11",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "WAN1 (TRUE)",
+                        "ip": "110.170.174.146",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "Fiber",
+                            "networkConfig": " (TRUE)"
+                        }
+                    },
+                    {
+                        "name": "WAN2 (TOT)",
+                        "ip": "113.53.83.91",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "Fiber",
+                            "networkConfig": " (TOT)"
+                        }
+                    },
+                    {
+                        "name": "QNAP Cloud",
+                        "ip": "192.168.0.2",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Virtual"
+                        }
+                    },
+                    {
+                        "name": "Server แจ้งซ่อม MT",
+                        "ip": "192.168.0.18",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "Server Roomsys,Carsys,PowertechCenter",
+                        "ip": "192.168.0.13",
+                        "type": "hyperv",
+                        "details": {
+                            "serverType": "Virtual"
+                        }
+                    },
+                    {
+                        "name": "Print F16",
+                        "ip": "192.168.0.23",
+                        "type": "print",
+                        "details": {
+                            "connection": "Network",
+                            "brand": "FUJIFILM",
+                            "model": "Apeos C3070"
+                        }
+                    },
+                    {
+                        "name": "Print F17",
+                        "ip": "192.168.0.24",
+                        "type": "print",
+                        "details": {
+                            "brand": "FUJIFILM",
+                            "model": "Apeos C3070",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "Print F4",
+                        "ip": "192.168.0.25",
+                        "type": "print",
+                        "details": {
+                            "brand": "FUJIFILM",
+                            "model": "Apeos C3070",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "Print F8",
+                        "ip": "192.168.0.27",
+                        "type": "print",
+                        "details": {
+                            "brand": "FUJIFILM",
+                            "model": "Apeos C3070",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "CCTV F17",
+                        "ip": "192.168.0.50",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "16",
+                            "cameraType": "Analog",
+                            "resolution": "720P"
+                        }
+                    },
+                    {
+                        "name": "CCTV F16",
+                        "ip": "192.168.0.51",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "16",
+                            "cameraType": "Analog",
+                            "resolution": "720P"
+                        }
+                    },
+                    {
+                        "name": "CCTV F4",
+                        "ip": "192.168.0.52",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "16 CH",
+                            "cameraType": "Analog",
+                            "resolution": "720P"
+                        }
+                    },
+                    {
+                        "name": "CCTV F8",
+                        "ip": "192.168.0.53",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "16",
+                            "cameraType": "Analog",
+                            "resolution": "720P"
+                        }
+                    },
+                    {
+                        "name": "CCTV F20",
+                        "ip": "192.168.0.74",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "24",
+                            "cameraType": "IP",
+                            "resolution": "720P"
+                        }
+                    },
+                    {
+                        "name": "SQL",
+                        "ip": "192.158.0.10",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    }
+                ],
+                "PT4": [
+                    {
+                        "name": "AD",
+                        "ip": "192.168.1.239",
+                        "type": "server",
+                        "details": {}
+                    }
+                ],
+                "PTE": [
+                    {
+                        "name": "AD Server",
+                        "ip": "192.168.5.11",
+                        "type": "server",
+                        "details": {}
+                    }
+                ]
+            }
+        },
+        "PT4": {
+            "groups": {
+                "PTA": [],
+                "PT4": [
+                    {
+                        "name": "Fileddata",
+                        "ip": "192.168.1.249",
+                        "type": "server",
+                        "details": {
+                            "roles": "Fileddata แชไฟล",
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "ad",
+                        "ip": "192.168.1.239",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical",
+                            "roles": "adserver"
+                        }
+                    },
+                    {
+                        "name": "Fortigate",
+                        "ip": "192.168.1.10",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "ADSL",
+                            "networkConfig": "200D"
+                        }
+                    },
+                    {
+                        "name": "WAN1 (TOT):",
+                        "ip": "1.0.129.6",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "Fiber",
+                            "networkConfig": "WAN1 (TOT): 1.0.129.6"
+                        }
+                    },
+                    {
+                        "name": "WAN2 (True)",
+                        "ip": "61.90.139.3",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "Fiber",
+                            "networkConfig": "WAN2 (True): 61.90.139.3"
+                        }
+                    },
+                    {
+                        "name": "F7",
+                        "ip": "192.168.1.254",
+                        "type": "print",
+                        "details": {
+                            "printerType": "Laser",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "F6",
+                        "ip": "192.168.1.253",
+                        "type": "print",
+                        "details": {
+                            "printerType": "Inkjet",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "F5",
+                        "ip": "192.168.1.247",
+                        "type": "print",
+                        "details": {
+                            "printerType": "Laser",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "F6 LG",
+                        "ip": "192.168.1.238",
+                        "type": "print",
+                        "details": {
+                            "printerType": "Inkjet",
+                            "connection": "Network"
+                        }
+                    },
+                    {
+                        "name": "F6",
+                        "ip": "192.168.1.243",
+                        "type": "cctv",
+                        "details": {
+                            "cameraCount": "16",
+                            "cameraType": "Analog"
+                        }
+                    },
+                    {
+                        "name": "F5",
+                        "ip": "192.168.1.241",
+                        "type": "cctv",
+                        "details": {
+                            "brand": "Hiview",
+                            "cameraCount": "16",
+                            "cameraType": "Analog"
+                        }
+                    }
+                ],
+                "PTE": []
+            }
+        },
+        "PTE": {
+            "groups": {
+                "PTA": [],
+                "PT4": [],
+                "PTE": [
+                    {
+                        "name": "SV-Management Physical Server Imm1",
+                        "ip": "192.168.5.26",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-Management Physical Server Imm2",
+                        "ip": "192.168.5.26",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-IBM Storage FS5015",
+                        "ip": "192.168.5.21",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-Vmware ESXI1",
+                        "ip": "192.168.5.28",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-vCenter",
+                        "ip": "192.168.5.38",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-Vmware ESXI 2",
+                        "ip": "192.168.5.29",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "NAS Synology",
+                        "ip": "192.168.5.30",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "V-ESXI Share Drive",
+                        "ip": "192.168.5.11",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "SV-ESXI AD Server + Update Programs",
+                        "ip": "192.168.5.13",
+                        "type": "server",
+                        "details": {
+                            "serverType": "Physical",
+                            "roles": "ERP"
+                        }
+                    },
+                    {
+                        "name": "Fortigate 80F",
+                        "ip": "192.168.5.9",
+                        "type": "internet",
+                        "details": {
+                            "linkType": "Fiber"
+                        }
+                    },
+                    {
+                        "name": "Switch Zyxel 10gb",
+                        "ip": "192.168.5.20",
+                        "type": "server",
+                        "details": {}
+                    },
+                    {
+                        "name": "",
+                        "ip": "192.168.5.39",
+                        "type": "server",
+                        "details": {}
+                    },
+                    {
+                        "name": "Switch Cisco Catalyst 1300 #2 (ตัวล่าง)",
+                        "ip": "192.168.5.40",
+                        "type": "server",
+                        "details": {
+                            "cpu": "",
+                            "printerType": "Laser",
+                            "connection": "Network",
+                            "serverType": "Physical"
+                        }
+                    },
+                    {
+                        "name": "Printter",
+                        "ip": "192.168.5.5",
+                        "type": "print",
+                        "details": {
+                            "printerType": "Laser",
+                            "connection": "Network"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

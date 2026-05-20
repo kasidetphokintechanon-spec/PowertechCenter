@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางการใช้ห้องประชุม</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 1cm;
+            }
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 2rem auto;
+            padding: 1.5cm;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .header-bg {
+            background-color: #1e293b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print fixed top-4 right-4 z-50">
+        <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition">
+            <i class="fas fa-print mr-2"></i> พิมพ์
+        </button>
+    </div>
+
+    <div id="a4-page" class="a4-container">
+        <div id="loading-state" class="text-center py-40">
+            <i class="fas fa-spinner fa-spin text-4xl text-slate-400"></i>
+            <p class="mt-4 text-slate-500">กำลังโหลดข้อมูลตารางประชุม...</p>
+        </div>
+
+        <div id="content-state" class="hidden">
+            <header class="header-bg -mx-[1.5cm] -mt-[1.5cm] mb-8 p-8 rounded-b-2xl">
+                <h1 id="room-name" class="text-4xl font-bold">ตารางการใช้ห้องประชุม</h1>
+                <p id="month-name" class="text-xl text-slate-300"></p>
+            </header>
+
+            <main>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-slate-800">
+                            <th class="py-3 px-2 w-1/4">วันที่</th>
+                            <th class="py-3 px-2 w-1/4">เวลา</th>
+                            <th class="py-3 px-2 w-1/2">หัวข้อ / ผู้จอง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body">
+                        <!-- Rows will be injected here -->
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+
+        function getRoomIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('room_id');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const roomId = getRoomIdFromUrl();
+            if (!roomId) {
+                document.getElementById('loading-state').innerHTML = '<p class="text-red-500">Error: ไม่ได้ระบุ ID ห้องประชุมใน URL</p>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_PATH}?action=get_monthly_schedule&room_id=${roomId}`);
+                const data = await res.json();
+
+                if (data.status !== 'success' || !data.schedule) {
+                    throw new Error(data.message || 'Failed to load schedule');
+                }
+
+                renderSchedule(data.schedule);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading-state').innerHTML = `<p class="text-red-500">เกิดข้อผิดพลาด: ${e.message}</p>`;
+            }
+        });
+
+        function renderSchedule(schedule) {
+            const tbody = document.getElementById('schedule-body');
+            const now = new Date();
+            const monthName = now.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+
+            document.getElementById('month-name').textContent = monthName;
+            if (schedule.length > 0) {
+                document.getElementById('room-name').textContent = schedule[0].room_name;
+            }
+
+            if (schedule.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-slate-400">เดือนนี้ยังไม่มีการจอง</td></tr>`;
+            } else {
+                tbody.innerHTML = schedule.map(item => {
+                    const start = new Date(item.start_time);
+                    const end = new Date(item.end_time);
+                    const dateStr = start.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                    const timeStr = `${start.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`;
+
+                    return `
+                        <tr class="border-b border-slate-100">
+                            <td class="py-3 px-2 font-semibold">${dateStr}</td>
+                            <td class="py-3 px-2 text-slate-600">${timeStr}</td>
+                            <td class="py-3 px-2">
+                                <p class="font-semibold text-slate-800">${item.title}</p>
+                                <p class="text-sm text-slate-500">โดย: ${item.booker_name}</p>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('content-state').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+```
+
+### วิธีใช้งาน
+1.  **เปิดหน้าเว็บ:** เข้าไปที่ URL: `http://[your-server]/PowertechTest/room_schedule_a4.html?room_id=X`
+    *   อย่าลืมเปลี่ยน `X` ให้เป็น `id` ของห้องประชุมที่ต้องการพิมพ์รายงาน
+2.  **ตรวจสอบข้อมูล:** หน้าเว็บจะแสดงตารางการประชุมทั้งหมดของเดือนปัจจุบันสำหรับห้องนั้นๆ
+3.  **สั่งพิมพ์:** กดปุ่ม **"พิมพ์"** ที่มุมขวาบนเพื่อสั่งพิมพ์ออกทางเครื่องพิมพ์ได้เลยครับ
+
+คุณสามารถนำกระดาษ A4 ที่พิมพ์แล้วไปติดไว้ที่หน้าห้องประชุมได้ทันทีครับ
+
+<!--
+[PROMPT_SUGGESTION]ช่วยเพิ่ม QR Code ในหน้า A4 เพื่อให้สแกนไปหน้าจองห้องประชุมนี้ได้[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]ช่วยเพิ่มฟังก์ชันส่งอีเมลสรุปตารางประชุมของแต่ละห้องให้ Admin ทุกสิ้นเดือน[/PROMPT_SUGGESTION]
+-->

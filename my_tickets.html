@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>งานแจ้งซ่อมของฉัน - SystemCenter</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        @media print {
+            body.printing-ticket > *:not(.print-container) { display: none !important; }
+            body.printing-ticket .print-container { display: block !important; width: 100%; height: 100%; }
+        }
+    </style>
+    <style>
+        /* === PTC Design System supplements for my_tickets.html === */
+        body { font-family: var(--ptc-font-th, 'Kanit', sans-serif) !important; }
+
+        /* Responsive ticket list table */
+        @media (max-width: 640px) {
+            table.ticket-table thead { display: none; }
+            table.ticket-table tbody tr {
+                display: flex; flex-direction: column;
+                border: 1px solid var(--ptc-border, #e2e8f0);
+                border-radius: var(--ptc-radius-lg, 0.75rem);
+                margin-bottom: .75rem; padding: .6rem .75rem;
+                background: var(--ptc-surface, #fff);
+            }
+            table.ticket-table td { padding: .35rem 0; border: none; font-size: .875rem; }
+            table.ticket-table td::before {
+                content: attr(data-label);
+                display: block; font-size: .7rem; font-weight: 600;
+                color: var(--ptc-text-muted, #94a3b8);
+                text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px;
+            }
+            /* Ticket detail modal full-width */
+            .ticket-modal-inner { margin: .5rem !important; border-radius: var(--ptc-radius-xl, 1rem) !important; }
+        }
+
+        /* Status badges */
+        .badge-Pending    { background: var(--ptc-warning-bg, #fef3c7); color: var(--ptc-warning, #d97706); }
+        .badge-In-Progress{ background: var(--ptc-info-bg, #dbeafe);    color: var(--ptc-info, #2563eb); }
+        .badge-Completed  { background: var(--ptc-success-bg, #d1fae5); color: var(--ptc-success, #059669); }
+
+        /* Focus ring */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ptc-primary, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)) !important;
+        }
+
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border, #cbd5e1); border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 ptc-normalize">
+
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-3 h-16 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center gap-2 font-bold text-lg text-slate-700 dark:text-white hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                    </a>
+                </div>
+                <h1 class="text-lg font-bold text-center">ติดตามสถานะงานซ่อม</h1>
+                <div></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-16 w-full">
+        <div class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 overflow-hidden min-h-[calc(100vh-4rem)]">
+            <div class="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><i class="fas fa-ticket-alt text-blue-500"></i> รายการแจ้งซ่อมของฉัน</h2>
+                <div class="flex items-center gap-2 flex-wrap justify-center w-full sm:w-auto">
+                    <div class="flex items-center gap-2 flex-wrap justify-center flex-1">
+                        <select id="status-view" class="px-3 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <option value="all">ทั้งหมด</option>
+                            <option value="active">กำลังดำเนินการ</option>
+                            <option value="completed">เสร็จสิ้น</option>
+                            <option value="cancelled">ยกเลิก</option>
+                        </select>
+                        <div class="relative w-full sm:w-auto">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input id="search-input" type="text" placeholder="ค้นหา Ticket / อาการ / ผู้รับผิดชอบ" class="pl-9 pr-3 py-1.5 sm:py-2 w-full sm:w-64 max-w-[100vw] sm:max-w-[70vw] rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400" />
+                        </div>
+                        <button id="quick-last-30" type="button" class="px-3 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition whitespace-nowrap">
+                            ย้อนหลัง 30 วัน
+                        </button>
+                        <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                            <input id="date-start" type="date" class="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-200" />
+                            <span class="text-[10px] sm:text-xs text-slate-400">ถึง</span>
+                            <input id="date-end" type="date" class="px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-200" />
+                            <button id="clear-date-filter" type="button" class="px-3 py-1.5 sm:py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition whitespace-nowrap">
+                                ล้างวันที่
+                            </button>
+                        </div>
+                    </div>
+                    <a href="request.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition order-1 sm:order-none">+ แจ้งปัญหาใหม่</a>
+                    <button onclick="exportTickets()" class="px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-sm font-bold shadow-md hover:bg-emerald-700 transition flex items-center gap-1 sm:gap-2">
+                        <i class="fas fa-file-excel"></i> <span class="hidden sm:inline">Export</span>
+                    </button>
+                </div>
+            </div>
+            <div class="px-4 sm:px-6 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40">
+                <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span class="font-semibold">Legend:</span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-file-signature text-blue-600"></i> PR</span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-file-invoice text-emerald-600"></i> PO</span>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 sm:px-6 sm:py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/40">
+                <div id="ticket-stats" class="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300"></div>
+                <div class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
+                    Tip: กดที่แถวเพื่อดูรายละเอียด/รูปภาพ และใช้ช่องค้นหาเพื่อค้นจาก Ticket/อาการ/ผู้รับผิดชอบ
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-200 dark:border-slate-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                            <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-semibold text-xs sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th class="px-3 py-3 sm:px-6 sm:py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition select-none" onclick="sortTickets('id')">
+                                        Ticket ID <i class="fas fa-sort ml-1 text-slate-300 sort-icon" id="sort-icon-id"></i>
+                                    </th>
+                                    <th class="px-6 py-4 hidden sm:table-cell cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition select-none" onclick="sortTickets('date')">
+                                        วันที่แจ้ง <i class="fas fa-sort ml-1 text-slate-300 sort-icon" id="sort-icon-date"></i>
+                                    </th>
+                                    <th class="px-3 py-3 sm:px-6 sm:py-4 w-full sm:w-1/3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition select-none" onclick="sortTickets('problem')">
+                                        ปัญหา / อาการ <i class="fas fa-sort ml-1 text-slate-300 sort-icon" id="sort-icon-problem"></i>
+                                    </th>
+                                    <th class="px-6 py-4 hidden md:table-cell cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition select-none" onclick="sortTickets('type')">
+                                        ประเภท <i class="fas fa-sort ml-1 text-slate-300 sort-icon" id="sort-icon-type"></i>
+                                    </th>
+                                    <th class="px-6 py-4 hidden sm:table-cell cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition select-none" onclick="sortTickets('status')">
+                                        สถานะ <i class="fas fa-sort ml-1 text-slate-300 sort-icon" id="sort-icon-status"></i>
+                                    </th>
+                                    <th class="px-6 py-4 text-center hidden sm:table-cell">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticket-list" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                <tr><td colspan="6" class="px-6 py-10 text-center text-slate-400">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                    </table>
+                    <div id="pagination-controls" class="hidden flex-col sm:flex-row justify-between items-center p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <span class="text-sm text-slate-500 dark:text-slate-400 mb-2 sm:mb-0">แสดง <span id="page-start" class="font-bold text-slate-700 dark:text-slate-200">0</span> - <span id="page-end" class="font-bold text-slate-700 dark:text-slate-200">0</span> จาก <span id="page-total" class="font-bold text-slate-700 dark:text-slate-200">0</span> รายการ</span>
+                        <div class="flex gap-2">
+                            <button onclick="changePage(-1)" id="btn-prev" class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-chevron-left mr-1"></i> ก่อนหน้า</button>
+                            <button onclick="changePage(1)" id="btn-next" class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-medium text-slate-600 dark:text-slate-300 transition disabled:opacity-50 disabled:cursor-not-allowed">ถัดไป <i class="fas fa-chevron-right ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="print-container"></div>
+
+    <script>
+        const API_PATH = 'api.php';
+        let allMyLogs = [];
+        let sessionData = {};
+        let currentSort = { column: 'date', direction: 'desc' };
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let selectedTicketId = null;
+        let lastDetailRenderedId = null;
+        let dateStartFilter = '';
+        let dateEndFilter = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // 1. Get User Info
+                const sessRes = await fetch('api.php?action=check_session');
+                sessionData = await sessRes.json();
+                if (!sessionData.loggedin) { window.location.href = 'login.html'; return; }
+
+                // 2. Get Logs (ใช้ endpoint เดียวกับหน้า Dashboard)
+                const res = await fetch('api.php?action=get&file=it_logs&v=' + Date.now());
+                const logsRaw = await res.json();
+                if (!Array.isArray(logsRaw) && logsRaw && typeof logsRaw === 'object' && logsRaw.status === 'error') {
+                    throw new Error(logsRaw.message || 'โหลดข้อมูลไม่สำเร็จ');
+                }
+                const logs = Array.isArray(logsRaw) ? logsRaw : [];
+
+                // 3. Filter & Render (ยึด logic เดียวกับหน้า Dashboard → renderMyStatusUI)
+                const uid = String(sessionData.user_id ?? '').trim();
+                const role = String(sessionData.role ?? '').toLowerCase();
+                const primaryDept = String(sessionData.primary_department ?? '').toUpperCase();
+
+                if (!uid) {
+                    allMyLogs = [];
+                } else if (role === 'admin' || primaryDept === 'IT') {
+                    allMyLogs = logs.filter(l =>
+                        l &&
+                        (String(l.requester_id ?? '') === uid ||
+                         String(l.servicedById ?? '') === uid ||
+                         l.status === 'Pending')
+                    );
+                } else {
+                    allMyLogs = logs.filter(l =>
+                        l &&
+                        (String(l.requester_id ?? '') === uid ||
+                         String(l.servicedById ?? '') === uid)
+                    );
+                }
+
+                // กันเคสข้อมูลเก่า/ไม่ลง requester_id → ถ้ากรองแล้วว่าง แต่ฐานมีข้อมูล ให้แสดงทั้งหมดก่อน
+                if (allMyLogs.length === 0 && logs.length > 0) allMyLogs = logs;
+                updateTicketStats();
+                sortTickets('date', false);
+
+                const statusView = document.getElementById('status-view');
+                const searchInput = document.getElementById('search-input');
+                if (statusView) statusView.addEventListener('change', () => { currentPage = 1; renderTickets(); });
+                if (searchInput) searchInput.addEventListener('input', () => { currentPage = 1; renderTickets(); });
+
+                const dateStartEl = document.getElementById('date-start');
+                const dateEndEl = document.getElementById('date-end');
+                const quickLast30 = document.getElementById('quick-last-30');
+                const clearDateBtn = document.getElementById('clear-date-filter');
+
+                if (dateStartEl) dateStartEl.addEventListener('change', () => { dateStartFilter = dateStartEl.value || ''; currentPage = 1; renderTickets(); });
+                if (dateEndEl) dateEndEl.addEventListener('change', () => { dateEndFilter = dateEndEl.value || ''; currentPage = 1; renderTickets(); });
+                if (clearDateBtn) clearDateBtn.addEventListener('click', () => {
+                    dateStartFilter = '';
+                    dateEndFilter = '';
+                    if (dateStartEl) dateStartEl.value = '';
+                    if (dateEndEl) dateEndEl.value = '';
+                    currentPage = 1;
+                    renderTickets();
+                });
+                if (quickLast30) quickLast30.addEventListener('click', () => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setDate(end.getDate() - 30);
+                    const toISODate = (d) => d.toISOString().slice(0, 10);
+                    dateStartFilter = toISODate(start);
+                    dateEndFilter = toISODate(end);
+                    if (dateStartEl) dateStartEl.value = dateStartFilter;
+                    if (dateEndEl) dateEndEl.value = dateEndFilter;
+                    currentPage = 1;
+                    renderTickets();
+                });
+            } catch (e) {
+                console.error(e);
+                const tbody = document.getElementById('ticket-list');
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400">โหลดข้อมูลไม่สำเร็จ</td></tr>`;
+                if (window.Swal) Swal.fire('ผิดพลาด', e?.message || 'โหลดข้อมูลไม่สำเร็จ', 'error');
+            }
+        });
+
+        function updateTicketStats() {
+            const el = document.getElementById('ticket-stats');
+            if (!el) return;
+
+            const total = allMyLogs.length;
+            const active = allMyLogs.filter(l => l && !['Completed', 'Cancelled', 'Unrepairable'].includes(l.status)).length;
+            const completed = allMyLogs.filter(l => l && ['Completed', 'Unrepairable'].includes(l.status)).length;
+            const cancelled = allMyLogs.filter(l => l && l.status === 'Cancelled').length;
+            const rated = allMyLogs.filter(l => l && ['Completed', 'Unrepairable'].includes(l.status) && l.rating).length;
+
+            el.innerHTML = `
+                <button type="button" data-view="all" class="px-2.5 py-1 rounded-full bg-slate-200/70 dark:bg-slate-700/70 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition">ทั้งหมด: ${total}</button>
+                <button type="button" data-view="active" class="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-200/70 dark:hover:bg-blue-900/40 transition">กำลังดำเนินการ: ${active}</button>
+                <button type="button" data-view="completed" class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-200/70 dark:hover:bg-emerald-900/40 transition">เสร็จสิ้น: ${completed}</button>
+                <button type="button" data-view="cancelled" class="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-semibold hover:bg-red-200/70 dark:hover:bg-red-900/40 transition">ยกเลิก: ${cancelled}</button>
+                <span class="px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 font-semibold">ให้คะแนนแล้ว: ${rated}</span>
+            `;
+
+            el.querySelectorAll('button[data-view]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const view = btn.getAttribute('data-view') || 'all';
+                    const statusView = document.getElementById('status-view');
+                    if (statusView) statusView.value = view;
+                    currentPage = 1;
+                    renderTickets();
+                });
+            });
+        }
+
+        function sortTickets(column, toggle = true) {
+            if (toggle) {
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+            }
+            
+            updateSortIndicators();
+
+            allMyLogs.sort((a, b) => {
+                let valA = a[column] || '';
+                let valB = b[column] || '';
+                
+                if (column === 'date') {
+                    valA = new Date(valA).getTime();
+                    valB = new Date(valB).getTime();
+                } else {
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                }
+
+                if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            currentPage = 1; // Reset page on sort
+            renderTickets();
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('.sort-icon').forEach(icon => icon.className = 'fas fa-sort ml-1 text-slate-300 sort-icon');
+            const activeIcon = document.getElementById(`sort-icon-${currentSort.column}`);
+            if (activeIcon) activeIcon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'} ml-1 text-blue-500 sort-icon`;
+        }
+
+        function exportTickets() {
+            if (!allMyLogs || allMyLogs.length === 0) {
+                Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ Export', 'warning');
+                return;
+            }
+
+            // CSV Header
+            let csvContent = "\uFEFFTicket ID,Date,Problem,Type,Status,Serviced By,Solution\n";
+
+            allMyLogs.forEach(log => {
+                const escapeCsv = (text) => {
+                    if (!text) return "";
+                    return '"' + String(text).replace(/"/g, '""').replace(/\n/g, ' ') + '"';
+                };
+
+                const row = [
+                    escapeCsv(log.id),
+                    escapeCsv(log.date),
+                    escapeCsv(log.problem),
+                    escapeCsv(log.type),
+                    escapeCsv(log.status),
+                    escapeCsv(log.servicedBy),
+                    escapeCsv(log.solution)
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `My_Tickets_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function formatTypeLabel(type) {
+            const t = String(type || '').trim();
+            if (!t) return '-';
+            if (t.toLowerCase() === 'other') return 'อื่นๆ';
+            return t;
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderTickets();
+        }
+
+        function renderTickets() {
+            const tbody = document.getElementById('ticket-list');
+            const paginationControls = document.getElementById('pagination-controls');
+            const view = document.getElementById('status-view')?.value || 'all';
+            const term = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+
+            const filteredLogs = allMyLogs.filter(l => {
+                if (!l) return false;
+                const isClosed = ['Completed', 'Cancelled', 'Unrepairable'].includes(l.status);
+                if (view === 'active' && isClosed) return false;
+                if (view === 'completed' && !['Completed', 'Unrepairable'].includes(l.status)) return false;
+                if (view === 'cancelled' && l.status !== 'Cancelled') return false;
+
+                if (dateStartFilter || dateEndFilter) {
+                    const baseDateRaw = (view === 'completed' || view === 'cancelled')
+                        ? (l.closed_date || l.completed_date || l.date)
+                        : l.date;
+                    const baseDate = new Date(baseDateRaw);
+                    if (!isNaN(baseDate.getTime())) {
+                        if (dateStartFilter) {
+                            const start = new Date(dateStartFilter + 'T00:00:00');
+                            if (baseDate < start) return false;
+                        }
+                        if (dateEndFilter) {
+                            const end = new Date(dateEndFilter + 'T23:59:59');
+                            if (baseDate > end) return false;
+                        }
+                    }
+                }
+
+                if (!term) return true;
+                const hay = [
+                    l.id, l.problem, l.type, l.status, l.solution, l.servicedBy,
+                    l.department, l.company, l.asset_id, l.asset
+                ].filter(Boolean).join(' ').toLowerCase();
+                return hay.includes(term);
+            });
+
+            // Pagination Logic
+            const totalItems = filteredLogs.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            // Ensure currentPage is valid
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+            const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+
+            if (filteredLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 flex flex-col items-center"><i class="fas fa-search text-4xl mb-2 opacity-50"></i><p>ไม่พบรายการ</p></td></tr>`;
+                paginationControls.classList.add('hidden');
+                paginationControls.classList.remove('flex');
+                return;
+            }
+
+            paginationControls.classList.remove('hidden');
+            paginationControls.classList.add('flex');
+            document.getElementById('page-start').textContent = totalItems > 0 ? startIndex + 1 : 0;
+            document.getElementById('page-end').textContent = endIndex;
+            document.getElementById('page-total').textContent = totalItems;
+            document.getElementById('btn-prev').disabled = currentPage <= 1;
+            document.getElementById('btn-next').disabled = currentPage >= totalPages;
+
+            tbody.innerHTML = paginatedLogs.map(l => {
+                    const isSelected = l.id === selectedTicketId;
+                    const selectedRowClass = isSelected ? 'bg-blue-50/70 dark:bg-blue-900/20' : '';
+                    // เช็คว่าเป็นงานที่ได้รับมอบหมายหรือไม่
+                    const isAssigned = String(l.servicedById ?? '').trim() === String(sessionData.user_id ?? '').trim();
+                    const jobBadge = isAssigned ? '<span class="bg-amber-100 text-amber-700 border border-amber-200 text-[10px] px-1.5 py-0.5 rounded ml-2 font-bold">งานซ่อม</span>' : '';
+                    
+                    // Service Type Icon
+                    let typeIcon = '<i class="fas fa-laptop text-blue-500"></i>';
+                    let typeBg = 'bg-blue-50 border-blue-100';
+                    if (l.service_type === 'MT') {
+                        typeIcon = '<i class="fas fa-tools text-orange-500"></i>';
+                        typeBg = 'bg-orange-50 border-orange-100';
+                    }
+
+                    let idColorClass = 'text-slate-700 dark:text-slate-200';
+                    if (l.id && l.id.startsWith('PT4')) idColorClass = 'text-red-600 dark:text-red-400';
+                    else if (l.id && l.id.startsWith('PTA')) idColorClass = 'text-emerald-600 dark:text-emerald-400';
+                    else if (l.id && l.id.startsWith('PTE')) idColorClass = 'text-blue-600 dark:text-blue-400';
+
+                    // Timeline Logic
+                    let currentIdx = 0;
+                    let subStatus = '';
+                    let activeColor = 'blue';
+                    let isCancelled = l.status === 'Cancelled';
+                    let step2Label = 'ดำเนินการ';
+
+                    if (l.status === 'Pending') currentIdx = 0;
+                    else if (['Received','In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(l.status)) {
+                        currentIdx = 1;
+                        if(l.status === 'Received') { subStatus = 'รับเรื่องแล้ว (รอเริ่มซ่อม)'; activeColor = 'amber'; step2Label = 'รับเรื่องแล้ว'; }
+                        else if(l.status === 'PR Submitted') { subStatus = 'ส่ง PR แล้ว'; activeColor = 'sky'; step2Label = 'PR แล้ว'; }
+                        else if(l.status === 'PO Issued') { subStatus = 'ออก PO แล้ว'; activeColor = 'teal'; step2Label = 'PO แล้ว'; }
+                        else if(l.status === 'Parts Received') { subStatus = 'ได้รับอะไหล่แล้ว'; activeColor = 'cyan'; step2Label = 'อะไหล่มาแล้ว'; }
+                        else if(l.status === 'Waiting for Parts') { subStatus = 'รออะไหล่'; activeColor = 'orange'; step2Label = 'รออะไหล่'; }
+                        else if(l.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'indigo'; step2Label = 'แก้ชั่วคราว'; }
+                        else { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
+                    }
+                    else if (l.status === 'Unrepairable') { currentIdx = 2; activeColor = 'rose'; step2Label = 'ซ่อมไม่ได้'; }
+                    else if (l.status === 'Completed') { currentIdx = 2; activeColor = 'emerald'; }
+
+                    const steps = [
+                        { label: 'รับเรื่อง', icon: 'fa-file-import' },
+                        { label: step2Label, icon: 'fa-tools' },
+                        { label: 'เสร็จสิ้น', icon: 'fa-check' }
+                    ];
+
+                    let timelineHtml = '';
+                    if (isCancelled) {
+                        timelineHtml = `<div class="w-full min-w-[220px] pb-4 flex flex-col items-center justify-center text-slate-400 font-bold"><i class="fas fa-ban mr-2 text-red-400"></i> ยกเลิกงานแล้ว</div>`;
+                    } else {
+                        const statusDuration = getCurrentStatusDuration(l);
+                        timelineHtml = `
+                        <div class="flex flex-col w-full min-w-[180px] pb-3">
+                            <div class="flex items-center w-full">
+                                ${steps.map((s, i) => {
+                                    let circle = 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500';
+                                    let text = 'text-slate-400 dark:text-slate-500';
+                                    
+                                    if (i < currentIdx) {
+                                        circle = 'bg-emerald-500 text-white';
+                                        text = 'text-emerald-600 dark:text-emerald-400 font-medium';
+                                    } else if (i === currentIdx) {
+                                        if(activeColor === 'blue') { circle = 'bg-blue-500 text-white ring-4 ring-blue-100 dark:ring-blue-900/30'; text = 'text-blue-600 dark:text-blue-400 font-bold'; }
+                                        else if(activeColor === 'sky') { circle = 'bg-sky-500 text-white ring-4 ring-sky-100 dark:ring-sky-900/30'; text = 'text-sky-600 dark:text-sky-400 font-bold'; }
+                                        else if(activeColor === 'teal') { circle = 'bg-teal-500 text-white ring-4 ring-teal-100 dark:ring-teal-900/30'; text = 'text-teal-600 dark:text-teal-400 font-bold'; }
+                                        else if(activeColor === 'cyan') { circle = 'bg-cyan-500 text-white ring-4 ring-cyan-100 dark:ring-cyan-900/30'; text = 'text-cyan-600 dark:text-cyan-400 font-bold'; }
+                                        else if(activeColor === 'orange') { circle = 'bg-orange-500 text-white ring-4 ring-orange-100 dark:ring-orange-900/30'; text = 'text-orange-500 dark:text-orange-400 font-bold'; }
+                                        else if(activeColor === 'indigo') { circle = 'bg-indigo-500 text-white ring-4 ring-indigo-100 dark:ring-indigo-900/30'; text = 'text-indigo-600 dark:text-indigo-400 font-bold'; }
+                                        else if(activeColor === 'emerald') { circle = 'bg-emerald-500 text-white ring-4 ring-emerald-100 dark:ring-emerald-900/30'; text = 'text-emerald-600 dark:text-emerald-400 font-bold'; }
+                                        else if(activeColor === 'rose') { circle = 'bg-rose-500 text-white ring-4 ring-rose-100 dark:ring-rose-900/30'; text = 'text-rose-600 dark:text-rose-400 font-bold'; }
+                                    }
+                                    
+                                    const lineHtml = i > 0 ? `<div class="flex-1 h-1 mx-1 rounded ${i <= currentIdx ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}"></div>` : '';
+                                    
+                                    return `
+                                        ${lineHtml}
+                                        <div class="flex flex-col items-center mx-1">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs z-10 transition-all ${circle}">
+                                                <i class="fas ${s.icon}"></i>
+                                            </div>
+                                            <div class="mt-1 text-[10px] leading-tight text-center max-w-[80px] ${text}">
+                                                ${s.label}
+                                                ${i === 1 && subStatus && i === currentIdx ? `<div class="text-[9px] opacity-80 mt-0.5">${subStatus}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-1">
+                                เวลาในสถานะนี้: ${statusDuration}
+                            </div>
+                        </div>
+                        `;
+                    }
+
+                    // Action Button Logic
+                    let actionBtn = '';
+                    if (l.status === 'Pending') {
+                        actionBtn = `<button onclick="cancelTicket('${l.id}')" class="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition border border-red-200 shadow-sm"><i class="fas fa-times-circle mr-1"></i> ยกเลิก</button>`;
+                    } else if (['Completed', 'Unrepairable'].includes(l.status)) {
+                        if (l.rating) {
+                             actionBtn = `<div class="flex justify-center text-yellow-400 text-xs" title="Rating: ${l.rating}/5">`;
+                             for(let r=1; r<=5; r++) actionBtn += r <= l.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star text-slate-300"></i>';
+                             actionBtn += `</div>`;
+                        } else {
+                             actionBtn = `<button onclick="rateTicket('${l.id}')" class="px-3 py-1 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg text-xs font-bold transition border border-yellow-200 shadow-sm"><i class="far fa-star mr-1"></i> ให้คะแนน</button>`;
+                        }
+                    } else if (isCancelled) {
+                        actionBtn = `<span class="text-xs text-slate-400">-</span>`;
+                    } else {
+                        actionBtn = `<span class="text-xs text-slate-400">รอปิดงาน</span>`;
+                    }
+
+                    // Print Button
+                    const printBtn = `<button onclick="printTicket('${l.id}')" class="ml-2 p-1.5 text-slate-400 hover:text-blue-600 transition rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="พิมพ์ใบงาน"><i class="fas fa-print"></i></button>`;
+
+                    const statusBadge = (() => {
+                        const map = {
+                            'Pending': 'bg-blue-50 text-blue-700 border-blue-200',
+                            'Received': 'bg-amber-50 text-amber-700 border-amber-200',
+                            'PR Submitted': 'bg-sky-50 text-sky-700 border-sky-200',
+                            'PO Issued': 'bg-teal-50 text-teal-700 border-teal-200',
+                            'Parts Received': 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                            'In Progress': 'bg-amber-50 text-amber-700 border-amber-200',
+                            'Waiting for Parts': 'bg-orange-50 text-orange-700 border-orange-200',
+                            'Temporary Fix': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                            'Unrepairable': 'bg-rose-50 text-rose-700 border-rose-200',
+                            'Completed': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            'Cancelled': 'bg-slate-100 text-slate-600 border-slate-200'
+                        };
+                        const cls = map[l.status] || 'bg-slate-100 text-slate-600 border-slate-200';
+                        const labelMap = {
+                            'Pending': 'รอรับเรื่อง',
+                            'Received': 'รับเรื่องแล้ว',
+                            'PR Submitted': 'ส่ง PR แล้ว',
+                            'PO Issued': 'ออก PO แล้ว',
+                            'Parts Received': 'ได้รับอะไหล่แล้ว',
+                            'In Progress': 'กำลังซ่อม',
+                            'Waiting for Parts': 'รออะไหล่',
+                            'Temporary Fix': 'แก้ชั่วคราว',
+                            'Unrepairable': 'ซ่อมไม่ได้',
+                            'Completed': 'เสร็จสิ้น',
+                            'Cancelled': 'ยกเลิก'
+                        };
+                        const label = labelMap[l.status] || l.status;
+                        return `<span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-bold ${cls}">${label}${getPrPoStatusIcon(l)}</span>`;
+                    })();
+
+                    const assigneeLine = l.servicedBy ? `<div class="text-[10px] text-slate-400 mt-1"><i class="fas fa-user-gear mr-1 opacity-60"></i>${l.servicedBy}</div>` : '';
+
+                    // Mobile Status Indicator
+                    let mobileStatusDot = '';
+                    if (l.status === 'Pending') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-blue-500 ml-1" title="Pending"></span>';
+                    else if (l.status === 'Received') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-amber-400 ml-1" title="Received"></span>';
+                    else if (l.status === 'PR Submitted') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-sky-500 ml-1" title="PR Submitted"></span>';
+                    else if (l.status === 'PO Issued') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-teal-500 ml-1" title="PO Issued"></span>';
+                    else if (l.status === 'Parts Received') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-cyan-500 ml-1" title="Parts Received"></span>';
+                    else if (l.status === 'In Progress') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-amber-500 ml-1" title="In Progress"></span>';
+                    else if (l.status === 'Waiting for Parts') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-orange-500 ml-1" title="Waiting for Parts"></span>';
+                    else if (l.status === 'Temporary Fix') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-indigo-500 ml-1" title="Temporary Fix"></span>';
+                    else if (l.status === 'Unrepairable') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-rose-500 ml-1" title="Unrepairable"></span>';
+                    else if (l.status === 'Completed') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1" title="Completed"></span>';
+                    else if (l.status === 'Cancelled') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-red-500 ml-1" title="Cancelled"></span>';
+
+                    return `<tr class="${selectedRowClass} hover:bg-slate-50 dark:hover:bg-slate-700/30 transition cursor-pointer text-xs sm:text-sm" onclick="handleTicketClick('${l.id}')">
+                        <td class="px-3 py-3 sm:px-6 sm:py-4 font-mono font-medium text-slate-700 dark:text-slate-200 align-top">
+                            <div class="flex items-center gap-2"><div class="w-6 h-6 rounded flex items-center justify-center border ${typeBg}">${typeIcon}</div> <span class="${idColorClass}">${l.id}</span></div>
+                            ${mobileStatusDot}
+                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                ${statusBadge}
+                                ${jobBadge}
+                            </div>
+                            <div class="sm:hidden text-[10px] text-slate-400 mt-1">${new Date(l.date).toLocaleDateString('th-TH', {day:'numeric', month:'short'})}</div>
+                            ${assigneeLine}
+                        </td>
+                        <td class="px-6 py-4 align-top text-slate-600 dark:text-slate-300 hidden sm:table-cell">${new Date(l.date).toLocaleDateString('th-TH')}</td>
+                        <td class="px-3 py-3 sm:px-6 sm:py-4 font-medium align-top text-slate-800 dark:text-slate-100">
+                            <div class="line-clamp-2">${l.problem}</div>
+                            <div class="mt-1 flex flex-wrap items-center gap-2">
+                                ${l.asset_id || l.asset ? `<span class="text-[10px] text-indigo-600 dark:text-indigo-300"><i class="fas fa-desktop mr-1 opacity-60"></i>${l.asset_id || l.asset}</span>` : ''}
+                                ${l.appointment_date ? `<span class="text-[10px] text-slate-500 dark:text-slate-400"><i class="far fa-calendar mr-1 opacity-60"></i>${new Date(l.appointment_date).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}</span>` : ''}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 align-top hidden md:table-cell"><span class="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs text-slate-600 dark:text-slate-300">${formatTypeLabel(l.type)}</span></td>
+                        <td class="px-6 py-2 align-middle hidden sm:table-cell">${timelineHtml}</td>
+                        <td class="px-6 py-4 align-top text-center hidden sm:table-cell" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-center">
+                                ${actionBtn}
+                                ${printBtn}
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+
+        }
+
+        window.handleTicketClick = function(id) {
+            selectedTicketId = id;
+            renderTickets();
+            showTicketDetails(id);
+        }
+
+        function clearTicketDetailPanel() {
+            const panel = document.getElementById('ticket-detail-panel');
+            if (!panel) return;
+            panel.innerHTML = `
+                <div class="text-slate-400 text-sm flex items-center gap-2">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>เลือก Ticket จากฝั่งซ้ายเพื่อดูรายละเอียด</span>
+                </div>
+            `;
+        }
+
+        async function renderTicketDetailPanel(logId, force = false) {
+            const panel = document.getElementById('ticket-detail-panel');
+            if (!panel) return;
+            if (!force && lastDetailRenderedId === logId && panel.getAttribute('data-ticket-id') === logId) return;
+
+            const log = allMyLogs.find(l => l && l.id === logId);
+            if (!log) { clearTicketDetailPanel(); return; }
+
+            panel.setAttribute('data-ticket-id', logId);
+            panel.innerHTML = `
+                <div class="animate-pulse space-y-3">
+                    <div class="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+                    <div class="h-24 bg-slate-100 dark:bg-slate-700/50 rounded"></div>
+                    <div class="h-24 bg-slate-100 dark:bg-slate-700/50 rounded"></div>
+                </div>
+            `;
+
+            let imagesHtml = '';
+            try {
+                const res = await fetch('api.php?action=get&file=it_log_attachments&log_id=' + encodeURIComponent(logId));
+                const files = await res.json();
+                if (Array.isArray(files) && files.length > 0) {
+                    const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                    if (imgs.length > 0) {
+                        imagesHtml = `
+                        <div class="mt-4 border-t border-slate-200 dark:border-slate-600 pt-3">
+                            <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 text-xs uppercase"><i class="fas fa-images text-blue-500 mr-1"></i> รูปภาพประกอบ</h4>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${imgs.map(f => `<a href="uploads/attachments/${f.stored_filename}" target="_blank" class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 hover:opacity-80 transition bg-slate-100"><img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover"></a>`).join('')}
+                            </div>
+                        </div>`;
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            let uploadMoreHtml = '';
+            if (!['Completed', 'Cancelled', 'Unrepairable'].includes(log.status)) {
+                uploadMoreHtml = `
+                    <div class="mt-4 border-t border-slate-200 dark:border-slate-600 pt-3">
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 text-xs uppercase"><i class="fas fa-paperclip text-green-500 mr-1"></i> แนบรูปภาพเพิ่มเติม</h4>
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="more-attachments-panel-${log.id}" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-slate-200">
+                            <button onclick="uploadMoreAttachments('${log.id}', 'more-attachments-panel-${log.id}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2">
+                                <i class="fas fa-upload"></i> <span class="hidden sm:inline">อัปโหลด</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const txt = (t) => t || '-';
+            const getStatusClass = s => {
+                 const map = { 'Pending':'bg-blue-100 text-blue-600', 'PR Submitted':'bg-sky-100 text-sky-600', 'PO Issued':'bg-teal-100 text-teal-600', 'Parts Received':'bg-cyan-100 text-cyan-600', 'In Progress':'bg-amber-100 text-amber-600', 'Waiting for Parts':'bg-red-100 text-red-600', 'Temporary Fix':'bg-indigo-100 text-indigo-600', 'Unrepairable':'bg-rose-100 text-rose-600', 'Completed':'bg-emerald-100 text-emerald-600', 'Cancelled': 'bg-slate-100 text-slate-500' };
+                 return map[s] || 'bg-slate-100 text-slate-600';
+            };
+
+            let panelActions = '';
+            if (log.status === 'Pending') {
+                panelActions = `<button onclick="cancelTicket('${log.id}')" class="w-full mt-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-bold transition border border-red-200"><i class="fas fa-times-circle mr-1"></i> ยกเลิกงานแจ้งซ่อม</button>`;
+            } else if (['Completed', 'Unrepairable'].includes(log.status)) {
+                if (!log.rating) {
+                     panelActions = `<button onclick="rateTicket('${log.id}')" class="w-full mt-4 py-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg font-bold transition border border-yellow-200"><i class="far fa-star mr-1"></i> ให้คะแนนความพึงพอใจ</button>`;
+                }
+            }
+            panelActions += `<button onclick="printTicket('${log.id}')" class="w-full mt-2 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg font-bold transition border border-slate-200"><i class="fas fa-print mr-1"></i> พิมพ์ใบงาน</button>`;
+
+            let currentIdx = 0;
+            let subStatus = '';
+            let activeColor = 'blue';
+            let isCancelled = log.status === 'Cancelled';
+            let step2Label = 'ดำเนินการ';
+
+            if (log.status === 'Pending') currentIdx = 0;
+            else if (['Received','In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                currentIdx = 1;
+                if(log.status === 'Received') { subStatus = 'รับเรื่องแล้ว (รอเริ่มซ่อม)'; activeColor = 'amber'; step2Label = 'รับเรื่องแล้ว'; }
+                else if(log.status === 'PR Submitted') { subStatus = 'ส่ง PR แล้ว'; activeColor = 'sky'; step2Label = 'PR แล้ว'; }
+                else if(log.status === 'PO Issued') { subStatus = 'ออก PO แล้ว'; activeColor = 'teal'; step2Label = 'PO แล้ว'; }
+                else if(log.status === 'Parts Received') { subStatus = 'ได้รับอะไหล่แล้ว'; activeColor = 'cyan'; step2Label = 'อะไหล่มาแล้ว'; }
+                else if(log.status === 'Waiting for Parts') { subStatus = 'รออะไหล่'; activeColor = 'orange'; step2Label = 'รออะไหล่'; }
+                else if(log.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'indigo'; step2Label = 'แก้ชั่วคราว'; }
+                else { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
+            }
+            else if (log.status === 'Unrepairable') { currentIdx = 2; activeColor = 'rose'; step2Label = 'ซ่อมไม่ได้'; }
+            else if (log.status === 'Completed') { currentIdx = 2; activeColor = 'emerald'; }
+
+            const steps = [ { label: 'รับเรื่อง', icon: 'fa-file-import' }, { label: step2Label, icon: 'fa-tools' }, { label: 'เสร็จสิ้น', icon: 'fa-check' } ];
+
+            let timelineHtml = '';
+            if (isCancelled) {
+                const statusDuration = getCurrentStatusDuration(log);
+                timelineHtml = `<div class="w-full flex flex-col items-center justify-center text-slate-400 font-bold text-sm py-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700 mb-2">
+                    <div><i class="fas fa-ban mr-2 text-red-400"></i> ยกเลิกงานแล้ว</div>
+                    <div class="text-[11px] font-normal mt-1">เวลาในสถานะนี้: ${statusDuration}</div>
+                </div>`;
+            } else {
+                const statusDuration = getCurrentStatusDuration(log);
+                timelineHtml = `<div class="flex flex-col md:flex-row md:items-center w-full py-4 md:py-6 px-2 mb-2">
+                    ${steps.map((s, i) => {
+                        let circle = 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500';
+                        let text = 'text-slate-400 dark:text-slate-500';
+                        let animation = '';
+                        
+                        if (i < currentIdx) { circle = 'bg-emerald-500 text-white'; text = 'text-emerald-600 dark:text-emerald-400 font-medium'; }
+                        else if (i === currentIdx) {
+                            animation = 'animate-pulse ring-offset-2 ring-offset-white dark:ring-offset-slate-800';
+                            if(activeColor === 'blue') { circle = 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900'; text = 'text-blue-600 dark:text-blue-400 font-bold'; }
+                            else if(activeColor === 'sky') { circle = 'bg-sky-500 text-white ring-4 ring-sky-200 dark:ring-sky-900'; text = 'text-sky-600 dark:text-sky-400 font-bold'; }
+                            else if(activeColor === 'teal') { circle = 'bg-teal-500 text-white ring-4 ring-teal-200 dark:ring-teal-900'; text = 'text-teal-600 dark:text-teal-400 font-bold'; }
+                            else if(activeColor === 'cyan') { circle = 'bg-cyan-500 text-white ring-4 ring-cyan-200 dark:ring-cyan-900'; text = 'text-cyan-600 dark:text-cyan-400 font-bold'; }
+                            else if(activeColor === 'orange') { circle = 'bg-orange-500 text-white ring-4 ring-orange-200 dark:ring-orange-900'; text = 'text-orange-500 dark:text-orange-400 font-bold'; }
+                            else if(activeColor === 'indigo') { circle = 'bg-indigo-500 text-white ring-4 ring-indigo-200 dark:ring-indigo-900'; text = 'text-indigo-600 dark:text-indigo-400 font-bold'; }
+                            else if(activeColor === 'emerald') { circle = 'bg-emerald-500 text-white ring-4 ring-emerald-200 dark:ring-emerald-900'; text = 'text-emerald-600 dark:text-emerald-400 font-bold'; }
+                            else if(activeColor === 'rose') { circle = 'bg-rose-500 text-white ring-4 ring-rose-200 dark:ring-rose-900'; text = 'text-rose-600 dark:text-rose-400 font-bold'; }
+                        }
+                        
+                        const lineHtml = i > 0 ? `<div class="h-6 w-1 ml-[1.125rem] md:ml-0 md:h-1 md:w-auto md:flex-1 rounded ${i <= currentIdx ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'} transition-colors duration-500"></div>` : '';
+                        
+                        return `${lineHtml}
+                        <div class="relative flex flex-row md:flex-col items-center group/step z-10">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all duration-500 ${circle} ${animation} shadow-lg transform hover:scale-110 cursor-default flex-shrink-0">
+                                <i class="fas ${s.icon}"></i>
+                            </div>
+                            <div class="ml-3 md:ml-0 md:absolute md:top-11 text-xs md:text-[10px] whitespace-nowrap ${text} transition-all duration-500 font-medium">
+                                ${s.label}${i === 1 && subStatus && i === currentIdx ? `<span class="md:block inline ml-1 md:ml-0 text-[9px] opacity-80">(${subStatus})</span>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('')}</div>
+                    <div class="text-[11px] text-slate-500 mt-2 md:mt-3">เวลาในสถานะนี้: ${statusDuration}</div>`;
+            }
+
+            const closedAt = log.closed_date || log.completed_date || '';
+            const closedAtLine = closedAt ? `<div class="text-[11px] text-slate-400 mt-1"><i class="far fa-clock mr-1 opacity-60"></i>ปิดงานเมื่อ: ${new Date(closedAt).toLocaleString('th-TH')}</div>` : '';
+
+            panel.innerHTML = `
+                <div class="text-left font-sans text-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="text-[11px] text-slate-400">รายละเอียด Ticket</div>
+                            <div class="font-mono font-bold text-lg text-slate-800 dark:text-slate-100">Case ID: ${log.id}</div>
+                            ${closedAtLine}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="printTicket('${log.id}')" class="px-3 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg font-bold transition border border-slate-200 text-sm whitespace-nowrap"><i class="fas fa-print mr-1"></i> พิมพ์</button>
+                        </div>
+                    </div>
+                    ${timelineHtml}
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <div><span class="text-slate-500 dark:text-slate-400">วันที่:</span> <span class="font-medium dark:text-slate-200">${new Date(log.date).toLocaleDateString('th-TH')}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400">สถานะ:</span> <span class="${getStatusClass(log.status)} inline-flex items-center px-2 py-0.5 rounded text-xs font-bold">${log.status}${getPrPoStatusIcon(log)}</span></div>
+                        <div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">ประเภท:</span> <span class="font-medium dark:text-slate-200">${formatTypeLabel(log.type)}</span></div>
+                        <div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">ผู้รับผิดชอบ:</span> <span class="font-medium dark:text-slate-200">${txt(log.servicedBy)}</span></div>
+                        ${log.pr_no ? `<div><span class="text-slate-500 dark:text-slate-400">PR:</span> <span class="font-medium dark:text-slate-200">${txt(log.pr_no)}</span></div>` : ''}
+                        ${log.po_no ? `<div><span class="text-slate-500 dark:text-slate-400">PO:</span> <span class="font-medium dark:text-slate-200">${txt(log.po_no)}</span></div>` : ''}
+                        ${log.vendor_name ? `<div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">Vendor:</span> <span class="font-medium dark:text-slate-200">${txt(log.vendor_name)}</span></div>` : ''}
+                        ${log.eta_date ? `<div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">ETA:</span> <span class="font-medium text-amber-600">${new Date(log.eta_date).toLocaleDateString('th-TH')}</span></div>` : ''}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-1">ปัญหา / อาการ</h4>
+                        <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 whitespace-pre-wrap">${txt(log.problem)}</div>
+                    </div>
+                    ${log.solution ? `
+                    <div>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-1">วิธีแก้ไข</h4>
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded border border-emerald-100 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap">${txt(formatSolutionText(log.solution))}</div>
+                    </div>` : ''}
+                    ${imagesHtml}
+                    ${uploadMoreHtml}
+                    ${panelActions}
+                </div>
+            `;
+        }
+
+        async function showTicketDetails(logId) {
+            const log = allMyLogs.find(l => l.id === logId);
+            if (!log) return;
+
+            // Fetch attachments
+            let imagesHtml = '';
+            try {
+                const res = await fetch('api.php?action=get&file=it_log_attachments&log_id=' + encodeURIComponent(logId));
+                const files = await res.json();
+                if (Array.isArray(files) && files.length > 0) {
+                    const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                    if (imgs.length > 0) {
+                        imagesHtml = `
+                        <div class="mt-4 border-t border-slate-200 dark:border-slate-600 pt-3">
+                            <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 text-xs uppercase"><i class="fas fa-images text-blue-500 mr-1"></i> รูปภาพประกอบ</h4>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${imgs.map(f => `<a href="uploads/attachments/${f.stored_filename}" target="_blank" class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 hover:opacity-80 transition bg-slate-100"><img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover"></a>`).join('')}
+                            </div>
+                        </div>`;
+                    }
+                }
+            } catch(e) { console.error(e); }
+
+            // NEW: Upload more images section
+            let uploadMoreHtml = '';
+            if (!['Completed', 'Cancelled', 'Unrepairable'].includes(log.status)) {
+                uploadMoreHtml = `
+                    <div class="mt-4 border-t border-slate-200 dark:border-slate-600 pt-3">
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 text-xs uppercase"><i class="fas fa-paperclip text-green-500 mr-1"></i> แนบรูปภาพเพิ่มเติม</h4>
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="more-attachments-${log.id}" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-slate-200">
+                            <button onclick="uploadMoreAttachments('${log.id}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2">
+                                <i class="fas fa-upload"></i> <span class="hidden sm:inline">อัปโหลด</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const txt = (t) => t || '-';
+            const getStatusClass = s => {
+                 const map = { 'Pending':'bg-blue-100 text-blue-600', 'PR Submitted':'bg-sky-100 text-sky-600', 'PO Issued':'bg-teal-100 text-teal-600', 'Parts Received':'bg-cyan-100 text-cyan-600', 'In Progress':'bg-amber-100 text-amber-600', 'Waiting for Parts':'bg-red-100 text-red-600', 'Temporary Fix':'bg-indigo-100 text-indigo-600', 'Unrepairable':'bg-rose-100 text-rose-600', 'Completed':'bg-emerald-100 text-emerald-600', 'Cancelled': 'bg-slate-100 text-slate-500' };
+                 return map[s] || 'bg-slate-100 text-slate-600';
+            };
+
+            // Action Buttons for Modal (Mobile Friendly)
+            let modalActions = '';
+            if (log.status === 'Pending') {
+                modalActions = `<button onclick="Swal.close(); cancelTicket('${log.id}')" class="w-full mt-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-bold transition border border-red-200"><i class="fas fa-times-circle mr-1"></i> ยกเลิกงานแจ้งซ่อม</button>`;
+            } else if (['Completed', 'Unrepairable'].includes(log.status)) {
+                if (!log.rating) {
+                     modalActions = `<button onclick="Swal.close(); rateTicket('${log.id}')" class="w-full mt-4 py-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg font-bold transition border border-yellow-200"><i class="far fa-star mr-1"></i> ให้คะแนนความพึงพอใจ</button>`;
+                }
+            }
+            // Add Print Button
+            modalActions += `<button onclick="printTicket('${log.id}')" class="w-full mt-2 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg font-bold transition border border-slate-200"><i class="fas fa-print mr-1"></i> พิมพ์ใบงาน</button>`;
+
+            // --- Timeline Logic with Animation ---
+            let currentIdx = 0;
+            let subStatus = '';
+            let activeColor = 'blue';
+            let isCancelled = log.status === 'Cancelled';
+            let step2Label = 'ดำเนินการ';
+
+            if (log.status === 'Pending') currentIdx = 0;
+            else if (['Received','In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                currentIdx = 1;
+                if(log.status === 'Received') { subStatus = 'รับเรื่องแล้ว (รอเริ่มซ่อม)'; activeColor = 'amber'; step2Label = 'รับเรื่องแล้ว'; }
+                else if(log.status === 'PR Submitted') { subStatus = 'ส่ง PR แล้ว'; activeColor = 'sky'; step2Label = 'PR แล้ว'; }
+                else if(log.status === 'PO Issued') { subStatus = 'ออก PO แล้ว'; activeColor = 'teal'; step2Label = 'PO แล้ว'; }
+                else if(log.status === 'Parts Received') { subStatus = 'ได้รับอะไหล่แล้ว'; activeColor = 'cyan'; step2Label = 'อะไหล่มาแล้ว'; }
+                else if(log.status === 'Waiting for Parts') { subStatus = 'รออะไหล่'; activeColor = 'orange'; step2Label = 'รออะไหล่'; }
+                else if(log.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'indigo'; step2Label = 'แก้ชั่วคราว'; }
+                else { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
+            }
+            else if (log.status === 'Unrepairable') { currentIdx = 2; activeColor = 'rose'; step2Label = 'ซ่อมไม่ได้'; }
+            else if (log.status === 'Completed') { currentIdx = 2; activeColor = 'emerald'; }
+
+            const steps = [ { label: 'รับเรื่อง', icon: 'fa-file-import' }, { label: step2Label, icon: 'fa-tools' }, { label: 'เสร็จสิ้น', icon: 'fa-check' } ];
+
+            let timelineHtml = '';
+            if (isCancelled) {
+                const statusDuration = getCurrentStatusDuration(log);
+                timelineHtml = `<div class="w-full flex flex-col items-center justify-center text-slate-400 font-bold text-sm py-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700 mb-2">
+                    <div><i class="fas fa-ban mr-2 text-red-400"></i> ยกเลิกงานแล้ว</div>
+                    <div class="text-[11px] font-normal mt-1">เวลาในสถานะนี้: ${statusDuration}</div>
+                </div>`;
+            } else {
+                const statusDuration = getCurrentStatusDuration(log);
+                timelineHtml = `<div class="flex flex-col md:flex-row md:items-center w-full py-4 md:py-6 px-2 mb-2">
+                    ${steps.map((s, i) => {
+                        let circle = 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500';
+                        let text = 'text-slate-400 dark:text-slate-500';
+                        let animation = '';
+                        
+                        if (i < currentIdx) { circle = 'bg-emerald-500 text-white'; text = 'text-emerald-600 dark:text-emerald-400 font-medium'; }
+                        else if (i === currentIdx) {
+                            animation = 'animate-pulse ring-offset-2 ring-offset-white dark:ring-offset-slate-800';
+                            if(activeColor === 'blue') { circle = 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900'; text = 'text-blue-600 dark:text-blue-400 font-bold'; }
+                            else if(activeColor === 'sky') { circle = 'bg-sky-500 text-white ring-4 ring-sky-200 dark:ring-sky-900'; text = 'text-sky-600 dark:text-sky-400 font-bold'; }
+                            else if(activeColor === 'teal') { circle = 'bg-teal-500 text-white ring-4 ring-teal-200 dark:ring-teal-900'; text = 'text-teal-600 dark:text-teal-400 font-bold'; }
+                            else if(activeColor === 'cyan') { circle = 'bg-cyan-500 text-white ring-4 ring-cyan-200 dark:ring-cyan-900'; text = 'text-cyan-600 dark:text-cyan-400 font-bold'; }
+                            else if(activeColor === 'orange') { circle = 'bg-orange-500 text-white ring-4 ring-orange-200 dark:ring-orange-900'; text = 'text-orange-500 dark:text-orange-400 font-bold'; }
+                            else if(activeColor === 'indigo') { circle = 'bg-indigo-500 text-white ring-4 ring-indigo-200 dark:ring-indigo-900'; text = 'text-indigo-600 dark:text-indigo-400 font-bold'; }
+                            else if(activeColor === 'emerald') { circle = 'bg-emerald-500 text-white ring-4 ring-emerald-200 dark:ring-emerald-900'; text = 'text-emerald-600 dark:text-emerald-400 font-bold'; }
+                        }
+                        
+                        // Responsive Line
+                        const lineHtml = i > 0 ? `<div class="h-6 w-1 ml-[1.125rem] md:ml-0 md:h-1 md:w-auto md:flex-1 rounded ${i <= currentIdx ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'} transition-colors duration-500"></div>` : '';
+                        
+                        // Responsive Item
+                        return `${lineHtml}
+                        <div class="relative flex flex-row md:flex-col items-center group/step z-10">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all duration-500 ${circle} ${animation} shadow-lg transform hover:scale-110 cursor-default flex-shrink-0">
+                                <i class="fas ${s.icon}"></i>
+                            </div>
+                            <div class="ml-3 md:ml-0 md:absolute md:top-11 text-xs md:text-[10px] whitespace-nowrap ${text} transition-all duration-500 font-medium">
+                                ${s.label}${i === 1 && subStatus && i === currentIdx ? `<span class="md:block inline ml-1 md:ml-0 text-[9px] opacity-80">(${subStatus})</span>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('')}</div>
+                    <div class="text-[11px] text-slate-500 mt-2 md:mt-3">เวลาในสถานะนี้: ${statusDuration}</div>`;
+            }
+
+            const content = `
+                <div class="text-left font-sans text-sm space-y-4">
+                    ${timelineHtml}
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <div><span class="text-slate-500 dark:text-slate-400">วันที่:</span> <span class="font-medium dark:text-slate-200">${new Date(log.date).toLocaleDateString('th-TH')}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400">สถานะ:</span> <span class="${getStatusClass(log.status)} inline-flex items-center px-2 py-0.5 rounded text-xs font-bold">${log.status}${getPrPoStatusIcon(log)}</span></div>
+                        <div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">ผู้รับผิดชอบ:</span> <span class="font-medium dark:text-slate-200">${txt(log.servicedBy)}</span></div>
+                        ${log.pr_no ? `<div><span class="text-slate-500 dark:text-slate-400">PR:</span> <span class="font-medium dark:text-slate-200">${txt(log.pr_no)}</span></div>` : ''}
+                        ${log.po_no ? `<div><span class="text-slate-500 dark:text-slate-400">PO:</span> <span class="font-medium dark:text-slate-200">${txt(log.po_no)}</span></div>` : ''}
+                        ${log.vendor_name ? `<div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">Vendor:</span> <span class="font-medium dark:text-slate-200">${txt(log.vendor_name)}</span></div>` : ''}
+                        ${log.eta_date ? `<div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">ETA:</span> <span class="font-medium text-amber-600">${new Date(log.eta_date).toLocaleDateString('th-TH')}</span></div>` : ''}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-1">ปัญหา / อาการ</h4>
+                        <div class="bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 whitespace-pre-wrap">${txt(log.problem)}</div>
+                    </div>
+                    ${log.solution ? `
+                    <div>
+                        <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-1">วิธีแก้ไข</h4>
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded border border-emerald-100 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 whitespace-pre-wrap">${txt(formatSolutionText(log.solution))}</div>
+                    </div>` : ''}
+                    ${imagesHtml}
+                    ${uploadMoreHtml}
+                    ${modalActions}
+                </div>`;
+
+            Swal.fire({
+                title: `Case ID: ${log.id}`,
+                html: content,
+                width: '600px',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { popup: 'dark:bg-slate-800 dark:border dark:border-slate-700 dark:text-white' }
+            });
+        }
+
+        async function cancelTicket(id) {
+            const { value: reason } = await Swal.fire({
+                title: 'ยกเลิกการแจ้งซ่อม?',
+                text: `กรุณาระบุเหตุผลที่ต้องการยกเลิก Ticket ID: ${id}`,
+                input: 'textarea',
+                inputPlaceholder: 'ระบุเหตุผล เช่น ข้อมูลไม่ครบถ้วน, แก้ไขปัญหาได้เองแล้ว...',
+                inputAttributes: { 'aria-label': 'ระบุเหตุผลการยกเลิก' },
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ยืนยันการยกเลิก',
+                cancelButtonText: 'ปิด',
+                inputValidator: (value) => {
+                    if (!value) return 'กรุณาระบุเหตุผลก่อนยกเลิก';
+                }
+            });
+
+            if (reason) {
+                const fd = new FormData();
+                fd.append('action', 'cancel_ticket');
+                fd.append('id', id);
+                fd.append('reason', `[USER CANCELLED] เหตุผล: ${reason}`);
+                
+                try {
+                    const res = await (await fetch(API_PATH, { method: 'POST', body: fd })).json();
+                    if (res.status === 'success') {
+                        Swal.fire('สำเร็จ', 'ยกเลิกรายการเรียบร้อยแล้ว', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('ผิดพลาด', res.message, 'error');
+                    }
+                } catch (e) { Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); }
+            }
+        }
+
+        window.rateTicket = async function(id) {
+            const { value: rating } = await Swal.fire({
+                title: 'ประเมินความพึงพอใจ',
+                text: `Ticket ID: ${id}`,
+                icon: 'question',
+                input: 'range',
+                inputLabel: 'เลื่อนเพื่อเลือกคะแนน (1-5)',
+                inputAttributes: { min: 1, max: 5, step: 1 },
+                inputValue: 5,
+                showCancelButton: true,
+                confirmButtonText: 'ส่งคะแนน',
+                confirmButtonColor: '#f59e0b'
+            });
+
+            if (rating) {
+                const fd = new FormData();
+                fd.append('action', 'rate_ticket');
+                fd.append('id', id);
+                fd.append('rating', rating);
+
+                try {
+                    const res = await (await fetch(API_PATH, { method: 'POST', body: fd })).json();
+                    if (res.status === 'success') {
+                        Swal.fire('ขอบคุณครับ', 'บันทึกคะแนนเรียบร้อยแล้ว', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('ผิดพลาด', res.message, 'error');
+                    }
+                } catch (e) { Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error'); }
+            }
+        }
+
+        function formatDuration(startDate, endDate) {
+            if (!startDate || !endDate) return '-';
+
+            let diff = new Date(endDate) - new Date(startDate);
+            if (diff < 0) return '-';
+
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+
+            let hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+
+            let mins = Math.floor(diff / (1000 * 60));
+
+            let parts = [];
+            if (days > 0) parts.push(`${days} วัน`);
+            if (hours > 0) parts.push(`${hours} ชม.`);
+            if (mins > 0 && days === 0) parts.push(`${mins} นาที`);
+
+            if (parts.length === 0 && diff > 0) return '< 1 นาที';
+            if (parts.length === 0) return '-';
+            return parts.join(' ');
+        }
+
+        function formatSecondsDuration(totalSeconds) {
+            if (!totalSeconds || totalSeconds <= 0) return '-';
+            let remaining = Math.floor(totalSeconds);
+            const days = Math.floor(remaining / 86400);
+            remaining -= days * 86400;
+            const hours = Math.floor(remaining / 3600);
+            remaining -= hours * 3600;
+            const mins = Math.floor(remaining / 60);
+            const parts = [];
+            if (days > 0) parts.push(days + ' วัน');
+            if (hours > 0) parts.push(hours + ' ชม.');
+            if (mins > 0 && days === 0) parts.push(mins + ' นาที');
+            if (!parts.length) return '< 1 นาที';
+            return parts.join(' ');
+        }
+        function formatSolutionText(value) {
+            const raw = String(value || '');
+            if (!raw.trim()) return '';
+            return raw
+                .replace(/\[(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{1,2}-\d{1,2})(\s+\d{1,2}:\d{2}(:\d{2})?)?\]\s*/g, '[$1] ')
+                .replace(/\[Reopened\s+(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{1,2}-\d{1,2})(\s+\d{1,2}:\d{2}(:\d{2})?)?\]\s*/g, '[Reopened $1] ')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(Boolean)
+                .join('\n');
+        }
+        function getPrPoStatusIcon(item) {
+            const hasPr = !!String(item?.pr_no || '').trim();
+            const hasPo = !!String(item?.po_no || '').trim();
+            if (!hasPr && !hasPo) return '';
+            let html = '';
+            if (hasPr) html += `<span class="ml-1 inline-flex items-center text-blue-600" title="มี PR แล้ว"><i class="fas fa-file-signature"></i></span>`;
+            if (hasPo) html += `<span class="ml-1 inline-flex items-center text-emerald-600" title="มี PO แล้ว"><i class="fas fa-file-invoice"></i></span>`;
+            return html;
+        }
+
+        function getCurrentStatusDuration(log) {
+            const now = new Date();
+            const status = log.status || '';
+            if (['In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(status)) {
+                let secs = Number(log.total_work_duration_seconds || 0);
+                if (log.last_work_start_time) {
+                    const start = new Date(log.last_work_start_time);
+                    if (!isNaN(start.getTime())) {
+                        secs += Math.max(0, Math.floor((now - start) / 1000));
+                    }
+                }
+                return formatSecondsDuration(secs);
+            }
+            if (status === 'Completed' || status === 'Unrepairable') {
+                const secs = Number(log.total_work_duration_seconds || 0);
+                return formatSecondsDuration(secs);
+            }
+            const created = new Date(log.date);
+            if (isNaN(created.getTime())) return '-';
+            const diffSecs = Math.max(0, Math.floor((now - created) / 1000));
+            return formatSecondsDuration(diffSecs);
+        }
+
+        function getCompanyPrintInfo(code) {
+            const c = String(code || '').trim().toUpperCase();
+            const map = {
+                'PTA': {
+                    code: 'PTA',
+                    name: 'Powertech Engine Assembly Co., Ltd.',
+                    address: '1/8, 1/37-38, 1/40 Moo 5, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand',
+                    phone: 'F4: +66(0)38 578520 | F16-17: +66(0)33 022 161-4'
+                },
+                'PT4': {
+                    code: 'PT4',
+                    name: 'Powertech 2004 Co., Ltd.',
+                    address: '1/11 Moo 5, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand',
+                    phone: 'Tel: +66(0)38 577182 | Fax: +66(0)38 578554'
+                },
+                'PTE': {
+                    code: 'PTE',
+                    name: 'Powertech Energy Solutions Co., Ltd.',
+                    address: '42 Moo 3, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand',
+                    phone: 'Tel: -'
+                }
+            };
+            return map[c] || {
+                code: c || '-',
+                name: 'Powertech Group',
+                address: '',
+                phone: ''
+            };
+        }
+
+        async function uploadMoreAttachments(logId, inputId) {
+            const input = document.getElementById(inputId || `more-attachments-${logId}`);
+            const files = input.files;
+
+            if (!files || files.length === 0) {
+                Swal.fire('แจ้งเตือน', 'กรุณาเลือกไฟล์รูปภาพก่อน', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: 'กำลังอัปโหลด...',
+                text: `กำลังอัปโหลด ${files.length} ไฟล์`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // Using Promise.all to upload concurrently
+                const uploadPromises = Array.from(files).map(file => {
+                    const fd = new FormData();
+                    fd.append('action', 'upload_attachment');
+                    fd.append('log_id', logId);
+                    fd.append('attachmentFile', file);
+                    return fetch(API_PATH, { method: 'POST', body: fd }).then(res => res.json());
+                });
+
+                const results = await Promise.all(uploadPromises);
+                
+                const failures = results.filter(r => r.status !== 'success');
+                if (failures.length > 0) {
+                    throw new Error(`อัปโหลดไม่สำเร็จ ${failures.length} ไฟล์`);
+                }
+
+                await Swal.fire('สำเร็จ!', 'อัปโหลดรูปภาพเพิ่มเติมเรียบร้อยแล้ว', 'success');
+                
+                showTicketDetails(logId);
+
+            } catch (err) {
+                Swal.fire('ผิดพลาด', err.message, 'error');
+            }
+        }
+
+        window.printTicket = function(id) {
+            const log = allMyLogs.find(l => l.id === id);
+            if (!log) return;
+            
+            const pc = document.querySelector('.print-container');
+            if (!pc) return;
+            
+            const txt = (t) => t || '-';
+            const ticketUrl = `${window.location.origin}${window.location.pathname.replace('my_tickets.html', 'log.html')}?ticket_id=${log.id}`;
+            const duration = log.completed_date ? formatDuration(log.date, log.completed_date) : '-';
+            const companyInfo = getCompanyPrintInfo(log.company);
+
+            const existing = document.getElementById('print-orientation');
+            if (existing) existing.remove();
+            const style = document.createElement('style');
+            style.id = 'print-orientation';
+            style.innerHTML = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }';
+            document.head.appendChild(style);
+
+            const footerHtml = `
+                <footer class="mt-6 pt-3 border-t border-slate-200 text-[9px] text-slate-400 flex justify-between">
+                    <div>FM-IT-001 : ใบรายงานงานซ่อมระบบสารสนเทศ / IT Service Report</div>
+                    <div>Revision 01 | Effective 01/01/2024</div>
+                    <div>Printed by ${sessionData.display_name || 'N/A'} on ${new Date().toLocaleString('th-TH')} | Confidential - Internal Use Only</div>
+                </footer>`;
+
+            pc.innerHTML = `
+                <div class="print-doc">
+                    <div class="print-ticket-wrap">
+                    <section class="print-page font-sans text-slate-800">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-12 h-12 rounded-full border border-slate-400 flex items-center justify-center text-xs font-bold tracking-wider">
+                                    ${companyInfo.code}
+                                </div>
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-semibold text-slate-900">${companyInfo.name}</p>
+                                    ${companyInfo.address ? `<p class="text-[10px] text-slate-600">${companyInfo.address}</p>` : ''}
+                                    ${companyInfo.phone ? `<p class="text-[10px] text-slate-600">${companyInfo.phone}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="text-right text-[10px] leading-snug">
+                                <p class="font-semibold">แบบฟอร์ม FM-IT-001</p>
+                                <p>Revision 01</p>
+                                <p>Effective Date: 01/01/2024</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-end border-b-2 border-slate-800 pb-3 mb-6">
+                            <div>
+                                <h1 class="text-lg font-bold text-slate-900 tracking-wide">ใบรายงานงานซ่อมระบบสารสนเทศ</h1>
+                                <p class="text-xs text-slate-500">IT Service Job Report</p>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-right text-xs space-y-0.5">
+                                    <p class="font-mono font-bold text-slate-700">Case ID: ${log.id}</p>
+                                    <p class="text-slate-500">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</p>
+                                    <p class="text-slate-500">บริษัท: ${companyInfo.name}</p>
+                                </div>
+                                <div id="ticket-qrcode" class="w-16 h-16"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-8 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้แจ้ง / Requester</p>
+                                <p class="font-bold text-lg text-slate-800">${txt(log.requester)}</p>
+                                <p class="text-sm text-slate-600">${txt(log.department)} <span class="text-xs bg-slate-100 px-1 rounded">${txt(log.company)}</span></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">รายละเอียดงาน / Job Details</p>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="font-semibold w-24 inline-block">ประเภทงาน:</span> ${txt(formatTypeLabel(log.type))}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ความเร่งด่วน:</span> ${txt(log.urgency)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ทรัพย์สิน:</span> ${txt(log.asset_id || log.asset)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ค่าใช้จ่าย:</span> ${log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH', {minimumFractionDigits: 2}) + ' ฿' : '-'}</p>
+                                    ${log.appointment_date ? `<p><span class="font-semibold w-24 inline-block">วันนัดหมาย:</span> ${new Date(log.appointment_date).toLocaleString('th-TH')}</p>` : ''}
+                                    ${log.pr_no ? `<p><span class="font-semibold w-24 inline-block">PR No.:</span> ${txt(log.pr_no)}</p>` : ''}
+                                    ${log.po_no ? `<p><span class="font-semibold w-24 inline-block">PO No.:</span> ${txt(log.po_no)}</p>` : ''}
+                                    ${log.vendor_name ? `<p><span class="font-semibold w-24 inline-block">Vendor:</span> ${txt(log.vendor_name)}</p>` : ''}
+                                    ${log.eta_date ? `<p><span class="font-semibold w-24 inline-block">ETA:</span> ${new Date(log.eta_date).toLocaleDateString('th-TH')}</p>` : ''}
+                                    <p><span class="font-semibold w-24 inline-block">วันที่เสร็จ:</span> ${log.completed_date ? new Date(log.completed_date).toLocaleString('th-TH') : '-'}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ระยะเวลาดำเนินการ:</span> ${duration}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รายละเอียดปัญหา (Problem / Issue)</p>
+                                <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm leading-relaxed whitespace-pre-wrap min-h-[80px]">${txt(log.problem)}</div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">วิธีการแก้ไข (Solution / Action Taken)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] leading-relaxed whitespace-pre-wrap min-h-[70px]">${txt(formatSolutionText(log.solution))}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 mb-4">
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">อะไหล่ / วัสดุที่ใช้ (Parts / Materials Used)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] text-slate-500 italic">
+                                    ${[log.repair_cost ? 'Cost: ' + Number(log.repair_cost).toLocaleString('th-TH') + ' THB' : '', log.pr_no ? 'PR: ' + txt(log.pr_no) : '', log.po_no ? 'PO: ' + txt(log.po_no) : '', log.vendor_name ? 'Vendor: ' + txt(log.vendor_name) : '', log.eta_date ? 'ETA: ' + new Date(log.eta_date).toLocaleDateString('th-TH') : ''].filter(Boolean).join(' | ') || '-'}
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">ความพึงพอใจผู้ใช้ (User Satisfaction)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] flex items-center gap-2">
+                                    <span class="font-bold">Rating:</span> 
+                                    ${log.rating ? `<span class="text-base font-bold text-slate-800">${log.rating}/5</span>` : '<span class="text-slate-400 italic">Not rated</span>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-6 mt-4 pt-4 border-t border-slate-200 mb-4">
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้แจ้ง / Requester</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้อนุมัติ / Approver</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2 flex items-end justify-center pb-1">
+                                    <span class="font-script text-xl text-slate-600">${txt(log.servicedBy)}</span>
+                                </div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้ปฏิบัติงาน / Technician</p>
+                            </div>
+                        </div>
+                    </section>
+                    </div>
+                </div>
+            `;
+            const w = window.open('', '_blank');
+            if (!w) return;
+            const style = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }';
+            w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print Preview</title>');
+            w.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+            w.document.write('<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+            w.document.write(`<style>${style} @media print { #preview-toolbar{display:none} } #preview-toolbar{position:fixed;top:0;left:0;right:0;padding:8px 12px;display:flex;gap:8px;justify-content:flex-end;background:rgba(17,24,39,0.06);backdrop-filter:saturate(180%) blur(10px);z-index:9999} #preview-toolbar button{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid rgba(0,0,0,0.1)} #preview-toolbar .primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}<\/style>`);
+            w.document.write('</head><body>');
+            w.document.write('<div id="preview-toolbar"><button class="primary" onclick="window.print()">Print</button><button onclick="window.close()">Close</button></div>');
+            w.document.write('<div style="padding-top:40px">' + content + '</div>');
+            w.document.write('</body></html>');
+            w.document.close();
+        }
+    </script>
+</body>
+</html>

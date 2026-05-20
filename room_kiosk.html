@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Room Status</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        /* Force dark mode for kiosk */
+        html {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .status-available { background-color: #10b981; }
+        .status-busy { background-color: #ef4444; }
+        .upcoming-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #475569;
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            50% { opacity: .7; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white flex flex-col h-screen overflow-hidden">
+
+    <!-- Header -->
+    <header class="p-6 flex justify-between items-center">
+        <div>
+            <h1 id="room-name" class="text-4xl font-bold">Loading...</h1>
+            <p id="room-location" class="text-lg text-slate-400"></p>
+        </div>
+        <div class="text-right">
+            <div id="current-time" class="text-5xl font-bold">00:00</div>
+            <div id="current-date" class="text-lg text-slate-400"></div>
+        </div>
+    </header>
+
+    <!-- Main Status -->
+    <main id="main-content" class="flex-1 flex flex-col justify-center items-center p-6 transition-all duration-500">
+        
+        <!-- Available State -->
+        <div id="available-state" class="hidden text-center">
+            <div class="w-48 h-48 rounded-full bg-emerald-500/20 flex items-center justify-center animate-pulse-slow mb-6">
+                <div class="w-32 h-32 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                    <i class="fas fa-check text-6xl text-emerald-300"></i>
+                </div>
+            </div>
+            <h2 class="text-7xl font-bold text-emerald-400">ว่าง</h2>
+            <p class="text-2xl text-slate-400 mt-2">AVAILABLE</p>
+            <button onclick="openWalkinModal()" class="mt-8 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-2xl shadow-lg transition transform active:scale-95">
+                <i class="fas fa-door-open mr-3"></i> จองด่วน (Walk-in)
+            </button>
+        </div>
+
+        <!-- Busy State -->
+        <div id="busy-state" class="hidden w-full max-w-4xl text-center">
+            <h2 class="text-7xl font-bold text-red-400 mb-4">ไม่ว่าง</h2>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
+                <p class="text-slate-400 text-lg">กำลังประชุม</p>
+                <h3 id="current-meeting-title" class="text-4xl font-bold my-2 line-clamp-2"></h3>
+                <p class="text-2xl text-slate-300 font-medium">
+                    <span id="current-meeting-start"></span> - <span id="current-meeting-end"></span>
+                </p>
+                <p class="text-lg text-slate-400 mt-4">โดย: <span id="current-meeting-booker" class="font-medium text-slate-200"></span></p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer: Upcoming Meetings -->
+    <footer class="p-6">
+        <h3 class="text-xl font-bold text-slate-300 mb-4 border-b border-slate-700 pb-2">การประชุมถัดไป (Upcoming)</h3>
+        <div id="upcoming-list" class="space-y-3 h-48 overflow-y-auto">
+            <p id="no-upcoming" class="text-slate-500 text-center pt-8">ไม่มีการจองเพิ่มเติมสำหรับวันนี้</p>
+        </div>
+    </footer>
+
+    <!-- Walk-in Booking Modal -->
+    <div id="walkin-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-700">
+                <h3 class="font-bold text-lg text-white">จองด่วน (Walk-in Booking)</h3>
+            </div>
+            <form id="walkin-form" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-1">ชื่อผู้จอง</label>
+                    <input type="text" id="walkin-name" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-1">ระยะเวลา</label>
+                    <select id="walkin-duration" class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white">
+                        <option value="30">30 นาที</option>
+                        <option value="60" selected>1 ชั่วโมง</option>
+                        <option value="90">1 ชั่วโมง 30 นาที</option>
+                        <option value="120">2 ชั่วโมง</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeWalkinModal()" class="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-700">ยกเลิก</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">ยืนยันการจอง</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+        const gid = (id) => document.getElementById(id);
+
+        function getRoomIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('room_id');
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeOpts = { hour: '2-digit', minute: '2-digit' };
+            const dateOpts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            gid('current-time').textContent = now.toLocaleTimeString('th-TH', timeOpts);
+            gid('current-date').textContent = now.toLocaleDateString('th-TH', dateOpts);
+        }
+
+        async function fetchData() {
+            const roomId = getRoomIdFromUrl();
+            if (!roomId) {
+                gid('room-name').textContent = 'Error';
+                gid('room-location').textContent = 'No Room ID specified in URL.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_PATH}?action=get_kiosk_data&room_id=${roomId}&v=${Date.now()}`);
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    renderData(data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (e) {
+                console.error("Fetch error:", e);
+                gid('room-name').textContent = 'Connection Error';
+            }
+        }
+
+        function renderData(data) {
+            const { room, current_meeting, upcoming_meetings } = data;
+
+            // Header
+            gid('room-name').textContent = room.name;
+            gid('room-location').textContent = room.location || '';
+
+            // Main Status
+            const availableState = gid('available-state');
+            const busyState = gid('busy-state');
+            const mainContent = gid('main-content');
+
+            if (current_meeting) {
+                // Busy
+                availableState.classList.add('hidden');
+                busyState.classList.remove('hidden');
+                mainContent.classList.remove('status-available');
+                mainContent.classList.add('status-busy');
+
+                gid('current-meeting-title').textContent = current_meeting.title;
+                gid('current-meeting-start').textContent = new Date(current_meeting.start_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                gid('current-meeting-end').textContent = new Date(current_meeting.end_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                gid('current-meeting-booker').textContent = current_meeting.booker_name;
+            } else {
+                // Available
+                busyState.classList.add('hidden');
+                availableState.classList.remove('hidden');
+                mainContent.classList.remove('status-busy');
+                mainContent.classList.add('status-available');
+            }
+
+            // Upcoming List
+            const upcomingList = gid('upcoming-list');
+            const noUpcoming = gid('no-upcoming');
+            if (upcoming_meetings && upcoming_meetings.length > 0) {
+                noUpcoming.classList.add('hidden');
+                upcomingList.innerHTML = upcoming_meetings.map(m => {
+                    const start = new Date(m.start_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    const end = new Date(m.end_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="upcoming-item p-4 rounded-lg flex justify-between items-center">
+                            <div class="flex-1">
+                                <p class="font-bold text-lg">${m.title}</p>
+                                <p class="text-sm text-slate-400">โดย: ${m.booker_name}</p>
+                            </div>
+                            <div class="text-lg font-medium text-amber-400">${start} - ${end}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                upcomingList.innerHTML = '';
+                noUpcoming.classList.remove('hidden');
+            }
+        }
+
+        function openWalkinModal() {
+            gid('walkin-modal').classList.remove('hidden');
+            gid('walkin-name').focus();
+        }
+
+        function closeWalkinModal() {
+            gid('walkin-modal').classList.add('hidden');
+        }
+
+        async function handleWalkinSubmit(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            const payload = {
+                action: 'create_walkin_booking',
+                room_id: getRoomIdFromUrl(),
+                booker_name: gid('walkin-name').value,
+                duration_minutes: gid('walkin-duration').value
+            };
+
+            try {
+                const res = await fetch(API_PATH, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(payload)
+                });
+                const json = await res.json();
+                if (json.status !== 'success') {
+                    throw new Error(json.message);
+                }
+                
+                closeWalkinModal();
+                await Swal.fire({ icon: 'success', title: 'จองสำเร็จ!', timer: 1500, showConfirmButton: false, background: '#1e293b', color: '#f8fafc' });
+                fetchData(); // Refresh the kiosk display immediately
+
+            } catch (err) {
+                await Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1e293b', color: '#f8fafc' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'ยืนยันการจอง';
+            }
+        }
+
+        // --- Initial Load & Intervals ---
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            fetchData();
+            setInterval(updateClock, 1000); // Update clock every second
+            setInterval(fetchData, 60000); // Refresh data every minute
+
+            // Add form submit listener
+            gid('walkin-form').addEventListener('submit', handleWalkinSubmit);
+        });
+    </script>
+</body>
+</html>

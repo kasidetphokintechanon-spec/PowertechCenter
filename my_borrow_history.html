@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการยืมของฉัน - SystemCenter</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-4">
+                    <a href="loan.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 hover:text-blue-600 transition flex-shrink-0">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="flex items-center gap-3">
+                        <div id="logo-bg" class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                            <i id="logo-icon" class="fas fa-history text-xl"></i>
+                        </div>
+                        <h1 id="logo-text" class="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">ประวัติการยืมคืน</h1>
+                    </div>
+                </div>
+                <div class="w-8"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+                <h2 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-history text-emerald-500"></i> รายการอุปกรณ์ที่เคยยืม</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                    <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-semibold text-xs">
+                        <tr>
+                            <th class="px-6 py-4">รหัสอุปกรณ์</th>
+                            <th class="px-6 py-4">ชื่ออุปกรณ์</th>
+                            <th class="px-6 py-4">วันที่ยืม</th>
+                            <th class="px-6 py-4">กำหนดคืน</th>
+                            <th class="px-6 py-4">วันที่คืนจริง</th>
+                            <th class="px-6 py-4">สถานะ</th>
+                            <th class="px-6 py-4 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                        <tr><td colspan="7" class="px-6 py-10 text-center text-slate-400">กำลังโหลด...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const gid = (id) => document.getElementById(id);
+                const sess = await (await fetch('api.php?action=check_session')).json();
+                if (!sess.loggedin) { window.location.href = 'login.html'; return; }
+
+                applyCompanyTheme(sess.company);
+
+                const [requestsRes, historyRes] = await Promise.all([
+                    fetch('api.php?action=getLoanRequests&v=' + Date.now()),
+                    fetch('api.php?action=getLoanManagementHistory&v=' + Date.now())
+                ]);
+
+                if (!requestsRes.ok || !historyRes.ok) {
+                    throw new Error('Failed to fetch loan data.');
+                }
+
+                const requests = await requestsRes.json();
+                const history = await historyRes.json();
+
+                // Filter by current user
+                const myRequests = requests.filter(r => r.borrower_id == sess.user_id);
+                // ใช้เฉพาะประวัติที่มีวันที่คืนจริง เพื่อลดความสับสน (ไม่ดึงรายการกำลังยืมซ้ำ)
+                const myHistory = history.filter(h => h.borrower_id == sess.user_id && h.return_date);
+
+                const tbody = document.getElementById('history-list');
+
+                const allMyItems = [
+                    ...myRequests,
+                    ...myHistory
+                ];
+
+                if (allMyItems.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-slate-400"><i class="fas fa-box-open text-4xl mb-2 opacity-50"></i><p>ไม่พบประวัติการยืม</p></td></tr>`;
+                    return;
+                }
+
+                // Sort: pending, active, then history by date
+                allMyItems.sort((a, b) => {
+                    const statusOrder = { 'Pending': 1, 'Active': 2, 'Returned': 3 };
+                    const statusA = a.loan_status || 'Returned';
+                    const statusB = b.loan_status || 'Returned';
+
+                    if (statusOrder[statusA] !== statusOrder[statusB]) {
+                        return statusOrder[statusA] - statusOrder[statusB];
+                    }
+                    const dateA = new Date(a.lend_date || 0);
+                    const dateB = new Date(b.lend_date || 0);
+                    return dateB - dateA;
+                });
+
+                tbody.innerHTML = allMyItems.map(item => {
+                    if (item.loan_status) { // This is a request (Pending or Active)
+                        const statusBadge = item.loan_status === 'Pending'
+                            ? `<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-bold">รออนุมัติ</span>`
+                            : `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">กำลังยืม</span>`;
+                        
+                        const cancelButton = item.loan_status === 'Pending'
+                            ? `<button onclick="cancelRequest(${item.loan_id})" class="px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold transition border border-red-200 shadow-sm"><i class="fas fa-times-circle mr-1"></i> ยกเลิก</button>`
+                            : '-';
+
+                        return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                            <td class="px-6 py-4 font-mono text-slate-500">${item.equipment_id}</td>
+                            <td class="px-6 py-4 font-medium dark:text-white">${item.asset_name}</td>
+                            <td class="px-6 py-4">-</td>
+                            <td class="px-6 py-4 text-slate-500">${item.return_date || '-'}</td>
+                            <td class="px-6 py-4 font-medium text-emerald-600">-</td>
+                            <td class="px-6 py-4">${statusBadge}</td>
+                            <td class="px-6 py-4 text-center">${cancelButton}</td>
+                        </tr>`;
+                    } else { // This is a history item
+                        const statusBadge = `<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">คืนแล้ว</span>`;
+                        return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                            <td class="px-6 py-4 font-mono text-slate-500">${item.equipment_id}</td>
+                            <td class="px-6 py-4 font-medium dark:text-white">${item.equipment_name}</td>
+                            <td class="px-6 py-4">${new Date(item.lend_date).toLocaleDateString('th-TH')}</td>
+                            <td class="px-6 py-4 text-slate-500">${item.expected_return_date || '-'}</td>
+                            <td class="px-6 py-4 font-medium text-emerald-600">${new Date(item.return_date).toLocaleDateString('th-TH')}</td>
+                            <td class="px-6 py-4">${statusBadge}</td>
+                            <td class="px-6 py-4 text-center">-</td>
+                        </tr>`;
+                    }
+                }).join('');
+
+            } catch (e) { console.error(e); }
+        });
+
+        async function cancelRequest(loanId) {
+            const { isConfirmed } = await Swal.fire({
+                title: 'ยกเลิกคำขอยืม?',
+                text: "คุณต้องการยกเลิกคำขอยืมอุปกรณ์นี้ใช่หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonText: 'ไม่',
+                confirmButtonText: 'ใช่, ยกเลิกเลย'
+            });
+
+            if (isConfirmed) {
+                const fd = new FormData();
+                fd.append('action', 'cancel_loan_request');
+                fd.append('id', loanId);
+
+                try {
+                    const res = await fetch('api.php', { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (json.status !== 'success') throw new Error(json.message);
+                    
+                    Swal.fire('สำเร็จ!', 'คำขอยืมของคุณถูกยกเลิกแล้ว', 'success').then(() => {
+                        location.reload();
+                    });
+                } catch (err) {
+                    Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                }
+            }
+        }
+
+        function applyCompanyTheme(company) {
+            const logoBg = document.getElementById('logo-bg');
+            const logoIcon = document.getElementById('logo-icon');
+            const logoText = document.getElementById('logo-text');
+
+            let fromColor, toColor, shadowColor;
+            let iconClass;
+
+            if (company === 'PTA') { // Green
+                fromColor = 'from-emerald-600'; toColor = 'to-teal-600'; shadowColor = 'shadow-emerald-500/30';
+                iconClass = 'fas fa-cogs';
+            } else if (company === 'PT4') { // Red
+                fromColor = 'from-red-600'; toColor = 'to-rose-600'; shadowColor = 'shadow-red-500/30';
+                iconClass = 'fas fa-industry';
+            } else { // PTE or Default (Blue)
+                fromColor = 'from-blue-600'; toColor = 'to-indigo-600'; shadowColor = 'shadow-blue-500/30';
+                iconClass = 'fas fa-history'; // Default icon for history page
+            }
+
+            // Apply classes
+            if(logoBg) logoBg.className = `w-10 h-10 bg-gradient-to-br ${fromColor} ${toColor} rounded-xl flex items-center justify-center text-white shadow-lg ${shadowColor}`;
+            if(logoText) logoText.className = `text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r ${fromColor} ${toColor} dark:from-blue-400 dark:to-indigo-400`;
+            // Optional: Change icon based on company, or keep history icon
+            // if(logoIcon) logoIcon.className = `${iconClass} text-xl`; 
+        }
+    </script>
+</body>
+</html>

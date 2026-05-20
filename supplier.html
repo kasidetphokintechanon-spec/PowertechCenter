@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการผู้จำหน่าย (Supplier/Vendor)</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+        (function () {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div>
+                    <div class="text-xl font-bold">ผู้จำหน่าย (Supplier/Vendor)</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400" id="user-info"></div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-theme" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="admin.html" class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>กลับ
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="font-bold text-slate-700 dark:text-slate-200">ฟอร์มผู้จำหน่าย</div>
+                    <button id="btn-new" class="text-sm px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                        <i class="fas fa-plus mr-2"></i>เพิ่มใหม่
+                    </button>
+                </div>
+
+                <form id="supplier-form" class="space-y-4">
+                    <input type="hidden" name="id" id="form-id" value="">
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">บริษัท</label>
+                        <select name="company" id="form-company" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                            <option value="">ทุกบริษัท (All)</option>
+                            <option value="PTA">PTA</option>
+                            <option value="PT4">PT4</option>
+                            <option value="PTE">PTE</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">ชื่อผู้จำหน่าย</label>
+                        <input type="text" name="name" id="form-name" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" required maxlength="255" placeholder="เช่น ABC Computer">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">เลขผู้เสียภาษี</label>
+                            <input type="text" name="tax_id" id="form-tax" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" maxlength="50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">ผู้ติดต่อ</label>
+                            <input type="text" name="contact_person" id="form-contact" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" maxlength="255">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">เบอร์โทร</label>
+                            <input type="text" name="phone" id="form-phone" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" maxlength="50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">อีเมล</label>
+                            <input type="email" name="email" id="form-email" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" maxlength="255" placeholder="name@company.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">ที่อยู่</label>
+                        <textarea name="address" id="form-address" rows="3" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">หมายเหตุ</label>
+                        <textarea name="notes" id="form-notes" rows="2" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="checkbox" id="form-active" class="rounded" checked>
+                            <span class="text-slate-700 dark:text-slate-200">เปิดใช้งาน</span>
+                        </label>
+                        <button id="btn-save" type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition">
+                            <i class="fas fa-save mr-2"></i>บันทึก
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">ค้นหา</label>
+                        <input type="text" id="search-term" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm" placeholder="ค้นหาชื่อ/เลขภาษี/เบอร์โทร/อีเมล...">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 w-full md:w-auto">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">บริษัท</label>
+                            <select id="filter-company" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                                <option value="">ทั้งหมด</option>
+                                <option value="PTA">PTA</option>
+                                <option value="PT4">PT4</option>
+                                <option value="PTE">PTE</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2 pt-6">
+                            <input type="checkbox" id="filter-inactive" class="rounded">
+                            <label for="filter-inactive" class="text-sm text-slate-700 dark:text-slate-200 cursor-pointer">แสดงที่ปิดใช้งาน</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-auto custom-scrollbar border border-slate-100 dark:border-slate-700 rounded-xl">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50 dark:bg-slate-900/40">
+                            <tr class="text-left text-slate-600 dark:text-slate-300">
+                                <th class="px-4 py-3">ชื่อผู้จำหน่าย</th>
+                                <th class="px-4 py-3">บริษัท</th>
+                                <th class="px-4 py-3">ติดต่อ</th>
+                                <th class="px-4 py-3">เลขภาษี</th>
+                                <th class="px-4 py-3">สถานะ</th>
+                                <th class="px-4 py-3 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplier-tbody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                    </table>
+                </div>
+                <div id="list-meta" class="text-xs text-slate-500 dark:text-slate-400 mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiPath = 'api.php';
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true });
+        let sessionData = {};
+        let suppliers = [];
+
+        const gid = (id) => document.getElementById(id);
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function normalizeCompany(co) {
+            const v = String(co || '').trim().toUpperCase();
+            return ['PTA', 'PT4', 'PTE'].includes(v) ? v : '';
+        }
+
+        async function checkSession() {
+            const res = await fetch(`${apiPath}?action=check_session`, { cache: 'no-store' });
+            const json = await res.json();
+            if (!json || !json.loggedin) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            sessionData = json;
+            gid('user-info').textContent = `${json.display_name || ''} ${json.company ? `(${json.company})` : ''}`.trim();
+            return true;
+        }
+
+        function resetForm(defaultCompany = '') {
+            gid('form-id').value = '';
+            gid('form-company').value = normalizeCompany(defaultCompany);
+            gid('form-name').value = '';
+            gid('form-tax').value = '';
+            gid('form-phone').value = '';
+            gid('form-email').value = '';
+            gid('form-address').value = '';
+            gid('form-contact').value = '';
+            gid('form-notes').value = '';
+            gid('form-active').checked = true;
+            gid('form-name').focus();
+        }
+
+        function getFormPayload() {
+            const name = gid('form-name').value.trim();
+            const email = gid('form-email').value.trim();
+            if (!name) throw new Error('กรุณากรอกชื่อผู้จำหน่าย');
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('รูปแบบอีเมลไม่ถูกต้อง');
+
+            return {
+                id: gid('form-id').value.trim(),
+                company: normalizeCompany(gid('form-company').value),
+                name,
+                tax_id: gid('form-tax').value.trim(),
+                phone: gid('form-phone').value.trim(),
+                email,
+                address: gid('form-address').value.trim(),
+                contact_person: gid('form-contact').value.trim(),
+                notes: gid('form-notes').value.trim(),
+                is_active: gid('form-active').checked ? '1' : '0'
+            };
+        }
+
+        async function saveSupplier(e) {
+            e.preventDefault();
+            try {
+                const payload = getFormPayload();
+                const fd = new FormData();
+                fd.append('action', 'save_supplier');
+                Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+
+                const btn = gid('btn-save');
+                const old = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+                const res = await fetch(apiPath, { method: 'POST', body: fd });
+                const json = await res.json();
+                if (!json || json.status !== 'success') throw new Error(json?.message || 'บันทึกล้มเหลว');
+
+                localStorage.setItem('suppliers_last_update', String(Date.now()));
+                Toast.fire({ icon: 'success', title: 'บันทึกสำเร็จ' });
+                gid('form-id').value = json.supplier?.id || '';
+                await loadSuppliers();
+                btn.disabled = false;
+                btn.innerHTML = old;
+            } catch (err) {
+                Swal.fire('ผิดพลาด', err.message || String(err), 'error');
+                gid('btn-save').disabled = false;
+                gid('btn-save').innerHTML = '<i class="fas fa-save mr-2"></i>บันทึก';
+            }
+        }
+
+        async function deleteSupplier(id) {
+            const row = suppliers.find(s => String(s.id) === String(id));
+            const name = row ? row.name : '';
+            const { isConfirmed } = await Swal.fire({
+                title: 'ปิดใช้งานผู้จำหน่าย?',
+                text: name ? `ผู้จำหน่าย: ${name}` : '',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ปิดใช้งาน',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#dc2626'
+            });
+            if (!isConfirmed) return;
+
+            const fd = new FormData();
+            fd.append('action', 'delete_supplier');
+            fd.append('id', String(id));
+            const res = await fetch(apiPath, { method: 'POST', body: fd });
+            const json = await res.json();
+            if (!json || json.status !== 'success') {
+                Swal.fire('ผิดพลาด', json?.message || 'ทำรายการไม่สำเร็จ', 'error');
+                return;
+            }
+            localStorage.setItem('suppliers_last_update', String(Date.now()));
+            Toast.fire({ icon: 'success', title: 'ปิดใช้งานแล้ว' });
+            await loadSuppliers();
+        }
+
+        function openEdit(s) {
+            gid('form-id').value = s.id || '';
+            gid('form-company').value = normalizeCompany(s.company);
+            gid('form-name').value = s.name || '';
+            gid('form-tax').value = s.tax_id || '';
+            gid('form-phone').value = s.phone || '';
+            gid('form-email').value = s.email || '';
+            gid('form-address').value = s.address || '';
+            gid('form-contact').value = s.contact_person || '';
+            gid('form-notes').value = s.notes || '';
+            gid('form-active').checked = String(s.is_active) === '1';
+            gid('form-name').focus();
+        }
+
+        function renderTable(items) {
+            const tbody = gid('supplier-tbody');
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">ไม่พบข้อมูล</td></tr>`;
+                gid('list-meta').textContent = '0 รายการ';
+                return;
+            }
+
+            tbody.innerHTML = items.map(s => {
+                const status = String(s.is_active) === '1';
+                const badge = status
+                    ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Active</span>'
+                    : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Inactive</span>';
+                const contact = [s.contact_person, s.phone, s.email].filter(Boolean).join(' • ') || '-';
+                const company = s.company ? escapeHtml(s.company) : '<span class="text-slate-400">All</span>';
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                        <td class="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">${escapeHtml(s.name || '')}</td>
+                        <td class="px-4 py-3">${company}</td>
+                        <td class="px-4 py-3 text-slate-600 dark:text-slate-300">${escapeHtml(contact)}</td>
+                        <td class="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">${escapeHtml(s.tax_id || '-')}</td>
+                        <td class="px-4 py-3">${badge}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button type="button" class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition" title="แก้ไข" onclick="window.__editSupplier(${Number(s.id)})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${status ? `
+                            <button type="button" class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-slate-700 transition" title="ปิดใช้งาน" onclick="window.__deleteSupplier(${Number(s.id)})">
+                                <i class="fas fa-ban"></i>
+                            </button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            gid('list-meta').textContent = `${items.length} รายการ`;
+        }
+
+        async function loadSuppliers() {
+            const term = gid('search-term').value.trim();
+            const company = normalizeCompany(gid('filter-company').value);
+            const includeInactive = gid('filter-inactive').checked ? '1' : '0';
+            const res = await fetch(`${apiPath}?action=get_suppliers&term=${encodeURIComponent(term)}&company=${encodeURIComponent(company)}&include_inactive=${includeInactive}&limit=500`, { cache: 'no-store' });
+            const json = await res.json();
+            suppliers = (json && json.status === 'success' && Array.isArray(json.suppliers)) ? json.suppliers : [];
+            renderTable(suppliers);
+        }
+
+        window.__editSupplier = function (id) {
+            const s = suppliers.find(x => String(x.id) === String(id));
+            if (s) openEdit(s);
+        }
+
+        window.__deleteSupplier = function (id) {
+            deleteSupplier(id);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const ok = await checkSession();
+            if (!ok) return;
+
+            gid('btn-theme').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+
+            gid('supplier-form').addEventListener('submit', saveSupplier);
+            gid('btn-new').addEventListener('click', () => resetForm(sessionData.company || ''));
+
+            const reload = () => loadSuppliers().catch(() => {});
+            gid('search-term').addEventListener('input', reload);
+            gid('filter-company').addEventListener('change', reload);
+            gid('filter-inactive').addEventListener('change', reload);
+
+            gid('form-company').value = normalizeCompany(sessionData.company || '');
+            gid('filter-company').value = normalizeCompany(sessionData.company || '');
+            resetForm(sessionData.company || '');
+            await loadSuppliers();
+        });
+    </script>
+</body>
+</html>

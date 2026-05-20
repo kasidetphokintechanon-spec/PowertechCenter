@@ -1,0 +1,56 @@
+compney,Building,Description
+PT4,F5,DVR RaySharp 16 CH
+PT4,F6,UPS 750 VA Server Room
+PT4,F7,Lighting
+PT4,F8,CCTV - System Status
+PTA,F4,CCTV - Cameras Online (%)
+PTA,F16,CCTV – Retention (≥90 Days)
+PTA,F17,DVR RaySharp 16 CH
+PTA,F20,UPS 750 VA Server Room
+PTE,PTE,Lighting
+,,CCTV - System Status
+,,CCTV - Cameras Online (%)
+,,CCTV – Retention (≥30 Days)
+,,TOT Fiber Optic
+,,FortiGate Firewall 200E
+,,UPS 750 VA
+,,"Status monitor,Lighting,Air Condition"
+,,Swith Hub D-Link 24 Port
+,,DVR RaySharp 16 CH
+,,UPS Server Rack
+,,CCTV - System Status
+,,CCTV - Cameras Online (%)
+,,CCTV – Retention (≥90 Days)
+,,Backup HDD
+,,Swith Hub D-Link 24 Port
+,,DVR RaySharp 16 CH
+,,UPS 750 VA
+,,CCTV - System Status
+,,CCTV - Cameras Online (%)
+,,CCTV – Retention (≥90 Days)
+,,Swith Hub D-Link 24 Port
+,,DVR RaySharp 16 CH
+,,UPS 750 VA
+,,Server NAS
+,,UPS Server Rack
+,,CCTV - System Status
+,,CCTV - Cameras Online (%)
+,,CCTV – Retention (≥90 Days)
+,,Status monitor
+,,Swith Hub D-Link 24 Port
+,,DVR RaySharp 16 CH
+,,UPS 750 VA Server Room
+,,Lighting
+,,CCTV – System Status (F-16)
+,,CCTV – Online (%) (F-16)
+,,CCTV – Retention (≥15 Days) F-16
+,,CCTV – System Status (F-17)
+,,CCTV – Online (%) (F-17)
+,,CCTV – Retention (≥60 Days) F17
+,,Backup HDD
+,,Swith Hub D-Link 24 Port
+,,DVR RaySharp 23 CH
+,,UPS 750 VA
+,,CCTV - System Status
+,,CCTV - Cameras Online (%)
+,,CCTV – Retention (≥90 Days)

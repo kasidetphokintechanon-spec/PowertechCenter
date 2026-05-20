@@ -1,0 +1,2761 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Service Log - Command Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" />
+    <link rel="stylesheet" href="css/design-system.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+                extend: {
+                    colors: {
+                        apple: {
+                            blue: '#007AFF',
+                            green: '#34C759',
+                            orange: '#FF9500',
+                            red: '#FF3B30',
+                            purple: '#AF52DE',
+                            pink: '#FF2D55',
+                            gray: '#8E8E93',
+                            gray2: '#636366',
+                            gray3: '#48484A',
+                            gray4: '#3A3A3C',
+                            gray5: '#2C2C2E',
+                            gray6: '#1C1C1E',
+                        }
+                    },
+                    boxShadow: {
+                        'macos': '0 22px 70px 4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                        'macos-dark': '0 22px 70px 4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                        'macos-sm': '0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                        'macos-hover': '0 8px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+                    },
+                    borderRadius: {
+                        'macos': '14px',
+                        'macos-lg': '18px',
+                        'macos-xl': '22px',
+                    }
+                }
+            }
+        };
+        // Theme Loader
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <style>
+        /* macOS Frosted Glass */
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+        .dark .glass {
+            background: rgba(30, 30, 32, 0.78);
+        }
+
+        /* macOS Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.35); }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+
+        /* macOS Button Style */
+        .btn-macos {
+            background: linear-gradient(180deg, #007AFF 0%, #0066E0 100%);
+            box-shadow: 0 1px 3px rgba(0, 122, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-macos:hover {
+            background: linear-gradient(180deg, #0084FF 0%, #007AFF 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+        .btn-macos:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 122, 255, 0.3);
+        }
+
+        /* macOS Card */
+        .card-macos {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .dark .card-macos {
+            background: rgba(44, 44, 46, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .card-macos:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        }
+
+        /* macOS Input */
+        .input-macos {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .input-macos:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+        }
+        .dark .input-macos {
+            background: rgba(58, 58, 60, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Stat Pill Improvements */
+        .stat-pill {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 84px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-pill.active { 
+            background: rgba(0, 122, 255, 0.08);
+            border: 2px solid #007AFF !important;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+        }
+        .stat-pill.active .stat-icon {
+            color: #007AFF;
+            background: rgba(0, 122, 255, 0.15);
+        }
+        .dark .stat-pill.active {
+            background: rgba(0, 122, 255, 0.15);
+            border-color: #007AFF !important;
+        }
+        .stat-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-top: 8px;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* macOS Table */
+        .table-macos th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 11px;
+            color: #8E8E93;
+        }
+        .dark .table-macos th {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .table-macos tr {
+            transition: background 0.15s ease;
+        }
+        .table-macos tr:hover {
+            background: rgba(0, 122, 255, 0.04);
+        }
+        .dark .table-macos tr:hover {
+            background: rgba(0, 122, 255, 0.08);
+        }
+
+        /* Print Layout Helpers */
+        .print-doc {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 24px 0;
+        }
+        .print-ticket-wrap {
+            width: 794px; /* A4 width at 96dpi approx */
+            margin: 0 auto;
+        }
+        .print-page {
+            background: #ffffff;
+        }
+
+        /* Print Styles */
+        @media print {
+            @page { size: auto; margin: 1cm; }
+            body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .no-print, header, .stats-bar, #filter-bar, .action-cell, button, #add-ticket-btn, #theme-toggle { display: none !important; }
+            .main-container { padding: 0; max-width: none; }
+            .card { box-shadow: none; border: none; padding: 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f3f4f6; color: #000; }
+            
+            body.printing-ticket > *:not(.print-container) { display: none !important; }
+            body.printing-ticket .print-container { display: block !important; width: 100%; height: auto; }
+            body.printing-ticket .print-ticket-wrap { margin: 0 auto; width: 100%; }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Timeline dots */
+        .timeline-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s ease;
+        }
+    </style>
+
+    <!-- ── Design-system supplement: responsive table + spacing refinements ── -->
+    <style>
+        /* Override body font to match design system */
+        body { font-family: var(--ptc-font) !important; }
+
+        /* Tighten the top padding so content starts closer to the fixed header */
+        #main-content { padding-top: 1.25rem; }
+
+        /* ── Responsive ticket table → stacked cards on mobile ── */
+        @media (max-width: 640px) {
+            /* Hide the main log table header on small screens */
+            #log-table thead { display: none !important; }
+            #log-table tbody { display: block; }
+            #log-table tbody tr {
+                display: flex !important;
+                flex-direction: column;
+                background: var(--ptc-surface) !important;
+                border: 1px solid var(--ptc-border) !important;
+                border-radius: var(--ptc-radius-lg) !important;
+                margin: 0 0 .75rem !important;
+                overflow: hidden;
+                box-shadow: var(--ptc-shadow-xs);
+            }
+            #log-table tbody td {
+                display: flex !important;
+                align-items: flex-start !important;
+                justify-content: space-between !important;
+                padding: .5rem .875rem !important;
+                border-bottom: 1px solid var(--ptc-border) !important;
+                font-size: .875rem;
+            }
+            #log-table tbody td:last-child { border-bottom: none !important; }
+            #log-table tbody td::before {
+                content: attr(data-label);
+                font-size: .6875rem; font-weight: 700;
+                letter-spacing: .05em; text-transform: uppercase;
+                color: var(--ptc-text-faint); flex-shrink: 0;
+                min-width: 80px; padding-right: .75rem; margin-top: 2px;
+            }
+        }
+
+        /* ── Stat pills refinement ── */
+        .stat-pill {
+            border-radius: var(--ptc-radius-lg) !important;
+            transition: var(--ptc-transition) !important;
+        }
+        .stat-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--ptc-shadow-md) !important;
+        }
+
+        /* ── Filter/search bar on mobile: full width ── */
+        @media (max-width: 640px) {
+            .filter-controls {
+                flex-direction: column !important;
+                gap: .625rem !important;
+            }
+            .filter-controls input,
+            .filter-controls select {
+                width: 100% !important;
+            }
+        }
+
+        /* ── Improve modal padding on mobile ── */
+        @media (max-width: 640px) {
+            #modal .modal-content,
+            #asset-details-modal .modal-content {
+                margin: .5rem !important;
+                max-height: calc(100dvh - 1rem);
+                border-radius: var(--ptc-radius-xl) !important;
+            }
+        }
+
+        /* ── Badge colours unified with design system ── */
+        .badge-Pending, .status-pending         { background: var(--ptc-primary-light)  !important; color: var(--ptc-primary)  !important; }
+        .badge-In-Progress, .status-in-progress { background: var(--ptc-warning-bg)     !important; color: var(--ptc-warning)  !important; }
+        .badge-Completed, .status-completed     { background: var(--ptc-success-bg)     !important; color: var(--ptc-success)  !important; }
+        .badge-Waiting-for-Parts                { background: var(--ptc-danger-bg)      !important; color: var(--ptc-danger)   !important; }
+        .badge-Temporary-Fix                    { background: var(--ptc-info-bg)        !important; color: var(--ptc-info)     !important; }
+        .badge-Cancelled                        { background: var(--ptc-surface-3)      !important; color: var(--ptc-text-muted) !important; }
+
+        /* ── Typography polish ── */
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+        .text-xs { font-size: .75rem !important; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); border-radius: 99px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-apple-gray6 dark:text-gray-100 flex flex-col min-h-screen transition-colors duration-300 overflow-x-hidden ptc-normalize">
+
+    <!-- macOS Style Navigation Bar -->
+    <header class="glass h-14 border-b border-gray-200/50 dark:border-white/5 flex justify-between items-center px-4 lg:px-6 sticky top-0 z-50 no-print">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100/80 dark:bg-apple-gray5/80 text-gray-500 hover:text-apple-blue hover:bg-apple-blue/10 transition-all duration-200">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <h1 class="text-base font-semibold text-gray-900 dark:text-white">IT Command Center</h1>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 hidden sm:block">Service Log & Ticket Management</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="chart-btn" onclick="toggleChart()" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-apple-purple bg-apple-purple/10 rounded-lg hover:bg-apple-purple/20 transition">
+                <i class="fas fa-chart-pie"></i> <span class="hidden lg:inline">Analytics</span>
+            </button>
+            <button id="print-report-btn" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100/80 dark:bg-apple-gray5/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-apple-gray4/80 transition">
+                <i class="fas fa-print"></i> <span class="hidden lg:inline">Print</span>
+            </button>
+            <button id="export-btn" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-apple-green bg-apple-green/10 rounded-lg hover:bg-apple-green/20 transition">
+                <i class="fas fa-file-excel"></i> <span class="hidden lg:inline">Export</span>
+            </button>
+            <button id="add-ticket-btn" class="btn-macos flex items-center gap-2 px-4 py-2 text-xs font-medium text-white rounded-xl">
+                <i class="fas fa-plus"></i> <span class="hidden sm:inline">New Ticket</span>
+            </button>
+            <div class="h-5 w-px bg-gray-200 dark:bg-apple-gray4 mx-1"></div>
+            <button id="theme-toggle" class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-apple-gray5 transition-colors">
+                <i class="fas fa-sun block dark:hidden text-sm"></i>
+                <i class="fas fa-moon hidden dark:block text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full">
+        <div class="max-w-7xl mx-auto space-y-4 p-3 sm:p-4 lg:p-6">
+
+            <!-- Chart Section -->
+            <div id="chart-section" class="hidden card-macos p-5 relative animate-fade-in">
+                <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2 text-sm">
+                    <i class="fas fa-chart-pie text-apple-purple"></i> Ticket Analytics by Status
+                </h3>
+                <div class="h-56 w-full flex justify-center">
+                    <canvas id="statusPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Stats Pills -->
+            <div class="stats-bar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-11 gap-2 no-print">
+                <div class="stat-pill active cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-gray-100 dark:bg-apple-gray5 flex items-center justify-center text-gray-500 flex-shrink-0">
+                        <i class="fas fa-list-check text-xs"></i>
+                    </div>
+                    <span id="totalTickets" class="stat-badge bg-gray-100 dark:bg-apple-gray5 text-gray-600 dark:text-gray-300">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">All</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Pending">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-apple-blue/10 flex items-center justify-center text-apple-blue flex-shrink-0">
+                        <i class="fas fa-hourglass-half text-xs"></i>
+                    </div>
+                    <span id="pendingTickets" class="stat-badge bg-apple-blue/10 text-apple-blue">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Pending</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="PR Submitted">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        <i class="fas fa-file-signature text-xs"></i>
+                    </div>
+                    <span id="prSubmittedTickets" class="stat-badge bg-blue-100 dark:bg-blue-900/30 text-blue-600">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">PR</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="PO Issued">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                        <i class="fas fa-file-invoice-dollar text-xs"></i>
+                    </div>
+                    <span id="poIssuedTickets" class="stat-badge bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">PO</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Parts Received">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 flex-shrink-0">
+                        <i class="fas fa-boxes-stacked text-xs"></i>
+                    </div>
+                    <span id="partsReceivedTickets" class="stat-badge bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Parts</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="In Progress">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-apple-orange/10 flex items-center justify-center text-apple-orange flex-shrink-0">
+                        <i class="fas fa-person-digging text-xs"></i>
+                    </div>
+                    <span id="progressTickets" class="stat-badge bg-apple-orange/10 text-apple-orange">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">In Progress</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Waiting for Parts">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-apple-red/10 flex items-center justify-center text-apple-red flex-shrink-0">
+                        <i class="fas fa-clock-rotate-left text-xs"></i>
+                    </div>
+                    <span id="waitingTickets" class="stat-badge bg-apple-red/10 text-apple-red">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Waiting</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Temporary Fix">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-apple-purple/10 flex items-center justify-center text-apple-purple flex-shrink-0">
+                        <i class="fas fa-screwdriver-wrench text-xs"></i>
+                    </div>
+                    <span id="tempFixTickets" class="stat-badge bg-apple-purple/10 text-apple-purple">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Temp Fix</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Unrepairable">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 flex-shrink-0">
+                        <i class="fas fa-circle-xmark text-xs"></i>
+                    </div>
+                    <span id="unrepairableTickets" class="stat-badge bg-rose-500/10 text-rose-600">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Unrepairable</div>
+                </div>
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-value="Completed">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-apple-green/10 flex items-center justify-center text-apple-green flex-shrink-0">
+                        <i class="fas fa-circle-check text-xs"></i>
+                    </div>
+                    <span id="completedTickets" class="stat-badge bg-apple-green/10 text-apple-green">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Completed</div>
+                </div>
+                <!-- Added Programmer Stat Pill -->
+                <div class="stat-pill cursor-pointer card-macos hover:shadow-macos-hover transition-all" data-filter-type="Programmer">
+                    <div class="stat-icon w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                        <i class="fas fa-laptop-code text-xs"></i>
+                    </div>
+                    <span id="programmerTicketsCount" class="stat-badge bg-indigo-500/10 text-indigo-600">0</span>
+                    <div class="stat-label text-gray-700 dark:text-gray-300">Programmer</div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div id="filter-bar" class="card-macos p-4 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between no-print">
+                <div class="flex gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0">
+                    <select id="company-filter" class="input-macos text-xs min-w-[100px]">
+                        <option value="">All Companies</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                    <select id="type-filter" class="input-macos text-xs min-w-[100px]">
+                        <option value="">All Types</option>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Software">Software</option>
+                        <option value="Network">Network</option>
+                        <option value="System">System</option>
+                        <option value="Programmer">Programmer</option>
+                        <option value="Other">อื่นๆ</option>
+                    </select>
+                    <select id="status-filter" class="hidden">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="PR Submitted">PR Submitted</option>
+                        <option value="PO Issued">PO Issued</option>
+                        <option value="Parts Received">Parts Received</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Waiting for Parts">Waiting for Parts</option>
+                        <option value="Temporary Fix">Temporary Fix</option>
+                        <option value="Unrepairable">Unrepairable</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="search-input" placeholder="Search tickets..." class="input-macos w-full pl-9 pr-4 text-xs">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="date-start" class="input-macos text-xs">
+                        <span class="text-xs text-gray-400">to</span>
+                        <input type="date" id="date-end" class="input-macos text-xs">
+                    </div>
+                    <button id="my-queue-toggle" class="px-3 py-2 rounded-xl border border-gray-200 dark:border-apple-gray4 bg-white/80 dark:bg-apple-gray5/80 text-gray-600 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-apple-gray4 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-user-check text-apple-blue"></i>
+                        <span>My Queue</span>
+                    </button>
+                    <button id="refresh-btn" class="px-3 py-2 rounded-xl border border-gray-200 dark:border-apple-gray4 bg-white/80 dark:bg-apple-gray5/80 text-gray-600 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-apple-gray4 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-rotate text-gray-400"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+            <div class="px-4 py-2 -mt-2 mb-2 no-print">
+                <div class="inline-flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 dark:border-apple-gray4 bg-white/70 dark:bg-apple-gray5/70 px-3 py-1.5 text-[11px] text-gray-500 dark:text-gray-300">
+                    <span class="font-semibold">Legend:</span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-file-signature text-blue-600"></i> PR</span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-file-invoice text-apple-green"></i> PO</span>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="card-macos overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-apple-gray5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 no-print">
+                    <div id="result-summary" class="text-xs text-gray-600 dark:text-gray-300"></div>
+                    <button id="clear-filters-btn" class="px-3 py-1.5 rounded-lg bg-gray-100/80 dark:bg-apple-gray5/80 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/80 dark:hover:bg-apple-gray4/80 transition">
+                        Clear Filters
+                    </button>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-sm text-gray-600 dark:text-gray-300 table-macos">
+                        <thead class="text-xs sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-3 w-10 text-center no-print hidden sm:table-cell"><i class="fas fa-paperclip"></i></th>
+                                <th class="px-4 py-3 whitespace-nowrap">Ticket</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Requester</th>
+                                <th class="px-4 py-3 min-w-[180px]">Issue</th>
+                                <th class="px-4 py-3 whitespace-nowrap hidden md:table-cell">Assignee</th>
+                                <th class="px-4 py-3 whitespace-nowrap hidden sm:table-cell">Status</th>
+                                <th class="px-4 py-3 whitespace-nowrap hidden lg:table-cell">Closed</th>
+                                <th class="px-4 py-3 text-center whitespace-nowrap no-print hidden sm:table-cell w-24">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-gray-100 dark:divide-apple-gray5">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-results" class="hidden flex-col items-center justify-center py-16 text-gray-400">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-apple-gray5 rounded-2xl flex items-center justify-center mb-4">
+                        <i class="fas fa-search text-2xl opacity-50"></i>
+                    </div>
+                    <p class="text-sm">No tickets found</p>
+                </div>
+                <!-- Pagination -->
+                <div id="pagination-controls" class="hidden flex-col sm:flex-row justify-between items-center p-4 border-t border-gray-100 dark:border-apple-gray5 bg-gray-50/50 dark:bg-apple-gray6/50 no-print">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 mb-2 sm:mb-0">
+                        Showing <span id="page-start" class="font-semibold text-gray-700 dark:text-gray-200">0</span> - <span id="page-end" class="font-semibold text-gray-700 dark:text-gray-200">0</span> of <span id="page-total" class="font-semibold text-gray-700 dark:text-gray-200">0</span>
+                    </span>
+                    <div class="flex gap-2">
+                        <button onclick="changePage(-1)" id="btn-prev" class="px-3 py-1.5 bg-white dark:bg-apple-gray5 border border-gray-200 dark:border-apple-gray4 rounded-lg hover:bg-gray-50 dark:hover:bg-apple-gray4 text-xs font-medium text-gray-600 dark:text-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-chevron-left mr-1"></i> Previous
+                        </button>
+                        <button onclick="changePage(1)" id="btn-next" class="px-3 py-1.5 bg-white dark:bg-apple-gray5 border border-gray-200 dark:border-apple-gray4 rounded-lg hover:bg-gray-50 dark:hover:bg-apple-gray4 text-xs font-medium text-gray-600 dark:text-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Next <i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="log-modal" class="fixed inset-0 z-50 hidden no-print" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-macos-xl bg-white dark:bg-apple-gray5 text-left shadow-macos dark:shadow-macos-dark transition-all sm:my-8 w-full max-w-4xl flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-apple-gray4 bg-gray-50/50 dark:bg-apple-gray6/50">
+                    <h3 class="text-base font-semibold text-gray-800 dark:text-white" id="modal-title">New Ticket</h3>
+                    <button onclick="closeModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-apple-gray4 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="log-form" class="flex flex-col flex-grow overflow-hidden">
+                    <div class="modal-body-scrollable p-6 overflow-y-auto space-y-5 custom-scrollbar">
+                        
+                        <!-- Requester Mode -->
+                        <div class="bg-gray-50/80 dark:bg-apple-gray6/50 p-4 rounded-xl border border-gray-100 dark:border-apple-gray4">
+                            <div class="flex gap-6 mb-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="requester-mode" value="auto" checked class="w-4 h-4 text-apple-blue focus:ring-apple-blue/50">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Employee</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="requester-mode" value="manual" class="w-4 h-4 text-apple-blue focus:ring-apple-blue/50">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Department/Other</span>
+                                </label>
+                            </div>
+                            
+                            <div id="requester-auto-container">
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Requester</label>
+                                <select class="input-macos w-full text-sm" id="form-requester-select" required>
+                                    <option value="">-- Select Requester --</option>
+                                </select>
+                            </div>
+
+                            <div id="requester-manual-container" class="hidden grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Company</label><select id="form-company" class="input-macos w-full text-sm"><option value="">Select</option><option value="PTA">PTA</option><option value="PT4">PT4</option><option value="PTE">PTE</option></select></div>
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Department</label><select id="form-department" class="input-macos w-full text-sm" disabled><option value="">-</option></select></div>
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Job Name (Optional)</label><input type="text" id="form-job-name-manual" class="input-macos w-full text-sm" placeholder="e.g. Server Check"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Assignee</label>
+                                <select id="form-servicedBy" class="input-macos w-full text-sm"><option value="">Select</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Asset No.</label>
+                                <div class="asset-search-wrapper relative">
+                                    <input type="text" id="form-asset" placeholder="Search asset..." class="input-macos w-full text-sm">
+                                    <div id="asset-results" class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-apple-gray5 border border-gray-200 dark:border-apple-gray4 rounded-xl shadow-macos max-h-48 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Contact</label>
+                                <input type="text" id="form-contact" class="input-macos w-full text-sm" placeholder="Phone">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Problem / Issue</label>
+                            <textarea id="form-problem" rows="3" class="input-macos w-full text-sm" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Solution</label>
+                            <textarea id="form-solution" rows="3" class="input-macos w-full text-sm"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label><select id="form-type" class="input-macos w-full text-sm" required><option value="">Select</option><option value="Hardware">Hardware</option><option value="Software">Software</option><option value="Network">Network</option><option value="System">System</option><option value="Programmer">Programmer</option><option value="Other">อื่นๆ</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label><select id="form-status" class="input-macos w-full text-sm" required><option value="Pending">Pending (รอรับเรื่อง)</option><option value="Received">Received (รับเรื่องแล้ว)</option><option value="PR Submitted">PR Submitted (ส่ง PR แล้ว)</option><option value="PO Issued">PO Issued (ออก PO แล้ว)</option><option value="Parts Received">Parts Received (ได้รับอะไหล่แล้ว)</option><option value="In Progress">In Progress (กำลังซ่อม)</option><option value="Waiting for Parts">Waiting for Parts (รออะไหล่)</option><option value="Temporary Fix">Temporary Fix (แก้ชั่วคราว)</option><option value="Unrepairable">Unrepairable (ซ่อมไม่ได้ แนะนำเปลี่ยน)</option><option value="Completed">Completed (เสร็จสิ้น)</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Urgency</label><select id="form-urgency" class="input-macos w-full text-sm" required><option value="ปกติ">Normal</option><option value="ด่วน">Urgent</option><option value="ด่วนที่สุด">Critical</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date</label><input type="date" id="form-date" class="input-macos w-full text-sm" required></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Appointment</label><input type="datetime-local" id="form-appointment_date" class="input-macos w-full text-sm"></div>
+                        </div>
+
+                        <div id="repair-cost-wrapper" class="hidden">
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Cost (THB)</label>
+                            <input type="number" step="0.01" id="form-repair_cost" class="input-macos w-full text-sm" placeholder="0.00">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PR No.</label>
+                                <input type="text" id="form-pr_no" class="input-macos w-full text-sm" placeholder="PR-XXXX">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PO No.</label>
+                                <input type="text" id="form-po_no" class="input-macos w-full text-sm" placeholder="PO-XXXX">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Vendor</label>
+                                <input type="text" id="form-vendor_name" class="input-macos w-full text-sm" placeholder="Vendor name">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ETA Date</label>
+                                <input type="date" id="form-eta_date" class="input-macos w-full text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Attachments</label>
+                            <input type="file" id="form-attachments" multiple class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-apple-blue/10 file:text-apple-blue hover:file:bg-apple-blue/20 transition">
+                            <div id="attachment-list" class="mt-2 grid grid-cols-2 gap-2 text-xs"></div>
+                        </div>
+
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-100 dark:border-apple-gray4 flex justify-end gap-3 bg-gray-50/50 dark:bg-apple-gray6/50">
+                        <button type="button" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-apple-gray4 rounded-xl text-sm font-medium transition" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn-macos px-6 py-2 text-white rounded-xl text-sm font-medium">Save Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-6 right-6 btn-macos w-12 h-12 rounded-2xl shadow-lg transform translate-y-20 opacity-0 z-40 flex items-center justify-center no-print transition-all duration-300">
+        <i class="fas fa-arrow-up text-white"></i>
+    </button>
+
+    <div class="print-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // --- 1. Init & Global Variables ---
+        let allLogs = [], allEmployees = [], allAssets = [], lightbox;
+        let currentEditId = null, userRole = 'user';
+        let statusChartInstance = null;
+        let selectedLogId = null;
+        let currentPage = 1; const itemsPerPage = 20;
+        let currentUserName = '', currentUserId = '';
+        let showMyQueueOnly = false;
+        const gid = id => document.getElementById(id);
+
+        // macOS Colors
+        const macosColors = {
+            blue: '#007AFF',
+            green: '#34C759',
+            orange: '#FF9500',
+            red: '#FF3B30',
+            purple: '#AF52DE',
+            gray: '#8E8E93'
+        };
+
+        function applyTheme(theme) { 
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        }
+        
+        function initializeThemeToggle() {
+            const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme);
+            const toggle = document.getElementById('theme-toggle');
+            if(toggle) toggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        }
+
+        const getStatusClass = s => {
+            const map = { 
+                'Pending':'bg-apple-blue/10 text-apple-blue', 
+                'PR Submitted':'bg-sky-100 text-sky-700',
+                'PO Issued':'bg-teal-100 text-teal-700',
+                'Parts Received':'bg-cyan-100 text-cyan-700',
+                'In Progress':'bg-apple-orange/10 text-apple-orange', 
+                'Waiting for Parts':'bg-apple-red/10 text-apple-red', 
+                'Temporary Fix':'bg-apple-purple/10 text-apple-purple', 
+                'Unrepairable':'bg-rose-100 text-rose-700',
+                'Completed':'bg-apple-green/10 text-apple-green', 
+                'Cancelled': 'bg-gray-100 text-gray-500 dark:bg-apple-gray5 dark:text-gray-400' 
+            };
+            return map[s] || 'bg-gray-100 text-gray-600';
+        };
+        const getStatusIcon = s => {
+            const map = { 'Pending':'fa-hourglass-half', 'PR Submitted':'fa-file-signature', 'PO Issued':'fa-file-invoice', 'Parts Received':'fa-box-open', 'In Progress':'fa-person-digging', 'Waiting for Parts':'fa-box-open', 'Temporary Fix':'fa-screwdriver-wrench', 'Unrepairable':'fa-triangle-exclamation', 'Completed':'fa-check-circle', 'Cancelled': 'fa-ban' };
+            return `<i class="fas ${map[s]||'fa-circle'} mr-1.5"></i>`;
+        };
+        function formatSolutionText(value) {
+            const raw = String(value || '');
+            if (!raw.trim()) return '';
+            return raw
+                .replace(/\[(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{1,2}-\d{1,2})(\s+\d{1,2}:\d{2}(:\d{2})?)?\]\s*/g, '[$1] ')
+                .replace(/\[Reopened\s+(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{1,2}-\d{1,2})(\s+\d{1,2}:\d{2}(:\d{2})?)?\]\s*/g, '[Reopened $1] ')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(Boolean)
+                .join('\n');
+        }
+        function getPrPoStatusIcon(item) {
+            const hasPr = !!String(item?.pr_no || '').trim();
+            const hasPo = !!String(item?.po_no || '').trim();
+            if (!hasPr && !hasPo) return '';
+            let html = '';
+            if (hasPr) html += `<span class="ml-1 inline-flex items-center text-blue-600" title="PR added"><i class="fas fa-file-signature"></i></span>`;
+            if (hasPo) html += `<span class="ml-1 inline-flex items-center text-emerald-600" title="PO added"><i class="fas fa-file-invoice"></i></span>`;
+            return html;
+        }
+
+        function formatDuration(startDate, endDate) {
+            if (!startDate || !endDate) return '-';
+            let diff = new Date(endDate) - new Date(startDate);
+            if (diff < 0) return '-';
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+            let hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+            let mins = Math.floor(diff / (1000 * 60));
+            let parts = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0) parts.push(`${hours}h`);
+            if (mins > 0 && days === 0) parts.push(`${mins}m`);
+            if (parts.length === 0 && diff > 0) return '< 1m';
+            if (parts.length === 0) return '-';
+            return parts.join(' ');
+        }
+
+        function formatSecondsDuration(totalSeconds) {
+            if (!totalSeconds || totalSeconds <= 0) return '-';
+            let remaining = Math.floor(totalSeconds);
+            const days = Math.floor(remaining / 86400);
+            remaining -= days * 86400;
+            const hours = Math.floor(remaining / 3600);
+            remaining -= hours * 3600;
+            const mins = Math.floor(remaining / 60);
+            const parts = [];
+            if (days > 0) parts.push(days + 'd');
+            if (hours > 0) parts.push(hours + 'h');
+            if (mins > 0 && days === 0) parts.push(mins + 'm');
+            if (!parts.length) return '< 1m';
+            return parts.join(' ');
+        }
+
+        function getCurrentStatusDuration(log) {
+            const now = new Date();
+            const status = log.status || '';
+            if (['In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(status)) {
+                let secs = Number(log.total_work_duration_seconds || 0);
+                if (log.last_work_start_time) {
+                    const start = new Date(log.last_work_start_time);
+                    if (!isNaN(start.getTime())) {
+                        secs += Math.max(0, Math.floor((now - start) / 1000));
+                    }
+                }
+                return formatSecondsDuration(secs);
+            }
+            if (status === 'Completed' || status === 'Unrepairable') {
+                const secs = Number(log.total_work_duration_seconds || 0);
+                return formatSecondsDuration(secs);
+            }
+            const created = new Date(log.date);
+            if (isNaN(created.getTime())) return '-';
+            const diffSecs = Math.max(0, Math.floor((now - created) / 1000));
+            return formatSecondsDuration(diffSecs);
+        }
+
+        function formatName(fullName) {
+            if (!fullName) return '-';
+            let name = fullName.replace(/^(Mr\.|Ms\.|Mrs\.|Miss|Dr\.|Khun)\s+/i, '');
+            const parts = name.trim().split(/\s+/);
+            if (parts.length > 1) {
+                return `${parts[0]} ${parts[1].charAt(0)}.`;
+            }
+            return parts[0];
+        }
+
+        function getInitials(fullName) {
+            if (!fullName) return '?';
+            let name = fullName.replace(/^(Mr\.|Ms\.|Mrs\.|Miss|Dr\.|Khun)\s+/i, '');
+            const parts = name.trim().split(/\s+/).filter(Boolean);
+            if (parts.length === 0) return '?';
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+        }
+
+        function getCompanyPrintInfo(code) {
+            const c = String(code || '').trim().toUpperCase();
+            const map = {
+                'PTA': { code: 'PTA', name: 'Powertech Engine Assembly Co., Ltd.', address: '1/8, 1/37-38, 1/40 Moo 5, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand', phone: 'F4: +66(0)38 578520 | F16-17: +66(0)33 022 161-4' },
+                'PT4': { code: 'PT4', name: 'Powertech 2004 Co., Ltd.', address: '1/11 Moo 5, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand', phone: 'Tel: +66(0)38 577182 | Fax: +66(0)38 578554' },
+                'PTE': { code: 'PTE', name: 'Powertech Energy Solutions Co., Ltd.', address: '42 Moo 3, Tasaarn, Bangpakong, Chachoengsao 24130 Thailand', phone: 'Tel: -' }
+            };
+            return map[c] || { code: c || '-', name: 'Powertech Group', address: '', phone: '' };
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatTypeLabel(type) {
+            const t = String(type || '').trim();
+            if (!t) return '-';
+            if (t.toLowerCase() === 'other') return 'อื่นๆ';
+            return t;
+        }
+
+        function isOtherType(type) {
+            const t = String(type || '').trim();
+            return t.toLowerCase() === 'other' || t === 'อื่นๆ';
+        }
+
+        function getAllKnownTypes() {
+            const base = ['Hardware', 'Software', 'Network', 'System', 'Programmer', 'Security', 'Other'];
+            const fromLogs = (allLogs || []).map(l => String(l?.type || '').trim()).filter(Boolean);
+            const set = new Set([...base, ...fromLogs]);
+            return Array.from(set);
+        }
+
+        function populateTypeDropdowns() {
+            const types = getAllKnownTypes().sort((a, b) => a.localeCompare(b, 'th-TH'));
+
+            const typeFilter = gid('type-filter');
+            if (typeFilter) {
+                const current = typeFilter.value;
+                typeFilter.innerHTML = '<option value="">All Types</option>' + types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(formatTypeLabel(t))}</option>`).join('');
+                if ([...typeFilter.options].some(o => o.value === current)) typeFilter.value = current;
+            }
+
+            const typeSelect = gid('form-type');
+            if (typeSelect) {
+                const current = typeSelect.value;
+                typeSelect.innerHTML = '<option value="">Select</option>' + types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(formatTypeLabel(t))}</option>`).join('');
+                if ([...typeSelect.options].some(o => o.value === current)) typeSelect.value = current;
+            }
+        }
+
+        // --- 2. Data Loading & API ---
+        async function loadInitialData() {
+            let empData = [], logData = [], astData = [];
+            try {
+                const empRes = await fetch(`api.php?action=get&file=employees&status_filter=active&v=${Date.now()}`);
+                if (empRes.ok) {
+                    try { empData = await empRes.json(); } catch (_) { empData = []; }
+                }
+            } catch (e) { console.error('employees fetch error', e); }
+            try {
+                const logRes = await fetch(`api.php?action=get&file=it_logs&v=${Date.now()}`);
+                if (logRes.ok) {
+                    try { logData = await logRes.json(); } catch (_) { logData = []; }
+                }
+            } catch (e) { console.error('it_logs fetch error', e); }
+            try {
+                const astRes = await fetch(`api.php?action=getEquipmentData&v=${Date.now()}`);
+                if (astRes.ok) {
+                    try { astData = await astRes.json(); } catch (_) { astData = []; }
+                }
+            } catch (e) { console.error('assets fetch error', e); }
+
+            allEmployees = Array.isArray(empData) ? empData : [];
+            allEmployees.forEach(emp => {
+                if (typeof emp.assignments === 'string' && emp.assignments) {
+                    try { emp.assignments = JSON.parse(emp.assignments); } catch (e) { emp.assignments = []; }
+                } else if (!Array.isArray(emp.assignments)) { emp.assignments = []; }
+            });
+
+            allLogs = Array.isArray(logData) ? logData : [];
+            allAssets = Array.isArray(astData) ? astData : [];
+
+            populateTypeDropdowns();
+            populateServicedByDropdown();
+            renderTable();
+            updateStatistics();
+            if (!empData.length && !logData.length && !astData.length) {
+                gid('table-body').innerHTML = `<tr><td colspan="8" class="text-center py-12 text-apple-red">Failed to load data.</td></tr>`;
+            }
+        }
+
+        // --- 3. Render Table ---
+        function getCurrentFilteredLogs() {
+            const term = gid('search-input').value.toLowerCase();
+            const co = gid('company-filter').value, stat = gid('status-filter').value, typ = gid('type-filter').value;
+            const dsVal = gid('date-start')?.value || '';
+            const deVal = gid('date-end')?.value || '';
+            const ds = dsVal ? new Date(dsVal + 'T00:00:00') : null;
+            const de = deVal ? new Date(deVal + 'T23:59:59') : null;
+            return allLogs.filter(l => {
+                if (!l) return false;
+                const txtAll = Object.values(l).join(' ').toLowerCase();
+                const myOk = !showMyQueueOnly || (String(l.servicedById || '') === String(currentUserId || ''));
+                const d = l.date ? new Date(l.date) : null;
+                const dateOk = (!ds || (d && d >= ds)) && (!de || (d && d <= de));
+                return myOk && dateOk && (!term || txtAll.includes(term)) && (!co || l.company === co) && (!stat || l.status === stat) && (!typ || l.type === typ);
+            });
+        }
+
+        function renderTable() {
+            const tbody = gid('table-body');
+            const filtered = getCurrentFilteredLogs();
+
+            const sorted = [...filtered].sort((a, b) => {
+                const da = a && a.date ? new Date(a.date) : null;
+                const db = b && b.date ? new Date(b.date) : null;
+                if (da && db && !isNaN(da) && !isNaN(db)) {
+                    if (db - da !== 0) return db - da; // วันที่ใหม่กว่าอยู่บน
+                }
+                // fallback: เรียงตาม id ให้ตัวเลขท้ายใหม่กว่าขึ้นก่อน
+                if (a.id && b.id && a.id !== b.id) return a.id < b.id ? 1 : -1;
+                return 0;
+            });
+
+            const totalItems = sorted.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedItems = sorted.slice(start, end);
+
+            const summaryEl = gid('result-summary');
+            if (summaryEl) {
+                summaryEl.replaceChildren();
+                const row = document.createElement('div');
+                row.className = 'flex flex-wrap items-center gap-2';
+                const main = document.createElement('span');
+                main.className = 'font-semibold text-gray-700 dark:text-gray-200';
+                main.textContent = `${totalItems} tickets found`;
+                row.appendChild(main);
+
+                const chips = [];
+                const term = gid('search-input').value.toLowerCase();
+                const co = gid('company-filter').value, stat = gid('status-filter').value, typ = gid('type-filter').value;
+                const dsVal = gid('date-start')?.value || '';
+                const deVal = gid('date-end')?.value || '';
+                if (showMyQueueOnly) chips.push('My Queue');
+                if (co) chips.push(`Company: ${co}`);
+                if (typ) chips.push(`Type: ${typ}`);
+                if (stat) chips.push(`Status: ${stat}`);
+                if (term) chips.push(`Search: ${term}`);
+                if (dsVal || deVal) chips.push(`Date: ${dsVal || '...'} to ${deVal || '...'}`);
+                chips.forEach(t => {
+                    const chip = document.createElement('span');
+                    chip.className = 'inline-flex items-center px-2 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue text-[10px] font-medium';
+                    chip.textContent = t;
+                    row.appendChild(chip);
+                });
+                summaryEl.appendChild(row);
+            }
+
+            gid('no-results').classList.toggle('flex', sorted.length===0);
+            gid('no-results').classList.toggle('hidden', sorted.length>0);
+            gid('pagination-controls').classList.toggle('hidden', sorted.length===0);
+            gid('pagination-controls').classList.toggle('flex', sorted.length>0);
+
+            tbody.innerHTML = paginatedItems.map(log => {
+                const isImg = log.first_attachment && /\.(jpg|jpeg|png|webp)$/i.test(log.first_attachment);
+                const attach = log.first_attachment ? `<a href="uploads/attachments/${log.first_attachment}" ${isImg?'class="table-lightbox"':'target="_blank"'} class="text-gray-400 hover:text-apple-blue transition"><i class="fas fa-paperclip"></i></a>` : '';
+                
+                const urgencyColor = log.urgency==='ด่วนที่สุด'?'text-apple-red font-semibold':(log.urgency==='ด่วน'?'text-apple-orange font-medium':'text-gray-400');
+                
+                let coColor = 'bg-gray-100 text-gray-600 dark:bg-apple-gray5 dark:text-gray-300';
+                if (log.id.startsWith('PT4')) coColor = 'bg-apple-red/10 text-apple-red';
+                else if (log.id.startsWith('PTA')) coColor = 'bg-apple-green/10 text-apple-green';
+                else if (log.id.startsWith('PTE')) coColor = 'bg-apple-blue/10 text-apple-blue';
+
+                // Timeline
+                let currentIdx = 0;
+                let subStatus = '';
+                let activeColor = 'blue';
+                let isCancelled = log.status === 'Cancelled';
+                let step2Label = 'Working';
+
+                if (log.status === 'Pending') currentIdx = 0;
+                else if (['Received', 'In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                    currentIdx = 1;
+                    if (log.status === 'Received') { subStatus = 'Received'; activeColor = 'orange'; step2Label = 'Received'; }
+                    else if (log.status === 'PR Submitted') { subStatus = 'PR Submitted'; activeColor = 'sky'; step2Label = 'PR'; }
+                    else if (log.status === 'PO Issued') { subStatus = 'PO Issued'; activeColor = 'teal'; step2Label = 'PO'; }
+                    else if (log.status === 'Parts Received') { subStatus = 'Parts Received'; activeColor = 'cyan'; step2Label = 'Parts'; }
+                    else if (log.status === 'Waiting for Parts') { subStatus = 'Waiting'; activeColor = 'red'; step2Label = 'Waiting'; }
+                    else if (log.status === 'Temporary Fix') { subStatus = 'Temp Fix'; activeColor = 'purple'; step2Label = 'Temp Fix'; }
+                    else { subStatus = 'Working'; activeColor = 'blue'; step2Label = 'Working'; }
+                }
+                else if (log.status === 'Unrepairable') { currentIdx = 2; activeColor = 'red'; }
+                else if (log.status === 'Completed') { currentIdx = 2; activeColor = 'green'; }
+
+                const steps = [
+                    { label: 'Open', icon: 'fa-file-import' },
+                    { label: step2Label, icon: 'fa-tools' },
+                    { label: 'Done', icon: 'fa-check' }
+                ];
+
+                const colorMap = {
+                    blue: { bg: 'bg-apple-blue', text: 'text-apple-blue', ring: 'ring-apple-blue/30' },
+                    orange: { bg: 'bg-apple-orange', text: 'text-apple-orange', ring: 'ring-apple-orange/30' },
+                    red: { bg: 'bg-apple-red', text: 'text-apple-red', ring: 'ring-apple-red/30' },
+                    purple: { bg: 'bg-apple-purple', text: 'text-apple-purple', ring: 'ring-apple-purple/30' },
+                    sky: { bg: 'bg-sky-500', text: 'text-sky-600', ring: 'ring-sky-300/50' },
+                    teal: { bg: 'bg-teal-500', text: 'text-teal-600', ring: 'ring-teal-300/50' },
+                    cyan: { bg: 'bg-cyan-500', text: 'text-cyan-600', ring: 'ring-cyan-300/50' },
+                    green: { bg: 'bg-apple-green', text: 'text-apple-green', ring: 'ring-apple-green/30' }
+                };
+
+                let timelineHtml = '';
+                if (isCancelled) {
+                    const statusDuration = getCurrentStatusDuration(log);
+                    timelineHtml = `<div class="w-full min-w-[160px] flex flex-col items-center justify-center text-gray-400 font-medium text-[10px]">
+                        <div class="pb-1"><i class="fas fa-ban mr-1 text-apple-red"></i> Cancelled</div>
+                        <div class="text-[9px] font-normal opacity-70">${statusDuration}</div>
+                    </div>`;
+                } else {
+                    const statusDuration = getCurrentStatusDuration(log);
+                    timelineHtml = `<div class="flex flex-col w-full min-w-[160px] pb-2 pt-1">
+                    <div class="flex items-center w-full">
+                        ${steps.map((s, i) => {
+                            let circle = 'bg-gray-200 text-gray-400 dark:bg-apple-gray4 dark:text-gray-500';
+                            let text = 'text-gray-400 dark:text-gray-500';
+                            
+                            if (i < currentIdx) {
+                                circle = 'bg-apple-green text-white';
+                                text = 'text-apple-green font-medium';
+                            } else if (i === currentIdx) {
+                                const colors = colorMap[activeColor] || colorMap.blue;
+                                circle = `${colors.bg} text-white ring-2 ${colors.ring}`;
+                                text = `${colors.text} font-semibold`;
+                            }
+                            
+                            const lineHtml = i > 0 ? `<div class="flex-1 h-0.5 mx-1 rounded ${i <= currentIdx ? 'bg-apple-green' : 'bg-gray-200 dark:bg-apple-gray4'}"></div>` : '';
+                            
+                            return `${lineHtml}
+                                <div class="flex flex-col items-center">
+                                    <div class="timeline-dot ${circle}">
+                                        <i class="fas ${s.icon}"></i>
+                                    </div>
+                                    <div class="mt-1.5 text-[9px] whitespace-nowrap ${text}">${s.label}</div>
+                                </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="text-[9px] text-gray-400 mt-1">${statusDuration}</div>
+                    </div>`;
+                }
+
+                const activeClass = (log.id === selectedLogId) ? 'bg-apple-blue/5 dark:bg-apple-blue/10' : '';
+                const closedDateStr = log.completed_date ? new Date(log.completed_date).toLocaleDateString('th-TH') : '-';
+
+                // Actions
+                let actions = `
+                    <button onclick="openLogModal('${log.id}')" class="p-1.5 text-gray-400 hover:text-apple-blue transition rounded-lg hover:bg-apple-blue/10"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="deleteItem('${log.id}')" class="p-1.5 text-gray-400 hover:text-apple-red transition rounded-lg hover:bg-apple-red/10"><i class="fas fa-trash text-xs"></i></button>`;
+                
+                if(log.status==='Pending') {
+                    actions = `<button onclick="acceptTicket('${log.id}')" class="p-1.5 text-apple-blue hover:bg-apple-blue/10 rounded-lg" title="Accept"><i class="fas fa-inbox text-xs"></i></button>` +
+                              `<button onclick="cancelTicket('${log.id}')" class="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg" title="Cancel"><i class="fas fa-ban text-xs"></i></button>` + actions;
+                } else if (log.status === 'Received') {
+                    actions = `<button onclick="startTicket('${log.id}')" class="p-1.5 text-apple-orange hover:bg-apple-orange/10 rounded-lg" title="Start"><i class="fas fa-play text-xs"></i></button>` +
+                              `<button onclick="cancelTicket('${log.id}')" class="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg" title="Cancel"><i class="fas fa-ban text-xs"></i></button>` + actions;
+                } else if(['In Progress','Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                    if(log.status === 'In Progress') actions = `<button onclick="pauseTicket('${log.id}')" class="p-1.5 text-apple-orange hover:bg-apple-orange/10 rounded-lg" title="Pause"><i class="fas fa-pause text-xs"></i></button>` + actions;
+                    else actions = `<button onclick="startTicket('${log.id}')" class="p-1.5 text-apple-blue hover:bg-apple-blue/10 rounded-lg" title="Resume"><i class="fas fa-play-circle text-xs"></i></button>` + actions;
+                    actions = `<button onclick="finishTicket('${log.id}')" class="p-1.5 text-apple-green hover:bg-apple-green/10 rounded-lg" title="Complete"><i class="fas fa-check-circle text-xs"></i></button>` +
+                              `<button onclick="cancelTicket('${log.id}')" class="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg" title="Cancel"><i class="fas fa-ban text-xs"></i></button>` + actions;
+                } else if (log.status === 'Unrepairable') {
+                    actions = `<button onclick="reopenTicket('${log.id}')" class="p-1.5 text-apple-purple hover:bg-apple-purple/10 rounded-lg" title="Reopen"><i class="fas fa-redo text-xs"></i></button>` + actions;
+                } else if (log.status === 'Completed') {
+                    actions = `<button onclick="reopenTicket('${log.id}')" class="p-1.5 text-apple-purple hover:bg-apple-purple/10 rounded-lg" title="Reopen"><i class="fas fa-redo text-xs"></i></button>` + actions;
+                }
+
+                const shortRequester = formatName(log.requester);
+                const tech = allEmployees.find(e => String(e.id) === String(log.servicedById || '')) || allEmployees.find(e => e.name === log.servicedBy);
+
+                let servicedByAvatarHtml = '';
+                if (tech && tech.image) {
+                    servicedByAvatarHtml = `<img src="uploads/employees/${tech.image}" alt="${tech.name}" title="${tech.name}" class="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-apple-gray5 shadow-sm">`;
+                } else {
+                    const initials = getInitials(log.servicedBy || '');
+                    servicedByAvatarHtml = `<div class="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-apple-purple text-white text-[10px] font-semibold shadow-sm" title="${log.servicedBy || '-'}">${initials}</div>`;
+                }
+
+                // Mobile Status Dot
+                let mobileStatusDot = '';
+                if (log.status === 'Pending') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-apple-blue ml-1"></span>';
+                else if (log.status === 'PR Submitted') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-sky-500 ml-1"></span>';
+                else if (log.status === 'PO Issued') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-teal-500 ml-1"></span>';
+                else if (log.status === 'Parts Received') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-cyan-500 ml-1"></span>';
+                else if (log.status === 'In Progress') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-apple-orange ml-1"></span>';
+                else if (log.status === 'Waiting for Parts') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-apple-red ml-1"></span>';
+                else if (log.status === 'Temporary Fix') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-apple-purple ml-1"></span>';
+                else if (log.status === 'Unrepairable') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-rose-500 ml-1"></span>';
+                else if (log.status === 'Completed') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-apple-green ml-1"></span>';
+                else if (log.status === 'Cancelled') mobileStatusDot = '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-gray-400 ml-1"></span>';
+
+                return `
+                <tr id="row-${log.id}" class="group ${activeClass} cursor-pointer text-xs sm:text-sm" onclick="showFullDetails('${log.id}')">
+                    <td class="px-4 py-3 text-center no-print hidden sm:table-cell">${attach}</td>
+                    <td class="px-4 py-3 align-top">
+                        <div class="flex flex-col items-start gap-1">
+                            <div class="flex items-center">
+                                <span class="font-mono font-semibold text-[10px] sm:text-xs px-2 py-0.5 rounded-lg ${coColor}">${log.id}</span>
+                                ${mobileStatusDot}
+                            </div>
+                            <span class="text-[10px] text-gray-400">${new Date(log.date).toLocaleDateString('th-TH', {day:'numeric', month:'short'})}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                        <div class="font-medium text-apple-blue truncate max-w-[100px] sm:max-w-[120px]" title="${log.requester}">${shortRequester}</div>
+                        <div class="hidden sm:block text-[10px] text-gray-500 truncate max-w-[120px]"><i class="fas fa-building mr-1 opacity-50"></i>${log.department||'-'}</div>
+                        ${(log.asset_id || log.asset) ? `<div class="hidden sm:block text-[10px] text-apple-purple mt-0.5 cursor-pointer hover:underline truncate max-w-[120px]" onclick="event.stopPropagation(); showAssetRepairHistory('${log.asset_id || log.asset}')"><i class="fas fa-desktop mr-1 opacity-50"></i>${log.asset_id || log.asset}</div>` : ''}
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                        <div class="text-gray-700 dark:text-gray-300 line-clamp-2 min-w-[140px]">${log.problem||'-'}</div>
+                        ${log.solution ? `<div class="hidden sm:block text-[10px] text-apple-green mt-1 line-clamp-1"><i class="fas fa-wrench mr-1 opacity-70"></i>${formatSolutionText(log.solution)}</div>` : ''}
+                        <div class="text-[10px] mt-1 ${urgencyColor}"><i class="fas fa-exclamation-circle mr-1 opacity-70"></i>${log.urgency}</div>
+                    </td>
+                    <td class="px-4 py-3 align-middle hidden md:table-cell">
+                        <div class="flex items-center justify-center md:justify-start">${servicedByAvatarHtml}</div>
+                    </td>
+                    <td class="px-4 py-2 align-middle hidden sm:table-cell">${timelineHtml}</td>
+                    <td class="px-4 py-3 text-[10px] align-top hidden lg:table-cell">
+                        <div class="text-gray-600 dark:text-gray-400 whitespace-nowrap">${closedDateStr}</div>
+                    </td>
+                    <td class="px-4 py-3 text-center no-print hidden sm:table-cell" onclick="event.stopPropagation()">
+                        <div class="flex justify-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity admin-action-btn">${actions}</div>
+                    </td>
+                </tr>`;
+            }).join('');
+            
+            if(lightbox) lightbox.refresh(); else lightbox = new SimpleLightbox('.table-lightbox', {});
+            if(['admin', 'staff'].includes(userRole)) document.querySelectorAll('.admin-action-btn').forEach(b => b.style.opacity = '1');
+            
+            updatePaginationControls(totalItems, totalPages);
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updatePaginationControls(total, pages) {
+            const start = total === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, total);
+            gid('page-start').textContent = start;
+            gid('page-end').textContent = end;
+            gid('page-total').textContent = total;
+            gid('btn-prev').disabled = currentPage <= 1;
+            gid('btn-next').disabled = currentPage >= pages;
+        }
+
+        async function showFullDetails(logId) {
+            selectedLogId = logId;
+            document.querySelectorAll('#table-body tr').forEach(tr => tr.classList.remove('bg-apple-blue/5', 'dark:bg-apple-blue/10'));
+            const row = document.getElementById(`row-${logId}`);
+            if(row) row.classList.add('bg-apple-blue/5', 'dark:bg-apple-blue/10');
+
+            const log = allLogs.find(l => l && l.id === logId); 
+            if (!log) return;
+            
+            let imagesHtml = '';
+            try {
+                const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${logId}`);
+                const files = await res.json();
+                if (Array.isArray(files) && files.length > 0) {
+                    const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                    if (imgs.length > 0) {
+                        imagesHtml = `
+                        <div class="mt-4 border-t border-gray-100 dark:border-apple-gray4 pt-3">
+                            <h4 class="font-semibold text-gray-700 dark:text-gray-200 mb-2 text-xs uppercase"><i class="fas fa-images text-apple-blue mr-1"></i> Attachments</h4>
+                            <div class="popup-gallery grid grid-cols-4 gap-2">
+                                ${imgs.map(f => `<a href="uploads/attachments/${f.stored_filename}" class="block aspect-square rounded-xl overflow-hidden border border-gray-200 dark:border-apple-gray4 hover:opacity-80 transition bg-gray-100"><img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover" alt="${f.original_filename}"></a>`).join('')}
+                            </div>
+                        </div>`;
+                    }
+                }
+            } catch(e) { console.error(e); }
+
+            const txt = (t) => t || '-';
+            
+            let modalActions = '';
+            if (['admin', 'staff'].includes(userRole)) {
+                let statusButtons = '';
+                if (log.status === 'Pending') {
+                    statusButtons = `
+                        <button onclick="Swal.close(); acceptTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-blue text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-inbox"></i> Accept
+                        </button>
+                        <button onclick="Swal.close(); cancelTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-gray text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-ban"></i> Cancel
+                        </button>`;
+                } else if (log.status === 'Received') {
+                    statusButtons = `
+                        <button onclick="Swal.close(); startTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-orange text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button onclick="Swal.close(); cancelTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-gray text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-ban"></i> Cancel
+                        </button>`;
+                } else if (['In Progress','Waiting for Parts','Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                    const secondaryAction = log.status === 'In Progress'
+                        ? `<button onclick="Swal.close(); pauseTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-orange text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95"><i class="fas fa-pause"></i> Pause</button>`
+                        : `<button onclick="Swal.close(); startTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-blue text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95"><i class="fas fa-play-circle"></i> Resume</button>`;
+                    statusButtons = `
+                        <button onclick="Swal.close(); finishTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-green text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-check-circle"></i> Complete
+                        </button>
+                        ${secondaryAction}`;
+                } else if (log.status === 'Unrepairable') {
+                    statusButtons = `
+                        <button onclick="Swal.close(); reopenTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-purple text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-redo"></i> Reopen
+                        </button>`;
+                } else if (log.status === 'Completed') {
+                    statusButtons = `
+                        <button onclick="Swal.close(); reopenTicket('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-purple text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                            <i class="fas fa-redo"></i> Reopen
+                        </button>`;
+                }
+
+                modalActions = `
+                    <div class="space-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-apple-gray4">
+                        ${statusButtons ? `<div class="grid grid-cols-2 gap-3">${statusButtons}</div>` : ''}
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="Swal.close(); openLogModal('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-apple-blue text-white rounded-xl font-semibold shadow-sm transition transform active:scale-95">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="Swal.close(); deleteItem('${log.id}')" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-apple-red/30 text-apple-red rounded-xl font-semibold transition transform active:scale-95">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+                    </div>`;
+            }
+
+            const content = `
+                <div class="text-left font-sans text-sm space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 dark:bg-apple-gray6/50 p-4 rounded-xl border border-gray-100 dark:border-apple-gray4">
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Date:</span> <span class="font-medium dark:text-gray-200">${new Date(log.date).toLocaleDateString('th-TH')}</span></div>
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Status:</span> <span class="${getStatusClass(log.status)} inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold">${log.status}${getPrPoStatusIcon(log)}</span></div>
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Requester:</span> <span class="font-medium dark:text-gray-200">${txt(log.requester)}</span></div>
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Department:</span> <span class="font-medium dark:text-gray-200">${txt(log.department)}</span></div>
+                        ${log.contact ? `<div><span class="text-gray-500 dark:text-gray-400 text-xs">Contact:</span> <span class="font-medium dark:text-gray-200">${txt(log.contact)}</span></div>` : ''}
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Type:</span> <span class="font-medium dark:text-gray-200">${txt(formatTypeLabel(log.type))}</span></div>
+                        <div><span class="text-gray-500 dark:text-gray-400 text-xs">Urgency:</span> <span class="font-medium ${log.urgency==='ด่วนที่สุด'?'text-apple-red':(log.urgency==='ด่วน'?'text-apple-orange':'dark:text-gray-200')}">${txt(log.urgency)}</span></div>
+                        ${(log.asset_id || log.asset) ? `<div class="col-span-1 sm:col-span-2"><span class="text-gray-500 dark:text-gray-400 text-xs">Asset:</span> <span class="font-mono text-apple-purple font-medium">${log.asset_id || log.asset}</span></div>` : ''}
+                        ${log.appointment_date ? `<div class="col-span-1 sm:col-span-2"><span class="text-gray-500 dark:text-gray-400 text-xs">Appointment:</span> <span class="font-medium text-apple-purple">${new Date(log.appointment_date).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}</span></div>` : ''}
+                        ${log.pr_no ? `<div><span class="text-gray-500 dark:text-gray-400 text-xs">PR No.:</span> <span class="font-medium dark:text-gray-200">${txt(log.pr_no)}</span></div>` : ''}
+                        ${log.po_no ? `<div><span class="text-gray-500 dark:text-gray-400 text-xs">PO No.:</span> <span class="font-medium dark:text-gray-200">${txt(log.po_no)}</span></div>` : ''}
+                        ${log.vendor_name ? `<div class="col-span-1 sm:col-span-2"><span class="text-gray-500 dark:text-gray-400 text-xs">Vendor:</span> <span class="font-medium dark:text-gray-200">${txt(log.vendor_name)}</span></div>` : ''}
+                        ${log.eta_date ? `<div class="col-span-1 sm:col-span-2"><span class="text-gray-500 dark:text-gray-400 text-xs">ETA:</span> <span class="font-medium text-amber-600">${new Date(log.eta_date).toLocaleDateString('th-TH')}</span></div>` : ''}
+                        ${log.servicedBy ? `<div class="col-span-1 sm:col-span-2 border-t border-gray-200 dark:border-apple-gray4 pt-2 mt-1"><span class="text-gray-500 dark:text-gray-400 text-xs">Assignee:</span> <span class="font-medium dark:text-gray-200">${log.servicedBy}</span></div>` : ''}
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-700 dark:text-gray-200 mb-1 text-xs"><i class="fas fa-circle-exclamation text-apple-red mr-1"></i> Problem</h4>
+                        <div class="bg-white dark:bg-apple-gray5 p-3 rounded-xl border border-gray-200 dark:border-apple-gray4 text-gray-600 dark:text-gray-300 whitespace-pre-wrap text-sm">${txt(log.problem)}</div>
+                    </div>
+
+                    ${log.solution ? `
+                    <div>
+                        <h4 class="font-semibold text-gray-700 dark:text-gray-200 mb-1 text-xs"><i class="fas fa-check-circle text-apple-green mr-1"></i> Solution</h4>
+                        <div class="bg-apple-green/5 p-3 rounded-xl border border-apple-green/20 text-apple-green whitespace-pre-wrap text-sm">${txt(formatSolutionText(log.solution))}</div>
+                    </div>` : ''}
+
+                    ${imagesHtml}
+                    <div class="mt-2 flex items-center gap-2">
+                        <input type="checkbox" id="print-include-images" class="rounded border-gray-300 text-apple-blue focus:ring-apple-blue" checked>
+                        <label for="print-include-images" class="text-xs text-gray-600 dark:text-gray-300">Include images when printing</label>
+                    </div>
+                    ${modalActions}
+                </div>`;
+            
+            Swal.fire({ 
+                title: `<span class="text-base font-semibold text-gray-800 dark:text-white">Ticket: ${log.id}</span>`, 
+                html: content, 
+                width: '560px',
+                showConfirmButton: true,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#007AFF',
+                showCloseButton: true,
+                showDenyButton: true,
+                denyButtonText: '<i class="fas fa-print"></i> Print',
+                denyButtonColor: '#8E8E93',
+                preDeny: () => { 
+                    const inc = document.getElementById('print-include-images')?.checked; 
+                    printSingleTicket(log, inc);
+                    return false; 
+                },
+                customClass: { popup: 'rounded-macos-xl dark:bg-apple-gray5' },
+                didOpen: () => new SimpleLightbox('.popup-gallery a', { uniqueImages: false })
+            });
+        }
+
+        async function printSingleTicket(log, includeImages = true, previewOnly = false) {
+            const pc = document.querySelector('.print-container');
+            if (!pc) return;
+
+            const txt = (t) => t || '-';
+            const companyInfo = getCompanyPrintInfo(log.company);
+            const ticketUrl = `${window.location.origin}${window.location.pathname}?ticket_id=${log.id}`;
+            const duration = log.completed_date ? formatDuration(log.date, log.completed_date) : '-';
+
+            const existing = document.getElementById('print-orientation');
+            if (existing) existing.remove();
+            const style = document.createElement('style');
+            style.id = 'print-orientation';
+            style.innerHTML = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }';
+            document.head.appendChild(style);
+
+            let attachmentsSection = '';
+            let attachmentsCount = 0;
+            if (includeImages) {
+                try {
+                    const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${encodeURIComponent(log.id)}&v=${Date.now()}`);
+                    const files = await res.json();
+                    if (Array.isArray(files) && files.length > 0) {
+                        const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                        if (imgs.length > 0) {
+                            attachmentsCount = imgs.length;
+                            attachmentsSection = `
+                            <div class="mt-4 pt-4 border-t border-slate-200 attachments">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รูปภาพแนบ (Attachments)</p>
+                                <div class="grid grid-cols-4 gap-2 attach-grid">
+                                    ${imgs.map(f => `
+                                        <div class="w-full aspect-square rounded border border-slate-200 overflow-hidden bg-slate-100 attach-item">
+                                            <img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover" alt="${f.original_filename || ''}" style="max-height: 70mm; width: auto; height: auto;">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            const footerHtml = `
+                <footer class="mt-4 pt-3 border-t border-slate-200 text-[9px] text-slate-400 flex justify-between">
+                    <div>FM-IT-001 : ใบรายงานงานซ่อมระบบสารสนเทศ / IT Service Job Report</div>
+                    <div>Revision 01 | Effective 01/01/2024</div>
+                    <div>Printed by ${currentUserName || 'N/A'} on ${new Date().toLocaleString('th-TH')}</div>
+                </footer>
+            `;
+
+            const ticketHtml = `
+                <div class="print-doc">
+                    <style class="print-inline-styles">
+                        .print-page, .attachments, .attach-grid, .grid-2 { page-break-inside: avoid; }
+                        .print-ticket-wrap { margin: 0 auto; }
+                    </style>
+                    <div class="print-ticket-wrap">
+                    <section class="print-page font-sans text-slate-800">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-12 h-12 rounded-full border border-slate-400 flex items-center justify-center text-xs font-bold tracking-wider">
+                                    ${companyInfo.code}
+                                </div>
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-semibold text-slate-900">${companyInfo.name}</p>
+                                    ${companyInfo.address ? `<p class="text-[10px] text-slate-600">${companyInfo.address}</p>` : ''}
+                                    ${companyInfo.phone ? `<p class="text-[10px] text-slate-600">${companyInfo.phone}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="text-right text-[10px] leading-snug">
+                                <p class="font-semibold">แบบฟอร์ม FM-IT-001</p>
+                                <p>Revision 01</p>
+                                <p>Effective Date: 01/01/2024</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-end border-b-2 border-slate-800 pb-3 mb-6">
+                            <div>
+                                <h1 class="text-lg font-bold text-slate-900 tracking-wide">ใบรายงานงานซ่อมระบบสารสนเทศ</h1>
+                                <p class="text-xs text-slate-500">IT Service Job Report</p>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-right text-xs space-y-0.5">
+                                    <p class="font-mono font-bold text-slate-700">Case ID: ${log.id}</p>
+                                    <p class="text-slate-500">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</p>
+                                    <p class="text-slate-500">บริษัท: ${companyInfo.name}</p>
+                                </div>
+                                <div id="ticket-qrcode" class="w-16 h-16"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-8 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้แจ้ง / Requester</p>
+                                <p class="font-bold text-lg text-slate-800">${txt(log.requester)}</p>
+                                <p class="text-sm text-slate-600">${txt(log.department)} <span class="text-xs bg-slate-100 px-1 rounded">${txt(log.company)}</span></p>
+                                ${log.contact ? `<p class="text-sm text-slate-600">เบอร์ติดต่อ: ${txt(log.contact)}</p>` : ''}
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">รายละเอียดงาน / Job Details</p>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="font-semibold w-24 inline-block">ประเภทงาน:</span> ${txt(formatTypeLabel(log.type))}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ความเร่งด่วน:</span> ${txt(log.urgency)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ทรัพย์สิน:</span> ${txt(log.asset_id || log.asset)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ค่าใช้จ่าย:</span> ${log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH', {minimumFractionDigits: 2}) + ' ฿' : '-'}</p>
+                                    ${log.appointment_date ? `<p><span class="font-semibold w-24 inline-block">วันนัดหมาย:</span> ${new Date(log.appointment_date).toLocaleString('th-TH')}</p>` : ''}
+                                    ${log.pr_no ? `<p><span class="font-semibold w-24 inline-block">PR No.:</span> ${txt(log.pr_no)}</p>` : ''}
+                                    ${log.po_no ? `<p><span class="font-semibold w-24 inline-block">PO No.:</span> ${txt(log.po_no)}</p>` : ''}
+                                    ${log.vendor_name ? `<p><span class="font-semibold w-24 inline-block">Vendor:</span> ${txt(log.vendor_name)}</p>` : ''}
+                                    ${log.eta_date ? `<p><span class="font-semibold w-24 inline-block">ETA:</span> ${new Date(log.eta_date).toLocaleDateString('th-TH')}</p>` : ''}
+                                    <p><span class="font-semibold w-24 inline-block">วันที่เสร็จ:</span> ${log.completed_date ? new Date(log.completed_date).toLocaleString('th-TH') : '-'}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ระยะเวลาดำเนินการ:</span> ${duration}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รายละเอียดปัญหา (Problem / Issue)</p>
+                                <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm leading-relaxed whitespace-pre-wrap min-h-[80px]">${txt(log.problem)}</div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">วิธีการแก้ไข (Solution / Action Taken)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] leading-relaxed whitespace-pre-wrap min-h-[70px]">${txt(formatSolutionText(log.solution))}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 mb-4">
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">อะไหล่ / วัสดุที่ใช้ (Parts / Materials Used)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] text-slate-500 italic">
+                                    ${[log.repair_cost ? 'Cost: ' + Number(log.repair_cost).toLocaleString('th-TH') + ' THB' : '', log.pr_no ? 'PR: ' + txt(log.pr_no) : '', log.po_no ? 'PO: ' + txt(log.po_no) : '', log.vendor_name ? 'Vendor: ' + txt(log.vendor_name) : '', log.eta_date ? 'ETA: ' + new Date(log.eta_date).toLocaleDateString('th-TH') : ''].filter(Boolean).join(' | ') || '-'}
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">ความพึงพอใจผู้ใช้ (User Satisfaction)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] flex items-center gap-2">
+                                    <span class="font-bold">Rating:</span> 
+                                    ${log.rating ? `<span class="text-base font-bold text-slate-800">${log.rating}/5</span>` : '<span class="text-slate-400 italic">Not rated</span>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-6 mt-4 pt-4 border-t border-slate-200 mb-4">
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้แจ้ง / Requester</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้อนุมัติ / Approver</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2 flex items-end justify-center pb-1">
+                                    <span class="font-script text-xl text-slate-600">${txt(log.servicedBy)}</span>
+                                </div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้ปฏิบัติงาน / Technician</p>
+                            </div>
+                        </div>
+
+                        ${attachmentsSection}
+
+                        ${footerHtml}
+                    </section>
+                    </div>
+                </div>
+            `;
+
+            if (previewOnly) {
+                const previewWin = window.open('', '_blank');
+                if (previewWin) {
+                    previewWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ticket Preview</title>');
+                    previewWin.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+                    previewWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+                    previewWin.document.write(`<style>
+                        ${style.innerHTML}
+                        html, body { margin: 0; padding: 0; background: #111827; }
+                        body { display: flex; justify-content: center; align-items: flex-start; padding: 24px; }
+                        .preview-shell { box-shadow: 0 18px 45px rgba(15,23,42,0.75); border-radius: 18px; overflow: hidden; background: #ffffff; }
+                        .preview-shell .print-page { width: 794px; min-height: 1123px; }
+                        .preview-shell .print-ticket-wrap { transform: scale(0.9); transform-origin: top center; }
+                        @media print {
+                            html, body { background: #ffffff; padding: 0; display: block; }
+                            .preview-shell { box-shadow: none; border-radius: 0; margin: 0; }
+                            .preview-shell .print-ticket-wrap { transform: none; width: 100%; }
+                        }
+                    </style>`);
+                    previewWin.document.write('</head><body>');
+                    previewWin.document.write(`<div class="preview-shell">${ticketHtml}</div>`);
+                    previewWin.document.write('</body></html>');
+                    previewWin.document.close();
+                }
+                return;
+            }
+
+            pc.innerHTML = ticketHtml;
+
+            try {
+                new QRCode(document.getElementById("ticket-qrcode"), { text: ticketUrl, width: 80, height: 80 });
+            } catch (e) {}
+
+            const probe = document.createElement('div');
+            probe.style.position = 'absolute';
+            probe.style.visibility = 'hidden';
+            probe.style.height = '277mm';
+            probe.style.width = '1px';
+            document.body.appendChild(probe);
+            const pageHeightPx = probe.getBoundingClientRect().height || 0;
+            probe.remove();
+
+            const wrap = pc.querySelector('.print-ticket-wrap');
+            const ticketPage = wrap ? wrap.querySelector('.print-page') : null;
+            if (wrap && ticketPage && pageHeightPx > 0) {
+                wrap.style.transform = '';
+                wrap.style.transformOrigin = '';
+                wrap.style.width = '';
+            }
+
+            document.body.classList.add('printing-ticket');
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove('printing-ticket');
+                pc.innerHTML = '';
+                const styleNode = document.getElementById('print-orientation');
+                if (styleNode) styleNode.remove();
+            }, 500);
+        }
+
+        async function previewTicketBrowser(log, includeImages = true) {
+            const txt = (t) => t || '-';
+            const companyInfo = getCompanyPrintInfo(log.company);
+            const ticketUrl = `${window.location.origin}${window.location.pathname}?ticket_id=${log.id}`;
+            const duration = log.completed_date ? formatDuration(log.date, log.completed_date) : '-';
+            let attachmentsSection = '';
+            if (includeImages) {
+                try {
+                    const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${encodeURIComponent(log.id)}&v=${Date.now()}`);
+                    const files = await res.json();
+                    if (Array.isArray(files) && files.length > 0) {
+                        const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                        if (imgs.length > 0) {
+                            attachmentsSection = `
+                            <div class="mt-4 pt-4 border-t border-slate-200 attachments">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รูปภาพแนบ (Attachments)</p>
+                                <div class="grid grid-cols-4 gap-2 attach-grid">
+                                    ${imgs.map(f => `
+                                        <div class="w-full aspect-square rounded border border-slate-200 overflow-hidden bg-slate-100 attach-item">
+                                            <img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover" alt="${f.original_filename || ''}" style="max-height: 70mm; width: auto; height: auto;">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    }
+                } catch (e) {}
+            }
+            const footerHtml = `
+                <footer class="mt-4 pt-3 border-t border-slate-200 text-[9px] text-slate-400 flex justify-between">
+                    <div>FM-IT-001 : ใบรายงานงานซ่อมระบบสารสนเทศ / IT Service Job Report</div>
+                    <div>Revision 01 | Effective 01/01/2024</div>
+                    <div>Printed by ${currentUserName || 'N/A'} on ${new Date().toLocaleString('th-TH')}</div>
+                </footer>
+            `;
+            const ticketHtml = `
+                <div class="print-doc">
+                    <style class="print-inline-styles">
+                        .print-page, .attachments, .attach-grid, .grid-2 { page-break-inside: avoid; }
+                        .print-ticket-wrap { margin: 0 auto; }
+                    </style>
+                    <div class="print-ticket-wrap">
+                    <section class="print-page font-sans text-slate-800">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-12 h-12 rounded-full border border-slate-400 flex items-center justify-center text-xs font-bold tracking-wider">
+                                    ${companyInfo.code}
+                                </div>
+                                <div class="space-y-0.5">
+                                    <p class="text-sm font-semibold text-slate-900">${companyInfo.name}</p>
+                                    ${companyInfo.address ? `<p class="text-[10px] text-slate-600">${companyInfo.address}</p>` : ''}
+                                    ${companyInfo.phone ? `<p class="text-[10px] text-slate-600">${companyInfo.phone}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="text-right text-[10px] leading-snug">
+                                <p class="font-semibold">แบบฟอร์ม FM-IT-001</p>
+                                <p>Revision 01</p>
+                                <p>Effective Date: 01/01/2024</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-end border-b-2 border-slate-800 pb-3 mb-6">
+                            <div>
+                                <h1 class="text-lg font-bold text-slate-900 tracking-wide">ใบรายงานงานซ่อมระบบสารสนเทศ</h1>
+                                <p class="text-xs text-slate-500">IT Service Job Report</p>
+                            </div>
+                            <div class="flex items-end gap-3">
+                                <div class="text-right text-xs space-y-0.5">
+                                    <p class="font-mono font-bold text-slate-700">Case ID: ${log.id}</p>
+                                    <p class="text-slate-500">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</p>
+                                    <p class="text-slate-500">บริษัท: ${companyInfo.name}</p>
+                                </div>
+                                <div id="ticket-qrcode" class="w-16 h-16"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้แจ้ง / Requester</p>
+                                <p class="font-bold text-lg text-slate-800">${txt(log.requester)}</p>
+                                <p class="text-sm text-slate-600">${txt(log.department)} <span class="text-xs bg-slate-100 px-1 rounded">${txt(log.company)}</span></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">รายละเอียดงาน / Job Details</p>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="font-semibold w-24 inline-block">ประเภทงาน:</span> ${txt(formatTypeLabel(log.type))}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ความเร่งด่วน:</span> ${txt(log.urgency)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ทรัพย์สิน:</span> ${txt(log.asset_id || log.asset)}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ค่าใช้จ่าย:</span> ${log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH', {minimumFractionDigits: 2}) + ' ฿' : '-'}</p>
+                                    ${log.appointment_date ? `<p><span class="font-semibold w-24 inline-block">วันนัดหมาย:</span> ${new Date(log.appointment_date).toLocaleString('th-TH')}</p>` : ''}
+                                    ${log.pr_no ? `<p><span class="font-semibold w-24 inline-block">PR No.:</span> ${txt(log.pr_no)}</p>` : ''}
+                                    ${log.po_no ? `<p><span class="font-semibold w-24 inline-block">PO No.:</span> ${txt(log.po_no)}</p>` : ''}
+                                    ${log.vendor_name ? `<p><span class="font-semibold w-24 inline-block">Vendor:</span> ${txt(log.vendor_name)}</p>` : ''}
+                                    ${log.eta_date ? `<p><span class="font-semibold w-24 inline-block">ETA:</span> ${new Date(log.eta_date).toLocaleDateString('th-TH')}</p>` : ''}
+                                    <p><span class="font-semibold w-24 inline-block">วันที่เสร็จ:</span> ${log.completed_date ? new Date(log.completed_date).toLocaleString('th-TH') : '-'}</p>
+                                    <p><span class="font-semibold w-24 inline-block">ระยะเวลาดำเนินการ:</span> ${duration}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6 mb-5">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รายละเอียดปัญหา (Problem / Issue)</p>
+                                <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm leading-relaxed whitespace-pre-wrap min-h-[80px]">${txt(log.problem)}</div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">วิธีการแก้ไข (Solution / Action Taken)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] leading-relaxed whitespace-pre-wrap min-h-[70px]">${txt(formatSolutionText(log.solution))}</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6 mb-4">
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">อะไหล่ / วัสดุที่ใช้ (Parts / Materials Used)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] text-slate-500 italic">
+                                    ${[log.repair_cost ? 'Cost: ' + Number(log.repair_cost).toLocaleString('th-TH') + ' THB' : '', log.pr_no ? 'PR: ' + txt(log.pr_no) : '', log.po_no ? 'PO: ' + txt(log.po_no) : '', log.vendor_name ? 'Vendor: ' + txt(log.vendor_name) : '', log.eta_date ? 'ETA: ' + new Date(log.eta_date).toLocaleDateString('th-TH') : ''].filter(Boolean).join(' | ') || '-'}
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">ความพึงพอใจผู้ใช้ (User Satisfaction)</p>
+                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] flex items-center gap-2">
+                                    <span class="font-bold">Rating:</span> 
+                                    ${log.rating ? `<span class="text-base font-bold text-slate-800">${log.rating}/5</span>` : '<span class="text-slate-400 italic">Not rated</span>'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-6 mt-4 pt-4 border-t border-slate-200 mb-4">
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้แจ้ง / Requester</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้อนุมัติ / Approver</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-16 border-b border-dotted border-slate-300 mb-2 flex items-end justify-center pb-1">
+                                    <span class="font-script text-xl text-slate-600">${txt(log.servicedBy)}</span>
+                                </div>
+                                <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้ปฏิบัติงาน / Technician</p>
+                            </div>
+                        </div>
+                        ${attachmentsSection}
+                        ${footerHtml}
+                    </section>
+                    </div>
+                </div>
+            `;
+            const w = window.open('', '_blank');
+            if (!w) return;
+            const style = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }';
+            w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print Preview</title>');
+            w.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+            w.document.write('<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
+            w.document.write(`<style>${style} @media print { #preview-toolbar{display:none} } #preview-toolbar{position:fixed;top:0;left:0;right:0;padding:8px 12px;display:flex;gap:8px;justify-content:flex-end;background:rgba(17,24,39,0.06);backdrop-filter:saturate(180%) blur(10px);z-index:9999} #preview-toolbar button{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid rgba(0,0,0,0.1)} #preview-toolbar .primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}<\/style>`);
+            w.document.write('</head><body>');
+            w.document.write('<div id="preview-toolbar"><button class="primary" onclick="window.print()">Print</button><button onclick="window.close()">Close</button></div>');
+            w.document.write(ticketHtml);
+            w.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
+            w.document.write(`<script>window.addEventListener('load',function(){var el=document.getElementById('ticket-qrcode');if(el){new QRCode(el,{text:'${ticketUrl}',width:80,height:80});}});<\/script>`);
+            w.document.write('</body></html>');
+            w.document.close();
+        }
+
+        function updateStatistics() {
+            const counts = { 'Pending':0, 'PR Submitted':0, 'PO Issued':0, 'Parts Received':0, 'In Progress':0, 'Waiting for Parts':0, 'Temporary Fix':0, 'Unrepairable':0, 'Completed':0 };
+            const logs = getCurrentFilteredLogs();
+            logs.forEach(l => { if(l && counts[l.status] !== undefined) counts[l.status]++; });
+            gid('totalTickets').textContent = allLogs.length;
+            
+            if(gid('pendingTickets')) gid('pendingTickets').textContent = counts['Pending'];
+            if(gid('prSubmittedTickets')) gid('prSubmittedTickets').textContent = counts['PR Submitted'];
+            if(gid('poIssuedTickets')) gid('poIssuedTickets').textContent = counts['PO Issued'];
+            if(gid('partsReceivedTickets')) gid('partsReceivedTickets').textContent = counts['Parts Received'];
+            if(gid('progressTickets')) gid('progressTickets').textContent = counts['In Progress'];
+            if(gid('waitingTickets')) gid('waitingTickets').textContent = counts['Waiting for Parts'];
+            if(gid('tempFixTickets')) gid('tempFixTickets').textContent = counts['Temporary Fix'];
+            if(gid('unrepairableTickets')) gid('unrepairableTickets').textContent = counts['Unrepairable'];
+            if(gid('completedTickets')) gid('completedTickets').textContent = counts['Completed'];
+            
+            // Programmer Count
+            const programmerCount = allLogs.filter(l => l.service_type === 'Programmer' || l.type === 'Programmer' || (l.problem && l.problem.includes('[PROGRAMMER REQUEST]'))).length;
+            if(gid('programmerTicketsCount')) gid('programmerTicketsCount').textContent = programmerCount;
+
+            if(!gid('chart-section').classList.contains('hidden')) {
+                renderChart(counts);
+            }
+        }
+
+        function toggleChart() {
+            const sec = gid('chart-section');
+            sec.classList.toggle('hidden');
+            if(!sec.classList.contains('hidden')) {
+                updateStatistics();
+            }
+        }
+
+        function renderChart(counts) {
+            const ctx = gid('statusPieChart').getContext('2d');
+            
+            if(statusChartInstance) statusChartInstance.destroy();
+
+            const labels = ['Pending', 'PR Submitted', 'PO Issued', 'Parts Received', 'In Progress', 'Waiting', 'Temp Fix', 'Unrepairable', 'Completed'];
+            const data = [counts['Pending'], counts['PR Submitted'], counts['PO Issued'], counts['Parts Received'], counts['In Progress'], counts['Waiting for Parts'], counts['Temporary Fix'], counts['Unrepairable'], counts['Completed']];
+            const colors = [macosColors.blue, '#0EA5E9', '#14B8A6', '#06B6D4', macosColors.orange, macosColors.red, macosColors.purple, '#F43F5E', macosColors.green];
+
+            statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        spacing: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: { 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280',
+                                font: { family: 'Inter', size: 11 },
+                                padding: 16,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            } 
+                        } 
+                    }
+                }
+            });
+        }
+
+        // --- 4. Form & Modal Functions ---
+        async function openLogModal(logId = null) {
+            currentEditId = logId;
+            gid('log-form').reset();
+            gid('attachment-list').innerHTML = '';
+            gid('modal-title').textContent = logId ? `Edit Ticket ${logId}` : 'New Ticket';
+            
+            document.querySelector('input[name="requester-mode"][value="auto"]').checked = true;
+            toggleRequesterMode();
+            populateAllRequestersDropdown();
+            gid('repair-cost-wrapper').classList.toggle('hidden', !['admin', 'staff'].includes(userRole));
+
+            if (logId) {
+                const log = allLogs.find(l => l.id === logId);
+                if(log) {
+                    populateTypeDropdowns();
+                    gid('form-date').value = log.date;
+                    gid('form-problem').value = log.problem;
+                    gid('form-solution').value = log.solution;
+                    gid('form-status').value = log.status;
+                    gid('form-type').value = log.type;
+                    populateServicedByDropdown(log.type);
+                    gid('form-urgency').value = log.urgency;
+                    gid('form-asset').value = log.asset_id || log.asset || '';
+                        gid('form-contact').value = log.contact || '';
+                    gid('form-appointment_date').value = log.appointment_date || '';
+                    gid('form-repair_cost').value = log.repair_cost || '';
+                    gid('form-pr_no').value = log.pr_no || '';
+                    gid('form-po_no').value = log.po_no || '';
+                    gid('form-vendor_name').value = log.vendor_name || '';
+                    gid('form-eta_date').value = log.eta_date || '';
+                    
+                    if(log.servicedById) gid('form-servicedBy').value = log.servicedById;
+                    else {
+                        const tech = allEmployees.find(e => e.name === log.servicedBy);
+                        if(tech) gid('form-servicedBy').value = tech.id;
+                    }
+
+                    let reqFound = false;
+                    if(log.requester_id) {
+                        const emp = allEmployees.find(e => e.id === log.requester_id);
+                        if(emp) { gid('form-requester-select').value = emp.name; reqFound = true; }
+                    }
+                    if(!reqFound) {
+                        document.querySelector('input[name="requester-mode"][value="manual"]').checked = true;
+                        toggleRequesterMode();
+                        gid('form-company').value = log.company;
+                        populateManualDepartmentDropdown();
+                        gid('form-department').value = log.department;
+                        const m = log.requester?.match(/\((.*?)\)/);
+                        if(m) gid('form-job-name-manual').value = m[1];
+                    }
+                    displayAttachments(logId);
+                }
+            } else {
+                gid('form-date').value = new Date().toISOString().split('T')[0];
+                gid('form-status').value = 'Pending';
+                gid('form-urgency').value = 'ปกติ';
+                populateTypeDropdowns();
+                populateServicedByDropdown(gid('form-type').value);
+                const uid = sessionStorage.getItem('user_id');
+                if(uid) {
+                    if(userRole !== 'user') gid('form-servicedBy').value = uid;
+                    const emp = allEmployees.find(e => e.id === uid);
+                    if(emp) gid('form-requester-select').value = emp.name;
+                }
+            }
+            gid('log-modal').classList.remove('hidden');
+        }
+
+        async function handleLogSubmit(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerHTML = 'Saving...';
+
+            const isMan = document.querySelector('input[name="requester-mode"]:checked').value === 'manual';
+            let reqName, co, dept, empId = null;
+
+            if(isMan) {
+                co = gid('form-company').value;
+                dept = gid('form-department').value;
+                const job = gid('form-job-name-manual').value.trim();
+                reqName = job ? `${dept} (${job})` : dept;
+                if(!co || !dept) { alert('Missing Info'); btn.disabled=false; btn.innerHTML = 'Save Ticket'; return; }
+            } else {
+                const opt = gid('form-requester-select').selectedOptions[0];
+                if(!opt || !opt.value) { alert('Select Requester'); btn.disabled=false; btn.innerHTML = 'Save Ticket'; return; }
+                reqName = opt.value;
+                co = opt.dataset.company;
+                dept = opt.dataset.department;
+                empId = opt.dataset.id;
+            }
+
+            const data = {
+                date: gid('form-date').value,
+                company: co, department: dept, requester: reqName,
+                servicedBy: gid('form-servicedBy').selectedOptions[0]?.text || '',
+                asset_id: gid('form-asset').value,
+                contact: (gid('form-contact').value || '').trim() || null,
+                problem: gid('form-problem').value,
+                solution: gid('form-solution').value,
+                status: gid('form-status').value,
+                type: gid('form-type').value,
+                urgency: gid('form-urgency').value,
+                repair_cost: gid('form-repair_cost').value || null,
+                appointment_date: gid('form-appointment_date').value || null,
+                pr_no: (gid('form-pr_no').value || '').trim() || null,
+                po_no: (gid('form-po_no').value || '').trim() || null,
+                vendor_name: (gid('form-vendor_name').value || '').trim() || null,
+                eta_date: gid('form-eta_date').value || null
+            };
+            if(currentEditId) data.id = currentEditId;
+
+            let reassignmentReason = '';
+            if (currentEditId) {
+                const oldLog = allLogs.find(l => l.id === currentEditId);
+                const oldAssigneeId = String(oldLog?.servicedById || '').trim();
+                const newAssigneeId = String(gid('form-servicedBy').value || '').trim();
+                if (oldAssigneeId && newAssigneeId && oldAssigneeId !== newAssigneeId) {
+                    const oldAssigneeName = oldLog?.servicedBy || (allEmployees.find(e => String(e.id) === oldAssigneeId)?.name || oldAssigneeId);
+                    const newAssigneeName = gid('form-servicedBy').selectedOptions[0]?.text || newAssigneeId;
+                    reassignmentReason = await promptReassignmentReason(currentEditId, oldAssigneeName, newAssigneeName);
+                    if (!reassignmentReason) {
+                        btn.disabled = false; btn.innerHTML = 'Save Ticket';
+                        return;
+                    }
+                }
+            }
+
+            const fd = new FormData();
+            fd.append('action', currentEditId ? 'update_item' : 'add_item');
+            fd.append('key', 'it_logs');
+            fd.append('data', JSON.stringify(data));
+            const servicedByIdValue = String(gid('form-servicedBy').value || '').trim();
+            if (servicedByIdValue) fd.append('servicedById', servicedByIdValue);
+            if (currentEditId) {
+                const oldLog = allLogs.find(l => l.id === currentEditId);
+                if (oldLog?.status) fd.append('expected_current_status', String(oldLog.status));
+            }
+            if (reassignmentReason) fd.append('reassignment_reason', reassignmentReason);
+            if(empId) fd.append('requester_id', empId);
+
+            try {
+                const res = await (await fetch('api.php', { method:'POST', body:fd })).json();
+                if(res.status!=='success') throw new Error(res.message);
+                
+                await uploadFiles(currentEditId || res.new_id, 'form-attachments');
+                await loadInitialData();
+                closeModal();
+                Swal.fire({ icon:'success', title:'Saved', toast:true, position:'top-end', showConfirmButton:false, timer:1500 });
+            } catch(err) {
+                Swal.fire('Error', err.message, 'error');
+            } finally {
+                btn.disabled = false; btn.innerHTML = 'Save Ticket';
+            }
+        }
+
+        async function uploadFiles(logId, inputId) {
+            const files = gid(inputId).files;
+            for(const f of files) {
+                const fd = new FormData();
+                fd.append('action', 'upload_attachment');
+                fd.append('log_id', logId);
+                fd.append('attachmentFile', f);
+                await fetch('api.php', { method:'POST', body:fd });
+            }
+        }
+
+        async function deleteItem(id) {
+            const {isConfirmed} = await Swal.fire({ title:'Delete ticket?', icon:'warning', showCancelButton:true, confirmButtonColor:'#FF3B30', confirmButtonText: 'Delete', cancelButtonText: 'Cancel' });
+            if(isConfirmed) {
+                const fd = new FormData(); 
+                fd.append('action','delete_item'); 
+                fd.append('key','it_logs'); 
+                fd.append('id',id);
+                try {
+                    const res = await fetch('api.php', { method:'POST', body:fd });
+                    const json = await res.json();
+                    if (!res.ok || json.status !== 'success') throw new Error(json.message || 'Failed to delete.');
+                    
+                    await loadInitialData();
+                    Swal.fire({ icon: 'success', title: 'Deleted', timer: 1500, showConfirmButton: false });
+                } catch(err) {
+                    Swal.fire('Error', err.message, 'error');
+                }
+            }
+        }
+
+        // --- Ticket Status Actions ---
+        async function promptReassignmentReason(id, fromName, toName) {
+            const { value: reason } = await Swal.fire({
+                title: 'เหตุผลการเปลี่ยนผู้รับผิดชอบ',
+                html: `<div class="text-left space-y-2">
+                    <p class="text-sm text-gray-600">Case <b>${id}</b></p>
+                    <p class="text-xs text-slate-500">จาก: <b>${fromName || '-'}</b> → <b>${toName || '-'}</b></p>
+                    <textarea id="swal-reassign-reason" class="w-full p-2 border rounded-xl" rows="3" placeholder="ระบุเหตุผล..."></textarea>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                confirmButtonColor: '#007AFF',
+                preConfirm: () => {
+                    const v = (document.getElementById('swal-reassign-reason')?.value || '').trim();
+                    if (!v) {
+                        Swal.showValidationMessage('กรุณาระบุเหตุผล');
+                        return false;
+                    }
+                    return v;
+                }
+            });
+            return reason || null;
+        }
+
+        async function promptAssigneeSelection(ticketId, assignableEmployees, mode) {
+            const selectId = mode === 'start' ? 'swal-servicedBy-start' : 'swal-servicedBy-accept';
+            const optionsHtml = assignableEmployees.map(e => `<option value="${e.id}" ${String(e.id) === String(currentUserId) ? 'selected' : ''}>${e.name}</option>`).join('');
+            const title = mode === 'start' ? 'Start Ticket' : 'Accept Ticket';
+            const confirmText = mode === 'start' ? '<i class="fas fa-play"></i> Start' : '<i class="fas fa-inbox"></i> Accept';
+            const confirmColor = mode === 'start' ? '#FF9500' : '#007AFF';
+            const { value, isDenied } = await Swal.fire({
+                title,
+                html: `<div class="text-left space-y-2 p-2">
+                    <p class="text-sm text-gray-600">Select assignee for <b>${ticketId}</b>:</p>
+                    <select id="${selectId}" class="w-full p-2 border rounded-xl">
+                        <option value="">-- Select --</option>
+                        ${optionsHtml}
+                    </select>
+                </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                denyButtonText: '<i class="fas fa-user-check"></i> รับงานของฉันทันที',
+                confirmButtonText: confirmText,
+                confirmButtonColor: confirmColor,
+                preConfirm: () => {
+                    const selectedId = document.getElementById(selectId).value;
+                    if (!selectedId) { Swal.showValidationMessage('Please select assignee'); return false; }
+                    return selectedId;
+                }
+            });
+            if (isDenied) {
+                const me = assignableEmployees.find(e => String(e.id) === String(currentUserId));
+                if (!me) {
+                    Swal.fire({ icon: 'warning', title: 'ไม่พบสิทธิ์รับงานนี้', text: 'คุณไม่ได้อยู่ในรายชื่อผู้รับผิดชอบของงานประเภทนี้' });
+                    return null;
+                }
+                return me.id;
+            }
+            return value || null;
+        }
+
+        async function startTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            if (log.status === 'Pending') {
+                Swal.fire({ icon: 'info', title: 'รับเรื่องก่อน', text: 'กรุณากด Accept (Received) ก่อนเริ่มทำงาน', timer: 2000, showConfirmButton: false });
+                return;
+            }
+
+            let assignedToId = log.servicedById || null;
+            let assignedToName = log.servicedBy || null;
+
+            if (!assignedToId) {
+                const assignableEmployees = getAssignableEmployeesForType(log.type);
+                const selectedUserId = await promptAssigneeSelection(id, assignableEmployees, 'start');
+
+                if (selectedUserId) {
+                    const selectedEmployee = assignableEmployees.find(e => e.id === selectedUserId);
+                    assignedToId = selectedUserId;
+                    assignedToName = selectedEmployee ? selectedEmployee.name : '';
+                } else { return; }
+            }
+
+            if (!assignedToId) return;
+
+            const fd = new FormData();
+            fd.append('action', 'update_item');
+            fd.append('key', 'it_logs');
+            fd.append('data', JSON.stringify({ id: id, status: 'In Progress', servicedBy: assignedToName }));
+            fd.append('servicedById', assignedToId);
+            fd.append('expected_current_status', String(log.status || ''));
+
+            try {
+                const response = await fetch('api.php', { method: 'POST', body: fd });
+                const resData = await response.json();
+                if (!response.ok || resData.status !== 'success') throw new Error(resData.message || 'Failed');
+                
+                await loadInitialData();
+                Swal.fire({ icon: 'success', title: 'Started', text: 'Status: In Progress', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+            }
+        }
+
+        async function acceptTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            if (log.status !== 'Pending') {
+                Swal.fire({ icon: 'info', title: 'ทำรายการไม่ได้', text: 'Ticket นี้ไม่ได้อยู่สถานะ Pending', timer: 2000, showConfirmButton: false });
+                return;
+            }
+
+            const assignableEmployees = getAssignableEmployeesForType(log.type);
+            const selectedUserId = await promptAssigneeSelection(id, assignableEmployees, 'accept');
+
+            if (!selectedUserId) return;
+
+            const selectedEmployee = assignableEmployees.find(e => e.id === selectedUserId);
+            let reassignmentReason = '';
+            const oldAssigneeId = String(log.servicedById || '').trim();
+            if (oldAssigneeId && oldAssigneeId !== String(selectedUserId).trim()) {
+                const oldAssigneeName = log.servicedBy || (allEmployees.find(e => String(e.id) === oldAssigneeId)?.name || oldAssigneeId);
+                reassignmentReason = await promptReassignmentReason(id, oldAssigneeName, selectedEmployee?.name || selectedUserId);
+                if (!reassignmentReason) return;
+            }
+            const fd = new FormData();
+            fd.append('action', 'update_item');
+            fd.append('key', 'it_logs');
+            fd.append('data', JSON.stringify({ id: id, status: 'Received', servicedBy: selectedEmployee?.name || '' }));
+            fd.append('servicedById', selectedUserId);
+            fd.append('expected_current_status', String(log.status || ''));
+            if (reassignmentReason) fd.append('reassignment_reason', reassignmentReason);
+
+            try {
+                const response = await fetch('api.php', { method: 'POST', body: fd });
+                const resData = await response.json();
+                if (!response.ok || resData.status !== 'success') throw new Error(resData.message || 'Failed');
+                await loadInitialData();
+                Swal.fire({ icon: 'success', title: 'Accepted', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+            }
+        }
+
+        async function pauseTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Pause Ticket / พักงาน',
+                html: `<div class="text-left space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Select status / เลือกสถานะ:</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="swal-status" value="Waiting for Parts" checked class="w-4 h-4 text-apple-orange">
+                                <span class="ml-2 text-sm">Waiting for Parts (รออะไหล่)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="swal-status" value="Temporary Fix" class="w-4 h-4 text-apple-purple">
+                                <span class="ml-2 text-sm">Temporary Fix (แก้ชั่วคราว)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="swal-status" value="PR Submitted" class="w-4 h-4 text-sky-500">
+                                <span class="ml-2 text-sm">PR Submitted (ส่ง PR แล้ว)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="swal-status" value="PO Issued" class="w-4 h-4 text-teal-500">
+                                <span class="ml-2 text-sm">PO Issued (ออก PO แล้ว)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer sm:col-span-2">
+                                <input type="radio" name="swal-status" value="Parts Received" class="w-4 h-4 text-cyan-500">
+                                <span class="ml-2 text-sm">Parts Received (ได้รับอะไหล่แล้ว)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer sm:col-span-2">
+                                <input type="radio" name="swal-status" value="Unrepairable" class="w-4 h-4 text-rose-500">
+                                <span class="ml-2 text-sm">Unrepairable (ซ่อมไม่ได้ แนะนำเปลี่ยน)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Note / หมายเหตุ:</label>
+                        <textarea id="swal-note" class="w-full p-2 border rounded-xl" rows="3" placeholder="Reason for pause... / ระบุเหตุผล"></textarea>
+                    </div>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'Save / บันทึก',
+                confirmButtonColor: '#FF9500',
+                preConfirm: () => {
+                    const status = document.querySelector('input[name="swal-status"]:checked').value;
+                    const note = document.getElementById('swal-note').value;
+                    return { status, note };
+                }
+            });
+
+            if (formValues) {
+                const newNote = `Paused (${formValues.status}): ${formValues.note || '-'}`;
+                const updatedSolution = (log.solution ? log.solution + '\n' : '') + newNote;
+
+                const fd = new FormData();
+                fd.append('action', 'update_item');
+                fd.append('key', 'it_logs');
+                fd.append('data', JSON.stringify({ id: id, status: formValues.status, solution: updatedSolution }));
+                
+                try {
+                    const response = await fetch('api.php', { method: 'POST', body: fd });
+                    const resData = await response.json();
+                    if (!response.ok || resData.status !== 'success') throw new Error(resData.message || 'Failed');
+                    await loadInitialData();
+                    Swal.fire({ icon: 'info', title: 'Paused', text: `Status: ${formValues.status}`, timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+                }
+            }
+        }
+
+        async function finishTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Complete Ticket',
+                html: `<div class="text-left space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Solution</label>
+                        <textarea id="swal-solution" class="w-full p-2 border rounded-xl" rows="3" placeholder="Describe the solution...">${log.solution || ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Cost (THB)</label>
+                        <input type="number" id="swal-cost" class="w-full p-2 border rounded-xl" placeholder="0.00" value="${log.repair_cost || ''}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Attachments</label>
+                        <input type="file" id="swal-files" multiple accept="image/*" class="w-full text-sm">
+                    </div>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-check"></i> Complete',
+                confirmButtonColor: '#34C759',
+                preConfirm: () => {
+                    const sol = document.getElementById('swal-solution').value;
+                    const cost = document.getElementById('swal-cost').value;
+                    const files = document.getElementById('swal-files').files;
+                    if (!sol) { Swal.showValidationMessage('Please enter solution'); return false; }
+                    return { solution: sol, cost: cost, files: files };
+                }
+            });
+
+            if (formValues) {
+                const fd = new FormData();
+                fd.append('action', 'update_item');
+                fd.append('key', 'it_logs');
+                fd.append('data', JSON.stringify({ id: id, status: 'Completed', solution: formValues.solution, repair_cost: formValues.cost || null }));
+                
+                try {
+                    const response = await fetch('api.php', { method: 'POST', body: fd });
+                    const resData = await response.json();
+                    if (!response.ok || resData.status !== 'success') throw new Error(resData.message || 'Failed');
+
+                    if (formValues.files && formValues.files.length > 0) {
+                        for(const f of formValues.files) {
+                            const fileFd = new FormData();
+                            fileFd.append('action', 'upload_attachment');
+                            fileFd.append('log_id', id);
+                            fileFd.append('attachmentFile', f);
+                            fetch('api.php', { method:'POST', body:fileFd });
+                        }
+                    }
+                    
+                    loadInitialData();
+                    Swal.fire({ icon: 'success', title: 'Completed!', timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+                }
+            }
+        }
+
+        async function cancelTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            const { value: reason } = await Swal.fire({
+                title: 'ยกเลิกงานแจ้งซ่อม?',
+                text: `กรุณาระบุเหตุผลที่ต้องการยกเลิก Ticket ${id}`,
+                input: 'textarea',
+                inputPlaceholder: 'ระบุเหตุผล เช่น ข้อมูลไม่ครบถ้วน, ซ่อมไม่ได้เนื่องจาก...',
+                inputAttributes: { 'aria-label': 'ระบุเหตุผลการยกเลิก' },
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันการยกเลิก',
+                confirmButtonColor: '#8E8E93',
+                inputValidator: (value) => {
+                    if (!value) return 'กรุณาระบุเหตุผลก่อนยกเลิก';
+                }
+            });
+
+            if (reason) {
+                const fd = new FormData();
+                fd.append('action', 'cancel_ticket');
+                fd.append('id', id);
+                fd.append('reason', `[CANCELLED BY IT] เหตุผล: ${reason}`);
+
+                try {
+                    const response = await fetch('api.php', { method: 'POST', body: fd });
+                    const resData = await response.json();
+                    if (!response.ok || resData.status !== 'success') throw new Error(resData.message || 'Failed');
+                    await loadInitialData();
+                    Swal.fire({ icon: 'success', title: 'Cancelled', timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+                }
+            }
+        }
+
+        async function reopenTicket(id) {
+            const log = allLogs.find(l => l.id === id);
+            if (!log) return;
+
+            const { value: reason } = await Swal.fire({
+                title: 'Reopen Ticket?',
+                text: `Reopen ticket ${id}?`,
+                icon: 'question',
+                input: 'text',
+                inputPlaceholder: 'Reason (e.g. issue returned)',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, reopen',
+                confirmButtonColor: '#AF52DE'
+            });
+
+            if (reason !== undefined) {
+                const dateStr = new Date().toLocaleString('th-TH');
+                const fd = new FormData();
+                fd.append('action', 'update_item');
+                fd.append('key', 'it_logs');
+                fd.append('data', JSON.stringify({ id: id, status: 'In Progress', solution: (log.solution ? log.solution + '\n' : '') + `[Reopened ${dateStr}]: ${reason || '-'}` }));
+
+                try {
+                    await fetch('api.php', { method: 'POST', body: fd });
+                    await loadInitialData();
+                    Swal.fire({ icon: 'success', title: 'Reopened', timer: 1500, showConfirmButton: false });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+                }
+            }
+        }
+
+        // --- Helper Functions ---
+        function isITAssignment(a) {
+            const d = (a?.department || '').toString().trim().toLowerCase();
+            return d === 'it' || d === 'i.t.' || d.includes('information technology');
+        }
+
+        function isTechnicianEmployee(e) {
+            const flag = e?.is_technician;
+            return flag === 1 || flag === '1' || flag === true;
+        }
+
+        function getITEmployeesOrFallback() {
+            const technicians = allEmployees.filter(isTechnicianEmployee);
+            if (technicians.length) return technicians;
+            const it = allEmployees.filter(e => (e.assignments || []).some(isITAssignment));
+            return it.length ? it : allEmployees;
+        }
+
+        function getAssignableEmployeesForType(type) {
+            return isOtherType(type) ? allEmployees : getITEmployeesOrFallback();
+        }
+
+        function populateServicedByDropdown(type = null, keepSelected = true) {
+            const selectedBefore = keepSelected ? gid('form-servicedBy')?.value : '';
+            const list = getAssignableEmployeesForType(type ?? gid('form-type')?.value);
+            gid('form-servicedBy').innerHTML = '<option value="">Select</option>' + list.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            if (selectedBefore && list.some(e => String(e.id) === String(selectedBefore))) {
+                gid('form-servicedBy').value = selectedBefore;
+            }
+        }
+
+        function populateAllRequestersDropdown() {
+            const grouped = allEmployees.reduce((acc, e) => {
+                const assign = e.assignments?.find(a => a.is_primary == 1) || e.assignments?.[0];
+                const co = assign?.company || 'Other';
+                if(!acc[co]) acc[co] = []; acc[co].push(e); return acc;
+            }, {});
+            gid('form-requester-select').innerHTML = '<option value="">-- Select --</option>';
+            Object.keys(grouped).sort().forEach(co => {
+                const grp = document.createElement('optgroup'); grp.label = co;
+                grouped[co].sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
+                    const assign = e.assignments?.find(a => a.is_primary == 1) || e.assignments?.[0];
+                    const dept = assign?.department || '-';
+                    const opt = document.createElement('option');
+                    opt.value = e.name; opt.textContent = `${e.name} (${dept})`;
+                    opt.dataset.company = co; opt.dataset.department = dept; opt.dataset.id = e.id;
+                    grp.appendChild(opt);
+                });
+                gid('form-requester-select').appendChild(grp);
+            });
+        }
+
+        function populateManualDepartmentDropdown() {
+            const co = gid('form-company').value;
+            const depts = [...new Set(allEmployees.flatMap(e => e.assignments).filter(a=>a?.company===co).map(a=>a?.department))];
+            gid('form-department').innerHTML = '<option value="">-</option>' + 
+                depts.map(d=>`<option value="${d}">${d}</option>`).join('') +
+                '<option value="Other">Other</option>';
+            gid('form-department').disabled = !co;
+        }
+
+        function toggleRequesterMode() {
+            const isMan = document.querySelector('input[name="requester-mode"]:checked').value === 'manual';
+            gid('requester-auto-container').classList.toggle('hidden', isMan);
+            gid('requester-manual-container').classList.toggle('hidden', !isMan);
+            gid('requester-manual-container').classList.toggle('grid', isMan);
+        }
+
+        function searchAssets(term) {
+            const res = gid('asset-results');
+            if(term.length<2) { res.classList.add('hidden'); return; }
+            const matches = allAssets.filter(a => a['ID อุปกรณ์']?.toLowerCase().includes(term.toLowerCase()) || a['ชื่ออุปกรณ์']?.toLowerCase().includes(term.toLowerCase())).slice(0,10);
+            res.innerHTML = matches.map(a => `<div class="p-2 hover:bg-gray-100 dark:hover:bg-apple-gray4 cursor-pointer text-sm rounded-lg" onclick="gid('form-asset').value='${a['ID อุปกรณ์']}'; gid('asset-results').classList.add('hidden');">${a['ID อุปกรณ์']} (${a['ชื่ออุปกรณ์']})</div>`).join('');
+            res.classList.remove('hidden');
+        }
+
+        async function displayAttachments(logId) {
+            const list = gid('attachment-list');
+            try {
+                const res = await (await fetch(`api.php?action=get&file=it_log_attachments&log_id=${logId}&v=${Date.now()}`)).json();
+                const files = res.filter(f => f.log_id == logId);
+                list.innerHTML = files.map(f => `<a href="uploads/attachments/${f.stored_filename}" target="_blank" class="text-apple-blue hover:underline block truncate text-xs"><i class="fas fa-file mr-1"></i>${f.original_filename}</a>`).join('');
+            } catch(e) { list.innerHTML = 'Error loading files'; }
+        }
+
+        async function showAssetRepairHistory(assetId) {
+            try {
+                const res = await fetch(`api.php?action=get_asset_repair_history&asset_id=${encodeURIComponent(assetId)}`);
+                const history = await res.json();
+
+                if (!Array.isArray(history) || history.length === 0) {
+                    Swal.fire({ icon: 'info', title: 'No History', text: `No repair history for: ${assetId}` });
+                    return;
+                }
+
+                const html = `<div class="text-left space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
+                    ${history.map(item => `
+                        <div class="p-3 rounded-xl bg-gray-50 dark:bg-apple-gray6 border border-gray-100 dark:border-apple-gray4 text-sm">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="font-mono font-semibold text-apple-blue text-xs">#${item.id}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg ${getStatusClass(item.status)}">${item.status}</span>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-200 mb-1"><span class="font-semibold">Issue:</span> ${item.problem}</p>
+                            ${item.solution ? `<p class="text-apple-green text-xs bg-apple-green/10 p-2 rounded-lg mt-1"><i class="fas fa-check-circle mr-1"></i>${item.solution}</p>` : ''}
+                            <div class="text-[10px] text-gray-400 mt-2 flex justify-between">
+                                <span><i class="far fa-calendar mr-1"></i>${new Date(item.date).toLocaleDateString('th-TH')}</span>
+                                <span><i class="fas fa-user-cog mr-1"></i>${item.servicedBy || '-'}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+
+                Swal.fire({
+                    title: `Repair History: ${assetId}`,
+                    html: html,
+                    width: '560px',
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-macos-xl' }
+                });
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Failed to load data', 'error');
+            }
+        }
+
+        function closeModal() { gid('log-modal').classList.add('hidden'); }
+
+        function setupPrinting() {
+            gid('print-report-btn')?.addEventListener('click', () => {
+                printFilteredReport();
+            });
+        }
+
+        function exportLogs() {
+            const co = gid('company-filter').value;
+            const stat = gid('status-filter').value;
+            const typ = gid('type-filter').value;
+            const search = gid('search-input').value;
+            const ds = gid('date-start')?.value || '';
+            const de = gid('date-end')?.value || '';
+            
+            const query = new URLSearchParams({ action: 'export_logs', company: co, status: stat, type: typ, search: search, date_start: ds, date_end: de });
+            window.location.href = `api.php?${query.toString()}`;
+        }
+
+        function exportLogsCSV() {
+            const items = getCurrentFilteredLogs();
+            const headers = ['ID','Date','Company','Department','Requester','Type','Status','Technician'];
+            const csvEscape = (v) => {
+                const s = String(v == null ? '' : v);
+                return `"${s.replace(/"/g, '""')}"`;
+            };
+            const rows = items.map(l => [
+                csvEscape(l.id),
+                csvEscape(l.date ? new Date(l.date).toLocaleString('th-TH') : ''),
+                csvEscape(l.company || ''),
+                csvEscape(l.department || ''),
+                csvEscape(l.requester || ''),
+                csvEscape(l.type || ''),
+                csvEscape(l.status || ''),
+                csvEscape(l.servicedBy || '')
+            ].join(','));
+            const content = [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const dsVal = gid('date-start')?.value || '';
+            const deVal = gid('date-end')?.value || '';
+            const fname = `it_tickets_${dsVal || 'all'}_to_${deVal || 'all'}.csv`;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fname;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function printFilteredReport() {
+            const pc = document.querySelector('.print-container');
+            if (!pc) return;
+            const filtered = getCurrentFilteredLogs();
+            const counts = { 'Pending':0, 'PR Submitted':0, 'PO Issued':0, 'Parts Received':0, 'In Progress':0, 'Waiting for Parts':0, 'Temporary Fix':0, 'Unrepairable':0, 'Completed':0 };
+            filtered.forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+            const chips = [];
+            if (showMyQueueOnly) chips.push('My Queue');
+            const co = gid('company-filter').value, stat = gid('status-filter').value, typ = gid('type-filter').value;
+            const term = gid('search-input').value.toLowerCase();
+            const dsVal = gid('date-start')?.value || '';
+            const deVal = gid('date-end')?.value || '';
+            if (co) chips.push(`Company: ${co}`);
+            if (typ) chips.push(`Type: ${typ}`);
+            if (stat) chips.push(`Status: ${stat}`);
+            if (term) chips.push(`Search: ${term}`);
+            if (dsVal || deVal) chips.push(`Date: ${dsVal || '...'} to ${deVal || '...'}`);
+            const existing = document.getElementById('print-orientation');
+            if (existing) existing.remove();
+            const style = document.createElement('style');
+            style.id = 'print-orientation';
+            style.innerHTML = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }';
+            document.head.appendChild(style);
+            const maxRows = 200;
+            const rows = filtered.slice(0, maxRows).map(l => `
+                <tr>
+                    <td class="px-2 py-1 text-xs font-mono">${l.id}</td>
+                    <td class="px-2 py-1 text-xs">${new Date(l.date).toLocaleDateString('th-TH')}</td>
+                    <td class="px-2 py-1 text-xs">${l.company || '-'}</td>
+                    <td class="px-2 py-1 text-xs">${l.department || '-'}</td>
+                    <td class="px-2 py-1 text-xs">${l.requester || '-'}</td>
+                    <td class="px-2 py-1 text-xs">${l.type || '-'}</td>
+                    <td class="px-2 py-1 text-xs">${l.status || '-'}</td>
+                    <td class="px-2 py-1 text-xs">${l.servicedBy || '-'}</td>
+                </tr>
+            `).join('');
+            const nowStr = new Date().toLocaleString('th-TH');
+            const reportHtml = `
+                <div class="print-ticket-wrap">
+                    <section class="print-page font-sans text-slate-800">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-start gap-3">
+                                <img src="uploads/logos/${String(co||'').toLowerCase()}_logo.png?t=${Date.now()}" class="w-8 h-8 rounded border border-slate-400 bg-white p-1 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-8 h-8 rounded-full border border-slate-400 hidden items-center justify-center text-[10px] font-bold tracking-wider">${co || 'ALL'}</div>
+                                <div>
+                                    <h1 class="text-base font-bold tracking-wide">IT Service Tickets Report</h1>
+                                    <p class="text-[10px] text-slate-500">Printed at ${nowStr}</p>
+                                </div>
+                            </div>
+                            <div class="text-right text-[10px] leading-tight">
+                                <p class="font-semibold">FM-IT-001</p>
+                                <p>Revision 01</p>
+                                <p>Effective Date: 01/01/2024</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 flex flex-wrap gap-1">
+                            ${chips.map(c => `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-medium">${c}</span>`).join('')}
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Total</span><span class="font-bold">${filtered.length}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Pending</span><span class="font-bold">${counts['Pending']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>PR Submitted</span><span class="font-bold">${counts['PR Submitted']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>PO Issued</span><span class="font-bold">${counts['PO Issued']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Parts Received</span><span class="font-bold">${counts['Parts Received']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>In Progress</span><span class="font-bold">${counts['In Progress']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Waiting</span><span class="font-bold">${counts['Waiting for Parts']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Temp Fix</span><span class="font-bold">${counts['Temporary Fix']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Unrepairable</span><span class="font-bold">${counts['Unrepairable']}</span></div>
+                                <div class="p-2 rounded border border-slate-200 bg-slate-50 flex justify-between"><span>Completed</span><span class="font-bold">${counts['Completed']}</span></div>
+                            </div>
+                            <div class="text-[10px] text-slate-500 self-end text-right">Showing top ${Math.min(filtered.length, maxRows)} rows</div>
+                        </div>
+                        <div class="rounded border border-slate-200 overflow-hidden">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-100 text-[10px]">
+                                    <tr>
+                                        <th class="px-2 py-1">ID</th>
+                                        <th class="px-2 py-1">Date</th>
+                                        <th class="px-2 py-1">Company</th>
+                                        <th class="px-2 py-1">Dept</th>
+                                        <th class="px-2 py-1">Requester</th>
+                                        <th class="px-2 py-1">Type</th>
+                                        <th class="px-2 py-1">Status</th>
+                                        <th class="px-2 py-1">Technician</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-[10px]">
+                                    ${rows || ''}
+                                </tbody>
+                            </table>
+                        </div>
+                        <footer class="mt-4 pt-3 border-t border-slate-200 text-[9px] text-slate-400 flex justify-between">
+                            <div>Powertech System Center</div>
+                            <div>Confidential – Internal Use Only</div>
+                        </footer>
+                    </section>
+                </div>
+            `;
+            pc.innerHTML = reportHtml;
+            document.body.classList.add('printing-ticket');
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove('printing-ticket');
+                pc.innerHTML = '';
+                const styleNode = document.getElementById('print-orientation');
+                if (styleNode) styleNode.remove();
+            }, 500);
+        }
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeThemeToggle();
+            const sess = await (await fetch('api.php?action=check_session')).json();
+            if (!sess.loggedin) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // จำกัดสิทธิ์เข้า IT Command Center เฉพาะ Admin หรือแผนก IT เท่านั้น
+            const isItUser = (sess.role === 'admin') || (sess.primary_department === 'IT');
+            if (!isItUser) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'หน้านี้สำหรับทีม IT เท่านั้น หากต้องการดูงานของคุณไปที่ "งานแจ้งซ่อมของฉัน"',
+                    confirmButtonText: 'กลับหน้าแรก'
+                });
+                window.location.href = 'index.html';
+                return;
+            }
+
+            userRole = sess.role;
+            currentUserName = sess.display_name;
+            currentUserId = sess.user_id;
+            sessionStorage.setItem('user_id', sess.user_id);
+
+            await loadInitialData();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const ticketIdParam = urlParams.get('ticket_id');
+            if (ticketIdParam) {
+                const logExists = allLogs.some(l => l && l.id === ticketIdParam);
+                if (logExists) { showFullDetails(ticketIdParam); }
+            }
+
+            // Event Listeners
+            gid('add-ticket-btn').addEventListener('click', () => openLogModal());            gid('export-btn').addEventListener('click', exportLogs);
+            gid('log-form').addEventListener('submit', handleLogSubmit);
+            gid('form-company').addEventListener('change', populateManualDepartmentDropdown);
+            document.querySelectorAll('input[name="requester-mode"]').forEach(r => r.addEventListener('change', toggleRequesterMode));
+            gid('form-asset').addEventListener('input', e => searchAssets(e.target.value));
+            document.addEventListener('click', e => { if(!e.target.closest('.asset-search-wrapper')) gid('asset-results').classList.add('hidden'); });
+            
+            ['search-input','company-filter','status-filter','type-filter'].forEach(id => gid(id).addEventListener('input', () => { currentPage = 1; renderTable(); }));
+            const myToggle = gid('my-queue-toggle');
+            if (myToggle) {
+                myToggle.addEventListener('click', () => {
+                    showMyQueueOnly = !showMyQueueOnly;
+                    myToggle.classList.toggle('bg-blue-600', showMyQueueOnly);
+                    myToggle.classList.toggle('text-white', showMyQueueOnly);
+                    myToggle.classList.toggle('border-blue-600', showMyQueueOnly);
+                    myToggle.classList.toggle('bg-white', !showMyQueueOnly);
+                    myToggle.classList.toggle('dark:bg-slate-700', !showMyQueueOnly);
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+            const refreshBtn = gid('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async () => {
+                    refreshBtn.disabled = true;
+                    const oldHtml = refreshBtn.innerHTML;
+                    refreshBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-slate-400"></i><span>กำลังโหลด</span>';
+                    try { await loadInitialData(); } finally { refreshBtn.disabled = false; refreshBtn.innerHTML = oldHtml; }
+                });
+            }
+            const clearBtn = gid('clear-filters-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    gid('search-input').value = '';
+                    gid('company-filter').value = '';
+                    gid('type-filter').value = '';
+                    gid('status-filter').value = '';
+                    showMyQueueOnly = false;
+                    const myToggleBtn = gid('my-queue-toggle');
+                    if (myToggleBtn) {
+                        myToggleBtn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                        myToggleBtn.classList.add('bg-white', 'dark:bg-slate-700');
+                    }
+                    document.querySelectorAll('.stat-pill').forEach(x => x.classList.remove('active'));
+                    const first = document.querySelector('.stat-pill[data-filter-value=""]');
+                    if (first) first.classList.add('active');
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+            document.querySelectorAll('.stat-pill').forEach(p => p.addEventListener('click', () => {
+                document.querySelectorAll('.stat-pill').forEach(x => x.classList.remove('active'));
+                p.classList.add('active');
+                gid('status-filter').value = p.dataset.filterValue;
+                currentPage = 1;
+                renderTable();
+            }));
+            setupPrinting();
+
+            // Back to Top Scroll Listener
+            window.addEventListener('scroll', () => {
+                const btn = gid('back-to-top');
+                if (window.scrollY > 300) btn.classList.remove('translate-y-20', 'opacity-0');
+                else btn.classList.add('translate-y-20', 'opacity-0');
+            });
+        });
+    </script>
+</body>
+</html>

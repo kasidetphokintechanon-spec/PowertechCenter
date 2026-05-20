@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base - Powertech System Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        .kb-content h1 { font-size: 1.875rem; font-weight: bold; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .dark .kb-content h1 { border-bottom-color: #374151; }
+        .kb-content h2 { font-size: 1.5rem; font-weight: bold; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        .kb-content h3 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.25rem; }
+        .kb-content p { margin-bottom: 1rem; line-height: 1.75; }
+        .kb-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .kb-content ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .kb-content li { margin-bottom: 0.5rem; }
+        .kb-content a { color: #2563eb; text-decoration: underline; }
+        .kb-content code { background-color: #f3f4f6; color: #ef4444; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; }
+        .dark .kb-content code { background-color: #374151; }
+        .kb-content pre { background-color: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+        .kb-content pre code { background-color: transparent; padding: 0; }
+        .kb-content blockquote { border-left: 4px solid #d1d5db; padding-left: 1rem; margin-left: 0; font-style: italic; color: #6b7280; }
+        .dark .kb-content blockquote { border-left-color: #4b5563; color: #9ca3af; }
+        .kb-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin-top: 1rem; margin-bottom: 1rem; }
+    </style>
+    <style>
+        /* === PTC Design System supplements for kb.html === */
+        body { font-family: var(--ptc-font-th, 'Kanit', sans-serif) !important; }
+
+        /* Article content uses design-system radius for code blocks */
+        .kb-content pre { border-radius: var(--ptc-radius-lg, 0.75rem); }
+        .kb-content code { border-radius: var(--ptc-radius-sm, 0.25rem); }
+
+        /* Focus ring */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ptc-primary, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)) !important;
+        }
+
+        /* KB article card hover */
+        .kb-article-card { transition: box-shadow .2s ease, transform .15s ease; }
+        .kb-article-card:hover {
+            box-shadow: var(--ptc-shadow-md, 0 4px 12px rgba(0,0,0,.1));
+            transform: translateY(-2px);
+        }
+
+        /* Mobile sidebar collapse */
+        @media (max-width: 640px) {
+            .kb-sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                border-radius: var(--ptc-radius-xl, 1rem) var(--ptc-radius-xl, 1rem) 0 0;
+                max-height: 75dvh; overflow-y: auto; z-index: 50;
+            }
+        }
+
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border, #cbd5e1); border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 ptc-normalize">
+
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-3 h-16 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center gap-2 font-bold text-lg text-slate-700 dark:text-white hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                    </a>
+                </div>
+                <h1 class="text-lg font-bold text-center">คลังความรู้ (Knowledge Base)</h1>
+                <div></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+        <div id="main-view">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 dark:text-white">เราช่วยอะไรคุณได้บ้าง?</h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-2">ค้นหาวิธีแก้ปัญหาเบื้องต้นได้ที่นี่</p>
+                <div class="mt-6 max-w-2xl mx-auto relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" placeholder="ค้นหาบทความ เช่น 'ปริ้นเตอร์', 'wifi'..." class="w-full pl-12 pr-4 py-3 rounded-full border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-lg focus:ring-2 focus:ring-blue-500 shadow-sm">
+                </div>
+            </div>
+
+            <div id="categories-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+                <!-- Categories will be loaded here -->
+            </div>
+
+            <div>
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-star text-amber-400"></i> บทความยอดนิยม</h3>
+                <div id="articles-container" class="space-y-3">
+                    <!-- Articles will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="article-view" class="hidden">
+            <div class="mb-6">
+                <button onclick="showMainView()" class="text-sm font-medium text-slate-500 hover:text-blue-600 transition"><i class="fas fa-chevron-left"></i> กลับไปหน้าหลัก</button>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 md:p-10">
+                <div id="article-content">
+                    <!-- Full article content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_PATH = 'api.php';
+        const gid = (id) => document.getElementById(id);
+        let allArticles = [];
+        let allCategories = [];
+        const markdownConverter = new showdown.Converter();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch(`${API_PATH}?action=get_kb_data`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allArticles = data.articles;
+                    allCategories = data.categories;
+                    renderCategories();
+                    
+                    // Check for search param from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchParam = urlParams.get('search');
+                    if (searchParam) {
+                        gid('search-input').value = searchParam;
+                        const filtered = allArticles.filter(a => a.title.toLowerCase().includes(searchParam.toLowerCase()));
+                        renderArticles(filtered);
+                    } else {
+                        renderArticles(allArticles);
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                gid('categories-container').innerHTML = '<p class="text-red-500 col-span-full">Failed to load data.</p>';
+            }
+
+            gid('search-input').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allArticles.filter(a => a.title.toLowerCase().includes(term));
+                renderArticles(filtered);
+            });
+        });
+
+        function renderCategories() {
+            const container = gid('categories-container');
+            if (allCategories.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = allCategories.map(cat => `
+                <a href="#" onclick="event.preventDefault(); filterByCategory(${cat.id})" class="group bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:shadow-lg transition-all flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-50 dark:bg-slate-700 text-blue-500 dark:text-blue-400 rounded-lg flex items-center justify-center text-xl transition-transform group-hover:scale-110">
+                        <i class="fas ${cat.icon || 'fa-book'}"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 dark:text-white">${cat.name}</h4>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function renderArticles(articles) {
+            const container = gid('articles-container');
+            if (articles.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-4">ไม่พบบทความ</p>';
+                return;
+            }
+            container.innerHTML = articles.map(art => `
+                <a href="#" onclick="event.preventDefault(); showArticle(${art.id})" class="block bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-slate-800 dark:text-white">${art.title}</p>
+                            <p class="text-xs text-slate-400 mt-1">
+                                <i class="fas fa-eye"></i> ${art.view_count || 0} views
+                                &bull; Last updated: ${new Date(art.updated_at).toLocaleDateString('th-TH')}
+                            </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300 dark:text-slate-600 mt-1"></i>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function filterByCategory(catId) {
+            const filtered = allArticles.filter(a => a.category_id == catId);
+            renderArticles(filtered);
+            gid('search-input').value = '';
+            window.scrollTo({ top: gid('articles-container').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        async function showArticle(id) {
+            gid('main-view').classList.add('hidden');
+            gid('article-view').classList.remove('hidden');
+            const contentDiv = gid('article-content');
+            contentDiv.innerHTML = '<div class="text-center py-20"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
+            window.scrollTo(0, 0);
+
+            try {
+                const res 

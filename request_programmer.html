@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แจ้งปัญหาโปรแกรม ERP/MRP/iControl - SystemCenter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#8e44ad' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        body {
+            background-image: radial-gradient(at 0% 0%, rgba(142, 68, 173, 0.1) 0px, transparent 50%), 
+                              radial-gradient(at 100% 100%, rgba(155, 89, 182, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .fade-in-up { animation: fade-in-up 0.5s ease-out both; }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <header class="fixed top-0 inset-x-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/40">
+                    <i class="fas fa-code text-sm"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-bold tracking-wide">SystemCenter</div>
+                    <div class="text-xs text-slate-500">Programmer Support</div>
+                </div>
+            </div>
+            <a href="index.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-lg hover:-translate-y-0.5 transition transform">
+                <i class="fas fa-home"></i> <span>กลับหน้าแรก</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col items-center pt-20 pb-10 px-4">
+        <div class="w-full max-w-4xl bg-white/80 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 dark:border-slate-700 fade-in-up">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 md:p-8 text-center">
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                    <i class="fas fa-laptop-code text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">แจ้งปัญหาโปรแกรม ERP / MRP / iControl</h1>
+                <p class="text-white/80 text-sm">ระบุรายละเอียดปัญหาและความต้องการให้ชัดเจนเพื่อความรวดเร็วในการแก้ไข</p>
+            </div>
+
+            <form id="progForm" class="p-6 md:p-8 space-y-8">
+                <!-- Section 1: User Info (Hidden/Auto) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-purple-50/50 dark:bg-slate-700/30 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/30">
+                    <div class="md:col-span-2 text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2">ข้อมูลผู้แจ้ง (Requester Info)</div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ชื่อผู้แจ้ง</label>
+                        <input type="text" id="req-name" readonly class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-500 text-sm p-3">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">แผนก/บริษัท</label>
+                        <input type="text" id="req-dept" readonly class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-500 text-sm p-3">
+                    </div>
+                </div>
+
+                <!-- Section 2: Module Selection -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">1</div>
+                        เลือกโปรแกรมและโมดูล (Software & Module)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">โปรแกรมที่พบปัญหา</label>
+                            <select id="prog-software" required class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all">
+                                <option value="">-- เลือกโปรแกรม --</option>
+                                <option value="ERP">ERP System</option>
+                                <option value="MRP">MRP System</option>
+                                <option value="iControl">iControl</option>
+                                <option value="Other">โปรแกรมอื่นๆ (Other Software)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">โมดูล / ระบบงาน (Module)</label>
+                            <select id="prog-module" required class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all">
+                                <option value="">-- เลือกโมดูล --</option>
+                                <option value="Purchasing">จัดซื้อ (Purchasing: PR/PO/Receive)</option>
+                                <option value="Inventory">คลังสินค้า (Inventory: Stock/Move)</option>
+                                <option value="Sales">ขาย (Sales: Quotation/DO/Invoice)</option>
+                                <option value="Production">ผลิต (Production: Plan/Job)</option>
+                                <option value="Accounting">บัญชี/การเงิน (Accounting/Finance)</option>
+                                <option value="HR">บุคคล (HR/Payroll)</option>
+                                <option value="Report">รายงาน (Report Only)</option>
+                                <option value="Other">อื่นๆ (Other Module)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Problem Details (The 3 Keys) -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">2</div>
+                        รายละเอียด (Request Details)
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">1. อาการเสียที่พบ (Problem Found)</label>
+                            <textarea id="prog-problem" required rows="3" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all" placeholder="อธิบายอาการเสียที่เกิดขึ้น หรือข้อผิดพลาดที่แสดงบนหน้าจอ..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">2. ความต้องการ (Requirement)</label>
+                            <textarea id="prog-requirement" required rows="3" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all" placeholder="อธิบายสิ่งที่ต้องการให้โปรแกรมทำได้ หรือผลลัพธ์ที่ต้องการ..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">3. แหล่งข้อมูล/การเชื่อมโยง (Source Data / Reference)</label>
+                            <textarea id="prog-source" required rows="3" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all" placeholder="ระบุแหล่งที่มาของข้อมูล เช่น มาจากหน้าจอไหน, เลขที่เอกสารอะไร, หรือต้องการให้ดึงข้อมูลจากส่วนไหนมาแสดง..."></textarea>
+                            <p class="text-[10px] text-slate-400 mt-1.5"><i class="fas fa-info-circle mr-1"></i> สำคัญมาก: หากไม่มีข้อมูลการเชื่อมโยง โปรแกรมเมอร์อาจไม่สามารถดำเนินการให้ได้</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Attachments -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">รูปภาพประกอบ / Screenshot (Optional)</label>
+                    <div onclick="document.getElementById('prog-file').click()" class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:bg-purple-50 dark:hover:bg-slate-700/50 hover:border-purple-300 transition cursor-pointer group bg-white dark:bg-slate-800">
+                        <div class="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition">
+                            <i class="fas fa-cloud-upload-alt text-slate-400 dark:text-slate-300 text-xl"></i>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 font-medium">คลิกเพื่ออัปโหลดรูปภาพตัวอย่างปัญหา</p>
+                        <input type="file" id="prog-file" class="hidden" accept="image/*">
+                        <div id="file-preview" class="mt-4 hidden">
+                            <img id="preview-img" class="max-h-48 mx-auto rounded-lg border shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <a href="index.html" class="text-slate-500 hover:text-slate-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition">ยกเลิก</a>
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-purple-500/40 hover:shadow-purple-500/60 transition transform hover:-translate-y-1 active:translate-y-0">
+                        <i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งปัญหาโปรแกรม
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let sessionData = {};
+        const gid = id => document.getElementById(id);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('api.php?action=check_session');
+                sessionData = await res.json();
+                if (!sessionData.loggedin) { window.location.href = 'login.html'; return; }
+
+                gid('req-name').value = sessionData.display_name || sessionData.username;
+                gid('req-dept').value = `${sessionData.primary_department || '-'} (${sessionData.company || '-'})`;
+                
+                gid('prog-file').onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            gid('preview-img').src = ev.target.result;
+                            gid('file-preview').classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+
+                gid('progForm').onsubmit = handleFormSubmit;
+            } catch (e) { console.error(e); }
+        });
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const btn = gid('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> กำลังส่ง...';
+
+            try {
+                const problem = gid('prog-problem').value;
+                const req = gid('prog-requirement').value;
+                const source = gid('prog-source').value;
+                const software = gid('prog-software').value;
+                const module = gid('prog-module').value;
+
+                const finalProblem = [
+                    `[PROGRAMMER REQUEST]`,
+                    `Software: ${software}`,
+                    `Module: ${module}`,
+                    `----------------------`,
+                    `1. อาการที่พบ: ${problem}`,
+                    `2. ความต้องการ: ${req}`,
+                    `3. แหล่งข้อมูล: ${source}`
+                ].join('\n');
+
+                const data = {
+                    date: new Date().toISOString().split('T')[0],
+                    company: sessionData.company,
+                    department: sessionData.primary_department,
+                    requester: sessionData.display_name || sessionData.username,
+                    problem: finalProblem,
+                    type: 'Programmer',
+                    urgency: 'ปกติ',
+                    status: 'Pending',
+                    service_type: 'IT',
+                    requester_id: sessionData.user_id
+                };
+
+                const fd = new FormData();
+                fd.append('action', 'add_item');
+                fd.append('key', 'it_logs');
+                fd.append('data', JSON.stringify(data));
+
+                const res = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+                if (res.status !== 'success') throw new Error(res.message);
+
+                // Handle file upload if any
+                const fileInput = gid('prog-file');
+                if (fileInput.files.length > 0) {
+                    const fd2 = new FormData();
+                    fd2.append('action', 'upload_attachment');
+                    fd2.append('log_id', res.new_id);
+                    fd2.append('attachmentFile', fileInput.files[0]);
+                    await fetch('api.php', { method: 'POST', body: fd2 });
+                }
+
+                await Swal.fire({ icon: 'success', title: 'ส่งข้อมูลเรียบร้อย', text: `Ticket ID: ${res.new_id}`, confirmButtonText: 'ตกลง' });
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                Swal.fire('Error', err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งปัญหาโปรแกรม';
+            }
+        }
+    </script>
+</body>
+</html>

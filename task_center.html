@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Center - Powertech System</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #f1f5f9; color: #0f172a; }
+
+        /* ── Metric pills ── */
+        .metric-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 10px 14px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+        }
+        .metric-pill:hover { border-color: #94a3b8; box-shadow: 0 2px 8px rgba(15,23,42,.06); }
+        .metric-pill.active { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+        .pill-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .pill-num { font-size: 1.5rem; font-weight: 700; line-height: 1; color: #0f172a; }
+        .pill-label { font-size: 0.72rem; color: #64748b; margin-top: 1px; }
+
+        .pill-total  .pill-icon { background: #dbeafe; color: #2563eb; }
+        .pill-todo   .pill-icon { background: #f1f5f9; color: #475569; }
+        .pill-doing  .pill-icon { background: #fef3c7; color: #b45309; }
+        .pill-overdue .pill-icon { background: #fee2e2; color: #dc2626; }
+        .pill-done   .pill-icon { background: #dcfce7; color: #15803d; }
+
+        /* ── Quick filter chips ── */
+        .qf-chip {
+            padding: 7px 14px; border-radius: 9999px; border: 1px solid #e2e8f0;
+            background: #fff; font-size: 0.82rem; font-weight: 500; color: #475569;
+            cursor: pointer; transition: all .15s; white-space: nowrap;
+        }
+        .qf-chip:hover { border-color: #94a3b8; }
+        .qf-chip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+
+        /* ── Filter inputs ── */
+        .filter-input, .filter-select {
+            width: 100%; border-radius: 10px; border: 1px solid #e2e8f0;
+            background: #fff; padding: 9px 11px; font-size: 0.875rem;
+            font-family: 'Kanit', sans-serif; color: #0f172a; outline: none; transition: border-color .15s;
+        }
+        .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
+        .filter-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 5px; }
+
+        /* ── Badges ── */
+        .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 3px 8px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+        .badge-status-todo    { background:#f1f5f9; color:#475569; }
+        .badge-status-doing   { background:#fef3c7; color:#b45309; }
+        .badge-status-approve { background:#ede9fe; color:#7c3aed; }
+        .badge-status-done    { background:#dcfce7; color:#15803d; }
+        .badge-stage-todo    { background:#f1f5f9; color:#475569; }
+        .badge-stage-receive { background:#dbeafe; color:#1d4ed8; }
+        .badge-stage-doing   { background:#fef3c7; color:#b45309; }
+        .badge-stage-send    { background:#e0f2fe; color:#0369a1; }
+        .badge-stage-approve { background:#ede9fe; color:#7c3aed; }
+        .badge-stage-done    { background:#dcfce7; color:#15803d; }
+        .badge-type-personal   { background:#eff6ff; color:#2563eb; }
+        .badge-type-job_ticket { background:#f0fdf4; color:#15803d; }
+
+        /* ── Task table ── */
+        .task-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
+        .task-table thead th { font-size: 0.72rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; padding: 0 12px 8px; white-space: nowrap; }
+        .task-row { background: #fff; border-radius: 12px; cursor: pointer; transition: all .12s; }
+        .task-row:hover { box-shadow: 0 4px 12px rgba(15,23,42,.08); transform: translateY(-1px); }
+        .task-row td { padding: 13px 12px; vertical-align: middle; font-size: 0.875rem; }
+        .task-row td:first-child { border-radius: 12px 0 0 12px; border-left: 3px solid transparent; }
+        .task-row td:last-child  { border-radius: 0 12px 12px 0; }
+        .task-row.overdue td:first-child { border-left-color: #ef4444; }
+
+        /* ── Task cards ── */
+        .task-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+            padding: 16px; cursor: pointer; transition: all .15s;
+        }
+        .task-card:hover { border-color: #94a3b8; box-shadow: 0 6px 18px rgba(15,23,42,.08); transform: translateY(-2px); }
+        .task-card.overdue { border-left: 3px solid #ef4444; }
+
+        /* ── Priority dot ── */
+        .prio-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .prio-urgent { background:#ef4444; }
+        .prio-high   { background:#f59e0b; }
+        .prio-normal { background:#3b82f6; }
+        .prio-low    { background:#94a3b8; }
+
+        /* ── View toggle ── */
+        .view-btn { width: 34px; height: 34px; border-radius: 9px; border: none; background: transparent; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+        .view-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+        /* ── Pagination ── */
+        .pg-btn { min-width: 34px; height: 34px; border-radius: 9px; border: 1px solid #e2e8f0; background: #fff; color: #334155; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all .12s; }
+        .pg-btn:hover:not(:disabled) { border-color: #94a3b8; }
+        .pg-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .pg-btn.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+
+        /* ── Empty/loading ── */
+        .empty-box { border: 2px dashed #e2e8f0; border-radius: 16px; background: #fff; }
+
+        /* ── Analytics bars ── */
+        .ov-track { height: 6px; border-radius: 9999px; background: #f1f5f9; overflow: hidden; margin-top: 6px; }
+        .ov-fill  { height: 100%; border-radius: 9999px; }
+
+        /* ── Saved-view chip ── */
+        .sv-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; padding: 5px 10px; font-size: 0.8rem; color: #334155; }
+        .sv-chip button { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; line-height: 1; }
+        .sv-chip button:hover { color: #ef4444; }
+
+        /* ── Remind badges ── */
+        .remind-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.65rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; }
+
+        /* ── Section card (white box) ── */
+        .section-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 20px; }
+
+        /* ── Detail modal ── */
+        #detailModal {
+            display: none; position: fixed; inset: 0; z-index: 500;
+            background: rgba(15,23,42,.5); backdrop-filter: blur(4px);
+            align-items: flex-start; justify-content: center; padding: 24px 16px; overflow-y: auto;
+        }
+        #detailModal.show { display: flex; }
+        #detailModalBox {
+            background: #fff; border-radius: 24px; width: 100%; max-width: 580px;
+            box-shadow: 0 24px 64px rgba(15,23,42,.18); margin: auto;
+            animation: modalIn .2s ease;
+        }
+        @keyframes modalIn { from { opacity:0; transform: translateY(12px) scale(.97); } to { opacity:1; transform: none; } }
+        .detail-block { background: #f8fafc; border-radius: 10px; padding: 10px 12px; }
+        .detail-block .db-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin-bottom: 2px; }
+        .detail-block .db-value { font-size: 0.875rem; font-weight: 500; color: #1e293b; }
+
+        /* ── Analytics collapsible ── */
+        #analyticsBody { transition: all .2s; }
+
+        /* ── Responsive table → card on mobile ── */
+        @media (max-width: 640px) {
+            .task-table thead { display: none; }
+            .task-table tbody tr {
+                display: flex; flex-direction: column;
+                border: 1px solid #e2e8f0; border-radius: 14px;
+                margin-bottom: 8px; padding: 12px; background: #fff;
+                border-left: 3px solid transparent;
+            }
+            .task-table tbody tr.overdue { border-left-color: #ef4444; }
+            .task-table td { padding: 3px 0; border: none; font-size: .875rem; }
+            .task-table td::before { content: attr(data-label); display: block; font-size: .65rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        h1,h2,h3,h4 { letter-spacing: -.01em; }
+    </style>
+</head>
+<body class="ptc-normalize">
+
+<!-- ═══════════════════════════════════════
+     NAV
+════════════════════════════════════════ -->
+<nav class="sticky top-0 z-50 bg-white border-b border-slate-200 flex items-center justify-between px-4 h-14 gap-3">
+    <div class="flex items-center gap-2">
+        <a href="index.html" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+            <i class="fas fa-arrow-left text-sm"></i>
+        </a>
+        <span class="font-bold text-slate-900 hidden sm:inline">Task Center</span>
+    </div>
+    <div class="flex items-center gap-2">
+        <button onclick="loadTaskCenter()" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" title="รีเฟรช">
+            <i class="fas fa-arrows-rotate text-sm"></i>
+        </button>
+        <a href="job_ticket.html" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+            <i class="fas fa-plus"></i><span>งานใหม่</span>
+        </a>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     METRICS STRIP
+════════════════════════════════════════ -->
+<div class="bg-white border-b border-slate-200 px-4 py-3 overflow-x-auto">
+    <div class="flex items-center gap-3" style="width: max-content; min-width: 100%;">
+        <button class="metric-pill pill-total active" data-quick-filter="all">
+            <div class="pill-icon"><i class="fas fa-layer-group"></i></div>
+            <div><div class="pill-num" id="metricTotal">0</div><div class="pill-label">งานทั้งหมด</div></div>
+        </button>
+        <button class="metric-pill pill-todo" data-quick-filter="all">
+            <div class="pill-icon"><i class="fas fa-circle-dot"></i></div>
+            <div><div class="pill-num" id="metricTodo">0</div><div class="pill-label">ยังไม่เริ่ม</div></div>
+        </button>
+        <button class="metric-pill pill-doing" data-quick-filter="open">
+            <div class="pill-icon"><i class="fas fa-rotate"></i></div>
+            <div><div class="pill-num" id="metricDoing">0</div><div class="pill-label">กำลังทำ</div></div>
+        </button>
+        <button class="metric-pill pill-overdue" data-quick-filter="overdue">
+            <div class="pill-icon"><i class="fas fa-clock"></i></div>
+            <div><div class="pill-num" id="metricOverdue">0</div><div class="pill-label">เกินกำหนด</div></div>
+        </button>
+        <button class="metric-pill pill-done" data-quick-filter="all">
+            <div class="pill-icon"><i class="fas fa-check"></i></div>
+            <div><div class="pill-num" id="metricDone">0</div><div class="pill-label">เสร็จแล้ว</div></div>
+        </button>
+        <!-- hidden refs for JS -->
+        <span id="metricTotalPct" class="hidden"></span>
+        <span id="metricTodoPct" class="hidden"></span>
+        <span id="metricDoingPct" class="hidden"></span>
+        <span id="metricOverduePct" class="hidden"></span>
+        <span id="metricDonePct" class="hidden"></span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════ -->
+<div class="max-w-7xl mx-auto px-4 py-5 space-y-4">
+
+    <!-- ── FILTER BAR ── -->
+    <div class="section-card">
+
+        <!-- Row 1: Quick chips + search + expand button -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button class="qf-chip active" data-quick-filter="all">ทั้งหมด</button>
+            <button class="qf-chip" data-quick-filter="open">งานค้าง</button>
+            <button class="qf-chip" data-quick-filter="overdue">
+                <i class="fas fa-clock text-red-400 mr-1 text-xs"></i>เกินกำหนด
+            </button>
+            <button class="qf-chip" data-quick-filter="approvals">รออนุมัติ</button>
+
+            <div class="flex-1 min-w-[180px] relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input id="searchInput" class="filter-input pl-8" type="text" placeholder="ค้นหาชื่องาน, ผู้รับผิดชอบ...">
+            </div>
+
+            <button id="advToggleBtn" onclick="toggleAdvFilters()" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-slate-400 transition">
+                <i class="fas fa-sliders-h text-slate-400 text-xs"></i>
+                <span>ตัวกรอง</span>
+                <i id="advToggleIcon" class="fas fa-chevron-down text-slate-400 text-xs transition-transform"></i>
+            </button>
+
+            <button id="resetFiltersBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-500 hover:border-slate-400 transition">
+                <i class="fas fa-rotate-left text-xs"></i> ล้าง
+            </button>
+        </div>
+
+        <!-- Row 2: Advanced filters (hidden by default) -->
+        <div id="advFilters" class="hidden mt-4 pt-4 border-t border-slate-100">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div>
+                    <div class="filter-label">บริษัท</div>
+                    <select id="companyFilter" class="filter-select"><option value="all">ทุกบริษัท</option></select>
+                </div>
+                <div>
+                    <div class="filter-label">ประเภท</div>
+                    <select id="taskTypeFilter" class="filter-select">
+                        <option value="">ทุกประเภท</option>
+                        <option value="personal">งานส่วนตัว</option>
+                        <option value="job_ticket">งานส่วนกลาง</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="filter-label">สถานะ</div>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="todo">ยังไม่เริ่ม</option>
+                        <option value="doing">กำลังดำเนินการ</option>
+                        <option value="done">เสร็จแล้ว</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="filter-label">Workflow</div>
+                    <select id="stageFilter" class="filter-select">
+                        <option value="">ทุกขั้นตอน</option>
+                        <option value="todo">รอรับงาน</option>
+                        <option value="receive">รับงานแล้ว</option>
+                        <option value="doing">กำลังทำ</option>
+                        <option value="send">ส่งแล้ว</option>
+                        <option value="approve">รออนุมัติ</option>
+                        <option value="done">เสร็จแล้ว</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="filter-label">แผนก</div>
+                    <input id="departmentFilter" class="filter-input" type="text" placeholder="IT, HR...">
+                </div>
+                <div>
+                    <div class="filter-label">ผู้รับผิดชอบ</div>
+                    <input id="assigneeFilter" class="filter-input" type="text" placeholder="ค้นหา...">
+                </div>
+            </div>
+
+            <!-- Saved views row -->
+            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Saved Views:</span>
+                <div id="savedViewsContainer" class="flex flex-wrap gap-1.5">
+                    <span class="text-xs text-slate-400">ยังไม่มี</span>
+                </div>
+                <button id="saveCurrentViewBtn" class="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-bookmark"></i> บันทึกมุมมองนี้
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TASK LIST ── -->
+    <div class="section-card !p-0 overflow-hidden">
+
+        <!-- List header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
+            <div>
+                <div class="font-semibold text-slate-900">รายการงาน</div>
+                <div class="text-xs text-slate-400 mt-0.5" id="resultSummary">กำลังโหลด...</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Sort -->
+                <select id="sortFilter" class="filter-select !w-auto text-xs" style="padding:7px 10px;">
+                    <option value="updated_desc">อัปเดตล่าสุด</option>
+                    <option value="due_asc">กำหนดส่งใกล้สุด</option>
+                    <option value="due_desc">กำหนดส่งไกลสุด</option>
+                    <option value="created_desc">สร้างล่าสุด</option>
+                    <option value="priority_desc">ความสำคัญสูงสุด</option>
+                </select>
+                <!-- Per page -->
+                <select id="pageSizeFilter" class="filter-select !w-[80px] text-xs" style="padding:7px 8px;">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <!-- View toggle -->
+                <div class="flex items-center bg-slate-100 rounded-xl p-1 gap-0.5">
+                    <button type="button" class="view-btn active" data-view="table"><i class="fas fa-table-list text-sm"></i></button>
+                    <button type="button" class="view-btn" data-view="cards"><i class="fas fa-grip text-sm"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="py-16 text-center text-slate-400">
+            <i class="fas fa-spinner fa-spin text-2xl"></i>
+            <div class="mt-3 text-sm">กำลังโหลดรายการงาน...</div>
+        </div>
+
+        <!-- Table view -->
+        <div id="tableView" class="hidden overflow-x-auto px-2">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th class="text-left pl-3">งาน</th>
+                        <th class="text-left">สถานะ</th>
+                        <th class="text-left hidden sm:table-cell">บริษัท / แผนก</th>
+                        <th class="text-left hidden md:table-cell">ผู้รับผิดชอบ</th>
+                        <th class="text-left hidden lg:table-cell">Workflow</th>
+                        <th class="text-left">กำหนดส่ง</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Card view -->
+        <div id="cardView" class="hidden grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4"></div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="hidden py-14 text-center">
+            <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xl mb-4">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="text-slate-700 font-semibold">ไม่พบรายการที่ตรงกับตัวกรอง</div>
+            <div class="text-sm text-slate-400 mt-1">ลองล้างตัวกรองหรือปรับคำค้นหา</div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-t border-slate-100">
+            <div class="text-xs text-slate-400" id="rangeSummary">-</div>
+            <div class="flex items-center gap-1.5">
+                <button id="prevPageBtn" class="pg-btn" type="button"><i class="fas fa-chevron-left"></i></button>
+                <div id="pageButtons" class="flex items-center gap-1"></div>
+                <button id="nextPageBtn" class="pg-btn" type="button"><i class="fas fa-chevron-right"></i></button>
+                <span class="text-xs text-slate-400 ml-1" id="pageSummary"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ANALYTICS (collapsible, สำหรับหัวหน้า) ── -->
+    <div class="section-card">
+        <button onclick="toggleAnalytics()" class="w-full flex items-center justify-between text-left">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                    <i class="fas fa-chart-line text-white text-sm"></i>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-900 text-sm">ภาพรวมสำหรับหัวหน้า</div>
+                    <div class="text-xs text-slate-400">บริษัท · Aging · Approval Queue</div>
+                </div>
+            </div>
+            <i id="analyticsIcon" class="fas fa-chevron-down text-slate-400 text-sm transition-transform duration-200"></i>
+        </button>
+
+        <div id="analyticsBody" class="hidden mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            <!-- Company overview -->
+            <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">งานค้างตามบริษัท</div>
+                <div id="companyOverview" class="space-y-3"></div>
+            </div>
+
+            <!-- Aging + Top owners -->
+            <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Aging Buckets</div>
+                <div id="agingOverview" class="space-y-2.5"></div>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Top Overdue Owners</div>
+                    <div id="ownerOverview" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- Approval queue -->
+            <div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Approval Queue</div>
+                <div id="approvalQueue" class="space-y-2"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- end main -->
+
+<!-- ═══════════════════════════════════════
+     DETAIL MODAL
+════════════════════════════════════════ -->
+<div id="detailModal" onclick="if(event.target===this)closeDetailModal()">
+    <div id="detailModalBox">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+            <div class="text-base font-bold text-slate-900">รายละเอียดงาน</div>
+            <div class="flex items-center gap-2">
+                <a href="job_ticket.html" class="inline-flex items-center gap-1.5 text-xs font-semibold bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition">
+                    <i class="fas fa-pen-to-square"></i> เปิดหน้าจัดการ
+                </a>
+                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition">
+                    <i class="fas fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Modal body -->
+        <div id="detailPanel" class="px-6 py-5"></div>
+    </div>
+</div>
+
+<script>
+    const session = { loaded: false };
+    const state = {
+        page: 1,
+        pageSize: parseInt(localStorage.getItem('taskCenterPageSize') || '25', 10),
+        view: localStorage.getItem('taskCenterView') || 'table',
+        quickFilter: 'all',
+        filters: { search:'', company:'all', task_type:'', status:'', workflow_stage:'', department:'', assignee:'', sort:'updated_desc' },
+        items: [],
+        pagination: { page:1, page_size:25, total:0, page_count:1 },
+        summary: { total:0, todo:0, doing:0, overdue:0, done:0 },
+        overview: { company_summary:[], aging:[], top_owners:[], approval_queue:[] },
+        selectedId: null,
+        loading: false,
+        analyticsOpen: false
+    };
+    const SAVED_VIEWS_KEY = 'taskCenterSavedViews';
+
+    const STATUS_LABELS = { todo:'ยังไม่เริ่ม', doing:'กำลังดำเนินการ', approve:'รออนุมัติ', done:'เสร็จแล้ว' };
+    const STAGE_LABELS  = { todo:'รอรับงาน', receive:'รับงานแล้ว', doing:'กำลังทำ', send:'ส่งแล้ว', approve:'รออนุมัติ', done:'เสร็จแล้ว' };
+    const TYPE_LABELS   = { personal:'งานส่วนตัว', job_ticket:'งานส่วนกลาง' };
+
+    /* ── UI helpers ── */
+    function toggleAdvFilters() {
+        const panel = document.getElementById('advFilters');
+        const icon  = document.getElementById('advToggleIcon');
+        const open  = panel.classList.toggle('hidden') === false;
+        icon.style.transform = open ? 'rotate(180deg)' : '';
+    }
+    function toggleAnalytics() {
+        const body = document.getElementById('analyticsBody');
+        const icon = document.getElementById('analyticsIcon');
+        const open = body.classList.toggle('hidden') === false;
+        state.analyticsOpen = open;
+        icon.style.transform = open ? 'rotate(180deg)' : '';
+        if (open) { body.style.display = 'grid'; }
+    }
+
+    /* ── Detail modal ── */
+    function openDetailModal(id) {
+        state.selectedId = id;
+        renderDetail();
+        document.getElementById('detailModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailModal(); });
+
+    /* ── Sync buttons ── */
+    function syncQuickFilterButtons() {
+        document.querySelectorAll('[data-quick-filter]').forEach(btn => btn.classList.toggle('active', btn.dataset.quickFilter === state.quickFilter));
+    }
+    function syncViewButtons() {
+        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.view === state.view));
+    }
+
+    /* ── API ── */
+    async function apiFetch(url, options = {}) {
+        const r = await fetch(url, options);
+        const p = await r.json();
+        if (!r.ok || p.status === 'error') throw new Error(p.message || 'เกิดข้อผิดพลาด');
+        return p;
+    }
+    async function loadSession() {
+        const p = await apiFetch('api.php?action=check_session');
+        if (!p.loggedin) { window.location.href = 'login.html'; return; }
+        Object.assign(session, p, { loaded: true });
+        hydrateCompanyFilter();
+    }
+    function hydrateCompanyFilter() {
+        const select = document.getElementById('companyFilter');
+        const allowed = Array.isArray(session.available_companies) ? session.available_companies.filter(Boolean) : [];
+        const companies = session.role === 'admin' ? ['PTA','PT4','PTE'] : Array.from(new Set((allowed.length ? allowed : [session.company]).filter(Boolean)));
+        select.innerHTML = '<option value="all">ทุกบริษัท</option>' + companies.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (session.role !== 'admin' && companies.length === 1) { state.filters.company = companies[0]; select.value = companies[0]; }
+    }
+
+    /* ── Utils ── */
+    function debounce(fn, wait = 350) { let t = null; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+    function percentText(v, total) { return !total ? '0%' : `${Math.round((v/total)*100)}%`; }
+    function formatDate(v) { if (!v) return '-'; const d = new Date(v); return isNaN(d) ? v : d.toLocaleDateString('th-TH'); }
+    function formatDateTime(v) { if (!v) return '-'; const d = new Date(v.replace(' ','T')); return isNaN(d) ? v : d.toLocaleString('th-TH'); }
+    function isOverdue(item) { if (!item?.due_date || item.status === 'done') return false; const t = new Date(); t.setHours(0,0,0,0); const d = new Date(item.due_date); d.setHours(0,0,0,0); return d < t; }
+    function dueText(item) { if (!item.due_date) return '-'; return isOverdue(item) ? `${formatDate(item.due_date)} ⚠` : formatDate(item.due_date); }
+    function companyLabel(item) { const raw = (item?.responsible_companies || item?.company) || ''; const p = String(raw).split(',').map(s=>s.trim()).filter(Boolean); return p.length ? p.join(', ') : (item?.company || '-'); }
+    function reminderBadges(item) {
+        const out = [];
+        if (Number(item?.remind_month_start||0)===1) out.push('<span class="remind-badge" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-calendar-day" style="font-size:9px;"></i>ต้นเดือน</span>');
+        if (Number(item?.remind_month_end||0)===1)   out.push('<span class="remind-badge" style="background:#ffedd5;color:#9a3412;"><i class="fas fa-calendar-check" style="font-size:9px;"></i>สิ้นเดือน</span>');
+        return out.join('');
+    }
+    function priorityLabel(p) { return {urgent:'เร่งด่วน',high:'สำคัญ',normal:'ปกติ',low:'ต่ำ'}[p]||'ปกติ'; }
+    function shareLabel(scope, company, dept) { if(scope==='company') return `ระดับบริษัท ${company||''}`.trim(); if(scope==='department') return `ระดับแผนก ${dept||''}`.trim(); return 'เฉพาะฉัน'; }
+    function canManageTask(item) {
+        if (!item) return false;
+        if (item.user_id === session.user_id || session.role === 'admin') return true;
+        if (session.role === 'staff') {
+            const companies = String(item.responsible_companies||item.company||'').split(',').map(s=>s.trim()).filter(Boolean);
+            if (!companies.includes(session.company)) return false;
+            const scope = item.share_scope||'private';
+            if (scope === 'company') return true;
+            if (scope === 'department') return (item.department||'') === (session.primary_department||'');
+        }
+        return false;
+    }
+    function escapeHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    /* ── Query ── */
+    function buildQuery() {
+        const p = new URLSearchParams();
+        p.set('action','task_center_list'); p.set('page',state.page); p.set('page_size',state.pageSize);
+        const f = {...state.filters};
+        if (state.quickFilter === 'open') p.set('open_only','1');
+        else if (state.quickFilter === 'overdue') p.set('overdue_only','1');
+        else if (state.quickFilter === 'approvals') f.workflow_stage = 'approve';
+        Object.entries(f).forEach(([k,v]) => { if (v!==''&&v!=='all') p.set(k,v); });
+        return p.toString();
+    }
+
+    /* ── Load ── */
+    async function loadTaskCenter() {
+        state.loading = true;
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.getElementById('tableView').classList.add('hidden');
+        document.getElementById('cardView').classList.add('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+        try {
+            const [payload, ov] = await Promise.all([
+                apiFetch(`api.php?${buildQuery()}`),
+                apiFetch(`api.php?action=task_center_overview&company=${encodeURIComponent(state.filters.company)}&task_type=${encodeURIComponent(state.filters.task_type)}`)
+            ]);
+            state.items      = Array.isArray(payload.items) ? payload.items : [];
+            state.pagination = payload.pagination || state.pagination;
+            state.summary    = payload.summary || state.summary;
+            state.overview   = ov || state.overview;
+            renderAll();
+        } catch (err) {
+            document.getElementById('loadingState').classList.add('hidden');
+            const e = document.getElementById('emptyState'); e.classList.remove('hidden');
+            e.innerHTML = `<div class="w-14 h-14 mx-auto rounded-full bg-red-50 text-red-400 flex items-center justify-center text-xl mb-4"><i class="fas fa-triangle-exclamation"></i></div><div class="text-slate-700 font-semibold">โหลดไม่สำเร็จ</div><div class="text-sm text-slate-400 mt-1">${escapeHtml(err.message)}</div>`;
+        } finally { state.loading = false; }
+    }
+
+    /* ── Render all ── */
+    function renderAll() {
+        renderSummary(); renderResultSummary(); renderSavedViews();
+        renderOverview(); renderList(); renderPagination();
+        document.getElementById('loadingState').classList.add('hidden');
+    }
+
+    function renderSummary() {
+        const total = state.summary.total||0;
+        document.getElementById('metricTotal').textContent   = total.toLocaleString('th-TH');
+        document.getElementById('metricTodo').textContent    = (state.summary.todo||0).toLocaleString('th-TH');
+        document.getElementById('metricDoing').textContent   = (state.summary.doing||0).toLocaleString('th-TH');
+        document.getElementById('metricOverdue').textContent = (state.summary.overdue||0).toLocaleString('th-TH');
+        document.getElementById('metricDone').textContent    = (state.summary.done||0).toLocaleString('th-TH');
+        document.getElementById('metricTotalPct').textContent   = 'ทั้งหมด';
+        document.getElementById('metricTodoPct').textContent    = percentText(state.summary.todo||0,total);
+        document.getElementById('metricDoingPct').textContent   = percentText(state.summary.doing||0,total);
+        document.getElementById('metricOverduePct').textContent = percentText(state.summary.overdue||0,total);
+        document.getElementById('metricDonePct').textContent    = percentText(state.summary.done||0,total);
+    }
+
+    function renderResultSummary() {
+        const {page,page_size,total,page_count} = state.pagination;
+        const start = total===0 ? 0 : ((page-1)*page_size)+1;
+        const end   = Math.min(page*page_size,total);
+        document.getElementById('resultSummary').textContent = `พบ ${total.toLocaleString('th-TH')} รายการ • แสดง ${start}–${end}`;
+        document.getElementById('rangeSummary').textContent  = `แสดง ${start.toLocaleString('th-TH')} – ${end.toLocaleString('th-TH')} จาก ${total.toLocaleString('th-TH')} รายการ`;
+        document.getElementById('pageSummary').textContent   = `หน้า ${page} / ${page_count}`;
+    }
+
+    /* ── List ── */
+    function renderList() {
+        const has = state.items.length > 0;
+        document.getElementById('emptyState').classList.toggle('hidden', has);
+        document.getElementById('tableView').classList.toggle('hidden', state.view!=='table'||!has);
+        document.getElementById('cardView').classList.toggle('hidden', state.view!=='cards'||!has);
+        if (!has) { document.getElementById('tableBody').innerHTML=''; document.getElementById('cardView').innerHTML=''; return; }
+        renderTableRows(); renderCards();
+    }
+
+    function renderTableRows() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = state.items.map(item => `
+            <tr class="task-row ${isOverdue(item)?'overdue':''}" data-id="${item.id}">
+                <td data-label="งาน" class="pl-3 min-w-[180px]">
+                    <div class="font-semibold text-slate-900 text-sm leading-tight">${escapeHtml(item.title||'-')}</div>
+                    <div class="text-xs text-slate-400 mt-0.5 line-clamp-1">${escapeHtml(item.description||item.tags||'')}</div>
+                    <div class="mt-1 flex flex-wrap gap-1">${reminderBadges(item)}</div>
+                </td>
+                <td data-label="สถานะ">
+                    <span class="badge badge-status-${item.status||'todo'}">${STATUS_LABELS[item.status]||'-'}</span><br>
+                    <span class="badge badge-type-${item.task_type||'personal'} mt-1">${TYPE_LABELS[item.task_type]||'-'}</span>
+                </td>
+                <td data-label="บริษัท/แผนก" class="hidden sm:table-cell text-xs text-slate-500">${escapeHtml([companyLabel(item),item.department||'ไม่ระบุ'].join(' / '))}</td>
+                <td data-label="ผู้รับผิดชอบ" class="hidden md:table-cell text-xs text-slate-500">${escapeHtml(item.assignee_name||item.owner_name||'-')}</td>
+                <td data-label="Workflow" class="hidden lg:table-cell"><span class="badge badge-stage-${item.workflow_stage||'todo'}">${STAGE_LABELS[item.workflow_stage]||'-'}</span></td>
+                <td data-label="กำหนดส่ง" class="text-xs ${isOverdue(item)?'text-red-500 font-semibold':'text-slate-500'}">${escapeHtml(dueText(item))}</td>
+            </tr>`).join('');
+        tbody.querySelectorAll('.task-row').forEach(row => row.addEventListener('click', () => openDetailModal(row.dataset.id)));
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardView');
+        container.innerHTML = state.items.map(item => `
+            <div class="task-card ${isOverdue(item)?'overdue':''}" data-id="${item.id}">
+                <div class="flex items-start justify-between gap-2 mb-2">
+                    <div class="flex flex-wrap gap-1">
+                        <span class="badge badge-type-${item.task_type||'personal'}">${TYPE_LABELS[item.task_type]||'-'}</span>
+                        <span class="badge badge-status-${item.status||'todo'}">${STATUS_LABELS[item.status]||'-'}</span>
+                        ${reminderBadges(item)}
+                    </div>
+                    <span class="badge badge-stage-${item.workflow_stage||'todo'} flex-shrink-0">${STAGE_LABELS[item.workflow_stage]||'-'}</span>
+                </div>
+                <div class="font-semibold text-slate-900 text-sm leading-snug">${escapeHtml(item.title||'-')}</div>
+                <div class="text-xs text-slate-400 mt-1.5 line-clamp-2">${escapeHtml(item.description||'ไม่มีรายละเอียด')}</div>
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span><i class="fas fa-building mr-1 text-slate-300"></i>${escapeHtml(companyLabel(item))}</span>
+                    <span><i class="fas fa-user mr-1 text-slate-300"></i>${escapeHtml(item.assignee_name||item.owner_name||'-')}</span>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs">
+                    <span class="flex items-center gap-1.5"><span class="prio-dot prio-${item.priority||'normal'}"></span>${escapeHtml(priorityLabel(item.priority))}</span>
+                    <span class="${isOverdue(item)?'text-red-500 font-semibold':'text-slate-400'}">${escapeHtml(dueText(item))}</span>
+                </div>
+            </div>`).join('');
+        container.querySelectorAll('.task-card').forEach(card => card.addEventListener('click', () => openDetailModal(card.dataset.id)));
+    }
+
+    /* ── Detail ── */
+    function renderDetail() {
+        const item = state.items.find(e => e.id == state.selectedId);
+        const panel = document.getElementById('detailPanel');
+        if (!item) { panel.innerHTML = ''; return; }
+        const canManage = canManageTask(item);
+        panel.innerHTML = `
+            <div class="flex flex-wrap gap-1.5 mb-3">
+                <span class="badge badge-type-${item.task_type||'personal'}">${TYPE_LABELS[item.task_type]||'-'}</span>
+                <span class="badge badge-status-${item.status||'todo'}">${STATUS_LABELS[item.status]||'-'}</span>
+                <span class="badge badge-stage-${item.workflow_stage||'todo'}">${STAGE_LABELS[item.workflow_stage]||'-'}</span>
+                ${reminderBadges(item)}
+            </div>
+            <h4 class="text-xl font-bold text-slate-900 leading-snug mb-2">${escapeHtml(item.title||'-')}</h4>
+            <p class="text-sm text-slate-500 whitespace-pre-wrap mb-4">${escapeHtml(item.description||'ไม่มีรายละเอียด')}</p>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                ${detailBlock('บริษัท',companyLabel(item))}
+                ${detailBlock('แผนก',item.department||'ไม่ระบุ')}
+                ${detailBlock('ผู้รับผิดชอบ',item.assignee_name||item.owner_name||'-')}
+                ${detailBlock('พื้นที่ / ตึก',item.building||'-')}
+                ${detailBlock('กำหนดส่ง',dueText(item))}
+                ${detailBlock('ความสำคัญ',priorityLabel(item.priority))}
+            </div>
+            <div class="mb-4">
+                <div class="flex justify-between text-xs text-slate-500 mb-1.5">
+                    <span>ความคืบหน้า — ${STAGE_LABELS[item.workflow_stage]||'-'}</span>
+                    <span class="font-semibold">${Number(item.progress_pct||0)}%</span>
+                </div>
+                <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width:${Math.max(0,Math.min(100,Number(item.progress_pct||0)))}%"></div>
+                </div>
+            </div>
+            <div class="text-xs text-slate-400 mb-4">การแชร์: ${escapeHtml(shareLabel(item.share_scope,item.company,item.department))} &nbsp;·&nbsp; อัปเดต ${escapeHtml(formatDateTime(item.updated_at))}</div>
+            <div class="flex gap-2">
+                <button type="button" id="advanceStatusBtn" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 text-white text-sm font-semibold py-2.5 hover:bg-slate-700 transition ${canManage?'':'opacity-40 cursor-not-allowed'}" ${canManage?'':'disabled'}>
+                    <i class="fas fa-forward-step"></i> เลื่อนไปขั้นถัดไป
+                </button>
+            </div>
+            ${!canManage?'<div class="mt-2 text-xs text-slate-400 text-center">ดูได้อย่างเดียวตามสิทธิ์ของคุณ</div>':''}`;
+        const btn = document.getElementById('advanceStatusBtn');
+        if (btn) btn.addEventListener('click', () => advanceTaskStage(item.id));
+    }
+
+    function detailBlock(label, value) {
+        return `<div class="detail-block"><div class="db-label">${escapeHtml(label)}</div><div class="db-value">${escapeHtml(value)}</div></div>`;
+    }
+
+    /* ── Overview ── */
+    function renderOverview() {
+        // Company
+        const cRows = Array.isArray(state.overview.company_summary) ? state.overview.company_summary : [];
+        const cMax  = Math.max(...cRows.map(r=>Number(r.open_count||0)),1);
+        document.getElementById('companyOverview').innerHTML = !cRows.length
+            ? '<div class="text-xs text-slate-400">ไม่มีข้อมูล</div>'
+            : cRows.map(row=>`
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <div><span class="font-semibold text-slate-800">${escapeHtml(row.company||'-')}</span><span class="text-slate-400 ml-1">ค้าง ${Number(row.open_count||0)} / ${Number(row.total||0)}</span></div>
+                        <span class="text-slate-500">${Number(row.approval_count||0)} รออนุมัติ</span>
+                    </div>
+                    <div class="ov-track"><div class="ov-fill" style="width:${Math.max(8,Math.round((Number(row.open_count||0)/cMax)*100))}%;background:linear-gradient(90deg,#2563eb,#4f46e5)"></div></div>
+                </div>`).join('');
+
+        // Aging
+        const aBuckets = Array.isArray(state.overview.aging) ? state.overview.aging : [];
+        const aMax = Math.max(...aBuckets.map(b=>Number(b.value||0)),1);
+        document.getElementById('agingOverview').innerHTML = !aBuckets.length
+            ? '<div class="text-xs text-slate-400">ไม่มีข้อมูล</div>'
+            : aBuckets.map(b=>`
+                <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">${escapeHtml(b.label||'-')}</span><span class="font-semibold text-slate-900">${Number(b.value||0)}</span></div>
+                    <div class="ov-track"><div class="ov-fill" style="width:${Math.max(8,Math.round((Number(b.value||0)/aMax)*100))}%;background:linear-gradient(90deg,#2563eb,#4f46e5)"></div></div>
+                </div>`).join('');
+
+        // Top owners
+        const oRows = Array.isArray(state.overview.top_owners) ? state.overview.top_owners : [];
+        const oMax  = Math.max(...oRows.map(r=>Number(r.overdue_count||0)),1);
+        document.getElementById('ownerOverview').innerHTML = !oRows.length
+            ? '<div class="text-xs text-slate-400">ไม่มีงานเกินกำหนด</div>'
+            : oRows.map(row=>`
+                <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">${escapeHtml(row.owner_name||'-')}</span><span class="font-semibold text-slate-900">${Number(row.overdue_count||0)}</span></div>
+                    <div class="ov-track"><div class="ov-fill" style="width:${Math.max(8,Math.round((Number(row.overdue_count||0)/oMax)*100))}%;background:linear-gradient(90deg,#ef4444,#f97316)"></div></div>
+                </div>`).join('');
+
+        // Approval queue
+        const qRows = Array.isArray(state.overview.approval_queue) ? state.overview.approval_queue : [];
+        document.getElementById('approvalQueue').innerHTML = !qRows.length
+            ? '<div class="text-xs text-slate-400">ไม่มีงานรออนุมัติ</div>'
+            : qRows.map(row=>`
+                <button type="button" class="w-full text-left rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 hover:border-blue-300 hover:bg-blue-50/60 transition" data-open-task="${row.id}">
+                    <div class="font-semibold text-slate-800 text-xs leading-snug">${escapeHtml(row.title||'-')}</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">${escapeHtml([row.company||'-',row.department||'ไม่ระบุ',row.assignee_name||'-'].join(' / '))}</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">กำหนด: ${escapeHtml(formatDate(row.due_date))}</div>
+                </button>`).join('');
+        document.querySelectorAll('[data-open-task]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.selectedId = btn.dataset.openTask;
+                state.quickFilter = 'approvals'; state.filters.workflow_stage = '';
+                document.getElementById('stageFilter').value = '';
+                syncQuickFilterButtons(); state.page = 1; loadTaskCenter();
+            });
+        });
+    }
+
+    /* ── Advance stage ── */
+    async function advanceTaskStage(taskId) {
+        const item = state.items.find(e => e.id == taskId);
+        if (!item) return;
+        const stages = item.task_type === 'job_ticket' ? ['todo','receive','doing','send','approve','done'] : ['todo','doing','done'];
+        const cur = item.task_type === 'job_ticket' ? (item.workflow_stage||'todo') : (item.status||'todo');
+        const nextStage = stages[(stages.indexOf(cur)+1) % stages.length];
+        const nextStatus = nextStage==='done'?'done':nextStage==='todo'?'todo':'doing';
+        const payload = { id:item.id, task_type:item.task_type||'personal', company:item.company||'', responsible_companies:item.responsible_companies||item.company||'', building:item.building||'', title:item.title||'', assignee_name:item.assignee_name||'', description:item.description||'', due_date:item.due_date||null, remind_month_start:Number(item.remind_month_start||0), remind_month_end:Number(item.remind_month_end||0), priority:item.priority||'normal', tags:item.tags||'', share_scope:item.share_scope||'private', status:nextStatus, workflow_stage:nextStage };
+        const fd = new FormData(); fd.append('data', JSON.stringify(payload));
+        try { await apiFetch('api.php?action=personal_tasks_save',{method:'POST',body:fd}); closeDetailModal(); loadTaskCenter(); }
+        catch (err) { alert(err.message || 'เปลี่ยนสถานะไม่สำเร็จ'); }
+    }
+
+    /* ── Saved views ── */
+    function getSavedViews() { try { const r=localStorage.getItem(SAVED_VIEWS_KEY); const p=r?JSON.parse(r):[]; return Array.isArray(p)?p:[]; } catch { return []; } }
+    function setSavedViews(views) { localStorage.setItem(SAVED_VIEWS_KEY, JSON.stringify(views.slice(0,10))); }
+    function renderSavedViews() {
+        const c = document.getElementById('savedViewsContainer');
+        const views = getSavedViews();
+        if (!views.length) { c.innerHTML='<span class="text-xs text-slate-400">ยังไม่มี</span>'; return; }
+        c.innerHTML = views.map(v=>`<div class="sv-chip"><button type="button" data-apply-view="${v.id}" class="font-medium">${escapeHtml(v.name)}</button><button type="button" data-remove-view="${v.id}" title="ลบ"><i class="fas fa-xmark text-[10px]"></i></button></div>`).join('');
+        c.querySelectorAll('[data-apply-view]').forEach(btn => btn.addEventListener('click', () => applySavedView(btn.dataset.applyView)));
+        c.querySelectorAll('[data-remove-view]').forEach(btn => btn.addEventListener('click', () => removeSavedView(btn.dataset.removeView)));
+    }
+    function applySavedView(id) {
+        const view = getSavedViews().find(e=>e.id===id); if(!view) return;
+        state.quickFilter = view.quickFilter||'all';
+        state.filters = Object.assign({search:'',company:session.role==='admin'?'all':(session.company||'all'),task_type:'',status:'',workflow_stage:'',department:'',assignee:'',sort:'updated_desc'}, view.filters||{});
+        document.getElementById('searchInput').value = state.filters.search||'';
+        document.getElementById('companyFilter').value = state.filters.company||'all';
+        document.getElementById('taskTypeFilter').value = state.filters.task_type||'';
+        document.getElementById('statusFilter').value = state.filters.status||'';
+        document.getElementById('stageFilter').value = state.filters.workflow_stage||'';
+        document.getElementById('departmentFilter').value = state.filters.department||'';
+        document.getElementById('assigneeFilter').value = state.filters.assignee||'';
+        document.getElementById('sortFilter').value = state.filters.sort||'updated_desc';
+        syncQuickFilterButtons(); state.page=1; loadTaskCenter();
+    }
+    function removeSavedView(id) { setSavedViews(getSavedViews().filter(e=>e.id!==id)); renderSavedViews(); }
+    function saveCurrentView() {
+        const name = window.prompt('ตั้งชื่อมุมมองนี้'); if(!name) return;
+        const views = getSavedViews();
+        views.unshift({id:`view-${Date.now()}`,name:name.trim(),quickFilter:state.quickFilter,filters:{...state.filters}});
+        setSavedViews(views); renderSavedViews();
+    }
+
+    /* ── Pagination ── */
+    function renderPagination() {
+        const {page,page_count} = state.pagination;
+        document.getElementById('prevPageBtn').disabled = page<=1;
+        document.getElementById('nextPageBtn').disabled = page>=page_count;
+        const start = Math.max(1,page-2), end = Math.min(page_count,start+4);
+        let btns = [];
+        for (let c=start;c<=end;c++) btns.push(`<button type="button" class="pg-btn ${c===page?'active':''}" data-page="${c}">${c}</button>`);
+        document.getElementById('pageButtons').innerHTML = btns.join('');
+        document.querySelectorAll('[data-page]').forEach(btn => btn.addEventListener('click', () => { state.page=Number(btn.dataset.page); loadTaskCenter(); }));
+    }
+
+    /* ── Bind events ── */
+    function bindEvents() {
+        const debouncedLoad = debounce(() => { state.page=1; loadTaskCenter(); });
+
+        document.getElementById('searchInput').addEventListener('input', e => {
+            state.filters.search = e.target.value.trim();
+            state.quickFilter = 'all'; syncQuickFilterButtons(); debouncedLoad();
+        });
+        [['companyFilter','company'],['taskTypeFilter','task_type'],['statusFilter','status'],['stageFilter','workflow_stage'],['sortFilter','sort']].forEach(([id,key]) => {
+            document.getElementById(id).addEventListener('change', e => { state.filters[key]=e.target.value; state.page=1; state.quickFilter='all'; syncQuickFilterButtons(); loadTaskCenter(); });
+        });
+        document.getElementById('departmentFilter').addEventListener('input', debounce(e => { state.filters.department=e.target.value.trim(); state.page=1; loadTaskCenter(); }));
+        document.getElementById('assigneeFilter').addEventListener('input',   debounce(e => { state.filters.assignee=e.target.value.trim(); state.page=1; loadTaskCenter(); }));
+
+        document.getElementById('pageSizeFilter').value = String(state.pageSize);
+        document.getElementById('pageSizeFilter').addEventListener('change', e => { state.pageSize=Number(e.target.value); localStorage.setItem('taskCenterPageSize',String(state.pageSize)); state.page=1; loadTaskCenter(); });
+
+        document.getElementById('prevPageBtn').addEventListener('click', () => { if(state.pagination.page>1){state.page--;loadTaskCenter();} });
+        document.getElementById('nextPageBtn').addEventListener('click', () => { if(state.pagination.page<state.pagination.page_count){state.page++;loadTaskCenter();} });
+
+        document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => { state.view=btn.dataset.view; localStorage.setItem('taskCenterView',state.view); syncViewButtons(); renderList(); }));
+
+        document.querySelectorAll('[data-quick-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.quickFilter = btn.dataset.quickFilter;
+                if (['open','overdue'].includes(state.quickFilter)) { state.filters.status=''; state.filters.workflow_stage=''; document.getElementById('statusFilter').value=''; document.getElementById('stageFilter').value=''; }
+                else if (state.quickFilter==='approvals') { state.filters.status=''; document.getElementById('statusFilter').value=''; }
+                else { state.filters.workflow_stage=''; document.getElementById('stageFilter').value=''; }
+                syncQuickFilterButtons(); state.page=1; loadTaskCenter();
+            });
+        });
+
+        document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+            state.page=1; state.quickFilter='all';
+            state.filters = {search:'',company:session.role==='admin'?'all':(session.company||'all'),task_type:'',status:'',workflow_stage:'',department:'',assignee:'',sort:'updated_desc'};
+            document.getElementById('searchInput').value='';
+            document.getElementById('companyFilter').value=state.filters.company;
+            ['taskTypeFilter','statusFilter','stageFilter','departmentFilter','assigneeFilter'].forEach(id => { document.getElementById(id).value=''; });
+            document.getElementById('sortFilter').value='updated_desc';
+            syncQuickFilterButtons(); loadTaskCenter();
+        });
+
+        document.getElementById('saveCurrentViewBtn').addEventListener('click', saveCurrentView);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadSession();
+        hydrateCompanyFilter();
+        bindEvents();
+        syncViewButtons();
+        renderSavedViews();
+        await loadTaskCenter();
+    });
+</script>
+</body>
+</html>

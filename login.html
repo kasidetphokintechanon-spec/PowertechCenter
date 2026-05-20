@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Powertech System Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* ── Page-specific overrides ── */
+        body {
+            font-family: var(--ptc-font);
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            background-color: var(--ptc-bg);
+            /* Subtle mesh gradient */
+            background-image:
+                radial-gradient(ellipse at 0% 0%,   rgba(37,99,235,.12) 0, transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(139,92,246,.10) 0, transparent 55%);
+            background-attachment: fixed;
+        }
+        html.dark body {
+            background-color: var(--ptc-bg);
+            background-image:
+                radial-gradient(ellipse at 0% 0%,   rgba(37,99,235,.18) 0, transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(139,92,246,.14) 0, transparent 55%);
+        }
+
+        /* Card wrapper */
+        .login-card {
+            display: flex;
+            width: 100%;
+            max-width: 860px;
+            min-height: 520px;
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-2xl);
+            box-shadow: var(--ptc-shadow-xl);
+            overflow: hidden;
+        }
+
+        /* Left panel (branding) */
+        .login-sidebar {
+            display: none; /* hidden on mobile */
+            flex-direction: column;
+            justify-content: space-between;
+            width: 45%;
+            flex-shrink: 0;
+            padding: 2.5rem;
+            background: linear-gradient(145deg, #1e40af 0%, #2563eb 45%, #4f46e5 100%);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-sidebar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 15%, rgba(255,255,255,.18) 0, transparent 50%),
+                radial-gradient(ellipse at 85% 80%, rgba(255,255,255,.10) 0, transparent 45%);
+            pointer-events: none;
+        }
+        /* Company colour overrides */
+        .login-sidebar.theme-pta { background: linear-gradient(145deg, #065f46 0%, #059669 45%, #10b981 100%); }
+        .login-sidebar.theme-pt4 { background: linear-gradient(145deg, #991b1b 0%, #dc2626 45%, #ef4444 100%); }
+        .login-sidebar.theme-pte { background: linear-gradient(145deg, #1e40af 0%, #2563eb 45%, #4f46e5 100%); }
+
+        @media (min-width: 640px) { .login-sidebar { display: flex; } }
+
+        .sidebar-logo {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.20);
+            border: 1px solid rgba(255,255,255,.30);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.375rem;
+        }
+        .sidebar-logo img { width: 36px; height: 36px; object-fit: contain; }
+        .sidebar-dots { display: flex; gap: 0.5rem; }
+        .sidebar-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,.35);
+        }
+
+        /* Right panel (form) */
+        .login-form-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2.5rem 2.25rem;
+            overflow-y: auto;
+        }
+        @media (max-width: 639px) { .login-form-panel { padding: 2rem 1.5rem; } }
+
+        /* Input wrapper */
+        .field-wrap { position: relative; }
+        .field-icon {
+            position: absolute; left: .875rem; top: 50%; transform: translateY(-50%);
+            color: var(--ptc-text-faint); font-size: .875rem; pointer-events: none;
+        }
+        .field-wrap input { padding-left: 2.5rem !important; }
+        .field-wrap .eye-btn {
+            position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: var(--ptc-text-faint); padding: .25rem;
+            transition: color .15s;
+        }
+        .field-wrap .eye-btn:hover { color: var(--ptc-text-muted); }
+
+        /* Submit button full-width */
+        .login-submit {
+            width: 100%;
+            padding: .75rem 1.25rem;
+            border: none; border-radius: var(--ptc-radius-md);
+            font-size: .9375rem; font-weight: 600;
+            cursor: pointer;
+            background: var(--ptc-primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(37,99,235,.30);
+            transition: var(--ptc-transition);
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+        }
+        .login-submit:hover:not(:disabled) {
+            background: var(--ptc-primary-dark);
+            box-shadow: 0 4px 16px rgba(37,99,235,.40);
+            transform: translateY(-1px);
+        }
+        .login-submit:active:not(:disabled) { transform: translateY(0); }
+        .login-submit:disabled { opacity: .65; cursor: not-allowed; }
+        .login-submit.theme-pta { background: #059669; box-shadow: 0 2px 8px rgba(5,150,105,.30); }
+        .login-submit.theme-pta:hover:not(:disabled) { background: #047857; box-shadow: 0 4px 16px rgba(5,150,105,.40); }
+        .login-submit.theme-pt4 { background: #dc2626; box-shadow: 0 2px 8px rgba(220,38,38,.30); }
+        .login-submit.theme-pt4:hover:not(:disabled) { background: #b91c1c; box-shadow: 0 4px 16px rgba(220,38,38,.40); }
+
+        /* Theme toggle */
+        .theme-toggle-btn {
+            position: fixed; top: 1rem; right: 1rem; z-index: 50;
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            box-shadow: var(--ptc-shadow-md);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--ptc-transition);
+            color: var(--ptc-text-muted); font-size: 1rem;
+        }
+        .theme-toggle-btn:hover { transform: scale(1.06); box-shadow: var(--ptc-shadow-lg); }
+
+        /* Field label */
+        .field-label {
+            display: block;
+            font-size: .6875rem; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase;
+            color: var(--ptc-text-muted); margin-bottom: .375rem;
+        }
+
+        /* Error box */
+        .login-error {
+            display: flex; align-items: center; gap: .5rem;
+            background: var(--ptc-danger-bg);
+            border: 1px solid rgba(239,68,68,.25);
+            color: var(--ptc-danger);
+            border-radius: var(--ptc-radius-md);
+            padding: .625rem .875rem;
+            font-size: .875rem;
+        }
+
+        /* Security notice */
+        .security-notice {
+            background: var(--ptc-surface-2);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-md);
+            padding: .625rem .875rem;
+            font-size: .75rem;
+            color: var(--ptc-text-muted);
+            display: flex; align-items: flex-start; gap: .5rem;
+        }
+
+        /* Focus ring for selects */
+        .login-select {
+            width: 100%;
+            padding: .5625rem .875rem;
+            padding-right: 2.25rem;
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-md);
+            font-size: .9375rem;
+            font-family: inherit;
+            color: var(--ptc-text);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right .75rem center;
+            transition: var(--ptc-transition);
+        }
+        .login-select:focus {
+            border-color: var(--ptc-primary);
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring);
+        }
+        html.dark .login-select {
+            background-color: var(--ptc-surface-2);
+            border-color: var(--ptc-border);
+            color: var(--ptc-text);
+        }
+
+        /* Input */
+        .login-input {
+            width: 100%;
+            padding: .5625rem .875rem;
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-md);
+            font-size: .9375rem;
+            font-family: inherit;
+            color: var(--ptc-text);
+            outline: none;
+            transition: var(--ptc-transition);
+        }
+        .login-input:focus {
+            border-color: var(--ptc-primary);
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring);
+        }
+        .login-input::placeholder { color: var(--ptc-text-faint); }
+        html.dark .login-input {
+            background: var(--ptc-surface-2);
+            border-color: var(--ptc-border);
+            color: var(--ptc-text);
+        }
+
+        /* Theme-coloured focus rings */
+        .login-input.theme-pta:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,.20); }
+        .login-input.theme-pt4:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.20); }
+        .login-select.theme-pta:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,.20); }
+        .login-select.theme-pt4:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.20); }
+
+        /* Link */
+        .login-link { color: var(--ptc-primary); font-size: .875rem; font-weight: 500; text-decoration: none; transition: color .15s; }
+        .login-link:hover { color: var(--ptc-primary-dark); text-decoration: underline; }
+        .login-link.theme-pta { color: #059669; }
+        .login-link.theme-pta:hover { color: #047857; }
+        .login-link.theme-pt4 { color: #dc2626; }
+        .login-link.theme-pt4:hover { color: #b91c1c; }
+    </style>
+</head>
+<body class="ptc-normalize">
+
+    <!-- Theme Toggle -->
+    <button id="themeToggle" class="theme-toggle-btn" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="login-card ptc-animate">
+
+        <!-- ── Left Sidebar (branding) ── -->
+        <div id="login-sidebar" class="login-sidebar" aria-hidden="true">
+            <div style="position:relative;z-index:1">
+                <div style="display:flex;align-items:center;gap:.875rem;margin-bottom:2rem">
+                    <div id="logo-icon-container" class="sidebar-logo">
+                        <i id="logo-icon" class="fas fa-bolt"></i>
+                    </div>
+                    <img id="company-logo-img" src="" alt="Logo"
+                         style="width:48px;height:48px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.2);padding:6px;display:none">
+                    <div>
+                        <div id="logo-text" style="font-size:1.25rem;font-weight:800;line-height:1.2">Powertech</div>
+                        <div style="font-size:.75rem;opacity:.75;margin-top:1px">System Center</div>
+                    </div>
+                </div>
+
+                <h1 style="font-size:1.875rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-bottom:.875rem">
+                    IT Service<br>Management
+                </h1>
+                <p id="company-desc" style="font-size:.9375rem;line-height:1.65;opacity:.85">
+                    ศูนย์รวมระบบบริหารจัดการภายในองค์กร<br>เชื่อมต่อทุกการทำงานให้เป็นหนึ่งเดียว
+                </p>
+            </div>
+
+            <div style="position:relative;z-index:1">
+                <!-- Feature bullets -->
+                <div style="display:flex;flex-direction:column;gap:.625rem;margin-bottom:1.75rem">
+                    <div style="display:flex;align-items:center;gap:.625rem;font-size:.8125rem;opacity:.9">
+                        <i class="fas fa-ticket-alt" style="width:16px;text-align:center;opacity:.8"></i>
+                        <span>ระบบแจ้งซ่อมและติดตามสถานะ</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.625rem;font-size:.8125rem;opacity:.9">
+                        <i class="fas fa-boxes" style="width:16px;text-align:center;opacity:.8"></i>
+                        <span>บริหารจัดการทรัพย์สินและอุปกรณ์</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.625rem;font-size:.8125rem;opacity:.9">
+                        <i class="fas fa-chart-bar" style="width:16px;text-align:center;opacity:.8"></i>
+                        <span>Dashboard วิเคราะห์ข้อมูลเรียลไทม์</span>
+                    </div>
+                </div>
+                <div class="sidebar-dots">
+                    <div class="sidebar-dot"></div>
+                    <div class="sidebar-dot" style="opacity:.6"></div>
+                    <div class="sidebar-dot" style="opacity:.35"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Right Form Panel ── -->
+        <div class="login-form-panel">
+
+            <!-- Header -->
+            <div style="margin-bottom:1.875rem">
+                <!-- Mobile-only logo -->
+                <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:1.25rem" class="sm-only-brand">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--ptc-primary-light);
+                                display:flex;align-items:center;justify-content:center;color:var(--ptc-primary);font-size:.875rem">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <span style="font-weight:700;font-size:.9375rem;color:var(--ptc-text)">Powertech System Center</span>
+                </div>
+
+                <h2 style="font-size:1.5rem;font-weight:800;color:var(--ptc-text);letter-spacing:-.02em;margin:0 0 .25rem">
+                    ยินดีต้อนรับ
+                </h2>
+                <p style="font-size:.875rem;color:var(--ptc-text-muted);margin:0">
+                    กรุณาลงชื่อเข้าใช้เพื่อจัดการระบบ
+                </p>
+            </div>
+
+            <form id="loginForm" style="display:flex;flex-direction:column;gap:1rem">
+
+                <!-- Company -->
+                <div>
+                    <label class="field-label" for="login-company">บริษัท (Company)</label>
+                    <select id="login-company" class="login-select input-theme"
+                            onchange="setCompanyTheme(this.value)">
+                        <option value="default" selected disabled>— เลือกบริษัทต้นสังกัด —</option>
+                        <option value="PTA">PTA — Powertech Engine Assembly</option>
+                        <option value="PT4">PT4 — Powertech 2004</option>
+                        <option value="PTE">PTE — Powertech Energy Solutions</option>
+                    </select>
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label class="field-label" for="username">Username</label>
+                    <div class="field-wrap">
+                        <i class="field-icon fas fa-user"></i>
+                        <input type="text" id="username" class="login-input input-theme"
+                               placeholder="ชื่อผู้ใช้ หรือ รหัสพนักงาน" required autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.375rem">
+                        <label class="field-label" for="password" style="margin:0">Password</label>
+                        <a href="forgot_password.html" class="login-link btn-text-theme"
+                           style="font-size:.75rem">ลืมรหัสผ่าน?</a>
+                    </div>
+                    <div class="field-wrap">
+                        <i class="field-icon fas fa-lock"></i>
+                        <input type="password" id="password" class="login-input input-theme"
+                               placeholder="รหัสผ่าน (ค่าเริ่มต้นคือรหัสพนักงาน)"
+                               required autocomplete="current-password"
+                               style="padding-right:2.75rem">
+                        <button type="button" id="togglePassword" class="eye-btn" tabindex="-1" aria-label="แสดง/ซ่อนรหัสผ่าน">
+                            <i class="fas fa-eye" style="font-size:.875rem"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error message -->
+                <div id="error-msg" class="login-error" style="display:none">
+                    <i class="fas fa-exclamation-circle" style="flex-shrink:0"></i>
+                    <span id="error-text"></span>
+                </div>
+
+                <!-- Security notice -->
+                <div class="security-notice">
+                    <i class="fas fa-shield-alt" style="flex-shrink:0;margin-top:1px;color:var(--ptc-text-faint)"></i>
+                    <span>ระบบนี้ใช้สำหรับบุคลากรที่ได้รับอนุญาตเท่านั้น กิจกรรมทั้งหมดอาจถูกบันทึก</span>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" id="loginBtn" class="login-submit btn-theme" style="margin-top:.25rem">
+                    <i class="fas fa-sign-in-alt"></i>
+                    เข้าสู่ระบบ
+                </button>
+            </form>
+
+            <!-- Footer links -->
+            <div style="margin-top:1.75rem;text-align:center;display:flex;flex-direction:column;gap:.625rem">
+                <a href="index.html" class="login-link btn-text-theme"
+                   style="display:inline-flex;align-items:center;justify-content:center;gap:.375rem">
+                    <i class="fas fa-arrow-left" style="font-size:.75rem"></i>
+                    กลับสู่หน้า Dashboard
+                </a>
+                <div style="font-size:.6875rem;color:var(--ptc-text-faint);display:flex;align-items:center;justify-content:center;gap:.625rem">
+                    <a href="#" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">Privacy Policy</a>
+                    <span>·</span>
+                    <a href="#" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">Terms of Service</a>
+                    <span>·</span>
+                    <span>© 2025 Powertech Group</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ── Theme Toggle ── */
+        (function () {
+            const btn  = document.getElementById('themeToggle');
+            const icon = btn.querySelector('i');
+            const html = document.documentElement;
+
+            function getTheme() {
+                return localStorage.getItem('theme') ||
+                       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            }
+            function apply(theme) {
+                html.classList.remove('light', 'dark');
+                html.classList.add(theme);
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            apply(getTheme());
+            btn.addEventListener('click', () => {
+                const next = html.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                apply(next);
+            });
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('theme')) apply(e.matches ? 'dark' : 'light');
+            });
+        })();
+
+        /* ── Company Theme ── */
+        function setCompanyTheme(company) {
+            const sidebar   = document.getElementById('login-sidebar');
+            const btn       = document.getElementById('loginBtn');
+            const inputs    = document.querySelectorAll('.input-theme');
+            const textBtns  = document.querySelectorAll('.btn-text-theme');
+            const logoIcon  = document.getElementById('logo-icon');
+            const logoText  = document.getElementById('logo-text');
+            const companyDesc = document.getElementById('company-desc');
+            const logoImg   = document.getElementById('company-logo-img');
+            const logoIconContainer = document.getElementById('logo-icon-container');
+
+            const themes = {
+                PTA: { cls: 'theme-pta', icon: 'fas fa-cogs',           name: 'PTA', desc: 'Powertech Engine Assembly Co., Ltd.\nผู้เชี่ยวชาญด้านการประกอบเครื่องยนต์' },
+                PT4: { cls: 'theme-pt4', icon: 'fas fa-industry',        name: 'PT4', desc: 'Powertech 2004 Co., Ltd.\nโรงงานผลิตชิ้นส่วนอุตสาหกรรม' },
+                PTE: { cls: 'theme-pte', icon: 'fas fa-charging-station', name: 'PTE', desc: 'Powertech Energy Solutions Co., Ltd.\nพลังงานสะอาดเพื่ออนาคต' },
+            };
+            const cfg = themes[company] || { cls: '', icon: 'fas fa-bolt', name: 'Powertech', desc: 'ศูนย์รวมระบบบริหารจัดการภายในองค์กร เชื่อมต่อทุกการทำงานให้เป็นหนึ่งเดียว' };
+
+            sidebar.className = 'login-sidebar' + (cfg.cls ? ' ' + cfg.cls : '');
+            btn.className     = 'login-submit btn-theme' + (cfg.cls ? ' ' + cfg.cls : '');
+
+            inputs.forEach(el => {
+                el.classList.remove('theme-pta', 'theme-pt4', 'theme-pte');
+                if (cfg.cls) el.classList.add(cfg.cls);
+            });
+            textBtns.forEach(el => {
+                el.classList.remove('theme-pta', 'theme-pt4', 'theme-pte');
+                if (cfg.cls) el.classList.add(cfg.cls);
+            });
+
+            if (logoIcon) logoIcon.className = cfg.icon;
+            if (logoText) logoText.textContent = cfg.name;
+            if (companyDesc) companyDesc.innerHTML = cfg.desc.replace('\n', '<br>');
+
+            const logoPaths = { PTA: 'uploads/logos/pta_logo.png', PT4: 'uploads/logos/pt4_logo.png', PTE: 'uploads/logos/pte_logo.png' };
+            if (logoImg && logoPaths[company]) {
+                logoImg.src = logoPaths[company] + '?t=' + Date.now();
+                logoImg.onload = () => { logoImg.style.display = 'block'; if (logoIconContainer) logoIconContainer.style.display = 'none'; };
+                logoImg.onerror = () => { logoImg.style.display = 'none'; if (logoIconContainer) logoIconContainer.style.display = 'flex'; };
+            } else {
+                if (logoImg) logoImg.style.display = 'none';
+                if (logoIconContainer) logoIconContainer.style.display = 'flex';
+            }
+            // Favicon
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+            if (logoPaths[company]) link.href = logoPaths[company] + '?t=' + Date.now();
+        }
+
+        /* ── Form Submit ── */
+        document.getElementById('loginForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn     = document.getElementById('loginBtn');
+            const errBox  = document.getElementById('error-msg');
+            const errText = document.getElementById('error-text');
+            btn.disabled  = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ…';
+            errBox.style.display = 'none';
+
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+            const c = document.getElementById('login-company').value;
+
+            if (c === 'default' || !c) {
+                errText.textContent = 'กรุณาเลือกบริษัทต้นสังกัดก่อนเข้าสู่ระบบ';
+                errBox.style.display = 'flex';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ';
+                return;
+            }
+            try {
+                const res  = await fetch('api.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p, company: c })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let returnUrl   = urlParams.get('returnUrl') || 'index.html';
+                    if (/^https?:\/\//i.test(returnUrl) || returnUrl.startsWith('//')) returnUrl = 'index.html';
+                    window.location.href = returnUrl;
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (err) {
+                errText.textContent = (err && err.message) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                errBox.style.display = 'flex';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ';
+            }
+        });
+
+        /* ── Toggle Password ── */
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const icon  = this.querySelector('i');
+            const isPass = input.type === 'password';
+            input.type   = isPass ? 'text' : 'password';
+            icon.className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+            icon.style.fontSize = '.875rem';
+        });
+
+        /* ── Hide mobile brand on desktop ── */
+        const mobileOnly = document.querySelector('.sm-only-brand');
+        function updateMobileBrand() {
+            if (mobileOnly) mobileOnly.style.display = window.innerWidth >= 640 ? 'none' : 'flex';
+        }
+        updateMobileBrand();
+        window.addEventListener('resize', updateMobileBrand);
+    </script>
+</body>
+</html>

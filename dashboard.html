@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - IT Support Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'light';
+            if (t === 'dark') document.documentElement.classList.add('dark', 'dark-theme');
+        })();
+    </script>
+    <style>
+        /* ── Page-specific layout ── */
+        body {
+            font-family: var(--ptc-font-th);
+            background-color: var(--ptc-bg);
+            color: var(--ptc-text);
+            min-height: 100vh;
+        }
+
+        /* Sticky top nav bar */
+        .dash-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255,255,255,.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--ptc-border);
+            padding: .75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .dark .dash-nav,
+        html.dark .dash-nav { background: rgba(15,23,42,.9); }
+
+        .dash-nav__left  { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+        .dash-nav__right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+
+        /* Main content */
+        .dash-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        @media (max-width: 640px) { .dash-content { padding: 1rem; gap: 1rem; } }
+
+        /* Stat cards grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        @media (max-width: 480px) { .stat-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; } }
+
+        /* Individual stat card */
+        .stat-card {
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-lg);
+            padding: 1.125rem 1.25rem;
+            box-shadow: var(--ptc-shadow-sm);
+            transition: var(--ptc-transition);
+            cursor: pointer;
+            border-left-width: 4px;
+        }
+        .stat-card:hover { box-shadow: var(--ptc-shadow-md); transform: translateY(-2px); }
+        .stat-card.active { box-shadow: var(--ptc-shadow-md); ring: 2px solid var(--ptc-primary); }
+        .stat-card__val  { font-size: 2rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .stat-card__lbl  { font-size: .75rem; font-weight: 600; color: var(--ptc-text-muted); margin-top: .375rem; }
+        .stat-card__icon { font-size: 1.5rem; opacity: .6; }
+
+        /* Chart grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 900px)  { .chart-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 901px) and (max-width: 1200px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* Chart card */
+        .chart-card {
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-lg);
+            box-shadow: var(--ptc-shadow-sm);
+            overflow: hidden;
+        }
+        .chart-card__header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--ptc-border);
+        }
+        .chart-card__title {
+            font-size: .9375rem;
+            font-weight: 700;
+            color: var(--ptc-text);
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .chart-card__title i { color: var(--ptc-text-faint); }
+        .chart-card__body { padding: 1.25rem; }
+        .chart-card canvas { max-height: 240px; width: 100% !important; }
+        .chart-card--wide { grid-column: 1 / -1; }
+
+        /* Filter buttons */
+        .filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; }
+        .filter-btn {
+            display: inline-flex; align-items: center; gap: .375rem;
+            padding: .375rem .75rem; border-radius: 99px; font-size: .8125rem; font-weight: 500;
+            cursor: pointer; border: 1px solid var(--ptc-border);
+            background: var(--ptc-surface); color: var(--ptc-text-muted);
+            transition: var(--ptc-transition); white-space: nowrap;
+        }
+        .filter-btn:hover  { border-color: var(--ptc-primary); color: var(--ptc-primary); }
+        .filter-btn.active {
+            background: var(--ptc-primary-light); border-color: var(--ptc-primary);
+            color: var(--ptc-primary); font-weight: 600;
+        }
+
+        /* Table */
+        .data-table-wrap {
+            background: var(--ptc-surface);
+            border: 1px solid var(--ptc-border);
+            border-radius: var(--ptc-radius-lg);
+            box-shadow: var(--ptc-shadow-sm);
+            overflow: hidden;
+        }
+        .data-table-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 1.25rem; border-bottom: 1px solid var(--ptc-border);
+            gap: .75rem; flex-wrap: wrap;
+        }
+        .data-table-header h2 { font-size: .9375rem; font-weight: 700; color: var(--ptc-text); margin: 0; display: flex; align-items: center; gap: .5rem; }
+        .data-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table.dtable { width: 100%; border-collapse: collapse; font-size: .875rem; }
+        table.dtable thead { background: var(--ptc-surface-2); }
+        table.dtable thead th {
+            padding: .625rem 1rem; text-align: left;
+            font-size: .6875rem; font-weight: 700; letter-spacing: .06em;
+            text-transform: uppercase; color: var(--ptc-text-muted);
+            border-bottom: 1px solid var(--ptc-border); white-space: nowrap;
+        }
+        table.dtable tbody td {
+            padding: .75rem 1rem; border-bottom: 1px solid var(--ptc-border);
+            color: var(--ptc-text-2); vertical-align: middle;
+        }
+        table.dtable tbody tr:last-child td { border-bottom: none; }
+        table.dtable tbody tr:hover { background: var(--ptc-surface-2); }
+
+        /* Status tags */
+        .stag {
+            display: inline-flex; align-items: center; gap: .3125rem;
+            padding: .1875rem .625rem; border-radius: 99px;
+            font-size: .75rem; font-weight: 600; white-space: nowrap;
+        }
+        .stag-pending   { background: var(--ptc-primary-light);  color: var(--ptc-primary); }
+        .stag-progress  { background: var(--ptc-warning-bg);      color: var(--ptc-warning); }
+        .stag-parts     { background: var(--ptc-danger-bg);       color: var(--ptc-danger); }
+        .stag-done      { background: var(--ptc-success-bg);      color: var(--ptc-success); }
+        .stag-temp      { background: var(--ptc-info-bg);         color: var(--ptc-info); }
+        .stag-overdue   { background: var(--ptc-danger-bg); color: var(--ptc-danger); font-weight: 700; }
+
+        /* Alert bar */
+        .alert-pending {
+            background: var(--ptc-danger-bg);
+            border: 1px solid rgba(239,68,68,.25);
+            border-left: 4px solid var(--ptc-danger);
+            border-radius: var(--ptc-radius-lg);
+            padding: 1rem 1.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .alert-pending__icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--ptc-danger-bg); color: var(--ptc-danger);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; flex-shrink: 0;
+        }
+        .alert-pending__title { font-weight: 700; color: var(--ptc-danger); font-size: 1rem; }
+        .alert-pending__sub   { font-size: .875rem; color: var(--ptc-text-2); }
+
+        /* Rating display */
+        .rating-big { font-size: 3rem; font-weight: 800; color: var(--ptc-warning); line-height: 1; letter-spacing: -.04em; }
+
+        /* Warranty days-left colour */
+        .days-critical { color: var(--ptc-danger); font-weight: 700; }
+        .days-warn     { color: var(--ptc-warning); font-weight: 600; }
+
+        /* Company selector */
+        .company-select {
+            padding: .5rem .875rem; padding-right: 2.25rem;
+            border: 1px solid var(--ptc-border); border-radius: var(--ptc-radius-md);
+            background: var(--ptc-surface); color: var(--ptc-text);
+            font-size: .875rem; font-family: inherit; outline: none;
+            appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right .625rem center;
+            transition: var(--ptc-transition);
+        }
+        .company-select:focus { border-color: var(--ptc-primary); box-shadow: 0 0 0 3px var(--ptc-primary-ring); }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center; padding: 2.5rem 1.5rem;
+            color: var(--ptc-text-muted); font-size: .875rem;
+        }
+        .empty-state i { font-size: 2rem; display: block; margin-bottom: .75rem; opacity: .4; }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex; align-items: center; gap: .375rem;
+            font-size: .8125rem; color: var(--ptc-text-muted); text-decoration: none;
+            padding: .375rem .625rem; border-radius: var(--ptc-radius-sm);
+            transition: var(--ptc-transition);
+        }
+        .back-link:hover { background: var(--ptc-surface-3); color: var(--ptc-text); }
+
+        /* Responsive table → card on mobile */
+        @media (max-width: 600px) {
+            table.dtable thead { display: none; }
+            table.dtable, table.dtable tbody { display: block; }
+            table.dtable tbody tr {
+                display: flex; flex-direction: column;
+                border: 1px solid var(--ptc-border);
+                border-radius: var(--ptc-radius-lg);
+                margin: .75rem 1rem;
+                overflow: hidden;
+            }
+            table.dtable tbody tr:last-child { margin-bottom: 1rem; }
+            table.dtable tbody td {
+                display: flex; align-items: flex-start; justify-content: space-between;
+                padding: .5rem .875rem; border-bottom: 1px solid var(--ptc-border);
+            }
+            table.dtable tbody td:last-child { border-bottom: none; }
+            table.dtable tbody td::before {
+                content: attr(data-label);
+                font-size: .6875rem; font-weight: 700;
+                letter-spacing: .05em; text-transform: uppercase;
+                color: var(--ptc-text-faint); flex-shrink: 0;
+                min-width: 80px; padding-right: .75rem; margin-top: 2px;
+            }
+        }
+    </style>
+</head>
+<body class="ptc-normalize">
+
+    <!-- ── Top Nav ── -->
+    <nav class="dash-nav">
+        <div class="dash-nav__left">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>หน้าหลัก</span>
+            </a>
+            <div style="width:1px;height:20px;background:var(--ptc-border)"></div>
+            <div>
+                <div style="font-size:.9375rem;font-weight:700;color:var(--ptc-text)">IT Dashboard</div>
+                <div style="font-size:.75rem;color:var(--ptc-text-muted)">ภาพรวมและงานซ่อมที่ได้รับมอบหมาย</div>
+            </div>
+        </div>
+        <div class="dash-nav__right">
+            <a href="job_plan.html" id="link-job-plan" class="back-link" style="display:none">
+                <i class="fas fa-calendar-alt"></i> Job Plan
+            </a>
+            <select id="dashboard-company-filter" class="company-select" onchange="filterDashboard()">
+                <option value="all">ทุกบริษัท</option>
+                <option value="PTA">PTA</option>
+                <option value="PT4">PT4</option>
+                <option value="PTE">PTE</option>
+            </select>
+        </div>
+    </nav>
+
+    <main class="dash-content">
+
+        <!-- Alert area -->
+        <div id="dashboard-alert-area" style="display:none"></div>
+
+        <!-- Stat cards -->
+        <div id="stat-cards-container" class="stat-grid ptc-animate"></div>
+
+        <!-- Chart grid -->
+        <div class="chart-grid">
+
+            <div class="chart-card ptc-animate ptc-animate--1">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-calendar-alt"></i> เคสรายเดือน (ภาพรวม)</span>
+                </div>
+                <div class="chart-card__body"><canvas id="monthlyChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--1">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-tasks"></i> สัดส่วนตามสถานะ</span>
+                </div>
+                <div class="chart-card__body"><canvas id="statusChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--2">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-cogs"></i> สัดส่วนตามประเภท</span>
+                </div>
+                <div class="chart-card__body"><canvas id="typeChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--2">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-user-shield"></i> งานซ่อมตามเจ้าหน้าที่</span>
+                </div>
+                <div class="chart-card__body"><canvas id="techChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--3">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-building"></i> เคสตามบริษัท</span>
+                </div>
+                <div class="chart-card__body"><canvas id="companyChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--3">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-star-half-alt"></i> คะแนนความพึงพอใจ</span>
+                    <div style="text-align:right;line-height:1.2">
+                        <span id="average-rating" class="rating-big">0.0</span>
+                        <span style="font-size:.875rem;color:var(--ptc-text-muted)"> / 5</span>
+                        <p id="total-ratings-text" style="font-size:.75rem;color:var(--ptc-text-faint);margin:.25rem 0 0"></p>
+                    </div>
+                </div>
+                <div class="chart-card__body"><canvas id="ratingChart"></canvas></div>
+            </div>
+
+            <div class="chart-card chart-card--wide ptc-animate ptc-animate--4">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-hand-holding"></i> สถิติการยืม-คืน (รายเดือน)</span>
+                </div>
+                <div class="chart-card__body" style="padding-bottom:1.5rem">
+                    <canvas id="loanChart" style="max-height:280px"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--4">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-stopwatch"></i> MTTR รายเดือน (ชม.)</span>
+                    <span style="font-size:.8125rem;color:var(--ptc-text-muted)">เฉลี่ย <b id="mttr-overall" style="color:var(--ptc-text)">-</b> ชม.</span>
+                </div>
+                <div class="chart-card__body"><canvas id="mttrChart"></canvas></div>
+            </div>
+
+            <div class="chart-card ptc-animate ptc-animate--4">
+                <div class="chart-card__header">
+                    <span class="chart-card__title"><i class="fas fa-hourglass-half"></i> Aging งานค้าง</span>
+                </div>
+                <div class="chart-card__body"><canvas id="agingChart"></canvas></div>
+            </div>
+
+        </div><!-- /chart-grid -->
+
+        <!-- Warranty table -->
+        <div class="data-table-wrap ptc-animate">
+            <div class="data-table-header">
+                <h2><i class="fas fa-shield-alt" style="color:var(--ptc-danger)"></i> พัสดุที่กำลังจะหมดประกัน (ใน 30 วัน)</h2>
+                <span id="expiring-count" class="ptc-badge ptc-badge--danger" style="font-size:.75rem">0</span>
+            </div>
+            <div class="data-table-scroll">
+                <table class="dtable">
+                    <thead>
+                        <tr>
+                            <th>รหัสพัสดุ</th>
+                            <th>ชื่ออุปกรณ์</th>
+                            <th>วันหมดประกัน</th>
+                            <th>เหลือเวลา</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warranty-table-body"></tbody>
+                </table>
+                <div id="no-expiring-warranty" class="empty-state" style="display:none">
+                    <i class="fas fa-check-circle" style="color:var(--ptc-success)"></i>
+                    ไม่มีพัสดุที่กำลังจะหมดประกันใน 30 วันนี้
+                </div>
+            </div>
+        </div>
+
+        <!-- My Jobs table -->
+        <div class="data-table-wrap ptc-animate">
+            <div class="data-table-header">
+                <h2><i class="fas fa-user-cog" style="color:var(--ptc-text-faint)"></i> งานของฉัน</h2>
+                <div class="filter-bar" id="filter-buttons"></div>
+            </div>
+            <div class="data-table-scroll">
+                <table class="dtable">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>ปัญหา</th>
+                            <th>ผู้แจ้ง / แผนก</th>
+                            <th>วันที่แจ้ง</th>
+                            <th>สถานะ</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobs-table-body"></tbody>
+                </table>
+                <div id="no-results" class="empty-state" style="display:none">
+                    <i class="fas fa-inbox"></i>
+                    ไม่พบรายการงานซ่อมที่ได้รับมอบหมาย
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+<script>
+    let allLogs = [], currentUserId = null, myJobs = [], currentJobFilter = 'all';
+    const gid = id => document.getElementById(id);
+
+    function formatName(n) {
+        if (!n) return 'N/A';
+        n = n.replace(/^(Mr\.|Ms\.|Mrs\.|Miss|Dr\.|Khun)\s+/i, '');
+        const p = n.trim().split(/\s+/);
+        return p.length > 1 ? `${p[0]} ${p[1].charAt(0)}.` : p[0];
+    }
+
+    const statusConfig = {
+        'all':               { text: 'งานทั้งหมด',       cls: '',            icon: 'fa-list-alt' },
+        'Pending':           { text: 'รอดำเนินการ',      cls: 'stag-pending',  icon: 'fa-hourglass-half' },
+        'In Progress':       { text: 'กำลังดำเนินการ',   cls: 'stag-progress', icon: 'fa-person-digging' },
+        'Waiting for Parts': { text: 'รออะไหล่',          cls: 'stag-parts',   icon: 'fa-box-open' },
+        'Temporary Fix':     { text: 'แก้ไขชั่วคราว',    cls: 'stag-temp',    icon: 'fa-screwdriver-wrench' },
+        'Completed':         { text: 'งานที่เสร็จสิ้น',  cls: 'stag-done',    icon: 'fa-check-circle' }
+    };
+
+    const C  = { blue:'rgb(54,162,235)',green:'rgb(75,192,192)',red:'rgb(255,99,132)',orange:'rgb(255,159,64)',yellow:'rgb(255,205,86)',purple:'rgb(153,102,255)',grey:'rgb(201,203,207)',indigo:'rgb(99,102,241)' };
+    const CA = { blue:'rgba(54,162,235,.5)',green:'rgba(75,192,192,.5)',red:'rgba(255,99,132,.5)',orange:'rgba(255,159,64,.5)',yellow:'rgba(255,205,86,.5)',purple:'rgba(153,102,255,.5)',grey:'rgba(201,203,207,.5)',indigo:'rgba(99,102,241,.5)' };
+    const SC = { 'Pending':C.blue,'In Progress':C.orange,'Completed':C.green,'Waiting for Parts':C.red,'Temporary Fix':C.indigo };
+    let charts = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const s = await (await fetch('api.php?action=check_session')).json();
+            if (!s.loggedin || (s.role !== 'admin' && s.primary_department !== 'IT')) {
+                window.location.href = 'index.html'; return;
+            }
+            currentUserId = s.user_id;
+            if (!currentUserId) throw new Error('User ID not found in session.');
+            const jpl = gid('link-job-plan');
+            if (jpl) jpl.style.display = 'inline-flex';
+            await Promise.all([loadAllLogs(), loadDashboardStats()]);
+            initMyJobs();
+        } catch (err) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้: ' + err.message, 'error');
+        }
+    });
+
+    async function loadAllLogs() {
+        const r = await fetch(`api.php?action=get&file=it_logs&v=${Date.now()}`);
+        if (!r.ok) throw new Error('Failed to load logs');
+        allLogs = await r.json();
+    }
+
+    function filterDashboard() { loadDashboardStats(); }
+
+    function initMyJobs() {
+        myJobs = allLogs.filter(l => l.servicedById === currentUserId);
+        const pending = myJobs.filter(j => j.status === 'Pending').length;
+        const alert   = gid('dashboard-alert-area');
+        if (pending > 0 && alert) {
+            alert.innerHTML = `
+              <div class="alert-pending">
+                <div style="display:flex;align-items:center;gap:1rem;flex:1;min-width:0">
+                  <div class="alert-pending__icon"><i class="fas fa-bell"></i></div>
+                  <div>
+                    <div class="alert-pending__title">มีงานซ่อมใหม่รอคุณอยู่!</div>
+                    <div class="alert-pending__sub">คุณมีงานสถานะ "รอดำเนินการ" จำนวน <strong>${pending}</strong> รายการ</div>
+                  </div>
+                </div>
+                <button onclick="filterByStatus('Pending')"
+                  style="padding:.5rem 1.125rem;background:var(--ptc-danger);color:#fff;border:none;border-radius:var(--ptc-radius-md);font-size:.875rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
+                  ดูรายการทันที <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>`;
+            alert.style.display = 'block';
+        } else if (alert) alert.style.display = 'none';
+        updateStatCards();
+        renderFilterButtons();
+        renderJobs();
+    }
+
+    function filterByStatus(status) {
+        currentJobFilter = status;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === status));
+        renderJobs();
+        gid('jobs-table-body').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function updateStatCards() {
+        const c = gid('stat-cards-container');
+        const colorMap = { all:'var(--ptc-primary)', Pending:'var(--ptc-primary)', 'In Progress':'var(--ptc-warning)', 'Waiting for Parts':'var(--ptc-danger)', 'Temporary Fix':'var(--ptc-info)', Completed:'var(--ptc-success)' };
+        c.innerHTML = Object.entries(statusConfig).map(([k, v]) => {
+            const n = k === 'all' ? myJobs.length : myJobs.filter(j => j.status === k).length;
+            const col = colorMap[k] || 'var(--ptc-primary)';
+            return `<div class="stat-card" style="border-left-color:${col}" onclick="filterByStatus('${k}')">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+                <div>
+                  <div class="stat-card__val" style="color:${col}">${n}</div>
+                  <div class="stat-card__lbl">${v.text}</div>
+                </div>
+                <i class="fas ${v.icon} stat-card__icon" style="color:${col};margin-top:.25rem"></i>
+              </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderFilterButtons() {
+        const c = gid('filter-buttons');
+        c.innerHTML = Object.entries(statusConfig).map(([k, v]) => `
+          <button class="filter-btn${k === currentJobFilter ? ' active' : ''}" data-filter="${k}"
+            onclick="filterByStatus('${k}')">
+            <i class="fas ${v.icon}"></i>${v.text}
+          </button>`).join('');
+    }
+
+    function renderJobs() {
+        const tbody = gid('jobs-table-body');
+        let jobs = [...myJobs];
+        if (currentJobFilter !== 'all') jobs = jobs.filter(l => l.status === currentJobFilter);
+        tbody.innerHTML = '';
+        const noRes = gid('no-results');
+        noRes.style.display = jobs.length ? 'none' : 'block';
+        jobs.forEach(log => {
+            const now = new Date();
+            let overdue = false;
+            if (log.status !== 'Completed') {
+                if (log.appointment_date && new Date(log.appointment_date) < now) overdue = true;
+                else if (log.date) { const d = new Date(log.date); d.setDate(d.getDate() + 7); if (d < now) overdue = true; }
+            }
+            const cfg = statusConfig[log.status] || { cls:'', icon:'fa-question' };
+            const idCls = log.id?.startsWith('PT4') ? 'color:#dc2626' : log.id?.startsWith('PTA') ? 'color:#059669' : log.id?.startsWith('PTE') ? 'color:#2563eb' : 'color:var(--ptc-text-muted)';
+            const row = document.createElement('tr');
+            if (overdue) row.style.background = 'rgba(239,68,68,.05)';
+            row.innerHTML = `
+              <td data-label="Case ID" style="font-weight:600;font-family:monospace;${idCls}">${log.id || 'N/A'}</td>
+              <td data-label="ปัญหา" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${log.problem||''}">
+                ${log.problem || 'N/A'}
+                ${overdue ? '<span class="stag stag-overdue" style="margin-left:.5rem">Overdue</span>' : ''}
+              </td>
+              <td data-label="ผู้แจ้ง">
+                <div style="font-weight:500;color:var(--ptc-primary)">${formatName(log.requester)}</div>
+                <div style="font-size:.75rem;color:var(--ptc-text-muted)">${log.department||''}</div>
+              </td>
+              <td data-label="วันที่แจ้ง">
+                ${log.date ? new Date(log.date).toLocaleDateString('th-TH') : '-'}
+                ${log.appointment_date ? `<div style="font-size:.75rem;color:${overdue?'var(--ptc-danger)':'var(--ptc-text-faint)'}">นัด: ${new Date(log.appointment_date).toLocaleDateString('th-TH')}</div>` : ''}
+              </td>
+              <td data-label="สถานะ"><span class="stag ${cfg.cls}">${log.status||'Unknown'}</span></td>
+              <td data-label="Actions">
+                <a href="log.html" target="_blank"
+                   style="font-size:.8125rem;font-weight:600;color:var(--ptc-primary);text-decoration:none;display:inline-flex;align-items:center;gap:.3rem">
+                  <i class="fas fa-external-link-alt"></i> เปิด/แก้ไข
+                </a>
+              </td>`;
+            tbody.appendChild(row);
+        });
+    }
+
+    function dc(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+    async function loadDashboardStats() {
+        const company = gid('dashboard-company-filter').value;
+        try {
+            const r = await fetch(`api.php?action=get_dashboard_stats&company=${company}`);
+            if (!r.ok) throw new Error('Network error');
+            const { status, data } = await r.json();
+            if (status !== 'success') throw new Error('API error');
+            renderMonthlyChart(data.monthly);
+            renderStatusChart(data.by_status);
+            renderTypeChart(data.by_type);
+            renderCompanyChart(data.by_company);
+            renderTechChart(data.by_technician);
+            renderWarrantyTable(data.expiring_warranty);
+            renderRatingChart(data.rating_distribution);
+            renderLoanChart(data.loan_monthly);
+            renderMttrChart(data.mttr_monthly, data.mttr_overall);
+            renderAgingChart(data.aging_buckets);
+        } catch (e) { console.error('Dashboard stats error:', e); }
+    }
+
+    const baseOpts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } };
+    const mLabel = arr => arr.map(i => i.month ? new Date(i.month+'-02').toLocaleDateString('th-TH',{month:'short',year:'2-digit'}) : '?');
+
+    function renderMonthlyChart(data) {
+        dc('monthlyChart');
+        const ctx = gid('monthlyChart')?.getContext('2d'); if (!ctx || !Array.isArray(data)) return;
+        charts['monthlyChart'] = new Chart(ctx, { type:'bar', data:{ labels:mLabel(data), datasets:[{ label:'จำนวนเคส', data:data.map(i=>i.count||0), backgroundColor:CA.blue, borderColor:C.blue, borderWidth:1, borderRadius:4 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true } } } });
+    }
+    function renderStatusChart(data) {
+        dc('statusChart');
+        const ctx = gid('statusChart')?.getContext('2d'); if (!ctx || !Array.isArray(data)) return;
+        const labels = data.map(i=>i.status||'Unknown');
+        charts['statusChart'] = new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data:data.map(i=>i.count||0), backgroundColor:labels.map(l=>SC[l]||C.grey) }] }, options:{ ...baseOpts, plugins:{ legend:{ display:true, position:'bottom', labels:{ boxWidth:10, padding:10, font:{size:11} } } } } });
+    }
+    function renderTypeChart(data) {
+        dc('typeChart');
+        const ctx = gid('typeChart')?.getContext('2d'); if (!ctx || !Array.isArray(data)) return;
+        const bg = [C.green,C.yellow,C.orange,C.red,C.purple,C.blue,C.grey];
+        charts['typeChart'] = new Chart(ctx, { type:'pie', data:{ labels:data.map(i=>i.type||'Unknown'), datasets:[{ data:data.map(i=>i.count||0), backgroundColor:bg }] }, options:{ ...baseOpts, plugins:{ legend:{ display:true, position:'bottom', labels:{ boxWidth:10, padding:10, font:{size:11} } } } } });
+    }
+    function renderTechChart(data) {
+        dc('techChart');
+        const ctx = gid('techChart')?.getContext('2d'); if (!ctx || !Array.isArray(data)) return;
+        charts['techChart'] = new Chart(ctx, { type:'bar', data:{ labels:data.map(i=>i.servicedBy||'Unknown'), datasets:[{ label:'งาน', data:data.map(i=>i.count||0), backgroundColor:CA.purple, borderColor:C.purple, borderWidth:1, borderRadius:4 }] }, options:{ ...baseOpts, indexAxis:'y', scales:{ x:{ beginAtZero:true } } } });
+    }
+    function renderCompanyChart(data) {
+        dc('companyChart');
+        const ctx = gid('companyChart')?.getContext('2d'); if (!ctx || !Array.isArray(data)) return;
+        const cm={PTA:C.green,PT4:C.red,PTE:C.blue}, ca={PTA:CA.green,PT4:CA.red,PTE:CA.blue};
+        const labels = data.map(i=>i.company||'N/A');
+        charts['companyChart'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'เคส', data:data.map(i=>i.count||0), backgroundColor:labels.map(l=>ca[l]||CA.grey), borderColor:labels.map(l=>cm[l]||C.grey), borderWidth:1, borderRadius:4 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true } } } });
+    }
+    function renderRatingChart(data) {
+        dc('ratingChart');
+        const ctx = gid('ratingChart')?.getContext('2d');
+        const avgEl = gid('average-rating'), totEl = gid('total-ratings-text');
+        if (!ctx || !Array.isArray(data)) { if(avgEl)avgEl.textContent='N/A'; return; }
+        const counts=[0,0,0,0,0]; let ts=0,tr=0;
+        data.forEach(i => { const r=parseInt(i.rating),c=parseInt(i.count); if(r>=1&&r<=5){counts[r-1]=c;ts+=r*c;tr+=c;} });
+        if(avgEl) avgEl.textContent = tr>0?(ts/tr).toFixed(1):'0.0';
+        if(totEl) totEl.textContent = `จาก ${tr} ratings`;
+        charts['ratingChart'] = new Chart(ctx, { type:'bar', data:{ labels:['1★','2★','3★','4★','5★'], datasets:[{ data:counts, backgroundColor:['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e'], borderRadius:4 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } } });
+    }
+    function renderWarrantyTable(data) {
+        const tbody=gid('warranty-table-body'), noEl=gid('no-expiring-warranty'), cnt=gid('expiring-count');
+        if(!tbody||!noEl||!cnt) return;
+        if(!data||data.length===0){tbody.innerHTML='';noEl.style.display='block';cnt.textContent='0';return;}
+        noEl.style.display='none'; cnt.textContent=data.length;
+        const today=new Date(); today.setHours(0,0,0,0);
+        tbody.innerHTML=data.map(item=>{
+            const exp=new Date(item.warranty_expires_on);
+            const dl=Math.ceil((exp-today)/(1000*3600*24));
+            const cls=dl<0?'days-critical':dl<=7?'days-critical':dl<=30?'days-warn':'';
+            const txt=dl<0?'หมดอายุแล้ว':`${dl} วัน`;
+            return `<tr>
+              <td data-label="รหัส" style="font-family:monospace;color:var(--ptc-primary)">${item.equipment_id}</td>
+              <td data-label="ชื่ออุปกรณ์">${item.name}</td>
+              <td data-label="วันหมดประกัน">${exp.toLocaleDateString('th-TH')}</td>
+              <td data-label="เหลือเวลา" class="${cls}">${txt}</td>
+            </tr>`;
+        }).join('');
+    }
+    function renderLoanChart(data) {
+        dc('loanChart');
+        const ctx = gid('loanChart')?.getContext('2d'); if (!ctx||!Array.isArray(data)) return;
+        charts['loanChart'] = new Chart(ctx, { type:'line', data:{ labels:mLabel(data), datasets:[{ label:'จำนวนการยืม', data:data.map(i=>i.count||0), borderColor:C.purple, backgroundColor:CA.purple, borderWidth:2, fill:true, tension:.4 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } } });
+    }
+    function renderMttrChart(data,overall) {
+        dc('mttrChart');
+        const ctx = gid('mttrChart')?.getContext('2d'); if (!ctx||!Array.isArray(data)) return;
+        const oe = gid('mttr-overall');
+        if(oe) oe.textContent = (overall?.avg_hours!=null)?parseFloat(overall.avg_hours).toFixed(2):'-';
+        charts['mttrChart'] = new Chart(ctx, { type:'line', data:{ labels:mLabel(data), datasets:[{ label:'ชม.เฉลี่ย', data:data.map(i=>parseFloat(i.avg_hours||0)), borderColor:C.green, backgroundColor:CA.green, borderWidth:2, fill:true, tension:.3 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true } } } });
+    }
+    function renderAgingChart(b) {
+        dc('agingChart');
+        const ctx = gid('agingChart')?.getContext('2d'); if (!ctx||typeof b!=='object') return;
+        charts['agingChart'] = new Chart(ctx, { type:'bar', data:{ labels:['0–1วัน','2–3วัน','4–7วัน','8–14วัน','15–30วัน','>30วัน'], datasets:[{ data:[+b.d_0_1||0,+b.d_2_3||0,+b.d_4_7||0,+b.d_8_14||0,+b.d_15_30||0,+b.d_30_plus||0], backgroundColor:CA.red, borderColor:C.red, borderWidth:1, borderRadius:4 }] }, options:{ ...baseOpts, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } } });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - Powertech System Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#6366f1' } }
+            }
+        };
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 text-slate-800">
+
+    <div class="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl w-full max-w-4xl flex overflow-hidden flex-col md:flex-row relative z-10">
+        
+        <div id="login-sidebar" class="md:w-1/2 bg-gradient-to-br from-indigo-600 to-violet-700 p-10 text-white flex flex-col justify-center items-start relative overflow-hidden transition-colors duration-500">
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div id="logo-icon-container" class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                        <i id="logo-icon" class="fas fa-bolt text-2xl"></i>
+                    </div>
+                    <img id="company-logo-img" src="" alt="Logo" class="w-16 h-16 hidden object-contain bg-white/20 rounded-lg p-2 backdrop-blur-sm shadow-inner">
+                    <span id="logo-text" class="text-xl font-bold tracking-wide">Powertech</span>
+                </div>
+                <h1 class="text-4xl font-bold mb-4 leading-tight">System Center</h1>
+                <p id="company-desc" class="text-white/90 text-lg opacity-90">ศูนย์รวมระบบบริหารจัดการภายในองค์กร เชื่อมต่อทุกการทำงานให้เป็นหนึ่งเดียว</p>
+            </div>
+        </div>
+
+        <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+            <div class="mb-8">
+                <div class="mb-4">
+                    <select id="login-company" onchange="setCompanyTheme(this.value)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all input-theme cursor-pointer">
+                        <option value="default" selected disabled>-- เลือกบริษัท --</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">ยินดีต้อนรับกลับมา! 👋</h2>
+                <p class="text-slate-500 text-sm">กรุณาลงชื่อเข้าใช้เพื่อจัดการระบบ</p>
+            </div>
+
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Username</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-slate-400"></i>
+                        </div>
+                        <input type="text" id="username" class="w-full pl-10 pr-4 py-2.5 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm input-theme" placeholder="ชื่อผู้ใช้ (เช่น somchai.j)" required>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-400">* ใช้ชื่อภาษาอังกฤษที่ลงทะเบียนไว้</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-slate-400"></i>
+                        </div>
+                        <input type="password" id="password" class="w-full pl-10 pr-10 py-2.5 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm input-theme" placeholder="รหัสพนักงาน (เช่น 6601234)" required>
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors btn-text-theme" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-400">* ค่าเริ่มต้นคือรหัสพนักงาน</p>
+                    <div class="text-right mt-2">
+                        <a href="forgot_password.html" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors btn-text-theme">ลืมรหัสผ่าน?</a>
+                    </div>
+                </div>
+
+                <div id="error-msg" class="hidden bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
+                </div>
+
+                <div class="text-xs text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <i class="fas fa-shield-alt text-slate-500"></i> <strong>Security Notice:</strong> This system is for authorized users only. All activities may be monitored and recorded.
+                </div>
+
+                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-0.5 btn-theme">
+                    เข้าสู่ระบบ (Login)
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <a href="index.html" class="text-sm text-slate-500 hover:text-indigo-600 transition flex items-center justify-center gap-2 btn-text-theme">
+                    <i class="fas fa-arrow-left"></i> กลับสู่หน้า Dashboard
+                </a>
+                <div class="mt-4 text-xs text-slate-400">
+                    <a href="#" class="hover:underline">Privacy Policy</a> &bull; <a href="#" class="hover:underline">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const errBox = document.getElementById('error-msg');
+            const errText = document.getElementById('error-text');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังตรวจสอบ...';
+            errBox.classList.add('hidden');
+
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const c = document.getElementById('login-company').value;
+
+            if (c === 'default' || !c) {
+                errText.textContent = 'กรุณาเลือกบริษัทต้นสังกัด';
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = 'เข้าสู่ระบบ (Login)';
+                return;
+            }
+
+            try {
+                const res = await fetch('api.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p, company: c })
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    // Redirect Logic
+                    // TISAX/Security: Add a basic client-side check to prevent open-redirect vulnerabilities.
+                    // The primary validation should always be on the server-side.
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let returnUrl = urlParams.get('returnUrl') || 'index.html';
+                    
+                    // Only allow relative URLs or whitelisted absolute URLs. For now, we'll just check for relative.
+                    if (returnUrl.startsWith('http:') || returnUrl.startsWith('https://') || returnUrl.startsWith('//')) {
+                        returnUrl = 'index.html'; // Fallback to a safe default if it's an absolute URL
+                    }
+
+                    window.location.href = returnUrl;
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (err) {
+                const msg = (err && typeof err.message === 'string' && err.message.trim() !== '')
+                    ? err.message
+                    : 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือบริษัทที่เลือกไม่ตรงกัน';
+                errText.textContent = msg;
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = 'เข้าสู่ระบบ (Login)';
+            }
+        });
+
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+
+        // Company Theme Logic
+        function setCompanyTheme(company) {
+            const sidebar = document.getElementById('login-sidebar');
+            const btn = document.getElementById('loginBtn');
+            const inputs = document.querySelectorAll('.input-theme');
+            const textBtns = document.querySelectorAll('.btn-text-theme');
+            
+            const logoIcon = document.getElementById('logo-icon');
+            const logoText = document.getElementById('logo-text');
+            const companyDesc = document.getElementById('company-desc');
+            const logoImg = document.getElementById('company-logo-img');
+            const logoIconContainer = document.getElementById('logo-icon-container');
+            
+            // Reset classes
+            sidebar.className = 'md:w-1/2 p-10 text-white flex flex-col justify-center items-start relative overflow-hidden transition-colors duration-500';
+            btn.className = 'w-full text-white font-bold py-3 rounded-lg shadow-lg transition transform hover:-translate-y-0.5 btn-theme';
+            
+            let fromColor, toColor, btnColor, btnHover, ringColor, textColor;
+            let iconClass, nameText, descText;
+
+            if (company === 'PTA') {
+                fromColor = 'from-emerald-600'; toColor = 'to-teal-700';
+                btnColor = 'bg-emerald-600'; btnHover = 'hover:bg-emerald-700';
+                ringColor = 'focus:ring-emerald-500'; textColor = 'hover:text-emerald-600';
+                
+                iconClass = 'fas fa-cogs';
+                nameText = 'PTA';
+                descText = 'Powertech Engine Assembly Co., Ltd.';
+            } else if (company === 'PT4') {
+                fromColor = 'from-red-600'; toColor = 'to-rose-700';
+                btnColor = 'bg-red-600'; btnHover = 'hover:bg-red-700';
+                ringColor = 'focus:ring-red-500'; textColor = 'hover:text-red-600';
+                
+                iconClass = 'fas fa-industry';
+                nameText = 'PT4';
+                descText = 'Powertech 2004 Co., Ltd.';
+            } else if (company === 'PTE') {
+                fromColor = 'from-blue-600'; toColor = 'to-indigo-700';
+                btnColor = 'bg-blue-600'; btnHover = 'hover:bg-blue-700';
+                ringColor = 'focus:ring-blue-500'; textColor = 'hover:text-blue-600';
+                
+                iconClass = 'fas fa-charging-station';
+                nameText = 'PTE';
+                descText = 'Powertech Energy Solutions Co., Ltd.';
+            } else { // Default
+                fromColor = 'from-indigo-600'; toColor = 'to-violet-700';
+                btnColor = 'bg-indigo-600'; btnHover = 'hover:bg-indigo-700';
+                ringColor = 'focus:ring-indigo-500'; textColor = 'hover:text-indigo-600';
+                
+                iconClass = 'fas fa-bolt';
+                nameText = 'Powertech';
+                descText = 'ศูนย์รวมระบบบริหารจัดการภายในองค์กร เชื่อมต่อทุกการทำงานให้เป็นหนึ่งเดียว';
+            }
+
+            sidebar.classList.add('bg-gradient-to-br', fromColor, toColor);
+            btn.classList.add(btnColor, btnHover);
+            inputs.forEach(el => { el.className = el.className.replace(/focus:ring-\w+-500/g, ringColor).replace(/focus:border-\w+-500/g, ringColor.replace('ring', 'border')); });
+            textBtns.forEach(el => { el.className = el.className.replace(/hover:text-\w+-600/g, textColor); });
+            
+            if(logoIcon) logoIcon.className = `${iconClass} text-2xl`;
+            if(logoText) logoText.textContent = nameText;
+            if(companyDesc) companyDesc.textContent = descText;
+
+            // --- Logo Image Logic ---
+            const logoPaths = {
+                'PT4': 'uploads/logos/pt4_logo.png',
+                'PTA': 'uploads/logos/pta_logo.png',
+                'PTE': 'uploads/logos/pte_logo.png'
+            };
+
+            if (logoImg && logoPaths[company]) {
+                logoImg.src = logoPaths[company] + '?t=' + new Date().getTime();
+                logoImg.onload = function() {
+                    logoImg.classList.remove('hidden');
+                    if(logoIconContainer) logoIconContainer.classList.add('hidden');
+                };
+                logoImg.onerror = function() {
+                    logoImg.classList.add('hidden');
+                    if(logoIconContainer) logoIconContainer.classList.remove('hidden');
+                };
+            } else {
+                // Default case or no logo found
+                if(logoImg) logoImg.classList.add('hidden');
+                if(logoIconContainer) logoIconContainer.classList.remove('hidden');
+            }
+
+            // --- Favicon Change Logic ---
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            if (logoPaths[company]) {
+                link.href = logoPaths[company] + '?t=' + new Date().getTime();
+            }
+        }
+    </script>
+</body>
+</html>

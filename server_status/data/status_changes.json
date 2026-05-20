@@ -1,0 +1,302 @@
+[
+    {
+        "time": "2026-01-23T02:55:13+01:00",
+        "profile": "PT4",
+        "group": "PT4",
+        "name": "F7",
+        "ip": "192.168.1.254",
+        "type": "print",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T02:55:13+01:00",
+        "profile": "PT4",
+        "group": "PT4",
+        "name": "F6",
+        "ip": "192.168.1.243",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T02:55:13+01:00",
+        "profile": "PT4",
+        "group": "PT4",
+        "name": "F5",
+        "ip": "192.168.1.241",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T02:55:25+01:00",
+        "profile": "PT4",
+        "group": "PT4",
+        "name": "F6 LG",
+        "ip": "192.168.1.238",
+        "type": "print",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T02:55:25+01:00",
+        "profile": "PT4",
+        "group": "PT4",
+        "name": "F5",
+        "ip": "192.168.1.241",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:19:23+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:20:31+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:26:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:27:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:28:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:29:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:30:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:30:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "SQL",
+        "ip": "192.158.0.10",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:31:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F17",
+        "ip": "192.168.0.50",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:31:38+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "SQL",
+        "ip": "192.158.0.10",
+        "type": "server",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Fortigate 200D",
+        "ip": "192.168.0.9",
+        "type": "internet",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Server AD User",
+        "ip": "192.168.0.12",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Server ShareFile",
+        "ip": "192.168.0.11",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "QNAP Cloud",
+        "ip": "192.168.0.2",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Server แจ้งซ่อม MT",
+        "ip": "192.168.0.18",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Server Roomsys,Carsys,PowertechCenter",
+        "ip": "192.168.0.13",
+        "type": "hyperv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Print F16",
+        "ip": "192.168.0.23",
+        "type": "print",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Print F17",
+        "ip": "192.168.0.24",
+        "type": "print",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Print F4",
+        "ip": "192.168.0.25",
+        "type": "print",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "Print F8",
+        "ip": "192.168.0.27",
+        "type": "print",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F16",
+        "ip": "192.168.0.51",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F4",
+        "ip": "192.168.0.52",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T03:56:55+01:00",
+        "profile": "PTA",
+        "group": "PTA",
+        "name": "CCTV F20",
+        "ip": "192.168.0.74",
+        "type": "cctv",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T08:03:37+01:00",
+        "profile": "PTA",
+        "group": "PT4",
+        "name": "AD",
+        "ip": "192.168.1.239",
+        "type": "server",
+        "from": "ONLINE",
+        "to": "OFFLINE"
+    },
+    {
+        "time": "2026-01-23T08:03:37+01:00",
+        "profile": "PTA",
+        "group": "PTE",
+        "name": "AD Server",
+        "ip": "192.168.5.11",
+        "type": "server",
+        "from": "OFFLINE",
+        "to": "ONLINE"
+    }
+]

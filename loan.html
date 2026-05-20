@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ยืมอุปกรณ์ IT (IT Equipment Loan) - SystemCenter</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb', secondary: '#475569' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .item-card { transition: all 0.3s ease; }
+        .item-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+    <style>
+        /* === PTC Design System supplements for loan.html === */
+        body { font-family: var(--ptc-font-th, 'Kanit', sans-serif) !important; }
+
+        /* Equipment card hover uses design-system shadow */
+        .item-card:hover { box-shadow: var(--ptc-shadow-lg, 0 10px 30px rgba(0,0,0,.12)) !important; }
+
+        /* Responsive loan table */
+        @media (max-width: 640px) {
+            table thead { display: none; }
+            table tbody tr {
+                display: flex; flex-direction: column;
+                border: 1px solid var(--ptc-border, #e2e8f0);
+                border-radius: var(--ptc-radius-lg, 0.75rem);
+                margin-bottom: .75rem; padding: .5rem .75rem;
+                background: var(--ptc-surface, #fff);
+            }
+            table td { padding: .35rem 0; border: none; font-size: .875rem; }
+            table td::before {
+                content: attr(data-label);
+                display: block; font-size: .7rem; font-weight: 600;
+                color: var(--ptc-text-muted, #94a3b8);
+                text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px;
+            }
+        }
+
+        /* Focus ring */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ptc-primary, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)) !important;
+        }
+
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border, #cbd5e1); border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 ptc-normalize">
+
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700 hover:text-blue-600 transition flex-shrink-0">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="flex items-center gap-3">
+                        <div id="logo-bg" class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                            <i id="logo-icon" class="fas fa-hand-holding-heart text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 id="logo-text" class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Equipment Hub</h1>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 -mt-1 font-medium">ระบบยืม-คืนอุปกรณ์ (Equipment Loan System)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a href="my_borrow_history.html" class="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-sm dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200">
+                        <i class="fas fa-history text-emerald-500"></i> ประวัติการยืม (History)
+                    </a>
+                    <button id="theme-toggle" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                        <i class="fas fa-sun block dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-20 z-40">
+            <div class="relative w-full md:w-96">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-input" placeholder="ค้นหาชื่อ, รหัส, หรือรุ่น... (Search Name, ID, Model)" class="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition-all dark:text-white placeholder-slate-400">
+            </div>
+            
+            <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 custom-scrollbar items-center">
+                <button onclick="filterItems('all')" class="filter-btn active px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition whitespace-nowrap" data-filter="all">
+                    ทั้งหมด (All)
+                </button>
+                <button onclick="filterItems('available')" class="filter-btn px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap" data-filter="available">
+                    <i class="fas fa-check-circle text-emerald-500 mr-1"></i> ว่าง (Available)
+                </button>
+                <button onclick="filterItems('unavailable')" class="filter-btn px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap" data-filter="unavailable">
+                    <i class="fas fa-times-circle text-red-500 mr-1"></i> ไม่ว่าง (Unavailable)
+                </button>
+            </div>
+        </div>
+
+        <div id="loading-state" class="text-center py-20 text-slate-400">
+            <i class="fas fa-circle-notch fa-spin text-4xl mb-4 text-blue-500"></i>
+            <p>กำลังโหลดรายการอุปกรณ์... (Loading items...)</p>
+        </div>
+
+        <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+            </div>
+
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-slate-400">
+            <div class="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-box-open text-4xl opacity-50"></i>
+            </div>
+            <p class="text-lg">ไม่พบอุปกรณ์ที่ค้นหา (No items found)</p>
+        </div>
+
+    </main>
+
+    <div id="borrow-modal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-2xl transition-all w-full max-w-4xl">
+                
+                <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">ทำเรื่องขอยืม (Borrow Request)</h3>
+                        <p id="modal-item-name" class="text-sm text-blue-600 font-medium truncate max-w-xs">Item Name</p>
+                    </div>
+                    <button onclick="closeModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-700 text-slate-400 hover:text-red-500 transition shadow-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2">
+                    <div id="modal-item-details" class="p-6 border-r border-slate-100 dark:border-slate-700">
+                        <!-- Details will be populated here by JS -->
+                        <div class="flex items-center justify-center h-full text-slate-400">
+                            <i class="fas fa-spinner fa-spin mr-2"></i> Loading details...
+                        </div>
+                    </div>
+                    <form id="borrow-form" class="p-6 space-y-5">
+                        <input type="hidden" id="modal-item-id">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ผู้ยืม (Borrower)</label>
+                            <select id="req-borrower" required class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                                <option value="">-- เลือกชื่อของคุณ (Select your name) --</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">วันที่คืน (Return Date)</label>
+                                <input type="date" id="req-date" required class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">แผนก (Department)</label>
+                                <input type="text" id="req-dept" readonly class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-600 text-slate-500 text-sm cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">วัตถุประสงค์ (Purpose)</label>
+                            <textarea id="req-purpose" rows="2" required placeholder="เช่น ใช้ประชุม, ทำงานนอกสถานที่..." class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white"></textarea>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5">
+                                ยืนยันการขอยืม (Confirm Request)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+        let allItems = [];
+        let allEmployees = [];
+        let sessionData = {};
+        const gid = (id) => document.getElementById(id);
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Theme Toggle
+            gid('theme-toggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+
+            // Set Min Date to Today
+            gid('req-date').min = new Date().toISOString().split('T')[0];
+
+            await loadInitialData();
+            
+            // Search Listener
+            gid('search-input').addEventListener('input', renderGrid);
+        });
+
+        // --- Core Functions ---
+        async function loadInitialData() {
+            try {
+                // 1. Check Session
+                const sessRes = await fetch(`${API_PATH}?action=check_session`);
+                sessionData = await sessRes.json();
+                if (!sessionData.loggedin) {
+                    window.location.href = `login.html?returnUrl=loan.html`;
+                    return;
+                }
+
+                // 2. Apply Company Theme
+                applyCompanyTheme(sessionData.company);
+
+                // 3. Fetch Data (Parallel)
+                // Fetch all companies' equipment to allow cross-company borrowing if needed
+                const [itemsRes, empsRes] = await Promise.all([
+                    fetch(`${API_PATH}?action=getLoanableEquipment&all_companies=1&v=${Date.now()}`),
+                    fetch(`${API_PATH}?action=get&file=employees&status_filter=active&v=${Date.now()}`)
+                ]);
+
+                allItems = await itemsRes.json() || [];
+                allEmployees = await empsRes.json() || [];
+
+                // FIX: Parse assignments
+                if (Array.isArray(allEmployees)) {
+                    allEmployees.forEach(emp => {
+                        if (typeof emp.assignments === 'string') {
+                            try { emp.assignments = JSON.parse(emp.assignments); } catch(e) { emp.assignments = []; }
+                        } else if (!Array.isArray(emp.assignments)) {
+                            emp.assignments = [];
+                        }
+                    });
+                }
+
+                // 4. Setup UI
+                populateBorrowerDropdown();
+                renderGrid();
+                
+                // Hide Loading
+                gid('loading-state').classList.add('hidden');
+                gid('items-grid').classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+            }
+        }
+
+        function populateBorrowerDropdown() {
+            const select = gid('req-borrower');
+            select.innerHTML = '<option value="">-- เลือกผู้ยืม --</option>';
+            
+            // Sort employees by name
+            allEmployees.sort((a,b) => a.name.localeCompare(b.name));
+
+            const isAdminOrStaff = ['admin', 'staff'].includes(sessionData.role);
+
+            if (isAdminOrStaff) {
+                allEmployees.forEach(emp => {
+                    const dept = (emp.assignments && emp.assignments[0]) ? emp.assignments[0].department : '';
+                    const opt = document.createElement('option');
+                    opt.value = emp.name;
+                    opt.textContent = `${emp.name} (${dept})`;
+                    opt.dataset.dept = dept;
+                    opt.dataset.empid = emp.id;
+                    
+                    if (sessionData.loggedin && emp.id == sessionData.user_id) {
+                        opt.selected = true;
+                        gid('req-dept').value = dept; 
+                    }
+                    select.appendChild(opt);
+                });
+                select.disabled = false;
+                select.classList.remove('bg-slate-100', 'cursor-not-allowed');
+            } else {
+                const me = allEmployees.find(e => e.id == sessionData.user_id);
+                if (me) {
+                    const dept = (me.assignments && me.assignments[0]) ? me.assignments[0].department : '';
+                    const opt = document.createElement('option');
+                    opt.value = me.name;
+                    opt.textContent = `${me.name} (${dept})`;
+                    opt.dataset.dept = dept;
+                    opt.dataset.empid = me.id;
+                    opt.selected = true;
+                    select.appendChild(opt);
+                    gid('req-dept').value = dept;
+                }
+                select.disabled = true;
+                select.classList.add('bg-slate-100', 'cursor-not-allowed');
+            }
+
+            // Update Dept on change
+            select.addEventListener('change', function() {
+                const selectedOpt = this.options[this.selectedIndex];
+                if(selectedOpt) gid('req-dept').value = selectedOpt.dataset.dept || '';
+                else gid('req-dept').value = '';
+            });
+        }
+
+        function renderGrid() {
+            const grid = gid('items-grid');
+            grid.innerHTML = '';
+            
+            const term = gid('search-input').value.toLowerCase();
+            const activeFilterBtn = document.querySelector('.filter-btn.active');
+            const filterType = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+            
+            // ทุกคน (รวมถึง user ปกติ) สามารถเห็นและยืมอุปกรณ์ทุกบริษัทได้
+            const filtered = allItems.filter(item => {
+                const txt = (item['ชื่ออุปกรณ์'] + item['ID อุปกรณ์'] + item['หมวดหมู่']).toLowerCase();
+                const matchesSearch = !term || txt.includes(term);
+                
+                let matchesFilter = true;
+                // แก้ไข: รองรับทั้ง 'ว่าง' และ 'ใช้งานปกติ'
+                if (filterType === 'available') matchesFilter = (item['สถานะ'] === 'ว่าง' || item['สถานะ'] === 'ใช้งานปกติ');
+                if (filterType === 'unavailable') matchesFilter = (item['สถานะ'] !== 'ว่าง' && item['สถานะ'] !== 'ใช้งานปกติ');
+
+                return matchesSearch && matchesFilter;
+            });
+
+            if (filtered.length === 0) {
+                gid('empty-state').classList.remove('hidden');
+                gid('empty-state').classList.add('flex');
+                return;
+            } else {
+                gid('empty-state').classList.add('hidden');
+                gid('empty-state').classList.remove('flex');
+            }
+
+            filtered.forEach(item => {
+                // แก้ไข: ให้สถานะ 'ใช้งานปกติ' สามารถยืมได้ด้วย
+                const isAvailable = (item['สถานะ'] === 'ว่าง' || item['สถานะ'] === 'ใช้งานปกติ');
+                const statusColor = isAvailable ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-amber-600 bg-amber-50 border-amber-100';
+                const btnClass = isAvailable 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30' 
+                    : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/30 cursor-not-allowed';
+                const btnText = isAvailable ? 'ยืมเลย (Borrow)' : 'จองคิว (Queue)';
+                const btnAction = isAvailable ? `onclick="openBorrowModal('${item['ID อุปกรณ์']}')"` : 'disabled';
+                const imgUrl = item['รูปภาพ (URL)'] || 'https://via.placeholder.com/300x200?text=No+Image';
+
+                // Company Badge Logic
+                let companyBadge = '';
+                if (item.company !== sessionData.company) {
+                    let badgeColor = 'bg-slate-100 text-slate-600';
+                    if (item.company === 'PTA') badgeColor = 'bg-emerald-100 text-emerald-700';
+                    else if (item.company === 'PT4') badgeColor = 'bg-red-100 text-red-700';
+                    else if (item.company === 'PTE') badgeColor = 'bg-blue-100 text-blue-700';
+                    companyBadge = `<span class="absolute top-3 left-3 px-2 py-1 rounded-md text-[10px] font-bold shadow-sm backdrop-blur-md ${badgeColor}">${item.company}</span>`;
+                }
+
+                // Borrower Info Logic
+                let borrowerHtml = '';
+                if (!isAvailable && item['ผู้ยืม']) {
+                    borrowerHtml = `<div class="text-xs text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded w-fit"><i class="fas fa-user-clock"></i> ${item['ผู้ยืม']}</div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'item-card bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col';
+                card.innerHTML = `
+                    <div class="h-48 overflow-hidden relative group">
+                        <img src="${imgUrl}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        ${companyBadge}
+                        <div class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold border ${statusColor} shadow-sm backdrop-blur-md">
+                            ${item['สถานะ']}
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <p class="text-xs text-slate-500 mb-1 font-mono">${item['ID อุปกรณ์']}</p>
+                            <h3 class="font-bold text-lg text-slate-800 dark:text-white mb-2 line-clamp-1" title="${item['ชื่ออุปกรณ์']}">${item['ชื่ออุปกรณ์']}</h3>
+                            <div class="flex items-center text-xs text-slate-400 gap-3 mb-4">
+                                <span><i class="fas fa-tag mr-1"></i> ${item['หมวดหมู่']}</span>
+                                <span><i class="fas fa-barcode mr-1"></i> ${item['Serial Number']||'-'}</span>
+                            </div>
+                            ${borrowerHtml}
+                        </div>
+                        <button ${btnAction} class="w-full py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all transform active:scale-95 ${btnClass}">
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterItems(type) {
+            // Update UI
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === type) {
+                    btn.className = 'filter-btn active px-5 py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition whitespace-nowrap';
+                } else {
+                    btn.className = 'filter-btn px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 transition whitespace-nowrap';
+                }
+            });
+            renderGrid();
+        }
+
+        function applyCompanyTheme(company) {
+            const logoBg = gid('logo-bg');
+            const logoIcon = gid('logo-icon');
+            const logoText = gid('logo-text');
+
+            let fromColor, toColor, shadowColor;
+            let iconClass, nameText;
+
+            if (company === 'PTA') { // Green
+                fromColor = 'from-emerald-600'; toColor = 'to-teal-600'; shadowColor = 'shadow-emerald-500/30';
+                iconClass = 'fas fa-cogs'; nameText = 'PTA Loan System';
+            } else if (company === 'PT4') { // Red
+                fromColor = 'from-red-600'; toColor = 'to-rose-600'; shadowColor = 'shadow-red-500/30';
+                iconClass = 'fas fa-industry'; nameText = 'PT4 Loan System';
+            } else { // PTE or Default
+                fromColor = 'from-blue-600'; toColor = 'to-indigo-600'; shadowColor = 'shadow-blue-500/30';
+                iconClass = 'fas fa-charging-station'; nameText = 'PTE Loan System';
+            }
+
+            // Apply classes
+            if(logoBg) logoBg.className = `w-10 h-10 bg-gradient-to-br ${fromColor} ${toColor} rounded-xl flex items-center justify-center text-white shadow-lg ${shadowColor}`;
+            if(logoText) logoText.className = `text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r ${fromColor} ${toColor} dark:from-blue-400 dark:to-indigo-400`;
+            if(logoText) logoText.textContent = nameText;
+            if(logoIcon) logoIcon.className = `${iconClass} text-xl`;
+        }
+
+        // --- Modal & Form Logic ---
+        window.openBorrowModal = function(id) {
+            if (!sessionData.loggedin) {
+                Swal.fire({
+                    title: 'กรุณาเข้าสู่ระบบ (Please Login)',
+                    text: 'คุณต้องเข้าสู่ระบบก่อนทำการยืมอุปกรณ์ (You must login first)',
+                    icon: 'warning',
+                    confirmButtonText: 'ไปหน้า Login'
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = `login.html?returnUrl=loan.html`;
+                });
+                return;
+            }
+
+            const item = allItems.find(i => i['ID อุปกรณ์'] === id);
+            if (!item) {
+                Swal.fire('Error', 'ไม่พบข้อมูลอุปกรณ์', 'error');
+                return;
+            }
+
+            // Populate details
+            const detailsContainer = gid('modal-item-details');
+            const imgUrl = item['รูปภาพ (URL)'] || 'https://via.placeholder.com/300x200?text=No+Image';
+            
+            let accessoriesHtml = '<p class="text-slate-400">ไม่มี</p>';
+            if (item.accessories && Array.isArray(item.accessories) && item.accessories.length > 0) {
+                accessoriesHtml = `<ul class="list-disc list-inside text-slate-600 dark:text-slate-300 space-y-1">${item.accessories.map(acc => `<li>${acc}</li>`).join('')}</ul>`;
+            }
+
+            detailsContainer.innerHTML = `
+                <h4 class="font-bold text-lg text-slate-800 dark:text-white mb-2">${item['ชื่ออุปกรณ์']}</h4>
+                <img src="${imgUrl}" class="w-full h-48 object-cover rounded-lg mb-4 border dark:border-slate-700">
+                
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <p class="font-medium text-slate-500 dark:text-slate-400">รายละเอียด</p>
+                        <p class="text-slate-700 dark:text-slate-200">${item['รายละเอียด'] || '-'}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div><p class="font-medium text-slate-500 dark:text-slate-400">Brand</p><p class="text-slate-700 dark:text-slate-200">${item.brand || '-'}</p></div>
+                        <div><p class="font-medium text-slate-500 dark:text-slate-400">Model</p><p class="text-slate-700 dark:text-slate-200">${item.model || '-'}</p></div>
+                        <div><p class="font-medium text-slate-500 dark:text-slate-400">Serial Number</p><p class="text-slate-700 dark:text-slate-200 font-mono text-xs">${item['Serial Number'] || '-'}</p></div>
+                        <div><p class="font-medium text-slate-500 dark:text-slate-400">Location</p><p class="text-slate-700 dark:text-slate-200">${item.location || '-'}</p></div>
+                    </div>
+                    <div>
+                        <p class="font-medium text-slate-500 dark:text-slate-400">อุปกรณ์เสริม (Accessories)</p>
+                        ${accessoriesHtml}
+                    </div>
+                </div>
+            `;
+
+            // Populate form
+            gid('modal-item-id').value = id;
+            gid('modal-item-name').textContent = item['ชื่ออุปกรณ์'];
+            gid('req-purpose').value = '';
+            
+            // Check dropdown selected
+            const sel = gid('req-borrower');
+            if(sel.selectedIndex > 0) {
+               gid('req-dept').value = sel.options[sel.selectedIndex].dataset.dept || '';
+            }
+
+            gid('borrow-modal').classList.remove('hidden');
+        }
+
+        window.closeModal = function() {
+            gid('borrow-modal').classList.add('hidden');
+        }
+
+        // Handle Form Submit
+        gid('borrow-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังบันทึก...';
+
+            // Get Data
+           

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องมือติดตั้ง (Setup Tools) - Powertech</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/powertech_app_icon.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="index.html" class="flex items-center gap-2 font-bold text-lg text-slate-700 dark:text-white hover:text-blue-600 transition">
+                    <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                </a>
+                <h1 class="text-lg font-bold">เครื่องมือติดตั้ง (Setup Tools)</h1>
+                <button id="installDirectoryAppBtn" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition hidden">
+                    <i class="fas fa-house mr-1"></i> ติดตั้งแอปหลัก
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+        
+        <!-- Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-slate-100 dark:bg-slate-700 p-1 rounded-xl inline-flex shadow-inner">
+                <button onclick="switchTab('reg')" id="tab-reg" class="px-6 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm transition-all flex items-center gap-2"><i class="fas fa-file-code"></i> Registry File (.reg)</button>
+                <button onclick="switchTab('shortcut')" id="tab-shortcut" class="px-6 py-2.5 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center gap-2"><i class="fas fa-external-link-square-alt"></i> Web Shortcut (.html)</button>
+            </div>
+        </div>
+
+        <!-- Content: Registry Generator -->
+        <div id="content-reg" class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 md:p-8">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-cogs text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">สร้างไฟล์ติดตั้งโปรแกรม</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">สำหรับเรียกใช้งานโปรแกรมผ่านเว็บ</p>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label for="protocolName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">1. ชื่อ Protocol (สำหรับเรียกใช้)</label>
+                        <input type="text" id="protocolName" placeholder="เช่น erp-acc" class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <p class="text-xs text-slate-400 mt-1.5">ตั้งชื่อสั้นๆ เป็นภาษาอังกฤษเท่านั้น ไม่มีเว้นวรรค</p>
+                    </div>
+                    <div>
+                        <label for="programPath" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">2. Path ไปยังไฟล์โปรแกรม (.exe)</label>
+                        <input type="text" id="programPath" placeholder="C:\Program Files (x86)\ERP\ATCM.exe" class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <p class="text-xs text-slate-400 mt-1.5">วิธีหา: คลิกขวาที่ Shortcut โปรแกรม > Properties > คัดลอก Path จากช่อง "Target"</p>
+                    </div>
+                    <div>
+                        <label for="fileName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">3. ชื่อไฟล์ (สำหรับดาวน์โหลด)</label>
+                        <input type="text" id="fileName" placeholder="เช่น register_account" class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                         <p class="text-xs text-slate-400 mt-1.5">ตั้งชื่อไฟล์ .reg ที่จะดาวน์โหลด (ไม่ต้องใส่นามสกุล)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                    <h3 class="font-bold text-slate-700 dark:text-white mb-3 flex items-center gap-2"><i class="fas fa-code text-sky-500"></i> Preview โค้ด</h3>
+                    <pre class="bg-slate-900 dark:bg-black/50 text-sky-300 p-4 rounded-lg text-xs custom-scrollbar max-h-60 overflow-auto"><code id="outputCode">กรุณากรอกข้อมูลข้างบนเพื่อสร้างโค้ด...</code></pre>
+                </div>
+                <button id="downloadBtn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition transform hover:-translate-y-0.5 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none" disabled>
+                    <i class="fas fa-download mr-2"></i>
+                    สร้างและดาวน์โหลดไฟล์ .reg
+                </button>
+                <div id="nextSteps" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6" style="display: none;">
+                    <h3 class="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-lg"><i class="fas fa-clipboard-list text-orange-500"></i> ขั้นตอนการติดตั้งและใช้งาน</h3>
+                    <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+                        
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mt-0.5">1</div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-white">ติดตั้งลงเครื่อง (Client Side)</p>
+                                <p class="mb-1">นำไฟล์ <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded text-xs">.reg</code> ที่ดาวน์โหลดไปไว้ที่เครื่องคอมพิวเตอร์ที่ต้องการใช้งาน</p>
+                                <p class="mb-1">ดับเบิลคลิกที่ไฟล์ แล้วกด <span class="font-bold text-emerald-600">Yes</span> (หรือ OK) เพื่อยืนยันการเพิ่มค่าลงใน Registry</p>
+                                <p class="text-xs text-slate-400">* ต้องใช้สิทธิ์ Administrator ของเครื่องนั้นๆ</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mt-0.5">2</div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-white">ตั้งค่าในระบบ (Admin Side)</p>
+                                <p class="mb-1">ไปที่เมนู <strong>Admin > Services</strong> แล้วกด "เพิ่มรายการ"</p>
+                                <p>ในช่อง <strong>Primary URL</strong> ให้ใส่ค่านี้:</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <code id="protocolPreview" class="bg-slate-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg font-mono border border-slate-200 dark:border-slate-600 select-all"></code>
+                                    <button onclick="copyTextWithFallback(document.getElementById('protocolPreview').innerText, 'ค่า Protocol')" class="text-slate-400 hover:text-blue-500 transition" title="Copy"><i class="fas fa-copy"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-100 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 mt-2">
+                            <i class="fas fa-lightbulb mr-1"></i> <strong>Tip:</strong> หาก Path ของโปรแกรมในแต่ละเครื่องไม่เหมือนกัน จำเป็นต้องสร้างไฟล์ .reg แยกสำหรับแต่ละเครื่อง หรือติดตั้งโปรแกรมไว้ที่ Path เดียวกันทุกเครื่อง (เช่น C:\Apps\...)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content: Shortcut Generator -->
+        <div id="content-shortcut" class="hidden max-w-2xl mx-auto animate-fade-in">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 md:p-8">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-link text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">สร้างทางลัดเข้าโปรแกรม</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">สร้างไฟล์ .html สำหรับวางหน้าจอ Desktop</p>
+                </div>
+                <div class="space-y-5">
+                    <div>
+                        <label for="sc-filename" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ชื่อไฟล์ (ชื่อที่จะแสดงบนหน้าจอ)</label>
+                        <input type="text" id="sc-filename" value="Powertech System Center" class="w-full p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-green-500 dark:text-white">
+                    </div>
+                    <div>
+                        <label for="sc-primary" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ลิงก์หลัก (Primary URL)</label>
+                        <div class="relative">
+                            <i class="fas fa-server absolute left-3 top-3.5 text-slate-400"></i>
+                            <input type="text" id="sc-primary" value="http://192.168.0.2/PowertechCenter/login.html" class="w-full pl-10 p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-green-500 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="sc-backup" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">ลิงก์สำรอง (Backup URL)</label>
+                        <div class="relative">
+                            <i class="fas fa-shield-alt absolute left-3 top-3.5 text-slate-400"></i>
+                            <input type="text" id="sc-backup" value="https://powertecha.myqnapcloud.com:8081/PowertechCenter/login.html" class="w-full pl-10 p-3 rounded-xl border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-green-500 dark:text-white">
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1.5">ระบบจะสลับไปใช้ลิงก์นี้อัตโนมัติหากลิงก์หลักเข้าไม่ได้</p>
+                    </div>
+                    <div>
+                        <label for="sc-logo" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">โลโก้ (Logo)</label>
+                        <div class="flex items-center gap-4">
+                            <img id="sc-logo-preview" src="uploads/logos/directory_app_icon.png" class="w-16 h-16 rounded-lg object-contain bg-slate-100 dark:bg-slate-700 p-1 border border-slate-200 dark:border-slate-600">
+                            <div class="flex-1">
+                                <input type="file" id="sc-logo" accept="image/png, image/jpeg, image/gif, image/svg+xml" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-slate-200">
+                                <button type="button" onclick="resetLogo()" class="text-xs text-slate-500 hover:text-red-500 mt-1">ใช้โลโก้เริ่มต้น</button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1.5">เลือกไฟล์รูปภาพสำหรับแสดงผลตอนโหลด (แนะนำ .png)</p>
+                    </div>
+                    <button onclick="generateShortcut()" class="w-full py-3 mt-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 transition transform hover:-translate-y-0.5">
+                        <i class="fas fa-download mr-2"></i> ดาวน์โหลดไฟล์ Shortcut
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let deferredInstallPrompt = null;
+            const installBtn = document.getElementById('installDirectoryAppBtn');
+            if (installBtn) {
+                const showInstallButton = () => installBtn.classList.remove('hidden');
+                showInstallButton();
+                window.addEventListener('beforeinstallprompt', (event) => {
+                    event.preventDefault();
+                    deferredInstallPrompt = event;
+                    showInstallButton();
+                });
+                window.addEventListener('appinstalled', () => {
+                    deferredInstallPrompt = null;
+                    showInstallButton();
+                });
+                installBtn.addEventListener('click', async () => {
+                    if (deferredInstallPrompt) {
+                        deferredInstallPrompt.prompt();
+                        const choice = await deferredInstallPrompt.userChoice;
+                        if (choice.outcome === 'accepted') deferredInstallPrompt = null;
+                        return;
+                    }
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'ติดตั้งแอปหลัก Powertech',
+                            html: 'มือถือ: กดเมนูเบราว์เซอร์แล้วเลือก Add to Home Screen<br>Desktop Chrome: กดเมนูมุมขวาบนแล้วเลือก Install app',
+                            confirmButtonText: 'เข้าใจแล้ว'
+                        });
+                    } else {
+                        alert('ติดตั้งแอปหลัก Powertech: มือถือเลือก Add to Home Screen หรือ Desktop Chrome เลือก Install app');
+                    }
+                });
+            }
+            try {
+                const response = await fetch('api.php?action=check_session');
+                if (!response.ok) throw new Error('Session check network failed');
+                const session = await response.json();
+
+                if (!session || !session.loggedin) {
+                    // ถ้ายังไม่ login ให้เด้งไปหน้า Login
+                    window.location.href = `login.html?returnUrl=reg_generator.html`;
+                    return;
+                }
+
+            } catch (error) {
+                console.error('Session check error:', error);
+                window.location.href = `login.html?returnUrl=reg_generator.html`;
+                return;
+            }
+            
+            const protocolNameInput = document.getElementById('protocolName');
+            const programPathInput = document.getElementById('programPath');
+            const fileNameInput = document.getElementById('fileName');
+            const outputCode = document.getElementById('outputCode');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const nextSteps = document.getElementById('nextSteps');
+            const protocolPreview = document.getElementById('protocolPreview');
+
+            async function copyTextWithFallback(text, label = 'ข้อความ') {
+                const value = String(text || '').trim();
+                if (!value) return false;
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(value);
+                        return true;
+                    }
+                } catch (e) {}
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = value;
+                    ta.setAttribute('readonly', '');
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    const ok = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    if (ok) return true;
+                } catch (e) {}
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: `คัดลอก${label}ด้วยตนเอง`,
+                        html: `<input value="${value}" readonly style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;">`,
+                        confirmButtonText: 'ตกลง'
+                    });
+                } else {
+                    prompt(`คัดลอก${label}:`, value);
+                }
+                return false;
+            }
+            window.copyTextWithFallback = copyTextWithFallback;
+
+            function generateContent() {
+                const protocol = protocolNameInput.value.trim();
+                const path = programPathInput.value.trim();
+                if (!protocol || !path) {
+                    outputCode.textContent = 'กรุณากรอกข้อมูลข้างบนเพื่อสร้างโค้ด...';
+                    downloadBtn.disabled = true;
+                    nextSteps.style.display = 'none';
+                    return;
+                }
+                const escapedPath = path.replace(/\\/g, '\\\\');
+                const regContent = `Windows Registry Editor Version 5.00\n\n[HKEY_CLASSES_ROOT\\${protocol}]\n@="URL:${protocol} Protocol"\n"URL Protocol"=""\n\n[HKEY_CLASSES_ROOT\\${protocol}\\DefaultIcon]\n@="${escapedPath},1"\n\n[HKEY_CLASSES_ROOT\\${protocol}\\shell]\n\n[HKEY_CLASSES_ROOT\\${protocol}\\shell\\open]\n\n[HKEY_CLASSES_ROOT\\${protocol}\\shell\\open\\command]\n@="\\"${escapedPath}\\" \\"%1\\""`;
+                outputCode.textContent = regContent;
+                protocolPreview.textContent = `${protocol}://`;
+                downloadBtn.disabled = false;
+                nextSteps.style.display = 'block';
+            }
+            function downloadFile() {
+                const fileName = (fileNameInput.value.trim() || 'register_protocol') + '.reg';
+                const content = outputCode.textContent;
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            protocolNameInput.addEventListener('input', generateContent);
+            programPathInput.addEventListener('input', generateContent);
+            downloadBtn.addEventListener('click', downloadFile);
+            
+            // --- Shortcut Generator Logic ---
+            window.switchTab = function(tab) {
+                const regContent = document.getElementById('content-reg');
+                const scContent = document.getElementById('content-shortcut');
+                const tabReg = document.getElementById('tab-reg');
+                const tabSc = document.getElementById('tab-shortcut');
+                
+                if (tab === 'reg') {
+                    regContent.classList.remove('hidden');
+                    scContent.classList.add('hidden');
+                    
+                    tabReg.className = "px-6 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm transition-all flex items-center gap-2";
+                    tabSc.className = "px-6 py-2.5 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center gap-2";
+                } else {
+                    regContent.classList.add('hidden');
+                    scContent.classList.remove('hidden');
+                    
+                    tabReg.className = "px-6 py-2.5 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all flex items-center gap-2";
+                    tabSc.className = "px-6 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm transition-all flex items-center gap-2";
+                }
+            }
+
+            window.generateShortcut = async function() {
+                const primary = document.getElementById('sc-primary').value.trim();
+                const backup = document.getElementById('sc-backup').value.trim();
+                const filename = (document.getElementById('sc-filename').value.trim() || 'Shortcut') + '.html';
+
+                // --- New Logo Logic ---
+                const logoPreview = document.getElementById('sc-logo-preview');
+                let logoDataUrl = logoPreview.src;
+
+                // If the src is a relative path (http...//.../img/logo.png), fetch and convert to Data URL
+                // This makes the shortcut file self-contained.
+                if (!logoDataUrl.startsWith('data:image')) {
+                    try {
+                        const response = await fetch(logoDataUrl);
+                        const blob = await response.blob();
+                        logoDataUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (error) {
+                        console.error("Error converting default logo to Data URL:", error);
+                        logoDataUrl = ''; // Fallback to an empty string if conversion fails
+                    }
+                }
+
+                const htmlContent = `<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Connecting...</title>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; text-align: center; }
+        .icon img { width: 100px; height: auto; margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+        a { color: #60a5fa; }
+    </style>
+    <script>
+        async function check() {
+            const p = '${primary}';
+            const b = '${backup}';
+            const c = new AbortController();
+            const t = setTimeout(() => c.abort(), 2500);
+            try {
+                await fetch(p.replace(/\\/[^/]*$/, '/'), { mode: 'no-cors', signal: c.signal });
+                clearTimeout(t); window.location.href = p;
+            } catch (e) {
+                clearTimeout(t); window.location.href = b;
+            }
+        }
+        check();
+    <\/script>
+</head><body><div><div class="icon"><img src="${logoDataUrl}" alt="Logo"></div><h2>Connecting...</h2><p>If not redirected, <a href="${primary}">Click Here</a></p></div></body></html>`;
+
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            const logoInput = document.getElementById('sc-logo');
+            const logoPreview = document.getElementById('sc-logo-preview');
+            if (logoInput && logoPreview) {
+                logoInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) { logoPreview.src = e.target.result; }
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+            }
+
+            window.resetLogo = function() {
+                if (logoInput && logoPreview) {
+                    logoInput.value = ''; // Clear the file input
+                    logoPreview.src = 'uploads/logos/directory_app_icon.png';
+                }
+            }
+
+        });
+    </script>
+</body>
+</html>

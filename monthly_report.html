@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Booking Report - Powertech System</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script>
+        tailwind.config = {
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        body {
+            background-color: #f1f5f9;
+        }
+        .a4-landscape {
+            background: white;
+            width: 297mm;
+            height: 210mm;
+            display: block;
+            margin: 2rem auto;
+            padding: 1.5cm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 1rem;
+        }
+        .fc .fc-daygrid-day-number {
+            font-size: 0.8em;
+            padding: 4px;
+        }
+        .fc .fc-event {
+            font-size: 0.75em;
+            cursor: pointer;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+            @page :first {
+                margin-top: 0.5cm;
+            }
+            body {
+                background-color: white;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a4-landscape {
+                width: auto;
+                height: auto;
+                margin: 0;
+                box-shadow: none;
+                padding: 0;
+            }
+            .fc {
+                font-size: 9pt;
+            }
+            .fc .fc-toolbar.fc-header-toolbar {
+                display: none;
+            }
+        }
+        .print-header-info { display: none; }
+        @media print {
+            .print-header-info { display: block; font-size: 10px; color: #666; text-align: right; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print p-4 bg-white border-b flex items-center justify-between">
+        <h1 class="text-xl font-bold text-slate-700">Monthly Report</h1>
+        <div class="flex items-center gap-4">
+            <select id="company-selector" class="p-2 rounded-lg border border-slate-300">
+                <option value="">ทุกบริษัท</option>
+                <option value="PTA">PTA</option>
+                <option value="PT4">PT4</option>
+                <option value="PTE">PTE</option>
+            </select>
+            <input type="month" id="month-selector" class="p-2 rounded-lg border border-slate-300">
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition">
+                <i class="fas fa-print mr-2"></i> Print
+            </button>
+            <a href="index.html" class="text-slate-500 hover:text-blue-600 transition"><i class="fas fa-arrow-left text-xl"></i> Back</a>
+        </div>
+    </div>
+
+    <div id="report-page" class="a4-landscape">
+        <div class="print-header-info">พิมพ์เมื่อ: <span id="print-date"></span></div>
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h2 id="report-title" class="text-2xl font-bold text-slate-800"></h2>
+                <p class="text-slate-500">สรุปการจองห้องประชุมประจำเดือน</p>
+            </div>
+            <img src="img/logo.png" alt="Logo" class="h-12">
+        </div>
+        <div id="calendar"></div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+        let calendar = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const monthSelector = document.getElementById('month-selector');
+            const companySelector = document.getElementById('company-selector');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            monthSelector.value = `${year}-${month}`;
+            
+            document.getElementById('print-date').textContent = new Date().toLocaleString('th-TH');
+
+            initCalendar();
+            loadCalendarEvents();
+
+            monthSelector.addEventListener('change', loadCalendarEvents);
+            companySelector.addEventListener('change', loadCalendarEvents);
+        });
+
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: false, // We use our own controls
+                locale: 'th',
+                fixedWeekCount: false,
+                events: [],
+                eventContent: function(arg) {
+                    let roomName = arg.event.extendedProps.room_name || '';
+                    return { html: `<div class="p-1 text-white rounded-md" style="background-color:${arg.event.backgroundColor || '#3788d8'}">
+                        <div class="font-bold">${arg.event.title}</div>
+                        <div class="text-xs">${roomName}</div>
+                        </div>` };
+                }
+            });
+            calendar.render();
+        }
+
+        async function loadCalendarEvents() {
+            const monthValue = document.getElementById('month-selector').value;
+            const companyValue = document.getElementById('company-selector').value;
+            if (!monthValue) return;
+
+            const [year, month] = monthValue.split('-');
+            const startDate = `${year}-${month}-01`;
+            
+            const tempDate = new Date(year, month, 0);
+            const endDate = tempDate.toISOString().split('T')[0];
+
+            // Update title
+            const reportDate = new Date(year, month - 1);
+            document.getElementById('report-title').textContent = reportDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+            
+            calendar.gotoDate(startDate);
+            
+            try {
+                const res = await fetch(`${API_PATH}?action=get_calendar_events&start=${startDate}&end=${endDate}&company=${companyValue}`);
+                const events = await res.json();
+                
+                if(!res.ok) throw new Error(events.message || 'Failed to load events');
+
+                calendar.removeAllEvents();
+                calendar.addEventSource(events);
+
+            } catch(e) {
+                console.error(e);
+                alert('Error loading calendar data: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

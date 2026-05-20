@@ -1,0 +1,3222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Powertech System Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#1d1d1f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.14.2/simple-lightbox.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+                extend: {
+                    colors: { 
+                        primary: '#007AFF',
+                        secondary: '#86868b',
+                        accent: '#0071e3',
+                        surface: {
+                            light: 'rgba(255, 255, 255, 0.72)',
+                            dark: 'rgba(29, 29, 31, 0.72)'
+                        }
+                    },
+                    animation: { 
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'zoom-in': 'zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'bounce-subtle': 'bounceSubtle 2s infinite'
+                    },
+                    keyframes: { 
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        zoomIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+                        bounceSubtle: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } }
+                    },
+                    boxShadow: {
+                        'macos': '0 0 0 0.5px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
+                        'macos-lg': '0 0 0 0.5px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.15)',
+                        'macos-hover': '0 0 0 0.5px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.16), 0 16px 48px rgba(0,0,0,0.12)'
+                    }
+                }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <style>
+        /* macOS-style Background */
+        body {
+            background: linear-gradient(180deg, #f5f5f7 0%, #e8e8ed 50%, #f5f5f7 100%);
+            min-height: 100vh;
+        }
+        .dark body, body.dark-mode {
+            background: linear-gradient(180deg, #1d1d1f 0%, #000000 50%, #1d1d1f 100%);
+        }
+        html.dark body {
+            background: linear-gradient(180deg, #1d1d1f 0%, #000000 50%, #1d1d1f 100%);
+        }
+
+        /* macOS Frosted Glass Effect */
+        .glass-navbar {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
+        .dark .glass-navbar {
+            background: rgba(29, 29, 31, 0.72);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* macOS Card Style */
+        .macos-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 0 0 0.5px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .macos-card:hover {
+            box-shadow: 0 0 0 0.5px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12), 0 16px 48px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .dark .macos-card {
+            background: rgba(44, 44, 46, 0.9);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,0.04), 0 2px 4px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .dark .macos-card:hover {
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.3);
+        }
+
+        /* macOS Service Card */
+        .service-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .service-card:hover {
+            transform: scale(1.02) translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.12);
+        }
+        .service-card:hover .service-icon {
+            transform: scale(1.1);
+        }
+        .dark .service-card {
+            background: rgba(44, 44, 46, 0.95);
+            border: 0.5px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* macOS Button */
+        .macos-btn {
+            background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+            border: 0.5px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            box-shadow: 0 0.5px 1px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        .macos-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .macos-btn:active {
+            background: linear-gradient(180deg, #e8e8e8 0%, #f0f0f0 100%);
+            transform: scale(0.98);
+        }
+        .dark .macos-btn {
+            background: linear-gradient(180deg, #3a3a3c 0%, #2c2c2e 100%);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+        .dark .macos-btn:hover {
+            background: linear-gradient(180deg, #48484a 0%, #3a3a3c 100%);
+        }
+
+        /* macOS Primary Button */
+        .macos-btn-primary {
+            background: linear-gradient(180deg, #0a84ff 0%, #007AFF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        .macos-btn-primary:hover {
+            background: linear-gradient(180deg, #1a8fff 0%, #0a84ff 100%);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
+        }
+        .macos-btn-primary:active {
+            background: linear-gradient(180deg, #0071e3 0%, #006ed4 100%);
+            transform: scale(0.98);
+        }
+
+        /* Traffic Light Dots */
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+        }
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .traffic-light.red { background: #ff5f57; border: 0.5px solid rgba(0,0,0,0.1); }
+        .traffic-light.yellow { background: #febc2e; border: 0.5px solid rgba(0,0,0,0.1); }
+        .traffic-light.green { background: #28c840; border: 0.5px solid rgba(0,0,0,0.1); }
+
+        /* Scrollbar macOS Style */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+            background: rgba(0, 0, 0, 0.2); 
+            border-radius: 4px; 
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); background-clip: content-box; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); background-clip: content-box; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); background-clip: content-box; }
+        .announcement-icon-float {
+            animation: announcementFloat 2.2s ease-in-out infinite;
+        }
+        .announcement-content {
+            height: 5.2rem;
+            overflow: hidden;
+            padding-right: 0.1rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: relative;
+        }
+        .announcement-content::-webkit-scrollbar {
+            display: none;
+        }
+        .announcement-content-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            will-change: transform;
+            animation-name: announcementVerticalMarquee;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-play-state: running;
+        }
+        .announcement-slide {
+            transition: opacity .55s ease, transform .55s ease;
+        }
+        .announcement-content-item {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.45;
+        }
+        @keyframes announcementVerticalMarquee {
+            0% { transform: translateY(var(--start-y, 100%)); }
+            100% { transform: translateY(var(--end-y, -100%)); }
+        }
+        .announcement-content a {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .announcement-live-dot {
+            animation: announcementPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes announcementFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes announcementPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.78); opacity: 0.5; }
+        }
+        @media (max-width: 768px) {
+            #announcement-container {
+                height: 14rem;
+            }
+            .announcement-slide {
+                transition: opacity .4s ease, transform .4s ease;
+            }
+            .announcement-content {
+                height: 5.8rem;
+            }
+        }
+
+        /* Dock-style Menu */
+        .dock-menu {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border: 0.5px solid rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+        }
+        .dark .dock-menu {
+            background: rgba(44, 44, 46, 0.7);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Stat Card Gradient - macOS Style */
+        .stat-card-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+        .dark .stat-card-gradient {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            box-shadow: 0 8px 32px rgba(90, 103, 216, 0.2);
+        }
+
+        /* Chat Styles */
+        .chat-message { max-width: 75%; }
+        .chat-message.sent { margin-left: auto; }
+        .chat-message.received { margin-right: auto; }
+        .chat-message .bubble { 
+            padding: 0.625rem 1rem; 
+            border-radius: 18px; 
+        }
+        .chat-message.sent .bubble { 
+            background: linear-gradient(135deg, #007AFF 0%, #0071e3 100%);
+            color: white; 
+            border-bottom-right-radius: 4px; 
+        }
+        .chat-message.received .bubble { 
+            background: #e9e9eb; 
+            color: #1d1d1f; 
+            border-bottom-left-radius: 4px; 
+        }
+        .dark .chat-message.received .bubble { 
+            background: #3a3a3c; 
+            color: #f5f5f7; 
+        }
+        
+        #chat-window {
+            transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s ease;
+            width: min(100vw - 2rem, 700px);
+            height: min(75vh, 500px);
+        }
+        #chat-window.hidden { transform: translateY(20px) scale(0.95); opacity: 0; }
+        
+        #chat-message-input {
+            min-height: 44px;
+            max-height: 120px;
+            resize: none;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            #chat-window {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0.75rem;
+                margin: 0 auto;
+                width: 100vw;
+                max-width: 100vw;
+                height: 85vh;
+                max-height: none;
+                border-radius: 20px 20px 0 0;
+            }
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e9e9eb;
+        }
+        .dark .skeleton { background: #3a3a3c; }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+            transform: translateX(-100%);
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .skeleton-line { height: 10px; border-radius: 6px; }
+        .skeleton-avatar { width: 40px; height: 40px; border-radius: 9999px; }
+
+        /* IT Command Center Badge */
+        .itcc-badge-blink {
+            animation: itcc-blink 1s ease-in-out infinite;
+        }
+        @keyframes itcc-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* macOS Window Title Bar */
+        .window-titlebar {
+            background: linear-gradient(180deg, #f6f6f6 0%, #e8e8e8 100%);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 16px 16px 0 0;
+        }
+        .dark .window-titlebar {
+            background: linear-gradient(180deg, #3a3a3c 0%, #2c2c2e 100%);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Spotlight-style Search */
+        .spotlight-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 0.5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        .dark .spotlight-input {
+            background: rgba(44, 44, 46, 0.9);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Badge Pill */
+        .badge-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 18px;
+            text-align: center;
+            color: white;
+            background: #ff3b30;
+            border-radius: 9px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .dark .notification-badge {
+            border-color: #1d1d1f;
+        }
+    </style>
+
+    <!-- ── Design-system supplement for index.html ── -->
+    <style>
+        /* ── Unified font ── */
+        body { font-family: var(--ptc-font) !important; }
+
+        /* ── Service card grid: better responsive breakpoints ── */
+        .service-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+            gap: .875rem !important;
+        }
+        @media (max-width: 400px) {
+            .service-grid { grid-template-columns: repeat(2, 1fr) !important; gap: .625rem !important; }
+        }
+
+        /* ── Stat/KPI summary cards ── */
+        .summary-stat-card {
+            border-radius: var(--ptc-radius-lg) !important;
+            transition: var(--ptc-transition) !important;
+        }
+        .summary-stat-card:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: var(--ptc-shadow-lg) !important;
+        }
+
+        /* ── Announcement cards ── */
+        .announcement-card {
+            border-radius: var(--ptc-radius-lg) !important;
+            transition: var(--ptc-transition) !important;
+        }
+
+        /* ── Chat panel: full-height bottom sheet on mobile ── */
+        @media (max-width: 640px) {
+            #chat-panel {
+                bottom: 0 !important;
+                top: auto !important;
+                right: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                max-height: 85dvh !important;
+                border-radius: var(--ptc-radius-xl) var(--ptc-radius-xl) 0 0 !important;
+                box-shadow: var(--ptc-shadow-xl) !important;
+            }
+        }
+
+        /* ── ITCC panel (IT Command Center) mobile ── */
+        @media (max-width: 768px) {
+            #itcc-panel {
+                position: fixed !important;
+                inset: 0 !important;
+                z-index: 200 !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+            }
+        }
+
+        /* ── Nav links: better spacing on tablet ── */
+        @media (max-width: 900px) and (min-width: 641px) {
+            .glass-navbar nav a { padding: .375rem .5rem !important; font-size: .75rem !important; }
+        }
+
+        /* ── macos-card consistent radius + shadow ── */
+        .macos-card {
+            border-radius: var(--ptc-radius-lg) !important;
+            box-shadow: var(--ptc-shadow-sm) !important;
+        }
+        .macos-card:hover {
+            box-shadow: var(--ptc-shadow-md) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* ── Better scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); border-radius: 99px; }
+
+        /* ── Typography polish ── */
+        h1, h2, h3 { letter-spacing: -0.015em; }
+
+        /* ── Content padding below fixed nav ── */
+        main, .main-content { padding-top: max(1.25rem, env(safe-area-inset-top)); }
+
+        /* ── Pending count badges ── */
+        .pending-badge {
+            background: var(--ptc-danger) !important;
+            color: #fff !important;
+            border-radius: 99px !important;
+            font-size: .625rem !important;
+            font-weight: 700 !important;
+            min-width: 16px !important;
+            height: 16px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 4px !important;
+        }
+
+        /* ── Ticket list rows on mobile: card view ── */
+        @media (max-width: 640px) {
+            .ticket-table thead { display: none !important; }
+            .ticket-table tbody { display: block; }
+            .ticket-table tbody tr {
+                display: flex !important; flex-direction: column;
+                border: 1px solid var(--ptc-border) !important;
+                border-radius: var(--ptc-radius-lg) !important;
+                margin-bottom: .75rem !important;
+                overflow: hidden;
+                background: var(--ptc-surface) !important;
+                box-shadow: var(--ptc-shadow-xs);
+            }
+            .ticket-table tbody td {
+                display: flex !important; align-items: flex-start !important;
+                justify-content: space-between !important;
+                padding: .5rem .875rem !important;
+                border-bottom: 1px solid var(--ptc-border) !important;
+                font-size: .875rem;
+            }
+            .ticket-table tbody td:last-child { border-bottom: none !important; }
+            .ticket-table tbody td::before {
+                content: attr(data-label);
+                font-size: .6875rem; font-weight: 700;
+                letter-spacing: .05em; text-transform: uppercase;
+                color: var(--ptc-text-faint); flex-shrink: 0;
+                min-width: 80px; padding-right: .75rem; margin-top: 2px;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300 ptc-normalize">
+
+    <!-- macOS-style Navigation Bar -->
+    <nav class="glass-navbar fixed w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-14">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3">
+                    <div id="logo-bg" class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <i id="logo-icon" class="fas fa-bolt text-lg"></i>
+                    </div>
+                    <img id="dashboard-logo-img" src="" alt="Logo" class="w-9 h-9 hidden object-contain bg-white dark:bg-gray-800 rounded-xl p-1 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h1 id="logo-text" class="text-base font-semibold text-gray-900 dark:text-white tracking-tight">Powertech</h1>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 -mt-0.5 font-medium">System Center</p>
+                    </div>
+                </div>
+                
+                <!-- Right Actions -->
+                <div class="flex items-center gap-2">
+                    <!-- IT Command Center Link -->
+                    <a href="log.html" id="menu-it-center" class="hidden w-9 h-9 rounded-xl macos-btn text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition" title="IT Command Center">
+                        <i class="fas fa-desktop text-sm"></i>
+                    </a>
+
+                    <!-- User Dropdown -->
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 transition px-2 py-1.5 rounded-xl hover:bg-gray-100/60 dark:hover:bg-gray-800/60">
+                            <div class="text-right hidden sm:block">
+                                <p id="user-name" class="font-semibold text-xs text-gray-900 dark:text-white">Guest User</p>
+                                <p id="user-role" class="text-[10px] text-gray-400">Please Login</p>
+                            </div>
+                            <div id="user-avatar" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm">
+                                <i class="fas fa-user text-gray-400 text-xs"></i>
+                            </div>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 dock-menu transform scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-200 origin-top-right invisible group-hover:visible z-50 overflow-hidden">
+                            <div class="py-1">
+                                <a href="dashboard.html" id="menu-dashboard" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hidden transition-colors">
+                                    <i class="fas fa-tachometer-alt w-5 text-purple-500"></i>
+                                    <span class="ml-3">IT Dashboard</span>
+                                </a>
+                                <a href="admin.html" id="menu-admin" class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hidden transition-colors">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-shield-alt w-5 text-blue-500"></i>
+                                        <span class="ml-3">Admin Panel</span>
+                                    </span>
+                                    <span id="admin-badge" class="badge-pill bg-red-500 text-white hidden animate-pulse">0</span>
+                                </a>
+                                <a href="update_db.php" id="menu-update-db" target="_blank" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hidden transition-colors">
+                                    <i class="fas fa-database w-5 text-red-500"></i>
+                                    <span class="ml-3">อัปเดตฐานข้อมูล</span>
+                                </a>
+                                <a href="borrow_management.html" id="menu-loan-manage" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hidden transition-colors">
+                                    <i class="fas fa-tasks w-5 text-amber-500"></i>
+                                    <span class="ml-3">จัดการการยืม-คืน</span>
+                                </a>
+                                
+                                <div class="h-px bg-gray-200 dark:bg-gray-700 my-1 mx-3"></div>
+
+                                <a href="my_tickets.html" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-colors">
+                                    <i class="fas fa-ticket-alt w-5 text-amber-500"></i>
+                                    <span class="ml-3">งานแจ้งซ่อมของฉัน</span>
+                                </a>
+                                <a href="my_borrow_history.html" class="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-colors">
+                                    <i class="fas fa-history w-5 text-emerald-500"></i>
+                                    <span class="ml-3">ประวัติการยืม</span>
+                                </a>
+
+                                <div class="h-px bg-gray-200 dark:bg-gray-700 my-1 mx-3"></div>
+                                
+                                <button onclick="handleLogout()" class="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-500/10 transition-colors">
+                                    <i class="fas fa-sign-out-alt w-5"></i>
+                                    <span class="ml-3">ออกจากระบบ</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <button id="installAppBtn" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 macos-btn text-gray-600 dark:text-gray-300 text-xs font-medium" title="ติดตั้งแอปหลัก Powertech">
+                        <i class="fas fa-house text-xs"></i>
+                        <span>ติดตั้งแอปหลัก</span>
+                    </button>
+                    <a href="reg_generator.html" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 macos-btn text-gray-600 dark:text-gray-300 text-xs font-medium" title="ติดตั้งโปรแกรม">
+                        <i class="fas fa-download text-xs"></i>
+                        <span>ติดตั้ง</span>
+                    </a>
+                    <button onclick="showDashboardHelp()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 macos-btn text-gray-600 dark:text-gray-300 text-xs font-medium" title="คู่มือการใช้งาน">
+                        <i class="fas fa-book-reader text-xs"></i>
+                        <span>คู่มือ</span>
+                    </button>
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="w-9 h-9 rounded-xl macos-btn flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+                        <i class="fas fa-sun text-sm block dark:hidden"></i>
+                        <i class="fas fa-moon text-sm hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Welcome Section -->
+        <div class="mb-8 opacity-0 animate-slide-up">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-1">
+                        ยินดีต้อนรับ, <span id="welcome-name" class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">User</span> 👋
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">จัดการงานระบบและบริการต่างๆ ได้ที่นี่</p>
+                </div>
+                <div class="text-right">
+                    <p id="current-date" class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 opacity-0 animate-slide-up items-stretch" style="animation-delay: 0.1s;">
+            <!-- Main Status Card -->
+            <div id="stat-card-bg" class="md:col-span-2 stat-card-gradient p-6 text-white relative overflow-hidden flex flex-col justify-between">
+                <div id="my-status-content" class="relative z-10">
+                    <div class="h-full flex items-center justify-center text-white/60">
+                        <i class="fas fa-spinner fa-spin text-xl"></i>
+                    </div>
+                </div>
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class="fas fa-clipboard-list text-8xl"></i>
+                </div>
+            </div>
+
+            <!-- Announcement Card -->
+            <div class="macos-card p-5 relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-800 dark:text-white text-sm flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                            <i class="fas fa-bullhorn text-orange-500 text-xs"></i>
+                        </div>
+                        ประกาศล่าสุด
+                    </h3>
+                    <div id="announcement-indicators" class="flex gap-1.5"></div>
+                </div>
+                <div id="announcement-container" class="relative h-44 md:h-48">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
+                        <i class="fas fa-circle-notch fa-spin mb-2"></i>
+                        กำลังโหลด...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Chart -->
+        <div id="department-chart-container" class="hidden macos-card p-6 mb-8 opacity-0 animate-slide-up" style="animation-delay: 0.2s;">
+            <h3 class="font-semibold text-gray-800 dark:text-white mb-4 text-sm flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <i class="fas fa-chart-bar text-indigo-500 text-xs"></i>
+                </div>
+                สัดส่วนงานซ่อมตามแผนก (<span id="chart-company-name" class="text-indigo-600 dark:text-indigo-400"></span>)
+            </h3>
+            <div class="h-72 relative">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-5 flex items-center gap-2 uppercase tracking-wider opacity-0 animate-slide-up" style="animation-delay: 0.3s;">
+            <i class="fas fa-th-large text-blue-500"></i> บริการทั้งหมด
+        </h3>
+        <div id="services-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 opacity-0 animate-slide-up" style="animation-delay: 0.4s;">
+            <!-- Loading Skeleton -->
+            <div class="service-card p-6 animate-pulse">
+                <div class="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mb-2"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Audio Elements -->
+    <audio id="chat-notification-sound" src="https://notificationsounds.com/storage/sounds/message-tones/juntos-607.mp3" preload="auto"></audio>
+    <audio id="chat-group-notification-sound" src="https://notificationsounds.com/storage/sounds/message-tones/pristine-609.mp3" preload="auto"></audio>
+    <audio id="itcc-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+
+    <!-- IT Command Center Floating Button -->
+    <div id="itcc-button-container" class="fixed bottom-5 right-5 z-[98] hidden">
+        <button
+            id="itcc-button"
+            type="button"
+            class="flex items-center justify-center rounded-2xl shadow-macos-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 bg-gradient-to-br from-blue-500 to-indigo-600 text-white w-14 h-14 relative transition-all hover:scale-105 active:scale-95"
+            aria-label="IT Command Center"
+            title="IT Command Center"
+        >
+            <div class="flex items-center justify-center">
+                <i class="fas fa-desktop text-lg"></i>
+                <i class="fas fa-cog text-sm ml-[-4px] opacity-80"></i>
+            </div>
+            <span
+                id="itcc-badge"
+                class="hidden notification-badge"
+            >0</span>
+        </button>
+    </div>
+
+    <!-- Chat Widget -->
+    <div id="chat-widget-container" class="fixed bottom-24 right-5 z-[99] hidden">
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle-btn" class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl shadow-macos-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 relative">
+            <i class="fas fa-comments text-xl"></i>
+            <span id="chat-unread-badge" class="notification-badge hidden">0</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-[700px] h-[500px] macos-card flex flex-col origin-bottom-right overflow-hidden">
+            
+            <!-- Body -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- User List -->
+                <div class="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50/50 dark:bg-gray-900/50">
+                    <div class="flex border-b border-gray-200 dark:border-gray-700">
+                        <button onclick="setChatTab('chats')" id="tab-chats" class="flex-1 py-3 text-blue-500 border-b-2 border-blue-500 text-center hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm" title="แชทล่าสุด">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                        <button onclick="setChatTab('users')" id="tab-users" class="flex-1 py-3 text-gray-400 border-b-2 border-transparent text-center hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm" title="รายชื่อพนักงาน">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <button onclick="setChatTab('groups')" id="tab-groups" class="flex-1 py-3 text-gray-400 border-b-2 border-transparent text-center hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm" title="กลุ่ม">
+                            <i class="fas fa-users"></i>
+                        </button>
+                    </div>
+                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                        <input type="text" id="chat-user-search" placeholder="ค้นหา..." class="w-full text-sm spotlight-input px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="openDirectorySearch()" class="flex-1 text-[10px] text-blue-500 hover:text-blue-600 flex items-center justify-center gap-1 py-1.5 border border-dashed border-blue-300 dark:border-blue-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                                <i class="fas fa-user-plus"></i> เพิ่มเพื่อน
+                            </button>
+                            <button onclick="createGroup()" class="flex-1 text-[10px] text-emerald-500 hover:text-emerald-600 flex items-center justify-center gap-1 py-1.5 border border-dashed border-emerald-300 dark:border-emerald-700 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition">
+                                <i class="fas fa-users-cog"></i> สร้างกลุ่ม
+                            </button>
+                        </div>
+                    </div>
+                    <div id="chat-user-list" class="flex-1 overflow-y-auto custom-scrollbar">
+                        <div class="p-10 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>
+                    </div>
+                </div>
+
+                <!-- Conversation Area -->
+                <div id="chat-conversation-area" class="w-2/3 flex flex-col bg-white dark:bg-gray-900">
+                    <!-- Conversation Header -->
+                    <div id="chat-conversation-header" class="flex-shrink-0 h-14 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 hidden">
+                        <div id="chat-header-info" class="flex items-center gap-3 min-w-0"></div>
+                        <div id="typing-indicator" class="text-xs text-gray-400 italic hidden">กำลังพิมพ์...</div>
+                        <button onclick="toggleChatWindow(false)" class="w-7 h-7 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center justify-center">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Ticket Panel -->
+                    <div id="chat-ticket-panel" class="hidden bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 text-xs">
+                        <div class="flex items-center justify-between px-4 py-2 gap-2">
+                            <div class="flex flex-col gap-1 min-w-0">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600">
+                                        <i class="fas fa-ticket-alt text-[10px]"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-semibold text-gray-700 dark:text-gray-100 truncate">งานแจ้งซ่อมของฉัน</div>
+                                        <div id="chat-ticket-summary" class="text-[10px] text-gray-500 dark:text-gray-400 truncate"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button id="chat-ticket-owner-created" class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500 text-white">ที่ผมเปิด</button>
+                                    <button id="chat-ticket-owner-assigned" class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300">ที่ผมรับผิดชอบ</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="hidden sm:flex items-center gap-1">
+                                    <button id="chat-ticket-filter-active" class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500 text-white">เปิดอยู่</button>
+                                    <button id="chat-ticket-filter-all" class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300">ทั้งหมด</button>
+                                </div>
+                                <input id="chat-ticket-search" type="text" placeholder="ค้นหางาน..." class="hidden md:block w-36 lg:w-44 px-2 py-1 rounded-lg spotlight-input text-[10px] focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                <button id="chat-ticket-toggle" class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="แสดง/ซ่อนรายการงาน">
+                                    <i class="fas fa-chevron-down text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="chat-ticket-list-wrapper" class="max-h-40 overflow-y-auto border-t border-gray-200 dark:border-gray-700 custom-scrollbar hidden">
+                            <div id="chat-ticket-list" class="divide-y divide-gray-100 dark:divide-gray-700"></div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder -->
+                    <div id="chat-placeholder" class="flex-1 flex flex-col items-center justify-center text-gray-400 p-4">
+                        <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                            <i class="fas fa-comment-dots text-3xl opacity-40"></i>
+                        </div>
+                        <p class="font-medium text-sm">เลือกพนักงานเพื่อเริ่มแชท</p>
+                        <p class="text-xs text-gray-400">การสนทนาจะถูกแยกตามบริษัท</p>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4 hidden"></div>
+                    
+                    <!-- Input -->
+                    <div id="chat-input-container" class="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hidden">
+                        <div class="flex items-center gap-2">
+                            <input type="file" id="chat-file-input" class="hidden">
+                            <button onclick="gid('chat-file-input').click()" class="w-9 h-9 text-gray-400 hover:text-blue-500 transition flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700" title="แนบไฟล์">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <div class="relative flex-1">
+                                <textarea id="chat-message-input" rows="1" placeholder="พิมพ์ข้อความ..." class="w-full spotlight-input border-none py-2.5 pl-4 pr-12 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none custom-scrollbar rounded-2xl"></textarea>
+                                <button id="chat-send-btn" class="absolute right-1.5 top-1.5 w-8 h-8 macos-btn-primary rounded-full flex items-center justify-center transition-transform active:scale-95">
+                                    <i class="fas fa-paper-plane text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview Overlay -->
+            <div id="chat-image-preview" class="absolute inset-0 bg-white/95 dark:bg-gray-900/95 z-50 flex flex-col hidden backdrop-blur-xl">
+                <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+                    <img id="preview-img-element" src="" class="max-w-[90%] max-h-[80%] rounded-2xl shadow-macos-lg object-contain">
+                </div>
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
+                    <button onclick="closeImagePreview()" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white macos-btn rounded-lg transition">ยกเลิก</button>
+                    <div id="preview-img-meta" class="text-[10px] text-gray-500 dark:text-gray-400 truncate px-3"></div>
+                    <button onclick="confirmSendImage()" id="btn-confirm-send-img" class="px-6 py-2 macos-btn-primary rounded-full flex items-center gap-2 transition-transform active:scale-95">
+                        <i class="fas fa-paper-plane"></i> ส่งรูปภาพ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+        const gid = (id) => document.getElementById(id);
+        let announcementInterval;
+        let announcementActiveIndex = 0;
+        let announcementTotalSlides = 0;
+        let announcementContentScrollTimer;
+        let announcementContentScrollState = null;
+        let announcementTouchStartX = 0;
+        let announcementTouchStartY = 0;
+        let departmentChartInstance = null;
+        let sessionData = {};
+        let chatUsers = [];
+        let currentChatUserId = null;
+        let chatPollingInterval = null;
+        let currentChatTab = 'chats';
+        let hiddenChatIds = JSON.parse(localStorage.getItem('hiddenChatIds') || '[]');
+        let pendingImageBlob = null;
+        let pendingPreviewUrl = null;
+        let pendingImageMeta = null;
+        let isChatInitialized = false;
+        let typingTimer;
+        let chatLightbox = null;
+        let wsConn = null;
+        let onlineUserIds = new Set();
+        let allLogs = [];
+        let allLoans = [];
+        let myStatusIndex = 0;
+        let myChatTickets = [];
+        let myChatTicketsById = {};
+        let currentChatTicketFilter = 'active';
+        let currentChatTicketOwnerFilter = 'created';
+        let currentChatTicketSearch = '';
+        let currentChatTicketId = null;
+        let itccPollInterval = null;
+        let itccLastTotal = 0;
+        let itccTasks = [];
+        let itccAudio = null;
+        let titleInterval = null;
+        let originalTitle = document.title;
+        let lastTypingSentAt = 0;
+        let deferredInstallPrompt = null;
+
+        function setupInstallAppButton() {
+            const installBtn = gid('installAppBtn');
+            if (!installBtn) return;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const hideBtn = () => installBtn.classList.add('hidden');
+            const showBtn = () => {
+                if (isStandalone) {
+                    hideBtn();
+                    return;
+                }
+                installBtn.classList.remove('hidden');
+            };
+            hideBtn();
+            window.addEventListener('beforeinstallprompt', (event) => {
+                event.preventDefault();
+                deferredInstallPrompt = event;
+                showBtn();
+            });
+            window.addEventListener('appinstalled', () => {
+                deferredInstallPrompt = null;
+                hideBtn();
+            });
+            installBtn.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    const choice = await deferredInstallPrompt.userChoice;
+                    if (choice.outcome === 'accepted') {
+                        deferredInstallPrompt = null;
+                        hideBtn();
+                    }
+                    return;
+                }
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'ติดตั้งแอปหลัก Powertech',
+                        html: 'Chrome Desktop: กดปุ่ม Install ที่แถบ URL หรือเมนูมุมขวาบน<br>มือถือ: กดเมนูเบราว์เซอร์แล้วเลือก Add to Home Screen',
+                        confirmButtonText: 'เข้าใจแล้ว'
+                    });
+                } else {
+                    alert('ติดตั้งแอปหลัก Powertech: Chrome Desktop เลือก Install app หรือมือถือเลือก Add to Home Screen');
+                }
+            });
+        }
+
+        function startTitleBlinking(message) {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (titleInterval) return;
+            let isOriginal = true;
+            titleInterval = setInterval(() => {
+                document.title = isOriginal ? message : originalTitle;
+                isOriginal = !isOriginal;
+            }, 1000);
+        }
+
+        function stopTitleBlinking() {
+            if (titleInterval) {
+                clearInterval(titleInterval);
+                titleInterval = null;
+                document.title = originalTitle;
+            }
+        }
+        function beep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine';
+                o.frequency.setValueAtTime(880, ctx.currentTime);
+                g.gain.setValueAtTime(0.001, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start();
+                o.stop(ctx.currentTime + 0.16);
+            } catch(e) {}
+        }
+
+        let isPollingActive = false;
+        const POLLING_INTERVAL_MS = 1500;
+
+        function escapeHtml(text) {
+            if (!text) return text;
+            return String(text)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function formatAnnouncementContent(text) {
+            const escaped = escapeHtml(text || '');
+            return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200 break-all">$1</a>');
+        }
+
+        function formatBytes(bytes) {
+            const n = parseInt(bytes) || 0;
+            if (n <= 0) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const idx = Math.min(units.length - 1, Math.floor(Math.log(n) / Math.log(1024)));
+            const v = n / Math.pow(1024, idx);
+            return `${v.toFixed(idx === 0 ? 0 : 2)} ${units[idx]}`;
+        }
+
+        function normalizeUrl(inputUrl) {
+            if (!inputUrl) return '';
+            const u = String(inputUrl).trim();
+            if (!u) return '';
+            if (u.startsWith('data:') || u.startsWith('blob:')) return u;
+            try {
+                return encodeURI(new URL(u, window.location.href).toString());
+            } catch {
+                return encodeURI(u);
+            }
+        }
+
+        function withCacheBuster(inputUrl) {
+            const u = String(inputUrl || '');
+            if (!u || u.startsWith('data:') || u.startsWith('blob:')) return u;
+            try {
+                const url = new URL(u, window.location.href);
+                url.searchParams.set('_cb', String(Date.now()));
+                return url.toString();
+            } catch {
+                const sep = u.includes('?') ? '&' : '?';
+                return `${u}${sep}_cb=${Date.now()}`;
+            }
+        }
+
+        window.handleImgError = function(imgEl) {
+            if (!imgEl || !imgEl.src) return;
+            const src = String(imgEl.src);
+            if (src.includes('img/logo.png')) return;
+            const retried = imgEl.dataset && imgEl.dataset.retry === '1';
+            if (!retried) {
+                if (imgEl.dataset) imgEl.dataset.retry = '1';
+                imgEl.src = withCacheBuster(src);
+                return;
+            }
+            imgEl.src = 'img/logo.png';
+            imgEl.classList.add('opacity-60');
+        }
+
+        window.handleAvatarError = function(imgEl, name = '') {
+            if (!imgEl) return;
+            const safeName = name ? String(name) : 'User';
+            imgEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=random&color=fff&size=40`;
+        }
+
+        async function prepareImageForUpload(file) {
+            if (!file || !file.type || !file.type.startsWith('image/')) return { file, meta: null };
+            if (file.type === 'image/gif' || file.type === 'image/svg+xml') return { file, meta: { originalBytes: file.size, finalBytes: file.size, compressed: false } };
+
+            const MAX_DIM = 1920;
+            const MAX_BYTES = 2.5 * 1024 * 1024;
+            const shouldTry = (file.size > MAX_BYTES);
+            if (!shouldTry) return { file, meta: { originalBytes: file.size, finalBytes: file.size, compressed: false } };
+
+            try {
+                const bmp = await createImageBitmap(file);
+                const maxSide = Math.max(bmp.width, bmp.height);
+                const scale = Math.min(1, MAX_DIM / maxSide);
+                const w = Math.max(1, Math.round(bmp.width * scale));
+                const h = Math.max(1, Math.round(bmp.height * scale));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d', { alpha: false });
+                ctx.drawImage(bmp, 0, 0, w, h);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.82));
+                if (!blob || blob.size >= file.size) {
+                    return { file, meta: { originalBytes: file.size, finalBytes: file.size, compressed: false } };
+                }
+                const outName = (file.name || 'image').replace(/\.[^.]+$/, '') + '.webp';
+                const outFile = new File([blob], outName, { type: blob.type });
+                return { file: outFile, meta: { originalBytes: file.size, finalBytes: outFile.size, compressed: true } };
+            } catch {
+                return { file, meta: { originalBytes: file.size, finalBytes: file.size, compressed: false } };
+            }
+        }
+
+        function getFileIcon(filename) {
+            const extension = (filename || '').split('.').pop().toLowerCase();
+            switch (extension) {
+                case 'pdf': return { icon: 'fa-file-pdf', color: 'text-red-500' };
+                case 'doc': case 'docx': return { icon: 'fa-file-word', color: 'text-blue-500' };
+                case 'xls': case 'xlsx': return { icon: 'fa-file-excel', color: 'text-emerald-500' };
+                case 'ppt': case 'pptx': return { icon: 'fa-file-powerpoint', color: 'text-orange-500' };
+                case 'zip': case 'rar': case '7z': return { icon: 'fa-file-archive', color: 'text-amber-500' };
+                default: return { icon: 'fa-file-alt', color: 'text-gray-500' };
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch(`${API_PATH}?action=check_session`);
+                sessionData = await res.json();
+                
+                if (sessionData.loggedin) {
+                    gid('user-name').textContent = sessionData.display_name || 'User';
+                    gid('welcome-name').textContent = sessionData.display_name || 'User';
+                    gid('user-role').textContent = sessionData.role;
+
+                    if (sessionData.image) {
+                        const avatar = gid('user-avatar');
+                        if (avatar) avatar.innerHTML = `<img src="uploads/employees/${sessionData.image}" class="w-full h-full object-cover" alt="Profile">`;
+                    }
+
+                    applyCompanyTheme(sessionData.company);
+                    
+                    if (sessionData.role === 'admin') {
+                        gid('menu-admin').classList.remove('hidden');
+                        const loanMenu = gid('menu-loan-manage');
+                        if (loanMenu) loanMenu.classList.remove('hidden');
+                    }
+
+                    if (sessionData.role === 'admin' || sessionData.primary_department === 'IT') {
+                        gid('menu-dashboard').classList.remove('hidden');
+                        gid('menu-it-center').classList.remove('hidden');
+                        if (sessionData.role === 'admin') gid('menu-update-db').classList.remove('hidden');
+                    }
+
+                    initItCommandCenter();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            } catch (e) {
+                console.error('Auth error:', e);
+            }
+        }
+
+        function applyCompanyTheme(company) {
+            const logoImg = gid('dashboard-logo-img');
+            const logoIcon = gid('logo-icon');
+            const logoBg = gid('logo-bg');
+            const logoPaths = { PT4:'uploads/logos/pt4_logo.png', PTA:'uploads/logos/pta_logo.png', PTE:'uploads/logos/pte_logo.png' };
+            if (logoImg && logoPaths[company]) {
+                logoImg.src = logoPaths[company] + '?t=' + Date.now();
+                logoImg.classList.remove('hidden');
+                if (logoIcon) logoIcon.classList.add('hidden');
+            } else {
+                if (logoImg) logoImg.classList.add('hidden');
+                if (logoIcon) logoIcon.classList.remove('hidden');
+            }
+            if (logoBg) {
+                logoBg.classList.remove('from-blue-500','to-indigo-600','from-emerald-600','to-teal-600','from-red-600','to-rose-600');
+                if (company === 'PTA') { logoBg.classList.add('from-emerald-600','to-teal-600'); }
+                else if (company === 'PT4') { logoBg.classList.add('from-red-600','to-rose-600'); }
+                else { logoBg.classList.add('from-blue-500','to-indigo-600'); }
+            }
+            const linkIcon = document.querySelector("link[rel~='icon']");
+            if (linkIcon && logoPaths[company]) linkIcon.href = logoPaths[company] + '?t=' + Date.now();
+        }
+
+        function initItCommandCenter() {
+            if (sessionData.role !== 'admin' && sessionData.primary_department !== 'IT') return;
+            
+            const container = gid('itcc-button-container');
+            const btn = gid('itcc-button');
+            
+            if (container) container.classList.remove('hidden');
+            if (btn) {
+                btn.onclick = () => { window.location.href = 'log.html'; };
+            }
+            
+            itccAudio = gid('itcc-sound');
+            fetchItccTasks(true);
+            itccPollInterval = setInterval(() => fetchItccTasks(false), 15000);
+        }
+
+        async function fetchItccTasks(isInitial = false) {
+            try {
+                const res = await fetch(`${API_PATH}?action=get_pending_tasks`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                const total = parseInt(data.total || 0, 10) || 0;
+                const urgentCount = parseInt(data.urgent_count || data.urgentCount || 0, 10) || 0;
+                itccTasks = Array.isArray(data.tasks) ? data.tasks : [];
+
+                updateItccBadge(total, urgentCount);
+
+                if (!isInitial && total > itccLastTotal && total > 0 && itccAudio) {
+                    try {
+                        itccAudio.currentTime = 0;
+                        itccAudio.play().catch(() => {});
+                    } catch (_) {}
+                }
+
+                itccLastTotal = total;
+            } catch (e) {
+                console.error('[ITCC] Failed to load pending tasks', e);
+            }
+        }
+
+        function updateItccBadge(total, urgentCount) {
+            const badge = gid('itcc-badge');
+            if (!badge) return;
+            
+            if (total > 0) {
+                badge.textContent = total > 99 ? '99+' : total;
+                badge.classList.remove('hidden');
+                if (urgentCount > 0) {
+                    badge.classList.add('itcc-badge-blink');
+                } else {
+                    badge.classList.remove('itcc-badge-blink');
+                }
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function changeStatusSlide(dir) {
+            myStatusIndex += dir;
+            renderMyStatusUI();
+        }
+
+        function renderMyStatus(myLogs, myLoans) {
+            const container = gid('my-status-content');
+            if (!container) return;
+
+            const isIT = sessionData.role === 'admin' || sessionData.primary_department === 'IT';
+
+            const activeTickets = myLogs
+                .filter(l => !['Completed', 'Closed', 'Cancelled', 'Unrepairable'].includes(l.status))
+                .map(l => ({
+                    type: 'ticket',
+                    data: l,
+                    sortDate: new Date(l.date),
+                    priority: (l.status === 'Pending' && isIT) ? 0 : 1
+                }));
+
+            const activeLoans = myLoans
+                .filter(l => ['Pending', 'Active'].includes(l.loan_status))
+                .map(l => ({
+                    type: 'loan',
+                    data: l,
+                    sortDate: new Date(l.return_date || new Date()),
+                    priority: l.loan_status === 'Pending' ? 0 : 2
+                }));
+
+            let allItems = [...activeTickets, ...activeLoans];
+
+            allItems.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                if (a.type === 'ticket' && b.type === 'ticket') {
+                    const aAssigned = a.data.servicedById === sessionData.user_id;
+                    const bAssigned = b.data.servicedById === sessionData.user_id;
+                    if (aAssigned !== bAssigned) return aAssigned ? -1 : 1;
+                }
+                return b.sortDate - a.sortDate;
+            });
+
+            if (myStatusIndex >= allItems.length) myStatusIndex = 0;
+            if (myStatusIndex < 0) myStatusIndex = Math.max(0, allItems.length - 1);
+
+            const currentItem = allItems[myStatusIndex];
+            const totalActive = allItems.length;
+
+            let html = '';
+
+            if (currentItem) {
+                const isTicket = currentItem.type === 'ticket';
+                const itemData = currentItem.data;
+
+                let currentIdx = 0;
+                let subStatus = '';
+                let activeColor = 'blue';
+                let step2Label = 'ดำเนินการ';
+
+                if (isTicket) {
+                    if (itemData.status === 'Pending') currentIdx = 0;
+                    else if (['Received','In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(itemData.status)) {
+                        currentIdx = 1;
+                        if(itemData.status === 'Received') { subStatus = 'รับเรื่องแล้ว (รอเริ่มซ่อม)'; activeColor = 'amber'; step2Label = 'รับเรื่องแล้ว'; }
+                        else if(itemData.status === 'PR Submitted') { subStatus = 'ส่ง PR แล้ว'; activeColor = 'sky'; step2Label = 'PR แล้ว'; }
+                        else if(itemData.status === 'PO Issued') { subStatus = 'ออก PO แล้ว'; activeColor = 'teal'; step2Label = 'PO แล้ว'; }
+                        else if(itemData.status === 'Parts Received') { subStatus = 'ได้รับอะไหล่แล้ว'; activeColor = 'cyan'; step2Label = 'อะไหล่มาแล้ว'; }
+                        else if(itemData.status === 'Waiting for Parts') { subStatus = 'รออะไหล่'; activeColor = 'orange'; step2Label = 'รออะไหล่'; }
+                        else if(itemData.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'indigo'; step2Label = 'แก้ชั่วคราว'; }
+                        else { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
+                    }
+                    else if (itemData.status === 'Unrepairable') { currentIdx = 2; activeColor = 'red'; }
+                } else {
+                    step2Label = 'กำลังยืม';
+                    if (itemData.loan_status === 'Pending') { currentIdx = 0; activeColor = 'amber'; }
+                    else if (itemData.loan_status === 'Active') { currentIdx = 1; activeColor = 'blue'; }
+                }
+
+                const steps = [
+                    { label: isTicket ? 'รับเรื่อง' : 'ขออนุมัติ', icon: isTicket ? 'fa-file-import' : 'fa-hand-holding' },
+                    { label: step2Label, icon: 'fa-tools' },
+                    { label: isTicket ? 'เสร็จสิ้น' : 'คืนแล้ว', icon: 'fa-check' }
+                ];
+
+                let timelineHtml = `<div class="flex items-center w-full mt-3">`;
+                steps.forEach((s, i) => {
+                    let circle = 'bg-white/20 text-blue-200';
+                    let text = 'text-blue-200';
+
+                    if (i < currentIdx) {
+                        circle = 'bg-white/90 text-emerald-500';
+                        text = 'text-white font-medium';
+                    } else if (i === currentIdx) {
+                        if(activeColor === 'blue') { circle = 'bg-white text-blue-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'orange') { circle = 'bg-white text-orange-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'indigo') { circle = 'bg-white text-indigo-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'sky') { circle = 'bg-white text-sky-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'teal') { circle = 'bg-white text-teal-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'cyan') { circle = 'bg-white text-cyan-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                        else if(activeColor === 'amber') { circle = 'bg-white text-amber-500 ring-4 ring-white/20'; text = 'text-white font-bold'; }
+                    }
+
+                    const lineHtml = i > 0 ? `<div class="flex-1 h-0.5 rounded ${i <= currentIdx ? 'bg-white/70' : 'bg-white/20'}"></div>` : '';
+
+                    timelineHtml += `${lineHtml}
+                        <div class="relative flex flex-col items-center group/step mx-1">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs z-10 transition-all ${circle}">
+                                <i class="fas ${s.icon}"></i>
+                            </div>
+                            <div class="absolute top-7 text-[10px] whitespace-nowrap ${text}">
+                                ${s.label}
+                                ${i === 1 && subStatus && i === currentIdx ? `<div class="text-[9px] opacity-80">${subStatus}</div>` : ''}
+                            </div>
+                        </div>`;
+                });
+                timelineHtml += `</div>`;
+
+                let navHtml = '';
+                if (totalActive > 1) {
+                    navHtml = `
+                        <div class="flex items-center gap-1 absolute top-4 right-4 bg-black/20 rounded-lg p-1 backdrop-blur-sm z-20">
+                            <button onclick="changeStatusSlide(-1)" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded text-white/80 hover:text-white transition"><i class="fas fa-chevron-left text-xs"></i></button>
+                            <span class="text-[10px] font-mono text-white/90 min-w-[30px] text-center select-none">${myStatusIndex + 1}/${totalActive}</span>
+                            <button onclick="changeStatusSlide(1)" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded text-white/80 hover:text-white transition"><i class="fas fa-chevron-right text-xs"></i></button>
+                        </div>
+                    `;
+                }
+
+                let badgeHtml = '';
+                let cardClickAction = '';
+                let titleText = '';
+                let subTitleText = '';
+                let detailText = '';
+                let cardBgClass = 'bg-gradient-to-br from-blue-600 to-indigo-700';
+
+                if (isTicket) {
+                    const isAssigned = itemData.servicedById === sessionData.user_id;
+                    badgeHtml = isAssigned
+                        ? '<span class="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shadow-sm">งานซ่อม</span>'
+                        : '<span class="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">Ticket</span>';
+                    cardClickAction = `showTicketDetails('${itemData.id}')`;
+                    titleText = itemData.problem;
+                    subTitleText = itemData.id;
+                    detailText = itemData.solution
+                        ? `<div class="mt-2 pt-2 border-t border-white/10 text-xs text-blue-100 line-clamp-2"><i class="fas fa-wrench mr-1"></i> ${escapeHtml(itemData.solution)}</div>`
+                        : '';
+
+                    if (itemData.urgency) {
+                        let uIcon = 'fa-info-circle';
+                        if (itemData.urgency === 'ด่วน') uIcon = 'fa-bolt';
+                        else if (itemData.urgency === 'ด่วนที่สุด') uIcon = 'fa-fire';
+                        badgeHtml += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-white/20 ml-1"><i class="fas ${uIcon}"></i> ${itemData.urgency}</span>`;
+                    }
+                    if (String(itemData.pr_no || '').trim()) {
+                        badgeHtml += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-blue-600 text-white ml-1"><i class="fas fa-file-signature text-[9px]"></i>PR</span>`;
+                    }
+                    if (String(itemData.po_no || '').trim()) {
+                        badgeHtml += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-600 text-white ml-1"><i class="fas fa-file-invoice text-[9px]"></i>PO</span>`;
+                    }
+
+                    if ((isAssigned || isIT) && itemData.status === 'Pending') {
+                        cardBgClass = 'bg-gradient-to-br from-orange-500 to-red-600 animate-pulse';
+                        if (isAssigned) cardClickAction = "window.location.href='dashboard.html'";
+                    }
+                } else {
+                    badgeHtml = '<span class="bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shadow-sm">ยืมของ</span>';
+                    cardClickAction = "window.location.href='my_borrow_history.html'";
+                    titleText = itemData.asset_name;
+                    subTitleText = itemData.equipment_id;
+                    const returnDate = itemData.return_date ? new Date(itemData.return_date).toLocaleDateString('th-TH') : '-';
+                    detailText = `<div class="mt-2 pt-2 border-t border-white/10 text-xs text-blue-100"><i class="fas fa-calendar-alt mr-1"></i> กำหนดคืน: ${returnDate}</div>`;
+                    if (itemData.loan_status === 'Pending') cardBgClass = 'bg-gradient-to-br from-amber-500 to-orange-600';
+                }
+
+                const cardBg = gid('stat-card-bg');
+                if(cardBg) {
+                    cardBg.className = `${cardBgClass} rounded-2xl shadow-lg shadow-blue-500/30 p-6 text-white relative overflow-hidden group transition-all duration-500`;
+                }
+
+                html = `
+                    <h3 class="font-bold text-blue-100 mb-1 text-sm uppercase tracking-wider">สถานะล่าสุด (รวม)</h3>
+                    ${navHtml}
+                    <div onclick="${cardClickAction}" class="block p-3 bg-black/10 rounded-lg hover:bg-black/20 transition cursor-pointer relative group">
+                        <div class="flex items-center justify-between pr-6 mb-0.5">
+                            <p class="font-bold text-white truncate flex-1">${escapeHtml(titleText)}</p>
+                            ${badgeHtml}
+                        </div>
+                        <div class="flex items-center mt-0.5">
+                            <p class="text-xs text-blue-200 font-mono">${subTitleText}</p>
+                        </div>
+                        ${detailText}
+                    </div>
+                    ${timelineHtml}
+                    <div class="flex justify-between items-end mt-10">
+                        <a href="my_tickets.html" class="text-sm text-blue-200 hover:text-white hover:underline">ดูทั้งหมด (${totalActive} รายการ) <i class="fas fa-arrow-right text-xs"></i></a>
+                        <div class="text-right"></div>
+                    </div>
+                `;
+            } else {
+                const cardBg = gid('stat-card-bg');
+                if(cardBg) cardBg.className = 'bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg shadow-blue-500/30 p-6 text-white relative overflow-hidden group';
+
+                html = `
+                    <h3 class="font-bold text-blue-100 mb-1 text-sm uppercase tracking-wider">สถานะของฉัน</h3>
+                    <div class="flex justify-between items-center mt-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-4xl text-emerald-300"></i>
+                            <div>
+                                <span class="text-2xl font-bold block">All Clear!</span>
+                                <span class="text-sm text-blue-200">ไม่มีงานค้าง</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function clearAnnouncementRotationTimer() {
+            if (announcementInterval) {
+                clearTimeout(announcementInterval);
+                announcementInterval = null;
+            }
+        }
+
+        function getActiveAnnouncementTrack() {
+            const activeSlide = document.querySelector(`.announcement-slide[data-index="${announcementActiveIndex}"]`);
+            if (!activeSlide) return null;
+            return activeSlide.querySelector('.announcement-content-track');
+        }
+
+        function scheduleAnnouncementRotation(totalSlides) {
+            clearAnnouncementRotationTimer();
+            if (!totalSlides || totalSlides <= 1) return;
+            const activeTrack = getActiveAnnouncementTrack();
+            const durationSec = Number(activeTrack?.dataset?.durationSec || 0);
+            const waitMs = durationSec > 0 ? Math.max(6000, Math.round((durationSec + 1.5) * 1000)) : 12000;
+            announcementInterval = setTimeout(() => {
+                announcementActiveIndex = (announcementActiveIndex + 1) % totalSlides;
+                showAnnouncement(announcementActiveIndex);
+                scheduleAnnouncementRotation(totalSlides);
+            }, waitMs);
+        }
+
+        function bindAnnouncementTouchHandlers() {
+            const container = gid('announcement-container');
+            if (!container || container.dataset.touchBound === '1') return;
+            container.dataset.touchBound = '1';
+            container.addEventListener('touchstart', () => {
+                const activeTrack = getActiveAnnouncementTrack();
+                if (activeTrack) activeTrack.style.animationPlayState = 'paused';
+                clearAnnouncementRotationTimer();
+            }, { passive: true });
+            container.addEventListener('touchstart', (ev) => {
+                const t = ev.changedTouches && ev.changedTouches[0];
+                if (!t) return;
+                announcementTouchStartX = t.clientX;
+                announcementTouchStartY = t.clientY;
+            }, { passive: true });
+            container.addEventListener('touchend', (ev) => {
+                const t = ev.changedTouches && ev.changedTouches[0];
+                if (!t) return;
+                const dx = t.clientX - announcementTouchStartX;
+                const dy = t.clientY - announcementTouchStartY;
+                const isSwipeHorizontal = Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy);
+                if (isSwipeHorizontal && announcementTotalSlides > 1) {
+                    announcementActiveIndex = dx < 0
+                        ? (announcementActiveIndex + 1) % announcementTotalSlides
+                        : (announcementActiveIndex - 1 + announcementTotalSlides) % announcementTotalSlides;
+                    showAnnouncement(announcementActiveIndex);
+                }
+                const activeTrack = getActiveAnnouncementTrack();
+                if (activeTrack) activeTrack.style.animationPlayState = 'running';
+                scheduleAnnouncementRotation(announcementTotalSlides);
+            }, { passive: true });
+        }
+
+        function stopAnnouncementContentAutoScroll() {
+            const tracks = document.querySelectorAll('.announcement-content-track');
+            tracks.forEach(track => {
+                track.style.animationName = 'none';
+                track.style.transform = 'translateY(0)';
+            });
+            announcementContentScrollTimer = null;
+            announcementContentScrollState = null;
+        }
+
+        function startAnnouncementContentAutoScroll(index) {
+            stopAnnouncementContentAutoScroll();
+            const slides = document.querySelectorAll('.announcement-slide');
+            const targetSlide = slides[index];
+            if (!targetSlide) return;
+            const contentEl = targetSlide.querySelector('.announcement-content');
+            const trackEl = targetSlide.querySelector('.announcement-content-track');
+            if (!contentEl) return;
+            if (!trackEl) return;
+
+            requestAnimationFrame(() => {
+                if (!document.body.contains(contentEl) || !document.body.contains(trackEl)) return;
+                if (!trackEl.dataset.baseHtml) {
+                    trackEl.dataset.baseHtml = trackEl.innerHTML;
+                }
+                const baseHtml = trackEl.dataset.baseHtml;
+                trackEl.innerHTML = `<div class="announcement-content-item">${baseHtml}</div><div class="announcement-content-item mt-5">${baseHtml}</div>`;
+                const firstItem = trackEl.querySelector('.announcement-content-item');
+                if (!firstItem) return;
+
+                const viewportHeight = contentEl.clientHeight;
+                const itemHeight = firstItem.offsetHeight;
+                const loopDistance = itemHeight + 20;
+                if (loopDistance <= 2) return;
+                const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+                const pxPerSec = isMobile ? 9 : 11;
+                const durationSec = Math.max(12, loopDistance / pxPerSec);
+                announcementContentScrollState = { loopDistance, viewportHeight, durationSec };
+                trackEl.dataset.durationSec = durationSec.toFixed(2);
+
+                trackEl.style.setProperty('--start-y', `${viewportHeight}px`);
+                trackEl.style.setProperty('--end-y', `${-loopDistance}px`);
+                trackEl.style.animationDuration = `${durationSec}s`;
+                trackEl.style.animationName = 'none';
+                void trackEl.offsetHeight;
+                trackEl.style.animationName = 'announcementVerticalMarquee';
+                trackEl.style.animationPlayState = 'running';
+            });
+        }
+
+        function renderMyStatusUI() {
+            if (!sessionData.user_id) return;
+            let myLogs = [];
+            if (sessionData.role === 'admin' || sessionData.primary_department === 'IT') {
+                myLogs = allLogs.filter(l => l.requester_id === sessionData.user_id || l.servicedById === sessionData.user_id || l.status === 'Pending');
+            } else {
+                myLogs = allLogs.filter(l => l.requester_id === sessionData.user_id || l.servicedById === sessionData.user_id);
+            }
+            const myLoans = allLoans.filter(l => l.borrower_id == sessionData.user_id);
+            renderMyStatus(myLogs, myLoans);
+        }
+
+        function renderAnnouncements(list) {
+            const container = gid('announcement-container');
+            const indicators = gid('announcement-indicators');
+            container.innerHTML = '';
+            indicators.innerHTML = '';
+            stopAnnouncementContentAutoScroll();
+            clearAnnouncementRotationTimer();
+            
+            const now = new Date();
+            const active = list.filter(a => {
+                if (!a.expirationDate) return true;
+                const exp = new Date(a.expirationDate);
+                if (isNaN(exp.getTime())) return true;
+                exp.setHours(23, 59, 59, 999);
+                return exp >= now;
+            });
+            
+            if (active.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
+                    <i class="fas fa-check-circle text-2xl mb-2 opacity-40"></i>
+                    ไม่มีประกาศใหม่
+                </div>`;
+                return;
+            }
+            announcementTotalSlides = active.length;
+
+            active.forEach((a, index) => {
+                let icon = 'fas fa-info-circle', color = 'text-blue-500', bg = 'bg-blue-100 dark:bg-blue-900/30';
+                if(a.level === 'warning') { icon = 'fas fa-exclamation-triangle'; color = 'text-amber-500'; bg = 'bg-amber-100 dark:bg-amber-900/30'; }
+                if(a.level === 'critical') { icon = 'fas fa-fire'; color = 'text-red-500'; bg = 'bg-red-100 dark:bg-red-900/30'; }
+
+                const item = document.createElement('div');
+                item.className = `announcement-slide absolute inset-0 flex flex-col justify-center ease-out transform ${index === 0 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'}`;
+                item.dataset.index = index;
+                
+                item.innerHTML = `
+                    <div class="flex gap-3 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center ${color} announcement-icon-float">
+                                <i class="${icon} text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span class="badge-pill ${bg} ${color} uppercase text-[9px]">${a.level || 'Info'}</span>
+                                ${active.length > 1 ? '<span class="inline-flex items-center gap-1 text-[10px] text-slate-400"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 announcement-live-dot"></span>auto</span>' : ''}
+                            </div>
+                            <h4 class="text-sm font-semibold text-gray-800 dark:text-white break-words">${escapeHtml(a.title)}</h4>
+                            <div class="announcement-content custom-scrollbar text-xs text-gray-600 dark:text-gray-300 mt-1"><div class="announcement-content-track">${formatAnnouncementContent(a.content)}</div></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+
+                const contentEl = item.querySelector('.announcement-content');
+                if (contentEl) {
+                    contentEl.addEventListener('mouseenter', () => {
+                        clearAnnouncementRotationTimer();
+                        const activeTrack = getActiveAnnouncementTrack();
+                        if (activeTrack) activeTrack.style.animationPlayState = 'paused';
+                    });
+                    contentEl.addEventListener('mouseleave', () => {
+                        const activeTrack = getActiveAnnouncementTrack();
+                        if (activeTrack) activeTrack.style.animationPlayState = 'running';
+                        scheduleAnnouncementRotation(active.length);
+                    });
+                }
+
+                const dot = document.createElement('button');
+                dot.className = `h-1.5 rounded-full transition-all duration-300 ${index === 0 ? 'bg-orange-500 w-5' : 'bg-gray-300 dark:bg-gray-600 w-1.5 hover:bg-orange-300'}`;
+                dot.onclick = () => {
+                    announcementActiveIndex = index;
+                    showAnnouncement(index);
+                    scheduleAnnouncementRotation(active.length);
+                };
+                indicators.appendChild(dot);
+            });
+
+            announcementActiveIndex = 0;
+            showAnnouncement(0);
+
+            if (active.length > 1) {
+                bindAnnouncementTouchHandlers();
+                scheduleAnnouncementRotation(active.length);
+                container.onmouseenter = () => {
+                    clearAnnouncementRotationTimer();
+                    const activeTrack = getActiveAnnouncementTrack();
+                    if (activeTrack) activeTrack.style.animationPlayState = 'paused';
+                };
+                container.onmouseleave = () => {
+                    const activeTrack = getActiveAnnouncementTrack();
+                    if (activeTrack) activeTrack.style.animationPlayState = 'running';
+                    scheduleAnnouncementRotation(active.length);
+                };
+            } else {
+                container.onmouseenter = null;
+                container.onmouseleave = null;
+            }
+        }
+
+        function showAnnouncement(index) {
+            const slides = document.querySelectorAll('.announcement-slide');
+            const dots = document.querySelectorAll('#announcement-indicators button');
+            announcementActiveIndex = index;
+            stopAnnouncementContentAutoScroll();
+            
+            slides.forEach((s, i) => {
+                if (i === index) {
+                    s.classList.remove('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    s.classList.add('opacity-100', 'translate-x-0');
+                } else {
+                    s.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    s.classList.remove('opacity-100', 'translate-x-0');
+                }
+            });
+
+            dots.forEach((d, i) => {
+                if (i === index) {
+                    d.classList.remove('bg-gray-300', 'dark:bg-gray-600', 'w-1.5');
+                    d.classList.add('bg-orange-500', 'w-5');
+                } else {
+                    d.classList.add('bg-gray-300', 'dark:bg-gray-600', 'w-1.5');
+                    d.classList.remove('bg-orange-500', 'w-5');
+                }
+            });
+            startAnnouncementContentAutoScroll(index);
+        }
+
+        function renderServices(services) {
+            const grid = gid('services-grid');
+            grid.innerHTML = '';
+
+            const jobTicketService = { 
+                id: 'job_ticket', 
+                title: 'Task Center', 
+                description: 'ศูนย์รวมงานสำหรับค้นหา กรอง และติดตามงานจำนวนมาก', 
+                icon: 'fas fa-clipboard-list', 
+                color: '#ef4444', 
+                url_primary: 'task_center.html', 
+                sort_order: 99 
+            };
+
+            if (services.length === 0) {
+                services = [
+                    { id: 'req', title: 'แจ้งซ่อม IT', description: 'แจ้งปัญหาคอมพิวเตอร์/Hardware/Network', icon: 'fas fa-wrench', color: '#007AFF', url_primary: 'request.html?mode=it', sort_order: 1 },
+                    { id: 'prog', title: 'แจ้งปัญหาโปรแกรม', description: 'ERP / MRP / iControl / ขอรายงาน', icon: 'fas fa-code', color: '#8e44ad', url_primary: 'request.html?mode=prog', sort_order: 1.5 },
+                    { id: 'loan', title: 'ยืม-คืนอุปกรณ์', description: 'ยืม Notebook, Projector', icon: 'fas fa-hand-holding', color: '#34c759', url_primary: 'loan.html', sort_order: 2 },
+                    { id: 'dir', title: 'สมุดรายชื่อ', description: 'ค้นหาเบอร์โทรพนักงาน', icon: 'fas fa-address-book', color: '#ff9500', url_primary: 'directory.html', sort_order: 4 }
+                ];
+            }
+            
+            if (!services.some(s => s.title === 'Job Ticket' || s.id === 'job_ticket')) {
+                services.push(jobTicketService);
+            }
+
+            services.forEach(s => {
+                const color = s.color || '#007AFF';
+                
+                const card = document.createElement('a');
+                card.href = 'javascript:void(0)';
+                card.onclick = (e) => {
+                    e.preventDefault();
+                    checkServiceUrl(s.url_primary, s.url_fallback);
+                };
+                card.className = "service-card group p-6 cursor-pointer";
+                
+                card.innerHTML = `
+                    <div class="relative">
+                        <div id="status-badge-${s.id}" class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-gray-300/50" title="Checking..."></div>
+                        <div id="notification-badge-${s.id}" class="hidden notification-badge z-10"></div>
+                    </div>
+                    <div class="service-icon w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-4 transition-transform duration-300" style="background: linear-gradient(135deg, ${color} 0%, ${color}dd 100%); box-shadow: 0 4px 12px ${color}40;">
+                        <i class="${s.icon} text-2xl"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-800 dark:text-white mb-1 group-hover:text-blue-500 transition-colors">${escapeHtml(s.title)}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">${escapeHtml(s.description) || 'บริการสำหรับพนักงาน'}</p>
+                    <div class="flex items-center text-xs font-medium" style="color: ${color}">
+                        ${s.button_text || 'เข้าใช้งาน'} 
+                        <i class="fas fa-arrow-right ml-2 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+                
+                checkServiceStatus(s.id, s.url_primary);
+            });
+        }
+
+        window.checkServiceUrl = async function(primary, backup) {
+            if (!primary || primary === '#') return;
+            
+            const newWin = window.open('', '_blank');
+            if (!newWin) {
+                Swal.fire('Popup Blocked', 'กรุณาอนุญาต Popups สำหรับเว็บไซต์นี้', 'error');
+                return;
+            }
+
+            newWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Connecting...</title>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: linear-gradient(180deg, #f5f5f7 0%, #e8e8ed 100%); color: #1d1d1f; }
+                        .container { text-align: center; background: rgba(255,255,255,0.9); padding: 48px; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); max-width: 400px; width: 90%; }
+                        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #007AFF; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 24px; }
+                        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: linear-gradient(180deg, #0a84ff 0%, #007AFF 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; }
+                        .btn:hover { background: linear-gradient(180deg, #1a8fff 0%, #0a84ff 100%); transform: scale(1.02); }
+                        .btn-secondary { background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%); color: #1d1d1f; margin-left: 8px; border: 0.5px solid rgba(0,0,0,0.1); }
+                        .btn-secondary:hover { background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%); }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="spinner"></div>
+                        <h2 style="margin-top:0; font-weight: 600;">Connecting...</h2>
+                        <p style="color:#86868b">กำลังตรวจสอบการเชื่อมต่อ...</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            newWin.document.close();
+
+            if (!backup) {
+                newWin.location.href = primary;
+                return;
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                await fetch(primary, { mode: 'no-cors', signal: controller.signal });
+                clearTimeout(timeoutId);
+                newWin.location.href = primary;
+            } catch (error) {
+                newWin.document.body.innerHTML = `
+                    <div class="container">
+                        <div class="spinner" style="border-top-color: #ff9500;"></div>
+                        <h2 style="margin-top:0; color:#1d1d1f; font-weight: 600;">Connecting to Backup...</h2>
+                        <p style="color:#86868b; margin-bottom:20px;">กำลังสลับไปใช้ลิงก์สำรอง</p>
+                        <div style="background:#fff7ed; color:#b45309; padding:16px; border-radius:12px; font-weight:500; margin-bottom:20px;">
+                            เข้าสู่ระบบอัตโนมัติใน <span id="countdown" style="font-weight:700; font-size:1.2em;">3</span> วินาที
+                        </div>
+                        <div>
+                            <button onclick="location.href='${backup}'" class="btn">ไปทันที</button>
+                            <button onclick="window.close()" class="btn btn-secondary">ปิด</button>
+                        </div>
+                    </div>
+                `;
+                
+                const script = newWin.document.createElement('script');
+                script.textContent = `let c=3;const t=setInterval(()=>{c--;document.getElementById('countdown').textContent=c;if(c<=0){clearInterval(t);location.href='${backup}'}},1000);`;
+                newWin.document.body.appendChild(script);
+            }
+        }
+
+        async function checkServiceStatus(id, primaryUrl) {
+            if (!primaryUrl || primaryUrl === '#') return;
+            const badge = document.getElementById(`status-badge-${id}`);
+            if (!badge) return;
+
+            try {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), 2000);
+                await fetch(primaryUrl, { mode: 'no-cors', signal: controller.signal });
+                badge.className = "absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm";
+                badge.title = "Online";
+            } catch (e) {
+                badge.className = "absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm animate-pulse";
+                badge.title = "Using Backup";
+            }
+        }
+
+        // Chat Functions
+        function toggleChatWindow(forceOpen = null) {
+            const windowEl = gid('chat-window');
+            if (!windowEl) return;
+            const isHidden = windowEl.classList.contains('hidden');
+            const shouldOpen = forceOpen === null ? isHidden : forceOpen;
+            if (shouldOpen) {
+                windowEl.classList.remove('hidden');
+                if (!currentChatUserId) {
+                    const search = gid('chat-user-search');
+                    if (search) setTimeout(() => search.focus(), 80);
+                }
+            } else {
+                windowEl.classList.add('hidden');
+            }
+        }
+
+        async function initChat() {
+            const chatWidget = gid('chat-widget-container');
+            if (!chatWidget) return;
+
+            if (sessionData.loggedin) {
+                chatWidget.classList.remove('hidden');
+            }
+
+            if (!isChatInitialized) {
+                const toggleBtn = gid('chat-toggle-btn');
+                if (toggleBtn) {
+                    toggleBtn.onclick = () => toggleChatWindow();
+                }
+
+                const sendBtn = gid('chat-send-btn');
+                if (sendBtn) sendBtn.addEventListener('click', sendChatMessage);
+
+                const input = gid('chat-message-input');
+                if (input) {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendChatMessage();
+                        }
+                    });
+                    input.addEventListener('paste', handleChatPaste);
+                    input.addEventListener('input', function () {
+                        this.style.height = 'auto';
+                        this.style.height = this.scrollHeight + 'px';
+                        if (this.value === '') this.style.height = '44px';
+                    });
+                    input.addEventListener('input', scheduleTypingStatus);
+                }
+
+                const search = gid('chat-user-search');
+                if (search) search.addEventListener('input', renderChatUserList);
+
+                const fileInput = gid('chat-file-input');
+                if (fileInput) fileInput.addEventListener('change', handleFileSelect);
+
+                isChatInitialized = true;
+            }
+
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission().catch(() => {});
+            }
+
+            await loadChatUsers();
+            startChatPolling();
+        }
+
+        async function loadChatUsers() {
+            try {
+                showChatSkeletons();
+                const res = await fetch(`${API_PATH}?action=get_chat_users&company=${encodeURIComponent(sessionData.company || '')}`);
+                const data = await res.json();
+                if (data.status !== 'success') throw new Error(data.message || 'โหลดรายชื่อไม่สำเร็จ');
+                chatUsers = Array.isArray(data.users) ? data.users.filter(u => u.id !== sessionData.user_id) : [];
+                renderChatUserList();
+            } catch (e) {
+                console.error(e);
+                const list = gid('chat-user-list');
+                if (list) list.innerHTML = `<div class="p-4 text-center text-red-500 text-xs">โหลดรายชื่อไม่สำเร็จ</div>`;
+            }
+        }
+
+        function setChatTab(tab) {
+            currentChatTab = tab;
+            ['chats', 'users', 'groups'].forEach(t => {
+                const btn = gid(`tab-${t}`);
+                if (!btn) return;
+                if (t === tab) {
+                    btn.classList.remove('text-slate-400', 'border-transparent');
+                    btn.classList.add('text-blue-600', 'border-blue-600');
+                } else {
+                    btn.classList.add('text-slate-400', 'border-transparent');
+                    btn.classList.remove('text-blue-600', 'border-blue-600');
+                }
+            });
+            renderChatUserList();
+        }
+
+        function showChatSkeletons() {
+            const listEl = gid('chat-user-list');
+            if (!listEl) return;
+            const rows = Array.from({ length: 8 }).map(() => `
+                <div class="flex items-center gap-3 p-3">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div class="flex-1 min-w-0 space-y-2">
+                        <div class="skeleton skeleton-line w-2/3"></div>
+                        <div class="skeleton skeleton-line w-1/2"></div>
+                    </div>
+                </div>
+            `).join('');
+            listEl.innerHTML = rows;
+        }
+
+        function renderChatUserList() {
+            const listEl = gid('chat-user-list');
+            if (!listEl) return;
+            const search = gid('chat-user-search');
+            const term = (search?.value || '').toLowerCase();
+
+            let users = Array.isArray(chatUsers) ? chatUsers.slice() : [];
+
+            if (currentChatTab === 'groups') {
+                users = users.filter(u => u.is_group);
+            } else if (currentChatTab === 'users') {
+                users = users.filter(u => !u.is_group);
+            }
+
+            users = users.filter(u => {
+                const n1 = (u.name || '').toLowerCase();
+                const n2 = (u.name_th || '').toLowerCase();
+                const dept = (u.department || '').toLowerCase();
+                return !term || n1.includes(term) || n2.includes(term) || dept.includes(term);
+            });
+
+            users.sort((a, b) => {
+                const ta = a.last_message_time || '';
+                const tb = b.last_message_time || '';
+                return ta < tb ? 1 : -1;
+            });
+
+            if (!users.length) {
+                listEl.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">ไม่พบพนักงาน</div>';
+                return;
+            }
+
+            listEl.innerHTML = users.map(u => {
+                const avatar = u.is_group
+                    ? 'https://ui-avatars.com/api/?name=IT+Group&background=0ea5e9&color=fff&size=40&font-size=0.33'
+                    : (u.image ? `uploads/employees/${u.image}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random&color=fff&size=40`);
+                const active = u.id === currentChatUserId;
+                const activeClass = active ? 'bg-blue-50 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50';
+                const unread = parseInt(u.unread_count) || 0;
+                const badgeClass = unread > 0 ? '' : 'hidden';
+                const badgeText = unread > 99 ? '99+' : unread;
+
+                return `
+                    <div class="group flex items-center gap-3 p-3 cursor-pointer transition-colors ${activeClass}"
+                         onclick="selectChatUser('${u.id}', '${escapeHtml(u.name)}', '${avatar}')">
+                        <div class="relative">
+                            <img src="${avatar}" class="w-10 h-10 rounded-full object-cover">
+                            <span id="chat-user-badge-${u.id}" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800 ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center gap-2">
+                                <p class="font-semibold text-sm text-slate-800 dark:text-white truncate">${escapeHtml(u.name_th || u.name || '')}</p>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold">${escapeHtml(u.company || '')}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate">${escapeHtml(u.department || '')}</p>
+                        </div>
+                        <button onclick="leaveOrHideChat(event, '${u.id}', '${escapeHtml(u.name)}', ${u.is_group || false})" class="flex-shrink-0 w-6 h-6 rounded-full text-slate-400 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/50 hidden group-hover:flex items-center justify-center transition" title="${u.is_group ? 'ออกจากกลุ่ม' : 'ซ่อนแชท'}">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectChatUser(userId, userName, userAvatar) {
+            currentChatUserId = userId;
+            renderChatUserList();
+
+            const headerInfo = gid('chat-header-info');
+            if (headerInfo) {
+                const backBtn = `<button onclick="backToChatList()" class="sm:hidden mr-2 text-slate-500 hover:text-blue-600"><i class="fas fa-arrow-left"></i></button>`;
+                let groupActionBtns = '';
+                if (String(userId).startsWith('GROUP_') && userId !== 'GROUP_IT') {
+                    groupActionBtns = `
+                        <button onclick="editGroupName('${userId}', '${escapeHtml(userName)}')" class="ml-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-100 transition" title="แก้ไขชื่อกลุ่ม"><i class="fas fa-edit"></i></button>
+                        <button onclick="openGroupMemberList('${userId}', '${escapeHtml(userName)}')" class="ml-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-100 transition" title="สมาชิกในกลุ่ม"><i class="fas fa-users"></i></button>
+                        <button onclick="openGroupInviteModal('${userId}', '${escapeHtml(userName)}')" class="ml-1 text-emerald-500 hover:text-emerald-600 transition" title="เพิ่มสมาชิกในกลุ่ม"><i class="fas fa-user-plus"></i></button>
+                        <button onclick="confirmGroupLeaveOrDelete('${userId}', '${escapeHtml(userName)}')" class="ml-1 text-red-500 hover:text-red-600 transition" title="ออกจากกลุ่ม / ลบกลุ่ม"><i class="fas fa-trash-alt"></i></button>
+                    `;
+                }
+                headerInfo.innerHTML = `
+                    ${backBtn}
+                    <img src="${userAvatar}" class="w-8 h-8 rounded-full object-cover">
+                    <div class="flex items-center min-w-0">
+                        <h3 class="font-bold text-slate-700 dark:text-white truncate">${escapeHtml(userName)}</h3>
+                        ${groupActionBtns}
+                    </div>
+                `;
+            }
+
+            gid('chat-conversation-header').classList.remove('hidden');
+            gid('chat-placeholder').classList.add('hidden');
+            gid('chat-messages-container').classList.remove('hidden');
+            gid('chat-input-container').classList.remove('hidden');
+
+            if (window.innerWidth < 640) {
+                gid('chat-sidebar').classList.add('hidden');
+                gid('chat-conversation-area').classList.remove('hidden');
+                gid('chat-conversation-area').classList.add('flex');
+            }
+
+            const badge = gid(`chat-user-badge-${userId}`);
+            if (badge) {
+                badge.classList.add('hidden');
+                badge.textContent = '0';
+            }
+
+            await loadChatHistory(userId);
+            gid('chat-message-input').focus();
+        }
+
+        async function editGroupName(groupId, oldNameParam) {
+            try {
+                const headerInfo = gid('chat-header-info');
+                const titleEl = headerInfo ? headerInfo.querySelector('h3') : null;
+                const currentName = titleEl ? titleEl.textContent : (oldNameParam || '');
+                const { value: newName } = await Swal.fire({
+                    title: 'แก้ไขชื่อกลุ่ม',
+                    input: 'text',
+                    inputValue: currentName,
+                    inputPlaceholder: 'ระบุชื่อกลุ่มใหม่',
+                    showCancelButton: true,
+                    confirmButtonText: 'บันทึก',
+                    cancelButtonText: 'ยกเลิก',
+                    preConfirm: (val) => {
+                        const v = (val || '').trim();
+                        if (!v) {
+                            Swal.showValidationMessage('กรุณาระบุชื่อกลุ่ม');
+                            return false;
+                        }
+                        return v;
+                    }
+                });
+                if (!newName) return;
+
+                const fd = new FormData();
+                fd.append('action', 'update_chat_group_name');
+                fd.append('group_id', groupId);
+                fd.append('new_name', newName);
+
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.status !== 'success') throw new Error(data.message || 'ไม่สามารถเปลี่ยนชื่อกลุ่มได้');
+
+                const group = Array.isArray(chatUsers) ? chatUsers.find(u => u.id === groupId) : null;
+                if (group) group.name = newName;
+                if (titleEl) titleEl.textContent = newName;
+                renderChatUserList();
+                Swal.fire('สำเร็จ', 'เปลี่ยนชื่อกลุ่มเรียบร้อยแล้ว', 'success');
+            } catch (e) {
+                Swal.fire('ผิดพลาด', e.message, 'error');
+            }
+        }
+
+        function backToChatList() {
+            gid('chat-sidebar').classList.remove('hidden');
+            gid('chat-conversation-area').classList.add('hidden');
+            gid('chat-conversation-area').classList.remove('flex');
+        }
+
+        async function loadChatHistory(otherUserId) {
+            const container = gid('chat-messages-container');
+            if (!container) return;
+            container.innerHTML = '<div class="text-center text-slate-400 p-4"><i class="fas fa-spinner fa-spin"></i></div>';
+            try {
+                const res = await fetch(`${API_PATH}?action=get_chat_history&other_user_id=${encodeURIComponent(otherUserId)}&company=${encodeURIComponent(sessionData.company || '')}&v=${Date.now()}`, { cache: 'no-store' });
+                const data = await res.json();
+                if (data.status !== 'success') throw new Error(data.message || 'โหลดประวัติไม่สำเร็จ');
+                renderMessages(data.messages || []);
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = '<div class="text-center text-red-500 p-4 text-xs">โหลดประวัติไม่สำเร็จ</div>';
+            }
+        }
+
+        function renderMessages(messages, append = false) {
+            const container = gid('chat-messages-container');
+            if (!container) return;
+            if (!append) container.innerHTML = '';
+            if (!messages || !messages.length) {
+                if (!append) container.innerHTML = '<div class="text-center text-slate-400 text-xs p-4">ยังไม่มีข้อความ</div>';
+                return;
+            }
+
+            messages.forEach(msg => {
+                if (gid(`chat-msg-${msg.message_id}`)) return;
+                const isSent = String(msg.sender_id) === String(sessionData.user_id);
+                const cls = isSent ? 'sent items-end' : 'received items-start';
+                const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+
+                let contentHtml = '';
+                try {
+                    const obj = JSON.parse(msg.message_text);
+                    if (obj.type === 'text') {
+                        contentHtml = enhanceTextWithTicketRefs(obj.content || '');
+                    } else if (obj.type === 'image') {
+                        const url = normalizeUrl(obj.url);
+                        contentHtml = url
+                            ? `<a href="${url}" class="chat-lightbox block"><img src="${url}" loading="lazy" decoding="async" onerror="handleImgError(this)" class="max-w-[250px] max-h-[250px] rounded-lg border object-contain"></a>`
+                            : '<div class="text-xs text-slate-400">รูปภาพไม่พร้อมใช้งาน</div>';
+                    } else if (obj.type === 'file') {
+                        const url = normalizeUrl(obj.url) || '#';
+                        const sizeStr = obj.size ? (obj.size > 1024 * 1024 ? `${(obj.size / (1024 * 1024)).toFixed(2)} MB` : `${(obj.size / 1024).toFixed(1)} KB`) : '';
+                        const fileInfo = getFileIcon(obj.filename || '');
+                        contentHtml = `
+                            <a href="${url}" target="_blank" class="flex items-center gap-3 p-2 bg-slate-200 dark:bg-slate-600 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-500 no-underline">
+                                <i class="fas ${fileInfo.icon} text-2xl ${fileInfo.color}"></i>
+                                <div class="min-w-0">
+                                    <div class="font-medium truncate text-slate-700 dark:text-slate-200">${escapeHtml(obj.filename || '')}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">${sizeStr}</div>
+                                </div>
+                            </a>`;
+                    } else {
+                        contentHtml = escapeHtml(obj.content || msg.message_text);
+                    }
+                } catch {
+                    contentHtml = escapeHtml(msg.message_text || '');
+                }
+
+                const html = `
+                    <div id="chat-msg-${msg.message_id}" class="chat-message flex flex-col ${cls} mt-3">
+                        <div class="flex items-end gap-2">
+                            <div class="relative">
+                                <div class="bubble">${contentHtml}</div>
+                            </div>
+                            <div class="text-[10px] text-slate-400 mb-1">${time}</div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function scheduleTypingStatus() {
+            if (!currentChatUserId) return;
+            // ส่งเฉพาะแชท 1:1 เพื่อให้ปลายทางเห็น "กำลังพิมพ์..."
+            if (String(currentChatUserId).startsWith('GROUP_')) return;
+            const now = Date.now();
+            if (now - lastTypingSentAt < 1000) return;
+            lastTypingSentAt = now;
+            sendTypingStatus(currentChatUserId);
+        }
+
+        async function sendTypingStatus(receiverId) {
+            try {
+                const fd = new FormData();
+                fd.append('action', 'update_typing_status');
+                fd.append('receiver_id', receiverId);
+                fetch(API_PATH, { method: 'POST', body: fd }); // fire-and-forget
+            } catch(e) {}
+        }
+
+        function startChatPolling() {
+            if (chatPollingInterval) clearInterval(chatPollingInterval);
+            chatPollingInterval = setInterval(pollChatUpdates, POLLING_INTERVAL_MS);
+        }
+
+        async function pollChatUpdates() {
+            try {
+                const res = await fetch(`${API_PATH}?action=get_chat_updates&v=${Date.now()}`, { cache: 'no-store' });
+                const data = await res.json();
+                if (data.status !== 'success') return;
+
+                const typingUsers = Array.isArray(data.typing_users) ? data.typing_users : [];
+                const typingEl = gid('typing-indicator');
+                if (typingEl) {
+                    const showTyping = typingUsers.includes(String(currentChatUserId)) && !String(currentChatUserId).startsWith('GROUP_');
+                    if (showTyping) typingEl.classList.remove('hidden');
+                    else typingEl.classList.add('hidden');
+                }
+
+                const messages = Array.isArray(data.messages) ? data.messages : [];
+                if (messages.length > 0) {
+                    let anyForOther = false;
+                    messages.forEach(m => {
+                        const isGroup = String(m.receiver_id).startsWith('GROUP_');
+                        const contextId = isGroup ? m.receiver_id : m.sender_id;
+                        // อัปเดตรายการผู้ใช้ให้ขึ้นลำดับบน
+                        const idx = chatUsers.findIndex(u => String(u.id) === String(contextId));
+                        if (idx >= 0) {
+                            chatUsers[idx].last_message_time = m.timestamp || new Date().toISOString();
+                            if (contextId !== currentChatUserId) {
+                                chatUsers[idx].unread_count = (parseInt(chatUsers[idx].unread_count) || 0) + 1;
+                                anyForOther = true;
+                            }
+                        }
+                        if (contextId === currentChatUserId) {
+                            renderMessages([m], true);
+                        }
+                    });
+                    renderChatUserList();
+
+                    if (anyForOther) {
+                        startTitleBlinking('คุณมีข้อความใหม่!');
+                        beep();
+                        if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
+                            try {
+                                new Notification('ข้อความใหม่', { body: 'คุณมีข้อความใหม่ในแชท', icon: 'uploads/logos/pta_logo.png' });
+                            } catch(e) {}
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+
+        async function sendChatMessage() {
+            const input = gid('chat-message-input');
+            if (!input || !currentChatUserId) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            const tempId = 'temp-' + Date.now();
+            const tempMessage = {
+                sender_id: sessionData.user_id,
+                message_text: JSON.stringify({ type: 'text', content: text }),
+                timestamp: new Date().toISOString(),
+                message_id: tempId
+            };
+            renderMessages([tempMessage], true);
+            input.value = '';
+            input.style.height = '44px';
+
+            const fd = new FormData();
+            fd.append('action', 'send_chat_message');
+            fd.append('receiver_id', currentChatUserId);
+            fd.append('company', sessionData.company);
+            fd.append('message_text', JSON.stringify({ type: 'text', content: text }));
+
+            try {
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.status === 'success' && data.message_id) {
+                    const el = gid(`chat-msg-${tempId}`);
+                    if (el) el.id = `chat-msg-${data.message_id}`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function closeImagePreview() {
+            gid('chat-image-preview').classList.add('hidden');
+            pendingImageBlob = null;
+            pendingImageMeta = null;
+            const metaEl = gid('preview-img-meta');
+            if (metaEl) metaEl.textContent = '';
+            gid('preview-img-element').src = '';
+            if (pendingPreviewUrl) {
+                URL.revokeObjectURL(pendingPreviewUrl);
+                pendingPreviewUrl = null;
+            }
+        }
+
+        async function confirmSendImage() {
+            if (!pendingImageBlob || !currentChatUserId) return;
+            const btn = gid('btn-confirm-send-img');
+            const original = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่ง...';
+                btn.disabled = true;
+            }
+
+            const fd = new FormData();
+            fd.append('action', 'upload_chat_file');
+            fd.append('file', pendingImageBlob);
+            fd.append('company', sessionData.company);
+
+            try {
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const messageContent = JSON.stringify({
+                        type: 'image',
+                        url: data.url,
+                        caption: ''
+                    });
+
+                    const msg = {
+                        sender_id: sessionData.user_id,
+                        message_text: messageContent,
+                        timestamp: new Date().toISOString(),
+                        message_id: 'temp-' + Date.now()
+                    };
+                    renderMessages([msg], true);
+                } else {
+                    Swal.fire('Error', data.message || 'Upload failed', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Network error', 'error');
+            } finally {
+                closeImagePreview();
+                if (btn) {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function handleFileSelect() {
+            if (!this.files || !this.files[0]) return;
+            const file = this.files[0];
+            if (file.type.startsWith('image/')) {
+                const prepared = await prepareImageForUpload(file);
+                pendingImageBlob = prepared.file;
+                pendingImageMeta = prepared.meta;
+                if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl);
+                pendingPreviewUrl = URL.createObjectURL(pendingImageBlob);
+                gid('preview-img-element').src = pendingPreviewUrl;
+                const metaEl = gid('preview-img-meta');
+                if (metaEl && pendingImageMeta) {
+                    if (pendingImageMeta.compressed) metaEl.textContent = `บีบอัดแล้ว: ${formatBytes(pendingImageMeta.originalBytes)} → ${formatBytes(pendingImageMeta.finalBytes)}`;
+                    else metaEl.textContent = `ขนาดไฟล์: ${formatBytes(pendingImageMeta.finalBytes)}`;
+                }
+                gid('chat-image-preview').classList.remove('hidden');
+            } else {
+                const fd = new FormData();
+                fd.append('action', 'upload_chat_file');
+                fd.append('file', file);
+                fd.append('company', sessionData.company);
+                try {
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        const msg = {
+                            sender_id: sessionData.user_id,
+                            message_text: JSON.stringify({
+                                type: 'file',
+                                url: data.url,
+                                filename: data.filename,
+                                size: data.size,
+                                caption: ''
+                            }),
+                            timestamp: new Date().toISOString(),
+                            message_id: 'temp-' + Date.now()
+                        };
+                        renderMessages([msg], true);
+                    } else {
+                        Swal.fire('Error', data.message || 'Upload failed', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    Swal.fire('Error', 'Network error', 'error');
+                }
+            }
+            this.value = '';
+        }
+
+        async function handleChatPaste(e) {
+            const items = (e.clipboardData || e.originalEvent?.clipboardData || {}).items || [];
+            let blob = null;
+            for (const item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    blob = item.getAsFile();
+                    break;
+                }
+            }
+            if (!blob) return;
+            e.preventDefault();
+            const prepared = await prepareImageForUpload(blob);
+            pendingImageBlob = prepared.file;
+            pendingImageMeta = prepared.meta;
+            if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl);
+            pendingPreviewUrl = URL.createObjectURL(pendingImageBlob);
+            gid('preview-img-element').src = pendingPreviewUrl;
+            const metaEl = gid('preview-img-meta');
+            if (metaEl && pendingImageMeta) {
+                if (pendingImageMeta.compressed) metaEl.textContent = `บีบอัดแล้ว: ${formatBytes(pendingImageMeta.originalBytes)} → ${formatBytes(pendingImageMeta.finalBytes)}`;
+                else metaEl.textContent = `ขนาดไฟล์: ${formatBytes(pendingImageMeta.finalBytes)}`;
+            }
+            gid('chat-image-preview').classList.remove('hidden');
+        }
+
+        async function openDirectorySearch() {
+            const { value: term } = await Swal.fire({
+                title: 'ค้นหาเพื่อนจาก Directory',
+                input: 'text',
+                inputPlaceholder: 'พิมพ์ชื่อ หรือ แผนก...',
+                showCancelButton: true,
+                confirmButtonText: 'ค้นหา',
+                cancelButtonText: 'ยกเลิก',
+                inputValidator: (value) => {
+                    if (!value) return 'กรุณาพิมพ์คำค้นหา';
+                }
+            });
+
+            if (term) {
+                try {
+                    const res = await fetch(`${API_PATH}?action=search_chat_directory&term=${encodeURIComponent(term)}`);
+                    const data = await res.json();
+                    
+                    if (data.status === 'success' && data.users.length > 0) {
+                        const inputOptions = {};
+                        data.users.forEach(u => {
+                            inputOptions[u.id] = `${u.name} (${u.department})`;
+                        });
+
+                        const { value: selectedUserId } = await Swal.fire({
+                            title: 'ผลการค้นหา',
+                            input: 'select',
+                            inputOptions: inputOptions,
+                            inputPlaceholder: 'เลือกผู้ใช้ที่ต้องการแชท',
+                            showCancelButton: true
+                        });
+
+                        if (selectedUserId) {
+                            const selectedUser = data.users.find(u => String(u.id) === String(selectedUserId));
+                            if (selectedUser) addAndSelectUser(selectedUser);
+                        }
+                    } else {
+                        Swal.fire('ไม่พบข้อมูล', 'ไม่พบผู้ใช้ที่ตรงกับคำค้นหา', 'info');
+                    }
+                } catch(e) {
+                    console.error(e);
+                    Swal.fire('Error', 'เกิดข้อผิดพลาดในการค้นหา', 'error');
+                }
+            }
+        }
+
+        function addAndSelectUser(user) {
+            const exists = chatUsers.find(u => String(u.id) === String(user.id));
+            if (!exists) {
+                chatUsers.unshift({
+                    ...user,
+                    last_message_time: new Date().toISOString()
+                });
+            }
+            
+            if (currentChatTab !== 'chats' && currentChatTab !== 'users') {
+                setChatTab('chats');
+            }
+            
+            renderChatUserList();
+            
+            const avatarSrc = user.image
+                ? `uploads/employees/${user.image}`
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&size=40`;
+            selectChatUser(user.id, (user.name_th || user.name), avatarSrc);
+        }
+
+        async function createGroup() {
+            const userOptions = chatUsers
+                .filter(u => !u.is_group)
+                .reduce((opts, user) => {
+                    opts[user.id] = `${user.name} (${user.department || '-'})`;
+                    return opts;
+                }, {});
+
+            const { value: formValues } = await Swal.fire({
+                title: 'สร้างกลุ่มแชทใหม่',
+                html:
+                    '<input id="swal-group-name" class="swal2-input" placeholder="ชื่อกลุ่ม">' +
+                    '<select id="swal-group-members" class="swal2-select" multiple style="height: 150px;">' +
+                    Object.entries(userOptions).map(([id, name]) => `<option value="${id}">${name}</option>`).join('') +
+                    '</select>',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'สร้างกลุ่ม',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const groupName = document.getElementById('swal-group-name').value;
+                    const members = Array.from(document.getElementById('swal-group-members').selectedOptions).map(opt => opt.value);
+                    if (!groupName) {
+                        Swal.showValidationMessage('กรุณาตั้งชื่อกลุ่ม');
+                        return false;
+                    }
+                    if (members.length < 1) {
+                        Swal.showValidationMessage('กรุณาเลือกสมาชิกอย่างน้อย 1 คน');
+                        return false;
+                    }
+                    return { groupName, members };
+                }
+            });
+
+            if (formValues) {
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'create_chat_group');
+                    fd.append('group_name', formValues.groupName);
+                    fd.append('member_ids', JSON.stringify(formValues.members));
+
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const data = await res.json();
+
+                    if (data.status === 'success') {
+                        Swal.fire('สำเร็จ', 'สร้างกลุ่มเรียบร้อยแล้ว', 'success');
+                        const newGroup = data.group;
+                        if (newGroup && newGroup.id) {
+                            if (!Array.isArray(chatUsers)) chatUsers = [];
+                            chatUsers.unshift(newGroup);
+                            setChatTab('groups');
+                            renderChatUserList();
+                            const avatarSrc = 'https://ui-avatars.com/api/?name=G&background=0ea5e9&color=fff&size=40&font-size=0.33';
+                            selectChatUser(newGroup.id, newGroup.name || 'Group', avatarSrc);
+                        }
+                    } else {
+                        throw new Error(data.message || 'ไม่สามารถสร้างกลุ่มได้');
+                    }
+                } catch (e) {
+                    Swal.fire('ผิดพลาด', e.message || 'ไม่สามารถสร้างกลุ่มได้', 'error');
+                }
+            }
+        }
+
+        async function openGroupInviteModal(groupId, groupName) {
+            const userOptions = chatUsers
+                .filter(u => !u.is_group)
+                .reduce((opts, user) => {
+                    opts[user.id] = user.name;
+                    return opts;
+                }, {});
+
+            const { value: formValues } = await Swal.fire({
+                title: `เพิ่มสมาชิกในกลุ่ม`,
+                html:
+                    `<div class="text-xs text-slate-500 mb-2 text-left break-words">กลุ่ม: <span class="font-semibold text-slate-700">${escapeHtml(groupName)}</span></div>` +
+                    '<select id="swal-invite-members" class="swal2-select" multiple style="height: 180px;">' +
+                    Object.entries(userOptions).map(([id, name]) => `<option value="${id}">${name}</option>`).join('') +
+                    '</select>',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'ส่งคำเชิญ',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const members = Array.from(document.getElementById('swal-invite-members').selectedOptions).map(opt => opt.value);
+                    if (members.length < 1) {
+                        Swal.showValidationMessage('กรุณาเลือกสมาชิกอย่างน้อย 1 คน');
+                        return false;
+                    }
+                    return { members };
+                }
+            });
+
+            if (formValues) {
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'invite_chat_group_members');
+                    fd.append('group_id', groupId);
+                    fd.append('invitee_ids', JSON.stringify(formValues.members));
+
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const data = await res.json();
+
+                    if (data.status === 'success') {
+                        const count = Array.isArray(data.createdInvites) ? data.createdInvites.length : 0;
+                        const msg = count > 0 ? `ส่งคำเชิญไปยัง ${count} คนเรียบร้อยแล้ว` : 'ไม่มีสมาชิกใหม่ที่สามารถเชิญได้ (อาจเป็นสมาชิกอยู่แล้วหรือมีคำเชิญค้างอยู่)';
+                        Swal.fire('สำเร็จ', msg, 'success');
+                    } else {
+                        throw new Error(data.message || 'ไม่สามารถส่งคำเชิญได้');
+                    }
+                } catch (e) {
+                    Swal.fire('ผิดพลาด', e.message, 'error');
+                }
+            }
+        }
+
+        async function openGroupMemberList(groupId, groupName) {
+            try {
+                const res = await fetch(`${API_PATH}?action=get_chat_group_members&group_id=${encodeURIComponent(groupId)}`);
+                const data = await res.json();
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'ไม่สามารถโหลดสมาชิกกลุ่มได้');
+                }
+
+                const members = Array.isArray(data.members) ? data.members : [];
+                if (members.length === 0) {
+                    await Swal.fire('ข้อมูลกลุ่ม', 'ยังไม่มีสมาชิกในกลุ่มนี้', 'info');
+                    return;
+                }
+
+                const html = `
+                    <div class="text-left text-sm">
+                        <div class="mb-2 font-semibold text-slate-700">กลุ่ม: <span class="text-blue-600">${escapeHtml(groupName)}</span></div>
+                        <ul class="max-h-64 overflow-y-auto custom-scrollbar space-y-1">
+                            ${members.map(m => {
+                                const name = m.name || m.user_id;
+                                const nameTh = m.name_th ? ' <span class="text-slate-400">(' + escapeHtml(m.name_th) + ')</span>' : '';
+                                const dept = m.department ? ' • ' + escapeHtml(m.department) : '';
+                                const company = m.company ? ' [' + escapeHtml(m.company) + ']' : '';
+                                const isMe = String(m.user_id) === String(sessionData.user_id) ? ' (คุณ)' : '';
+                                const removeBtn = (String(m.user_id) !== String(sessionData.user_id))
+                                    ? '<button class="ml-2 text-xs text-red-500 hover:text-red-600" title="ลบสมาชิก" onclick="removeGroupMember(' 
+                                        + JSON.stringify(groupId) + ',' 
+                                        + JSON.stringify(String(m.user_id)) + ',' 
+                                        + JSON.stringify(name) 
+                                        + ')"><i class="fas fa-user-minus"></i></button>'
+                                    : '';
+                                return '<li class="py-1 border-b border-slate-100 last:border-0 text-slate-700 flex items-center justify-between">' +
+                                    '<div>' + escapeHtml(name) + nameTh + isMe +
+                                    '<span class="text-xs text-slate-400">' + dept + company + '</span></div>' +
+                                    removeBtn +
+                                '</li>';
+                            }).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                await Swal.fire({
+                    title: 'สมาชิกในกลุ่ม',
+                    html,
+                    showConfirmButton: true,
+                    confirmButtonText: 'ปิด'
+                });
+            } catch (e) {
+                Swal.fire('ผิดพลาด', e.message, 'error');
+            }
+        }
+
+        async function removeGroupMember(groupId, targetUserId, targetName) {
+            try {
+                const { isConfirmed } = await Swal.fire({
+                    title: 'ยืนยันการลบสมาชิก?',
+                    text: `ลบ "${targetName}" ออกจากกลุ่มนี้?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ใช่, ลบสมาชิก',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!isConfirmed) return;
+
+                const fd = new FormData();
+                fd.append('action', 'remove_chat_group_member');
+                fd.append('group_id', groupId);
+                fd.append('target_id', targetUserId);
+
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'ไม่สามารถลบสมาชิกได้');
+                }
+
+                await Swal.fire('สำเร็จ', `ลบ "${targetName}" ออกจากกลุ่มเรียบร้อยแล้ว`, 'success');
+
+                const currentGroupName = (function() {
+                    const headerInfo = gid('chat-header-info');
+                    if (!headerInfo) return '';
+                    const titleEl = headerInfo.querySelector('h3');
+                    return titleEl ? titleEl.textContent : '';
+                })();
+                await openGroupMemberList(groupId, currentGroupName);
+            } catch (e) {
+                Swal.fire('ผิดพลาด', e.message, 'error');
+            }
+        }
+
+        async function confirmGroupLeaveOrDelete(groupId, groupName) {
+            const result = await Swal.fire({
+                title: 'จัดการกลุ่ม',
+                text: 'คุณต้องการออกจากกลุ่ม หรือ ลบกลุ่มสำหรับทุกคน?',
+                icon: 'warning',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'ออกจากกลุ่ม',
+                denyButtonText: 'ลบกลุ่ม (เจ้าของ/แอดมิน)',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'leave_chat_group');
+                    fd.append('group_id', groupId);
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.status !== 'success') throw new Error(data.message || 'ออกจากกลุ่มไม่สำเร็จ');
+                    await loadChatUsers();
+                    Swal.fire('สำเร็จ', 'ออกจากกลุ่มเรียบร้อยแล้ว', 'success');
+                } catch (e) {
+                    Swal.fire('ผิดพลาด', e.message, 'error');
+                }
+            } else if (result.isDenied) {
+                const { isConfirmed } = await Swal.fire({
+                    title: 'ยืนยันการลบกลุ่ม?',
+                    text: `กลุ่ม "${groupName}" และประวัติแชทจะถูกลบสำหรับทุกคน`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ใช่, ลบกลุ่ม',
+                    cancelButtonText: 'ยกเลิก'
+                });
+
+                if (!isConfirmed) return;
+
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'delete_chat_group');
+                    fd.append('group_id', groupId);
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    if (data.status !== 'success') throw new Error(data.message || 'ไม่สามารถลบกลุ่มได้');
+                    await loadChatUsers();
+                    Swal.fire('สำเร็จ', 'ลบกลุ่มเรียบร้อยแล้ว', 'success');
+                } catch (e) {
+                    Swal.fire('ผิดพลาด', e.message, 'error');
+                }
+            }
+        }
+
+        async function leaveOrHideChat(event, id, name, isGroup) {
+            event.stopPropagation();
+
+            if (isGroup) {
+                await confirmGroupLeaveOrDelete(id, name);
+                return;
+            }
+
+            const { isConfirmed } = await Swal.fire({
+                title: 'ซ่อนแชทนี้?',
+                text: `คุณต้องการซ่อนแชทกับ "${name}" หรือไม่? (แชทจะกลับมาแสดงอีกครั้งเมื่อมีข้อความใหม่)`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ซ่อนแชท',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (isConfirmed) {
+                if (!hiddenChatIds.includes(id)) {
+                    hiddenChatIds.push(id);
+                    localStorage.setItem('hiddenChatIds', JSON.stringify(hiddenChatIds));
+                }
+                renderChatUserList();
+            }
+        }
+
+        function refreshMyChatTicketsFromAllLogs() {
+            if (!sessionData.user_id || !Array.isArray(allLogs)) return;
+            let logs = [];
+            if (sessionData.role === 'admin' || sessionData.primary_department === 'IT') {
+                logs = allLogs.filter(l => l.requester_id === sessionData.user_id || l.servicedById === sessionData.user_id || l.status === 'Pending');
+            } else {
+                logs = allLogs.filter(l => l.requester_id === sessionData.user_id || l.servicedById === sessionData.user_id);
+            }
+            myChatTickets = logs;
+            myChatTicketsById = {};
+            logs.forEach(l => {
+                if (l && l.id) myChatTicketsById[String(l.id)] = l;
+            });
+        }
+
+        function enhanceTextWithTicketRefs(text) {
+            if (!text) return '';
+            let out = escapeHtml(String(text));
+            if (!myChatTickets || !myChatTickets.length) return out;
+            const seen = new Set();
+            myChatTickets.forEach(t => {
+                const id = String(t.id || '');
+                if (!id || seen.has(id)) return;
+                seen.add(id);
+                const escapedId = id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const re = new RegExp('\\b' + escapedId + '\\b', 'g');
+                out = out.replace(re, `<span class="chat-ticket-ref text-blue-600 font-semibold" data-ticket-id="${id}">$&</span>`);
+            });
+            return out;
+        }
+
+        function checkForNotifications(allLogs, allLoans) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 7000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            if (['admin', 'staff'].includes(sessionData.role)) {
+                const currentPendingRepairIds = allLogs.filter(l => l.status === 'Pending').map(l => l.id);
+                const currentPendingLoanIds = allLoans.filter(l => l.loan_status === 'Pending').map(l => l.loan_id);
+
+                const seenRepairIds = JSON.parse(localStorage.getItem('seenPendingRepairIds') || '[]');
+                const seenLoanIds = JSON.parse(localStorage.getItem('seenPendingLoanIds') || '[]');
+
+                const newRepairCount = currentPendingRepairIds.filter(id => !seenRepairIds.includes(id)).length;
+                const newLoanCount = currentPendingLoanIds.filter(id => !seenLoanIds.includes(id)).length;
+
+                if (newRepairCount > 0) {
+                    Toast.fire({
+                        icon: 'info',
+                        title: 'มีงานแจ้งซ่อมใหม่!',
+                        html: `มี <b>${newRepairCount}</b> รายการใหม่รอการตรวจสอบ<br><a href="log.html" class="text-blue-500 underline">ไปที่หน้าจัดการ</a>`
+                    });
+                }
+                if (newLoanCount > 0) {
+                    Toast.fire({
+                        icon: 'info',
+                        title: 'มีคำขอยืมใหม่!',
+                        html: `มี <b>${newLoanCount}</b> รายการใหม่รออนุมัติ<br><a href="borrow_management.html" class="text-blue-500 underline">ไปที่หน้าจัดการ</a>`
+                    });
+                }
+
+                localStorage.setItem('seenPendingRepairIds', JSON.stringify(currentPendingRepairIds));
+                localStorage.setItem('seenPendingLoanIds', JSON.stringify(currentPendingLoanIds));
+            }
+
+            if (sessionData.user_id) {
+                const myLogs = allLogs.filter(l => l.requester_id === sessionData.user_id);
+                const oldStatuses = JSON.parse(localStorage.getItem(`myTicketStatuses_${sessionData.user_id}`) || '{}');
+                const newStatuses = Object.fromEntries(myLogs.map(l => [l.id, l.status]));
+
+                for (const ticketId in newStatuses) {
+                    if (oldStatuses[ticketId] && oldStatuses[ticketId] !== newStatuses[ticketId]) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'สถานะงานซ่อมมีการเปลี่ยนแปลง',
+                            html: `<b>${ticketId}</b> เปลี่ยนเป็น <b>${newStatuses[ticketId]}</b><br><a href="my_tickets.html" class="text-blue-500 underline">ดูรายการของฉัน</a>`
+                        });
+                    }
+                }
+
+                localStorage.setItem(`myTicketStatuses_${sessionData.user_id}`, JSON.stringify(newStatuses));
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const [servicesRes, announceRes, myLogRes, myLoanRes] = await Promise.all([
+                    fetch(`${API_PATH}?action=get&file=services`),
+                    fetch(`${API_PATH}?action=get&file=announcements`),
+                    fetch(`${API_PATH}?action=get&file=it_logs`),
+                    fetch(`${API_PATH}?action=getLoanRequests`)
+                ]);
+
+                let services = await servicesRes.json();
+                if (!Array.isArray(services)) services = [];
+
+                let announcements = await announceRes.json();
+                if (!Array.isArray(announcements)) announcements = [];
+
+                allLogs = await myLogRes.json();
+                if (!Array.isArray(allLogs)) allLogs = [];
+                refreshMyChatTicketsFromAllLogs();
+
+                allLoans = await myLoanRes.json();
+                if (!Array.isArray(allLoans)) allLoans = [];
+
+                renderServices(services);
+                renderAnnouncements(announcements);
+                renderMyStatusUI();
+
+                checkForNotifications(allLogs, allLoans);
+                await initChat();
+
+                // Update Admin Badge
+                let totalPending = 0;
+                try {
+                    const countsRes = await fetch(`${API_PATH}?action=get_pending_counts`);
+                    if (countsRes.ok) {
+                        const counts = await countsRes.json();
+                        totalPending = (parseInt(counts.loan_pending_count) || 0) + (parseInt(counts.repair_pending_count) || 0);
+                    }
+                } catch (e) {}
+
+                const badge = gid('admin-badge');
+                if (badge) {
+                    if (totalPending > 0) {
+                        badge.textContent = totalPending > 99 ? '99+' : totalPending;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+
+                if (sessionData.role === 'admin' || sessionData.primary_department === 'IT') {
+                    fetchItccTasks(true);
+                }
+
+            } catch(e) { console.error('Dashboard Error:', e); }
+        }
+
+        async function refreshStatusData() {
+            if (!sessionData.user_id) return;
+            try {
+                const [myLogRes, myLoanRes] = await Promise.all([
+                    fetch(`${API_PATH}?action=get&file=it_logs`),
+                    fetch(`${API_PATH}?action=getLoanRequests`)
+                ]);
+                allLogs = await myLogRes.json();
+                allLoans = await myLoanRes.json();
+                refreshMyChatTicketsFromAllLogs();
+                renderMyStatusUI();
+                checkForNotifications(allLogs, allLoans);
+            } catch(e) { console.error('Refresh Error:', e); }
+        }
+
+        async function handleLogout() {
+            await fetch(`${API_PATH}?action=logout`);
+            window.location.href = 'login.html';
+        }
+
+        function showDashboardHelp() {
+            Swal.fire({
+                title: '<div class="flex items-center justify-center gap-2 text-blue-500"><i class="fas fa-book-reader"></i> คู่มือการใช้งาน</div>',
+                html: `
+                    <div class="w-full text-left text-sm text-gray-600 dark:text-gray-300">
+                        <div class="space-y-3 text-xs">
+                            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                                <p class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2"><i class="fas fa-bolt text-blue-500"></i> Quick Start 60 วินาที</p>
+                                <ol class="list-decimal pl-5 space-y-1">
+                                    <li>เลือกบริการที่ต้องการจากการ์ดหน้าแรก</li>
+                                    <li>กรอกข้อมูลให้ครบ และกดส่งคำขอ</li>
+                                    <li>ติดตามสถานะที่ “สถานะงานของฉัน” และเมนูโปรไฟล์มุมขวาบน</li>
+                                </ol>
+                            </div>
+                            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60">
+                                <p class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2"><i class="fas fa-route text-purple-500"></i> Flow แบบทีละขั้น</p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                    <div class="rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50/80 dark:bg-blue-900/20 p-2">
+                                        <p class="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5"><i class="fas fa-pen-to-square"></i> 1) เปิดคำขอ</p>
+                                        <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">เข้าเมนูแจ้งซ่อม เลือกประเภทงาน และกรอกรายละเอียดให้ครบ</p>
+                                    </div>
+                                    <div class="rounded-lg border border-amber-100 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-900/20 p-2">
+                                        <p class="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5"><i class="fas fa-user-check"></i> 2) ระบบรับงาน</p>
+                                        <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">ทีมช่างรับเรื่องและอัปเดตสถานะตามขั้นตอนจนดำเนินการเสร็จ</p>
+                                    </div>
+                                    <div class="rounded-lg border border-emerald-100 dark:border-emerald-800 bg-emerald-50/80 dark:bg-emerald-900/20 p-2">
+                                        <p class="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5"><i class="fas fa-flag-checkered"></i> 3) ปิดงาน</p>
+                                        <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">ตรวจผลลัพธ์ที่หน้า My Tickets และให้คะแนนบริการหลังปิดงาน</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60">
+                                    <p class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2"><i class="fas fa-user text-emerald-500"></i> สำหรับผู้แจ้งงาน</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li>แจ้งปัญหา IT และแนบรูป/รายละเอียดให้ครบ</li>
+                                        <li>ดูความคืบหน้าจากการ์ดสถานะและหน้า My Tickets</li>
+                                        <li>ปิดงานแล้วให้คะแนนเพื่อปรับปรุงบริการ</li>
+                                    </ul>
+                                </div>
+                                <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60">
+                                    <p class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2"><i class="fas fa-tools text-amber-500"></i> สำหรับช่าง / ผู้ปฏิบัติ</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li>รับงานจากหน้า Command Center และอัปเดตสถานะตามจริง</li>
+                                        <li>หากเปลี่ยนผู้รับผิดชอบ ให้ระบุเหตุผลทุกครั้ง</li>
+                                        <li>บันทึกแนวทางแก้ไขให้ชัด เพื่อใช้เป็นฐานความรู้</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+                                <p class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2"><i class="fas fa-circle-question text-indigo-500"></i> คำถามที่พบบ่อย (FAQ)</p>
+                                <ul class="space-y-1.5">
+                                    <li><strong>ส่งงานแล้วไม่ขึ้น?</strong> รีเฟรช 1 ครั้งและตรวจบริษัท/แผนกของผู้แจ้งให้ถูกต้อง</li>
+                                    <li><strong>ปิดงานไม่ได้?</strong> ตรวจว่างานมีผู้รับผิดชอบ และสถานะไหลตามลำดับ</li>
+                                    <li><strong>ยืม-คืนไม่อัปเดต?</strong> ดูที่เมนูประวัติการยืม และตรวจรายการที่ค้างอนุมัติ</li>
+                                </ul>
+                            </div>
+                            <div class="flex flex-wrap gap-2 pt-1">
+                                <a href="request.html" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"><i class="fas fa-screwdriver-wrench mr-1"></i> แจ้งซ่อม</a>
+                                <a href="my_tickets.html" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition"><i class="fas fa-ticket mr-1"></i> งานของฉัน</a>
+                                <a href="directory.html" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"><i class="fas fa-address-book mr-1"></i> Contact List</a>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                width: '760px',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { 
+                    popup: 'dark:bg-gray-800 dark:border dark:border-gray-700 dark:text-white rounded-2xl',
+                    closeButton: 'text-gray-400 hover:text-gray-600'
+                }
+            });
+        }
+
+        function loadDepartmentChart() {
+            // Chart loading logic
+        }
+
+        async function acceptTicket(id) {
+            try {
+                const fd = new FormData();
+                fd.append('action', 'update_item');
+                fd.append('key', 'it_logs');
+                fd.append('data', JSON.stringify({ id: id, status: 'Received', servicedBy: sessionData.display_name }));
+                fd.append('servicedById', sessionData.user_id);
+
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const json = await res.json().catch(() => null);
+
+                if (!res.ok || !json || json.status !== 'success') {
+                    const msg = (json && json.message) ? json.message : 'ไม่สามารถรับงานได้';
+                    throw new Error(msg);
+                }
+
+                Swal.fire({ icon: 'success', title: 'รับงานเรียบร้อย', timer: 1500, showConfirmButton: false });
+                await refreshStatusData();
+                Swal.close();
+            } catch(e) {
+                Swal.fire('Error', e.message || 'ไม่สามารถรับงานได้', 'error');
+            }
+        }
+
+        async function showTicketDetails(logId) {
+            const log = allLogs.find(l => l.id === logId);
+            if (!log) return;
+
+            let actionButton = '';
+            if ((sessionData.role === 'admin' || sessionData.primary_department === 'IT') && log.status === 'Pending') {
+                actionButton = `<button onclick="acceptTicket('${log.id}')" class="w-full mt-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-md transition transform active:scale-95"><i class="fas fa-hand-paper mr-2"></i> รับงานนี้ทันที</button>`;
+            }
+
+            let imagesHtml = '';
+            try {
+                const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${logId}&v=${Date.now()}`, { cache: 'no-store' });
+                const files = await res.json();
+                if (Array.isArray(files) && files.length > 0) {
+                    const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
+                    if (imgs.length > 0) {
+                        imagesHtml = `
+                        <div class="mt-4 border-t border-slate-200 dark:border-slate-600 pt-3">
+                            <h4 class="font-bold text-slate-700 dark:text-slate-200 mb-2 text-xs uppercase"><i class="fas fa-images text-blue-500 mr-1"></i> รูปภาพประกอบ</h4>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${imgs.map(f => `<a href="uploads/attachments/${encodeURIComponent(String(f.stored_filename||''))}" target="_blank" class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 hover:opacity-80 transition bg-slate-100"><img src="uploads/attachments/${encodeURIComponent(String(f.stored_filename||''))}" loading="lazy" decoding="async" onerror="handleImgError(this)" class="w-full h-full object-cover"></a>`).join('')}
+                            </div>
+                        </div>`;
+                    }
+                }
+            } catch(e) { console.error(e); }
+
+            const txt = (t) => t || '-';
+            const getStatusClass = s => {
+                 const map = { 'Pending':'bg-blue-100 text-blue-600', 'PR Submitted':'bg-sky-100 text-sky-600', 'PO Issued':'bg-teal-100 text-teal-600', 'Parts Received':'bg-cyan-100 text-cyan-600', 'In Progress':'bg-amber-100 text-amber-600', 'Waiting for Parts':'bg-red-100 text-red-600', 'Temporary Fix':'bg-indigo-100 text-indigo-600', 'Unrepairable':'bg-rose-100 text-rose-600', 'Completed':'bg-emerald-100 text-emerald-600', 'Cancelled': 'bg-slate-100 text-slate-500' };
+                 return map[s] || 'bg-slate-100 text-slate-600';
+            };
+
+            let currentIdx = 0;
+            let subStatus = '';
+            let activeColor = 'blue';
+            let isCancelled = log.status === 'Cancelled';
+            let step2Label = 'ดำเนินการ';
+
+            if (log.status === 'Pending') currentIdx = 0;
+            else if (['Received', 'In Progress', 'Waiting for Parts', 'Temporary Fix', 'PR Submitted', 'PO Issued', 'Parts Received'].includes(log.status)) {
+                currentIdx = 1;
+                if(log.status === 'Received') { subStatus = 'รับเรื่องแล้ว (รอเริ่มซ่อม)'; activeColor = 'amber'; step2Label = 'รับเรื่องแล้ว'; }
+                else if(log.status === 'PR Submitted') { subStatus = 'ส่ง PR แล้ว'; activeColor = 'sky'; step2Label = 'PR แล้ว'; }
+                else if(log.status === 'PO Issued') { subStatus = 'ออก PO แล้ว'; activeColor = 'teal'; step2Label = 'PO แล้ว'; }
+                else if(log.status === 'Parts Received') { subStatus = 'ได้รับอะไหล่แล้ว'; activeColor = 'cyan'; step2Label = 'อะไหล่มาแล้ว'; }
+                if(log.status === 'Waiting for Parts') { subStatus = 'รออะไหล่'; activeColor = 'orange'; step2Label = 'รออะไหล่'; }
+                else if(log.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'indigo'; step2Label = 'แก้ชั่วคราว'; }
+                else if(log.status === 'In Progress') { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
+            }
+            else if (log.status === 'Unrepairable') { currentIdx = 2; activeColor = 'rose'; }
+            else if (log.status === 'Completed') { currentIdx = 2; activeColor = 'emerald'; }
+
+            const steps = [ { label: 'รับเรื่อง', icon: 'fa-file-import' }, { label: step2Label, icon: 'fa-tools' }, { label: 'เสร็จสิ้น', icon: 'fa-check' } ];
+
+            let timelineHtml = '';
+            if (isCancelled) {
+                timelineHtml = `<div class="w-full flex items-center justify-center text-slate-400 font-bold text-sm py-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700 mb-4"><i class="fas fa-ban mr-2 text-red-400"></i> ยกเลิกงานแล้ว</div>`;
+            } else {
+                timelineHtml = `<div class="flex flex-col md:flex-row md:items-center w-full py-4 md:py-6 px-2 mb-2">
+                    ${steps.map((s, i) => {
+                        let circle = 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500';
+                        let text = 'text-slate-400 dark:text-slate-500';
+                        let animation = '';
+                        
+                        if (i < currentIdx) { circle = 'bg-emerald-500 text-white'; text = 'text-emerald-600 dark:text-emerald-400 font-medium'; }
+                        else if (i === currentIdx) {
+                            animation = 'animate-pulse ring-offset-2 ring-offset-white dark:ring-offset-slate-800';
+                            if(activeColor === 'blue') { circle = 'bg-blue-500 text-white ring-4 ring-blue-200 dark:ring-blue-900'; text = 'text-blue-600 dark:text-blue-400 font-bold'; }
+                            else if(activeColor === 'sky') { circle = 'bg-sky-500 text-white ring-4 ring-sky-200 dark:ring-sky-900'; text = 'text-sky-600 dark:text-sky-400 font-bold'; }
+                            else if(activeColor === 'teal') { circle = 'bg-teal-500 text-white ring-4 ring-teal-200 dark:ring-teal-900'; text = 'text-teal-600 dark:text-teal-400 font-bold'; }
+                            else if(activeColor === 'cyan') { circle = 'bg-cyan-500 text-white ring-4 ring-cyan-200 dark:ring-cyan-900'; text = 'text-cyan-600 dark:text-cyan-400 font-bold'; }
+                            else if(activeColor === 'orange') { circle = 'bg-orange-500 text-white ring-4 ring-orange-200 dark:ring-orange-900'; text = 'text-orange-500 dark:text-orange-400 font-bold'; }
+                            else if(activeColor === 'indigo') { circle = 'bg-indigo-500 text-white ring-4 ring-indigo-200 dark:ring-indigo-900'; text = 'text-indigo-600 dark:text-indigo-400 font-bold'; }
+                            else if(activeColor === 'rose') { circle = 'bg-rose-500 text-white ring-4 ring-rose-200 dark:ring-rose-900'; text = 'text-rose-600 dark:text-rose-400 font-bold'; }
+                            else if(activeColor === 'emerald') { circle = 'bg-emerald-500 text-white ring-4 ring-emerald-200 dark:ring-emerald-900'; text = 'text-emerald-600 dark:text-emerald-400 font-bold'; }
+                        }
+                        
+                        const lineHtml = i > 0 ? `<div class="h-6 w-1 ml-[1.125rem] md:ml-0 md:h-1 md:w-auto md:flex-1 rounded ${i <= currentIdx ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'} transition-colors duration-500"></div>` : '';
+                        
+                        return `${lineHtml}
+                            <div class="flex md:flex-col items-center md:items-center gap-2 md:gap-1 mt-2 md:mt-0">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${circle} ${animation}">
+                                        <i class="fas ${s.icon}"></i>
+                                    </div>
+                                    <span class="text-xs md:hidden ${text}">${s.label}</span>
+                                </div>
+                                <span class="hidden md:inline-block text-[11px] ${text} text-center">${s.label}${i === 1 && subStatus && i === currentIdx ? `<div class="text-[10px] opacity-80 mt-0.5">${subStatus}</div>` : ''}</span>
+                            </div>`;
+                    }).join('')}
+                </div>`;
+            }
+
+            const content = `
+                <div class="space-y-3 text-left text-sm">
+                    ${timelineHtml}
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">Ticket ID:</span><br><span class="font-mono font-bold text-slate-800 dark:text-slate-100">${txt(log.id)}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">สถานะ:</span><br><span class="${getStatusClass(log.status)} px-2 py-0.5 rounded text-xs font-bold">${log.status}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">วันที่แจ้ง:</span><br><span class="font-medium dark:text-slate-200">${log.date ? new Date(log.date).toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}) : '-'}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">ผู้แจ้ง:</span><br><span class="font-medium dark:text-slate-200">${txt(log.reporter || log.reporter_name)}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">แผนก:</span><br><span class="font-medium dark:text-slate-200">${txt(log.department)}</span></div>
+                        <div><span class="text-slate-500 dark:text-slate-400 text-xs">ประเภทงาน:</span><br><span class="font-medium dark:text-slate-200">${txt(log.type)}</span></div>
+                        <div class="col-span-2"><span class="text-slate-500 dark:text-slate-400 text-xs">ผู้รับผิดชอบ:</span><br><span class="font-medium dark:text-slate-200">${txt(log.servicedBy || log.tech_name)}</span></div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">อาการ / ปัญหา</p>
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">${txt(log.problem)}</div>
+                    </div>
+                    ${log.solution ? `<div>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">วิธีแก้ไข</p>
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800 text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">${txt(log.solution)}</div>
+                    </div>` : ''}
+                    ${imagesHtml}
+                    ${actionButton}
+                </div>`;
+
+            Swal.fire({
+                title: `<div class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2"><i class="fas fa-ticket-alt text-blue-500"></i> รายละเอียดงาน</div>`,
+                html: content,
+                showCloseButton: true,
+                showConfirmButton: false,
+                width: '520px',
+                customClass: { popup: 'dark:bg-slate-800 rounded-2xl', htmlContainer: 'text-left' }
+            });
+        }
+
+        // ─── STARTUP ──────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            setupInstallAppButton();
+            checkAuth().then(() => {
+                loadDashboardData();
+            }).catch(e => {
+                console.error('Init error:', e);
+                loadDashboardData(); // try loading anyway
+            });
+        });
+
+    </script>
+</body>
+</html>

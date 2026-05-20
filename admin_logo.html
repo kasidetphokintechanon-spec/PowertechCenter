@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการโลโก้บริษัท - Powertech System</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+    <div class="flex h-screen">
+        <!-- Static Sidebar (Copied from admin.html for consistency) -->
+        <aside class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col z-20 hidden md:flex shadow-xl">
+            <div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-slate-700">
+                <i class="fas fa-shield-alt text-blue-600 text-2xl mr-3"></i>
+                <span class="font-bold text-lg tracking-tight">System Admin</span>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-1">
+                <div class="px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">ASSETS</div>
+                <a href="admin.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left">
+                    <i class="fas fa-laptop w-5 text-center mr-3"></i> ทะเบียนพัสดุ
+                </a>
+                
+                <div class="mt-8 mb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">ORG</div>
+                <a href="admin.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left">
+                    <i class="fas fa-building w-5 text-center mr-3"></i> แผนก
+                </a>
+                <a href="admin.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left">
+                    <i class="fas fa-users w-5 text-center mr-3"></i> พนักงาน
+                </a>
+
+                <div class="mt-8 mb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">SYSTEM</div>
+                <a href="admin.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left">
+                    <i class="fas fa-bullhorn w-5 text-center mr-3"></i> ประกาศ
+                </a>
+                <a href="admin_logo.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 dark:bg-slate-700 dark:text-white shadow-sm border-r-4 border-blue-600 rounded-lg transition-all w-full text-left mt-1">
+                    <i class="fas fa-images w-5 text-center mr-3 text-purple-500"></i>
+                    <span>จัดการโลโก้</span>
+                </a>
+                <a href="settings_telegram.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left mt-1">
+                    <i class="fab fa-telegram w-5 text-center mr-3 text-blue-500"></i>
+                    <span>Telegram Notify</span>
+                </a>
+                <a href="settings_line.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left mt-1">
+                    <i class="fab fa-line w-5 text-center mr-3 text-green-500"></i>
+                    <span>LINE Notify</span>
+                </a>
+                <a href="audit_log.html" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg transition-all w-full text-left mt-1">
+                    <i class="fas fa-history w-5 text-center mr-3 text-gray-500"></i>
+                    <span>Audit Log</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700">
+                <a href="index.html" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> กลับหน้าหลัก
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 justify-between">
+                <h1 class="text-xl font-bold text-slate-700">จัดการโลโก้บริษัท</h1>
+                <a href="admin.html" class="text-slate-500 hover:text-blue-600"><i class="fas fa-arrow-left mr-2"></i>กลับไปหน้า Admin</a>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                <div class="max-w-3xl mx-auto">
+                    
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-slate-800">ปรับแต่งโลโก้บริษัท / ไอคอนแอป</h2>
+                        <p class="text-slate-500">เลือกบริษัทหรือไอคอนแอป (Main/Directory) ที่ต้องการเปลี่ยน</p>
+                    </div>
+
+                    <!-- Company Selector (Tabs) -->
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                        <button onclick="selectCompany('PTA')" data-code="PTA" class="company-btn flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm group">
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <span class="font-bold text-slate-700">PTA</span>
+                            <span class="text-xs text-slate-400">Engine Assembly</span>
+                        </button>
+                        <button onclick="selectCompany('PT4')" data-code="PT4" class="company-btn flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm group">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-industry"></i>
+                            </div>
+                            <span class="font-bold text-slate-700">PT4</span>
+                            <span class="text-xs text-slate-400">Powertech 2004</span>
+                        </button>
+                        <button onclick="selectCompany('PTE')" data-code="PTE" class="company-btn flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm group">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-charging-station"></i>
+                            </div>
+                            <span class="font-bold text-slate-700">PTE</span>
+                            <span class="text-xs text-slate-400">Energy Solutions</span>
+                        </button>
+                        <button onclick="selectCompany('DIR')" data-code="DIR" class="company-btn flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm group">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <span class="font-bold text-slate-700">Directory</span>
+                            <span class="text-xs text-slate-400">App Icon</span>
+                        </button>
+                        <button onclick="selectCompany('APP')" data-code="APP" class="company-btn flex flex-col items-center justify-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm group">
+                            <div class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span class="font-bold text-slate-700">Main App</span>
+                            <span class="text-xs text-slate-400">Powertech System</span>
+                        </button>
+                    </div>
+
+                    <!-- Editor Card -->
+                    <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                        <div class="p-8 flex flex-col items-center">
+                            
+                            <div class="mb-6 text-center">
+                                <h3 id="company-title" class="text-lg font-bold text-slate-800">Powertech Engine Assembly</h3>
+                                <p class="text-sm text-slate-400">โลโก้ปัจจุบัน</p>
+                            </div>
+
+                            <!-- Logo Preview Area -->
+                            <div class="relative group w-full max-w-lg aspect-[16/9] bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center mb-8 overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
+                                
+                                <img id="current-logo" src="" class="h-48 object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105 hidden z-10">
+                                
+                                <div id="no-logo-placeholder" class="flex flex-col items-center text-slate-400 z-0">
+                                    <div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center mb-3">
+                                        <i class="fas fa-image text-2xl text-slate-400"></i>
+                                    </div>
+                                    <span class="font-medium">ยังไม่มีโลโก้</span>
+                                    <span class="text-xs mt-1">คลิกเพื่ออัปโหลด</span>
+                                </div>
+                                
+                                <!-- Click Overlay -->
+                                <div class="absolute inset-0 z-20 cursor-pointer" onclick="document.getElementById('logo-file').click()"></div>
+                                
+                                <!-- Hover Hint -->
+                                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-white mb-2"></i>
+                                    <span class="text-white font-bold">เปลี่ยนรูปภาพ</span>
+                                    <span class="text-white/80 text-xs mt-1">รองรับ PNG, JPG</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Bar -->
+                            <div class="w-full max-w-lg flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-slate-700 mb-0.5">อัปโหลดไฟล์ใหม่</p>
+                                    <p id="file-name-display" class="text-xs text-slate-500 truncate">ยังไม่ได้เลือกไฟล์</p>
+                                </div>
+                                <input type="file" id="logo-file" accept="image/png, image/jpeg" class="hidden" onchange="handleFileSelect(this)">
+                                <button onclick="document.getElementById('logo-file').click()" class="px-4 py-2 bg-white border border-slate-300 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-50 transition shadow-sm">
+                                    เลือกไฟล์
+                                </button>
+                                <button onclick="uploadLogo()" id="btn-save" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                                    <i class="fas fa-save"></i> บันทึก
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/shared.js"></script>
+    <script>
+        let currentCompanyCode = 'PTA';
+        const companyNames = {
+            'PTA': 'Powertech Engine Assembly (PTA)',
+            'PT4': 'Powertech 2004 (PT4)',
+            'PTE': 'Powertech Energy Solutions (PTE)',
+            'DIR': 'Directory App Icon',
+            'APP': 'Powertech System Center App Icon'
+        };
+
+        function getLogoPath(code) {
+            if (code === 'DIR') return 'uploads/logos/directory_app_icon.png';
+            if (code === 'APP') return 'uploads/logos/powertech_app_icon.png';
+            return `uploads/logos/${code.toLowerCase()}_logo.png`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check Session manually since we removed renderSidebar
+            try {
+                const response = await fetch('api.php?action=check_session');
+                const session = await response.json();
+                if (!session.loggedin || session.role !== 'admin') {
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } catch(e) { window.location.href = 'login.html'; }
+            
+            selectCompany('PTA'); // Default
+        });
+
+        function selectCompany(code) {
+            currentCompanyCode = code;
+            
+            // Update Tabs UI
+            document.querySelectorAll('.company-btn').forEach(btn => {
+                const isSelected = btn.dataset.code === code;
+                if (isSelected) {
+                    btn.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-200');
+                    btn.classList.remove('bg-white', 'border-slate-200', 'hover:bg-slate-50');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-200');
+                    btn.classList.add('bg-white', 'border-slate-200', 'hover:bg-slate-50');
+                }
+            });
+
+            // Update Title
+            document.getElementById('company-title').textContent = companyNames[code];
+
+            // Reset Input
+            document.getElementById('logo-file').value = '';
+            document.getElementById('file-name-display').textContent = 'ยังไม่ได้เลือกไฟล์';
+            document.getElementById('btn-save').disabled = true;
+
+            loadCurrentLogo();
+        }
+
+        function loadCurrentLogo() {
+            const img = document.getElementById('current-logo');
+            const placeholder = document.getElementById('no-logo-placeholder');
+            
+            // Path ตามที่กำหนดใน shared.js
+            const path = getLogoPath(currentCompanyCode);
+            
+            // ลองโหลดรูปเพื่อเช็คว่ามีไฟล์ไหม
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                img.src = path + '?t=' + new Date().getTime(); // Cache busting
+                img.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            tempImg.onerror = function() {
+                img.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                img.src = '';
+            };
+            tempImg.src = path;
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Update Text
+                document.getElementById('file-name-display').textContent = file.name;
+                document.getElementById('btn-save').disabled = false;
+
+                // Preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('current-logo');
+                    const placeholder = document.getElementById('no-logo-placeholder');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function uploadLogo() {
+            const fileInput = document.getElementById('logo-file');
+            if (!fileInput.files || !fileInput.files[0]) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'upload_company_logo');
+            formData.append('company', currentCompanyCode);
+            formData.append('logoFile', fileInput.files[0]);
+
+            try {
+                Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+                const res = await fetch('api.php', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    await Swal.fire('สำเร็จ', 'บันทึกโลโก้เรียบร้อยแล้ว', 'success');
+                    // Reload sidebar logo if current company matches
+                    const session = await fetch('api.php?action=check_session').then(r => r.json());
+                    if (currentCompanyCode !== 'DIR' && session.company === currentCompanyCode) {
+                        location.reload(); // Reload page to see changes in sidebar
+                    } else {
+                        // Just reload the image in place to be sure
+                        loadCurrentLogo();
+                        // Reset input state
+                        document.getElementById('logo-file').value = '';
+                        document.getElementById('file-name-display').textContent = 'บันทึกแล้ว';
+                        document.getElementById('btn-save').disabled = true;
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (e) {
+                Swal.fire('ผิดพลาด', e.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

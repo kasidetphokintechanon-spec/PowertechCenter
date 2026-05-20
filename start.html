@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Connecting to Powertech System Center</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 2rem;
+        }
+        .icon {
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        .icon img {
+            width: 100px; /* ปรับขนาดโลโก้ตามความเหมาะสม */
+            height: auto;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .links {
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            color: #94a3b8; /* slate-400 */
+        }
+        .links a {
+            color: #60a5fa; /* blue-400 */
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        async function checkServerAndRedirect() {
+            const primaryUrl = 'http://192.168.0.13/powertechcenter/login.html';
+            const backupUrl = 'http://110.170.174.149/powertechcenter/login.html';
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5-second timeout
+
+            try {
+                await fetch('http://192.168.0.13/powertechcenter/', { mode: 'no-cors', signal: controller.signal });
+                clearTimeout(timeoutId);
+                window.location.href = primaryUrl;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.log('Primary server failed, redirecting to backup.');
+                window.location.href = backupUrl;
+            }
+        }
+        checkServerAndRedirect();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <!-- แก้ path ของโลโก้ตรงนี้ได้เลยครับ -->
+            <img src="img/logo.png" alt="Powertech Logo">
+        </div>
+        <h1>กำลังเชื่อมต่อไปยัง Powertech System Center...</h1>
+        <div class="links">
+            <p>หากไม่ถูกเปลี่ยนหน้าอัตโนมัติ กรุณาคลิกที่ลิงก์ด้านล่าง:</p>
+            <a href="http://192.168.0.13/powertechcenter/login.html">เซิร์ฟเวอร์หลัก (Primary)</a> | 
+            <a href="http://110.170.174.149/powertechcenter/login.html">เซิร์ฟเวอร์สำรอง (Backup)</a>
+        </div>
+    </div>
+</body>
+</html>

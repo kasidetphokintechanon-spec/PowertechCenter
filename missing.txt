@@ -1,0 +1,69 @@
+﻿            gid('export-btn').addEventListener('click', exportLogs);
+            gid('log-form').addEventListener('submit', handleLogSubmit);
+            gid('form-company').addEventListener('change', populateManualDepartmentDropdown);
+            document.querySelectorAll('input[name="requester-mode"]').forEach(r => r.addEventListener('change', toggleRequesterMode));
+            gid('form-asset').addEventListener('input', e => searchAssets(e.target.value));
+            document.addEventListener('click', e => { if(!e.target.closest('.asset-search-wrapper')) gid('asset-results').classList.add('hidden'); });
+            
+            ['search-input','company-filter','status-filter','type-filter'].forEach(id => gid(id).addEventListener('input', () => { currentPage = 1; renderTable(); }));
+            const myToggle = gid('my-queue-toggle');
+            if (myToggle) {
+                myToggle.addEventListener('click', () => {
+                    showMyQueueOnly = !showMyQueueOnly;
+                    myToggle.classList.toggle('bg-blue-600', showMyQueueOnly);
+                    myToggle.classList.toggle('text-white', showMyQueueOnly);
+                    myToggle.classList.toggle('border-blue-600', showMyQueueOnly);
+                    myToggle.classList.toggle('bg-white', !showMyQueueOnly);
+                    myToggle.classList.toggle('dark:bg-slate-700', !showMyQueueOnly);
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+            const refreshBtn = gid('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async () => {
+                    refreshBtn.disabled = true;
+                    const oldHtml = refreshBtn.innerHTML;
+                    refreshBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-slate-400"></i><span>เธเธณเธฅเธฑเธเนเธซเธฅเธ”</span>';
+                    try { await loadInitialData(); } finally { refreshBtn.disabled = false; refreshBtn.innerHTML = oldHtml; }
+                });
+            }
+            const clearBtn = gid('clear-filters-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    gid('search-input').value = '';
+                    gid('company-filter').value = '';
+                    gid('type-filter').value = '';
+                    gid('status-filter').value = '';
+                    showMyQueueOnly = false;
+                    const myToggleBtn = gid('my-queue-toggle');
+                    if (myToggleBtn) {
+                        myToggleBtn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                        myToggleBtn.classList.add('bg-white', 'dark:bg-slate-700');
+                    }
+                    document.querySelectorAll('.stat-pill').forEach(x => x.classList.remove('active'));
+                    const first = document.querySelector('.stat-pill[data-filter-value=""]');
+                    if (first) first.classList.add('active');
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+            document.querySelectorAll('.stat-pill').forEach(p => p.addEventListener('click', () => {
+                document.querySelectorAll('.stat-pill').forEach(x => x.classList.remove('active'));
+                p.classList.add('active');
+                gid('status-filter').value = p.dataset.filterValue;
+                currentPage = 1;
+                renderTable();
+            }));
+            setupPrinting();
+
+            // Back to Top Scroll Listener
+            window.addEventListener('scroll', () => {
+                const btn = gid('back-to-top');
+                if (window.scrollY > 300) btn.classList.remove('translate-y-20', 'opacity-0');
+                else btn.classList.add('translate-y-20', 'opacity-0');
+            });
+        });
+    </script>
+</body>
+</html>

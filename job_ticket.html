@@ -1,0 +1,1491 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- <base target="_top"> เอาออกเพื่อให้ทำงานบน Local ได้ -->
+    <title>Job Ticket - Powertech System</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-light: #f1f5f9;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --gray-border: #e2e8f0;
+            
+            /* Company Colors */
+            --pt4-main: #dc2626; --pt4-light: #fee2e2;
+            --pta-main: #16a34a; --pta-light: #dcfce7;
+            --pte-main: #0ea5e9; --pte-light: #e0f2fe;
+
+            /* Status Colors */
+            --col-receive: #0ea5e9; 
+            --col-doing: #f59e0b;
+            --col-send: #3b82f6;
+            --col-approve: #8b5cf6;
+            --col-done: #22c55e;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; color: var(--text-main); margin: 0; padding-bottom: 80px; }
+        
+        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Tabs (Mobile Scrollable) */
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            padding: 10px 24px; border: none; background: white; border-radius: 999px; cursor: pointer;
+            font-family: 'Kanit'; font-size: 0.95rem; font-weight: 500; color: var(--text-light); white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0; border: 2px solid transparent; transition: all 0.2s;
+        }
+        .tab-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-btn.active.pt4 { background: var(--pt4-main); color: white; border-color: var(--pt4-main); }
+        .tab-btn.active.pta { background: var(--pta-main); color: white; border-color: var(--pta-main); }
+        .tab-btn.active.pte { background: var(--pte-main); color: white; border-color: var(--pte-main); }
+
+        /* Dashboard (Mobile Compact) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (min-width: 768px) { .dashboard-grid { grid-template-columns: repeat(4, 1fr); } }
+        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative; overflow: hidden; border: 1px solid #f1f5f9; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .card h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
+        .card .value { font-size: 2rem; font-weight: 700; line-height: 1; }
+        .card-icon { position: absolute; right: 15px; top: 15px; font-size: 2rem; opacity: 0.1; }
+        [data-theme="PT4"] .card .value { color: var(--pt4-main); }
+        [data-theme="PTA"] .card .value { color: var(--pta-main); }
+        [data-theme="PTE"] .card .value { color: var(--pte-main); }
+
+        /* Controls */
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .controls select { flex: 1; min-width: 150px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--gray-border); background: white; font-family: 'Kanit'; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: border-color 0.2s; }
+        .controls select:focus { border-color: #3b82f6; }
+        
+        /* Floating Add Button (Mobile Friendly) */
+        .btn-add-float {
+            position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%;
+            background: #334155; color: white; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 90; cursor: pointer; transition: transform 0.2s;
+        }
+        [data-theme="PT4"] .btn-add-float { background: var(--pt4-main); }
+        [data-theme="PTA"] .btn-add-float { background: var(--pta-main); }
+        [data-theme="PTE"] .btn-add-float { background: var(--pte-main); }
+        .btn-add-float:active { transform: scale(0.95); }
+        .btn-add-float i { font-size: 1.5rem; }
+
+        .chart-wrapper {
+            position: relative;
+            height: 220px;
+        }
+        @media (min-width: 1024px) {
+            .chart-wrapper {
+                height: 260px;
+            }
+        }
+
+        /* Job List as Cards (Mobile First) */
+        .job-list { display: flex; flex-direction: column; gap: 12px; }
+
+        /* Personal Task Card — Rich & Colorful */
+        .personal-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .personal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+
+        /* สีแถบซ้ายตาม priority */
+        .personal-card .card-stripe { width: 5px; flex-shrink: 0; border-radius: 0; }
+        .personal-card.priority-urgent .card-stripe { background: linear-gradient(180deg,#ef4444,#dc2626); }
+        .personal-card.priority-high   .card-stripe { background: linear-gradient(180deg,#f59e0b,#d97706); }
+        .personal-card.priority-normal .card-stripe { background: linear-gradient(180deg,#3b82f6,#2563eb); }
+        .personal-card.priority-low    .card-stripe { background: linear-gradient(180deg,#94a3b8,#64748b); }
+
+        /* ส่วนหัว card */
+        .pc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+        .pc-title { font-size: 1rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
+        .pc-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 8px; }
+
+        /* Priority badge */
+        .pc-priority { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: .02em; }
+        .priority-urgent .pc-priority { background: #fef2f2; color: #dc2626; }
+        .priority-high   .pc-priority { background: #fffbeb; color: #d97706; }
+        .priority-normal .pc-priority { background: #eff6ff; color: #2563eb; }
+        .priority-low    .pc-priority { background: #f8fafc; color: #64748b; }
+
+        /* Deadline badge */
+        .pc-deadline { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
+        .pc-deadline.late { background: #fef2f2; color: #dc2626; font-weight: 600; }
+        .pc-deadline.soon { background: #fffbeb; color: #d97706; font-weight: 600; }
+
+        /* Description */
+        .pc-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Tags */
+        .pc-tag { display: inline-flex; align-items: center; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: #f1f5f9; color: #475569; margin-right: 4px; margin-bottom: 4px; }
+
+        /* Progress */
+        .pc-progress-bar { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+        .pc-progress-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+
+        /* Footer row */
+        .pc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+        .pc-meta { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+        .pc-meta-item { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+
+        /* Status cycle button */
+        .pc-status-btn { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer; font-family: 'Kanit'; font-weight: 500; transition: all .15s; white-space: nowrap; }
+        .pc-status-btn:hover { border-color: #3b82f6; color: #2563eb; }
+        .pc-status-btn.doing { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
+        .pc-status-btn.done  { border-color: #22c55e; color: #16a34a; background: #f0fdf4; }
+
+        /* Update button */
+        .pc-update-btn { font-size: 11px; padding: 4px 12px; border-radius: 999px; border: none; background: #3b82f6; color: white; cursor: pointer; font-family: 'Kanit'; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: background .15s; white-space: nowrap; }
+        .pc-update-btn:hover { background: #2563eb; }
+
+        /* Delete button */
+        .pc-delete-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: #fef2f2; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: background .15s; flex-shrink: 0; }
+        .pc-delete-btn:hover { background: #fee2e2; }
+
+        /* Column header colors */
+        .col-header-todo  { color: #64748b; }
+        .col-header-doing { color: #d97706; }
+        .col-header-done  { color: #16a34a; }
+
+        /* ═══════════════════════════════════════════
+           JOB TICKET CARD — Redesigned
+        ═══════════════════════════════════════════ */
+        .job-card {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid var(--gray-border);
+            transition: transform 0.2s cubic-bezier(.25,.8,.25,1), box-shadow 0.2s cubic-bezier(.25,.8,.25,1);
+            overflow: hidden;
+            position: relative;
+        }
+        .job-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.1); }
+
+        /* Top accent stripe — progress bar */
+        .jc-progress-bar { height: 5px; background: #f1f5f9; }
+        .jc-progress-fill { height: 100%; border-radius: 0 3px 3px 0; transition: width 0.6s ease; }
+        .job-card[data-company="PT4"] .jc-progress-fill { background: linear-gradient(90deg,#b91c1c,#ef4444); }
+        .job-card[data-company="PTA"] .jc-progress-fill { background: linear-gradient(90deg,#15803d,#22c55e); }
+        .job-card[data-company="PTE"] .jc-progress-fill { background: linear-gradient(90deg,#0284c7,#38bdf8); }
+
+        /* Card body */
+        .jc-body { padding: 16px 18px 18px; }
+
+        /* Title */
+        .job-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; }
+
+        /* Status + deadline row */
+        .jc-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; align-items: center; }
+
+        /* Status badge */
+        .jc-status { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; }
+        .jc-status.s-pending  { background: #f1f5f9; color: #64748b; }
+        .jc-status.s-receive  { background: #e0f2fe; color: #0284c7; }
+        .jc-status.s-doing    { background: #fef3c7; color: #b45309; }
+        .jc-status.s-send     { background: #ede9fe; color: #6d28d9; }
+        .jc-status.s-approve  { background: #f3e8ff; color: #7e22ce; }
+        .jc-status.s-done     { background: #dcfce7; color: #15803d; }
+
+        /* Deadline chip */
+        .jc-deadline { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .jc-deadline.dl-ok     { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .jc-deadline.dl-soon   { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .jc-deadline.dl-late   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .jc-deadline.dl-done   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        @keyframes overdue-pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+        .jc-deadline.dl-late { animation: overdue-pulse 2s infinite; }
+
+        /* Meta row (dept + buildings) */
+        .jc-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; align-items: center; }
+        .badge-building { padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .job-card[data-company="PT4"] .badge-building { background: var(--pt4-light); color: var(--pt4-main); }
+        .job-card[data-company="PTA"] .badge-building { background: var(--pta-light); color: var(--pta-main); }
+        .job-card[data-company="PTE"] .badge-building { background: var(--pte-light); color: var(--pte-main); }
+        .badge-building:not([class~="job-card"]) { background: #f1f5f9; color: #64748b; }
+        .badge-dept { font-size: 0.7rem; background: #e2e8f0; color: #475569; padding: 2px 7px; border-radius: 20px; }
+
+        /* Responsible row */
+        .jc-responsible { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 0.85rem; color: #475569; }
+        .jc-avatar { width: 28px; height: 28px; border-radius: 50%; font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase; }
+        .job-card[data-company="PT4"] .jc-avatar { background: #fee2e2; color: #b91c1c; }
+        .job-card[data-company="PTA"] .jc-avatar { background: #dcfce7; color: #15803d; }
+        .job-card[data-company="PTE"] .jc-avatar { background: #e0f2fe; color: #0284c7; }
+
+        /* Legacy (keep for table) */
+        .job-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .job-meta { display: flex; gap: 10px; font-size: 0.85rem; color: var(--text-light); align-items: center; flex-wrap: wrap; }
+        .badge-deadline { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+        .badge-deadline.late { color: #ef4444; font-weight: 600; }
+        
+        /* Stepper */
+        .stepper { display: flex; justify-content: space-between; margin-top: 16px; position: relative; padding: 0 5px; }
+        .stepper::before { content: ''; position: absolute; top: 15px; left: 10px; right: 10px; height: 3px; background: #f1f5f9; border-radius: 2px; z-index: 1; }
+        /* Filled portion — updated via JS */
+        .stepper-fill { position: absolute; top: 15px; left: 10px; height: 3px; border-radius: 2px; z-index: 1; transition: width 0.6s ease; }
+        .job-card[data-company="PT4"] .stepper-fill { background: linear-gradient(90deg,#b91c1c,#ef4444); }
+        .job-card[data-company="PTA"] .stepper-fill { background: linear-gradient(90deg,#15803d,#22c55e); }
+        .job-card[data-company="PTE"] .stepper-fill { background: linear-gradient(90deg,#0284c7,#38bdf8); }
+
+        .step-item { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; justify-content: center; align-items: center; color: #cbd5e1; font-size: 0.78rem; transition: all 0.2s; }
+        .step-label { font-size: 0.65rem; color: var(--text-light); margin-top: 5px; font-weight: 500; }
+
+        /* Active States */
+        .step-item.active .step-circle { color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
+        .step-item.active .step-label { font-weight: 700; color: var(--text-main); }
+        
+        .step-item[data-step="receive"].active .step-circle { background: var(--col-receive); }
+        .step-item[data-step="doing"].active .step-circle { background: var(--col-doing); }
+        .step-item[data-step="send"].active .step-circle { background: var(--col-send); }
+        .step-item[data-step="approve"].active .step-circle { background: var(--col-approve); }
+        .step-item[data-step="done"].active .step-circle { background: var(--col-done); }
+
+        /* Animations for Status Flow */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(var(--pulse-rgb), 0); }
+            100% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0); }
+        }
+        @keyframes icon-wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
+        @keyframes icon-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes icon-pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        .step-item { --pulse-rgb: 203, 213, 225; }
+        .step-item[data-step="receive"] { --pulse-rgb: 14, 165, 233; }
+        .step-item[data-step="doing"] { --pulse-rgb: 245, 158, 11; }
+        .step-item[data-step="send"] { --pulse-rgb: 59, 130, 246; }
+        .step-item[data-step="approve"] { --pulse-rgb: 139, 92, 246; }
+        .step-item[data-step="done"] { --pulse-rgb: 34, 197, 94; }
+
+        .step-item.current-pulse .step-circle { animation: pulse-ring 2s infinite; }
+        .step-item.current-pulse[data-step="doing"] i { animation: icon-wobble 2s ease-in-out infinite; display: inline-block; }
+        .step-item.current-pulse[data-step="send"] i { animation: icon-float 2s ease-in-out infinite; display: inline-block; }
+        .step-item.current-pulse[data-step="receive"] i { animation: icon-pop 2s ease-in-out infinite; display: inline-block; }
+
+        /* Last Update Footer */
+        .job-footer { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--gray-border); font-size: 0.72rem; color: #94a3b8; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+
+        /* Desktop Table Styles (Hidden on Mobile) */
+        .table-wrap { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; border: 1px solid var(--gray-border); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; }
+        th { background: #f8fafc; text-align: left; padding: 16px; font-weight: 600; color: #475569; border-bottom: 2px solid var(--gray-border); white-space: nowrap; position: sticky; top: 0; }
+        td { padding: 16px; border-bottom: 1px solid var(--gray-border); vertical-align: middle; }
+
+        /* Job Ticket Cards - ดีทั้ง mobile และ desktop */
+        .job-list { display: flex; flex-direction: column; gap: 12px; }
+        @media (min-width: 768px) {
+            .job-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        }
+        @media (min-width: 1200px) {
+            .job-list { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* Modal (Full Screen on Mobile) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        @media (max-width: 600px) {
+            .modal-content { width: 100%; height: 100%; max-width: none; max-height: none; border-radius: 0; padding: 20px; }
+        }
+
+        /* ── Add Job Modal – redesign ── */
+        #addModal .modal-content { padding: 0; overflow: hidden; border-radius: 22px; max-width: 460px; }
+        #addModal .add-modal-header { padding: 20px 22px 18px; display: flex; align-items: center; justify-content: space-between; transition: background .25s; }
+        #addModal[data-modal-theme="PT4"] .add-modal-header { background: linear-gradient(135deg, #b91c1c, #ef4444); }
+        #addModal[data-modal-theme="PTA"] .add-modal-header { background: linear-gradient(135deg, #15803d, #22c55e); }
+        #addModal[data-modal-theme="PTE"] .add-modal-header { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+        #addModal .add-modal-header h3 { color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0; }
+        #addModal .add-modal-header p  { color: rgba(255,255,255,.7); font-size: 0.72rem; margin: 0 0 2px; }
+        .add-modal-close { background: rgba(255,255,255,.2); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; transition: background .15s; flex-shrink: 0; }
+        .add-modal-close:hover { background: rgba(255,255,255,.35); }
+        #addModal .add-modal-body { padding: 20px 22px 22px; }
+        .co-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+        .co-tab { padding: 9px 0; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.88rem; color: #64748b; background: #f8fafc; transition: all .15s; user-select: none; }
+        .co-tab:hover:not(.active) { border-color: #94a3b8; background: #f1f5f9; }
+        .co-tab.active.pt4 { background:#dc2626; color:#fff; border-color:#dc2626; box-shadow:0 3px 10px rgba(220,38,38,.3); }
+        .co-tab.active.pta { background:#16a34a; color:#fff; border-color:#16a34a; box-shadow:0 3px 10px rgba(22,163,74,.3); }
+        .co-tab.active.pte { background:#0ea5e9; color:#fff; border-color:#0ea5e9; box-shadow:0 3px 10px rgba(14,165,233,.3); }
+        .co-tab.disabled { opacity: .35; pointer-events: none; }
+        .add-field { margin-bottom: 13px; }
+        .add-field > label { font-size: 0.73rem; font-weight: 700; color: #64748b; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .add-field .input-wrap { position: relative; }
+        .add-field .input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; pointer-events: none; }
+        .add-field .input-wrap input, .add-field .input-wrap select { width: 100%; padding: 11px 12px 11px 36px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; font-family: 'Kanit'; color: #0f172a; background: #f8fafc; transition: border-color .15s, box-shadow .15s; outline: none; -webkit-appearance: none; }
+        .add-field .input-wrap input:focus, .add-field .input-wrap select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); background: #fff; }
+        .date-shortcuts { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .ds-btn { padding: 4px 11px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.75rem; color: #475569; background: #fff; cursor: pointer; font-family: 'Kanit'; transition: all .12s; }
+        .ds-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+        #buildingSelector .b-chip { cursor: pointer; transition: all .12s; }
+        #buildingSelector .b-chip:hover:not(.selected) { background: #f1f5f9; border-color: #94a3b8; }
+        .add-submit { width: 100%; padding: 13px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; font-family: 'Kanit'; color: #fff; cursor: pointer; margin-top: 8px; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        #addModal[data-modal-theme="PT4"] .add-submit { background: linear-gradient(135deg,#dc2626,#ef4444); box-shadow: 0 4px 14px rgba(220,38,38,.35); }
+        #addModal[data-modal-theme="PTA"] .add-submit { background: linear-gradient(135deg,#16a34a,#22c55e); box-shadow: 0 4px 14px rgba(22,163,74,.35); }
+        #addModal[data-modal-theme="PTE"] .add-submit { background: linear-gradient(135deg,#0ea5e9,#38bdf8); box-shadow: 0 4px 14px rgba(14,165,233,.35); }
+        .add-submit:hover { opacity: .9; transform: translateY(-1px); }
+
+        .form-row { margin-bottom: 20px; }
+        .form-row label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; }
+        .form-row input, .form-row select { width: 100%; padding: 14px; border: 1px solid var(--gray-border); border-radius: 10px; font-size: 1rem; font-family: 'Kanit'; -webkit-appearance: none; background: white; }
+
+        /* Chips */
+        .building-selector { display: flex; flex-wrap: wrap; gap: 8px; }
+        .b-chip { 
+            padding: 10px 18px; border: 1px solid var(--gray-border); border-radius: 25px; 
+            font-size: 0.95rem; background: white; color: var(--text-main);
+        }
+        .b-chip.selected { color: white; border-color: transparent; }
+        .modal[data-modal-theme="PT4"] .b-chip.selected { background: var(--pt4-main); }
+        .modal[data-modal-theme="PTA"] .b-chip.selected { background: var(--pta-main); }
+        .modal[data-modal-theme="PTE"] .b-chip.selected { background: var(--pte-main); }
+        #personalSettingsModal input#setting-hide-done:checked + span { background: #60a5fa; }
+        #personalSettingsModal input#setting-hide-done:checked + span .dot { transform: translateX(20px); }
+
+        /* Dashboard styles */
+        .dash-filter-btn { transition: all .2s; }
+        .dash-company-card { background:white; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,.04); border:1px solid #f1f5f9; }
+        .dash-prog-bar { height:8px; background:#f1f5f9; border-radius:4px; overflow:hidden; margin:8px 0; }
+        .dash-prog-fill { height:100%; border-radius:4px; transition:width .5s ease; }
+        .dash-stat-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+        .dash-stat-chip { font-size:11px; padding:2px 8px; border-radius:6px; background:#f1f5f9; color:#64748b; }
+        .dash-stat-chip.red { background:#fee2e2; color:#dc2626; }
+        .dash-stat-chip.amber { background:#fef3c7; color:#d97706; }
+        .overdue-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:white; border:1px solid #f1f5f9; border-radius:12px; }
+        .overdue-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; }
+        .activity-row { display:flex; align-items:center; gap:10px; padding:8px 14px; background:white; border:1px solid #f1f5f9; border-radius:10px; font-size:0.85rem; }
+        /* Progress bar on personal cards */
+        .task-progress-bar { height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden; margin-top:8px; }
+        .task-progress-fill { height:100%; border-radius:2px; background:#22c55e; }
+        .task-comment-btn { font-size:11px; padding:3px 10px; border:1px solid #e2e8f0; border-radius:999px; background:white; color:#64748b; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:4px; }
+        .task-comment-btn:hover { border-color:#3b82f6; color:#3b82f6; }
+
+        /* Loading & Toast */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--gray-border); border-top-color: #334155; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 4000; display:flex; align-items:center; gap:10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size: 0.95rem; white-space: nowrap; }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        #toast.error { background: #ef4444; }
+        #toast.success { background: #22c55e; }
+    </style>
+</head>
+<body>
+
+    <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
+    <div id="toast">Message</div>
+
+    <nav class="glass-effect sticky top-0 z-50 px-6 py-4 flex flex-col gap-3 md:flex-row md:justify-between md:items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-600 transition text-slate-500"><i class="fas fa-arrow-left"></i></a>
+            <div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Job Notebook</h1>
+                <p class="text-xs text-slate-500">บันทึกงานส่วนตัวและติดตาม Job Ticket</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 justify-between md:justify-end">
+            <button id="btn-personal-add-desktop" onclick="openPersonalTaskModal()" class="hidden md:inline-flex bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg shadow-blue-500/30 transition transform active:scale-95 items-center gap-2">
+                <i class="fas fa-plus"></i><span>เพิ่มบันทึก</span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="personalSection" class="container animate-fade-in-up">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-5">
+            <div>
+                <h2 class="text-2xl font-semibold text-slate-800 mb-1">บันทึกงานส่วนตัว</h2>
+                <p class="text-sm text-slate-500">ใช้แทนโพสต์อิทและสมุดโน้ต จัดลำดับงานสำคัญให้ชัดเจน</p>
+                <div class="mt-2 inline-flex rounded-full bg-slate-100 text-[11px] p-1">
+                    <button id="btn-scope-mine" class="px-3 py-1.5 rounded-full bg-white text-slate-800 shadow-sm flex items-center gap-1">
+                        <i class="fas fa-user"></i><span>ของฉัน</span>
+                    </button>
+                    <button id="btn-scope-dept" class="px-3 py-1.5 rounded-full text-slate-500 hover:text-slate-800 hidden">
+                        <i class="fas fa-users"></i><span>แผนก</span>
+                    </button>
+                    <button id="btn-scope-company" class="px-3 py-1.5 rounded-full text-slate-500 hover:text-slate-800 hidden">
+                        <i class="fas fa-building"></i><span>บริษัท</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+                <div class="relative">
+                    <input id="personalSearch" type="text" class="pl-8 pr-3 py-2 rounded-full border border-slate-200 text-sm w-48 md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ค้นหาชื่องาน คำอธิบาย หรือแท็ก">
+                    <i class="fas fa-search text-slate-400 absolute left-2.5 top-2.5 text-sm"></i>
+                </div>
+                <select id="personalFilterPriority" class="border border-slate-200 rounded-full text-xs px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="">ทุกความสำคัญ</option>
+                    <option value="urgent">เร่งด่วน</option>
+                    <option value="high">สูง</option>
+                    <option value="normal">ปกติ</option>
+                    <option value="low">ต่ำ</option>
+                </select>
+                <select id="personalSort" class="border border-slate-200 rounded-full text-xs px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="due_date">เรียงตามกำหนดเวลา</option>
+                    <option value="priority">เรียงตามความสำคัญ</option>
+                    <option value="created_at">เรียงตามวันที่สร้าง</option>
+                    <option value="updated_at">เรียงตามวันที่แก้ไข</option>
+                </select>
+                <button id="btn-personal-settings" class="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-500 transition">
+                    <i class="fas fa-sliders-h text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-slate-700">สรุปตามสถานะ</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="personalStatusChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-slate-700">สรุปงานต่อบุคคล</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="personalOwnerChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-3">
+            <div>
+                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#f8fafc; border-left:4px solid #94a3b8;">
+                    <div class="flex items-center gap-2">
+                        <span style="font-size:16px;">📋</span>
+                        <h3 class="text-sm font-semibold" style="color:#475569;">ยังไม่เริ่ม</h3>
+                    </div>
+                    <span id="badge-count-todo" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#e2e8f0; color:#64748b;"></span>
+                </div>
+                <div id="personalColumnTodo" class="space-y-3 min-h-[40px]"></div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#fffbeb; border-left:4px solid #f59e0b;">
+                    <div class="flex items-center gap-2">
+                        <span style="font-size:16px;">⚙️</span>
+                        <h3 class="text-sm font-semibold" style="color:#d97706;">กำลังทำ</h3>
+                    </div>
+                    <span id="badge-count-doing" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#fef3c7; color:#d97706;"></span>
+                </div>
+                <div id="personalColumnDoing" class="space-y-3 min-h-[40px]"></div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#f0fdf4; border-left:4px solid #22c55e;">
+                    <div class="flex items-center gap-2">
+                        <span style="font-size:16px;">✅</span>
+                        <h3 class="text-sm font-semibold" style="color:#16a34a;">เสร็จแล้ว</h3>
+                    </div>
+                    <span id="badge-count-done" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#dcfce7; color:#16a34a;"></span>
+                </div>
+                <div id="personalColumnDone" class="space-y-3 min-h-[40px]"></div>
+            </div>
+        </div>
+
+        <div id="personalEmpty" class="mt-10 text-center text-slate-400 text-sm hidden">
+            <div class="inline-flex flex-col items-center gap-3">
+                <i class="far fa-sticky-note text-4xl opacity-40"></i>
+                <p>ยังไม่มีบันทึก ลองกดปุ่ม “เพิ่มบันทึก” เพื่อเริ่มต้น</p>
+            </div>
+        </div>
+
+        <button id="btn-personal-add-float" onclick="openPersonalTaskModal()" class="btn-add-float">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+
+    <!-- Personal Task Modal -->
+    <div id="personalModal" class="modal" onclick="if(event.target===this) closePersonalTaskModal()">
+        <div class="modal-content max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="personalModalTitle" class="text-lg font-semibold text-slate-800">เพิ่มบันทึกใหม่</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600" onclick="closePersonalTaskModal()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="personalForm">
+                <input type="hidden" id="personalTaskId">
+                <div class="form-row">
+                    <label for="personalTitle">ชื่องาน</label>
+                    <input id="personalTitle" type="text" required placeholder="เช่น ติดตั้งโปรแกรมให้แผนก HR">
+                </div>
+                <div class="form-row">
+                    <label for="personalAssignee">ผู้รับผิดชอบ</label>
+                    <input id="personalAssignee" type="text" placeholder="เช่น ชื่อคนหรือทีม">
+                </div>
+                <div class="form-row">
+                    <label for="personalDescription">รายละเอียด</label>
+                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid var(--gray-border); border-radius:10px; font-family:'Kanit'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
+                    <div>
+                        <label for="personalDueDate">กำหนดเสร็จ</label>
+                        <input id="personalDueDate" type="date">
+                    </div>
+                    <div>
+                        <label for="personalPriority">ความสำคัญ</label>
+                        <select id="personalPriority">
+                            <option value="normal">ปกติ</option>
+                            <option value="high">สูง</option>
+                            <option value="urgent">เร่งด่วน</option>
+                            <option value="low">ต่ำ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="personalTags">แท็ก</label>
+                    <input id="personalTags" type="text" placeholder="เช่น IT,PTA,ด่วน แยกด้วยเครื่องหมายจุลภาค">
+                </div>
+                <div class="form-row">
+                    <label for="personalShare">การแชร์</label>
+                    <select id="personalShare">
+                        <option value="private">เฉพาะฉัน</option>
+                        <option value="department">แชร์ในแผนก</option>
+                        <option value="company">แชร์ให้หัวหน้าดูภาพรวม</option>
+                    </select>
+                </div>
+                <div id="personalShareInfo" class="text-xs text-slate-500 mb-2"></div>
+                <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span id="personalMeta"></span>
+                    <button type="button" class="text-blue-500 hover:text-blue-700" onclick="clearPersonalDraft()">ล้างแบบร่าง</button>
+                </div>
+                <div id="personalHistory" class="text-xs text-slate-500 max-h-32 overflow-y-auto mb-3"></div>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-md transition active:scale-95">
+                        บันทึก
+                    </button>
+                    <button type="button" class="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm flex items-center gap-1" onclick="shareCurrentTask()">
+                        <i class="fas fa-share-alt"></i><span class="hidden md:inline">แชร์</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="personalSettingsModal" class="modal" onclick="if(event.target===this) closePersonalSettings()">
+        <div class="modal-content max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-slate-800">ตั้งค่าการแสดงผล</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600" onclick="closePersonalSettings()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div class="flex items-center justify-between">
+                    <span>ซ่อนงานที่เสร็จแล้ว</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input id="setting-hide-done" type="checkbox" class="sr-only">
+                        <span class="w-10 h-5 bg-slate-300 rounded-full relative transition">
+                            <span class="dot absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
+                        </span>
+                    </label>
+                </div>
+                <div>
+                    <p class="mb-1">ลำดับการเรียงเริ่มต้น</p>
+                    <select id="setting-default-sort" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                        <option value="due_date">กำหนดเวลา (ใกล้สุดก่อน)</option>
+                        <option value="priority">ความสำคัญ</option>
+                        <option value="created_at">วันที่สร้าง</option>
+                        <option value="updated_at">วันที่แก้ไข</option>
+                    </select>
+                </div>
+                <div>
+                    <p class="mb-1">โหมดการแสดงผล</p>
+                    <select id="setting-view-mode" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                        <option value="kanban">แสดงแบบคอลัมน์</option>
+                        <option value="list">แสดงแบบรายการเดียวยาว</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm" onclick="resetPersonalSettings()">คืนค่าเริ่มต้น</button>
+                <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold" onclick="savePersonalSettings()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Comment/Progress Modal (Personal Tasks) -->
+    <div id="commentModal" class="modal" onclick="if(event.target===this) closeCommentModal()">
+        <div class="modal-content" style="max-width:520px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 id="commentModalTitle" style="margin:0; font-size:1.1rem; font-weight:600; color:#334155;">อัปเดตความคืบหน้า</h3>
+                <i class="fas fa-times" onclick="closeCommentModal()" style="font-size:1.3rem; color:#94a3b8; cursor:pointer;"></i>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:0.85rem; color:#64748b; font-weight:500;">ความคืบหน้า</span>
+                    <span id="commentProgNum" style="font-size:1rem; font-weight:700; color:#334155;">0%</span>
+                </div>
+                <div style="height:10px; background:#f1f5f9; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+                    <div id="commentProgFill" style="height:100%; background:#22c55e; border-radius:5px; transition:width .3s; width:0%;"></div>
+                </div>
+                <input type="range" id="commentProgSlider" min="0" max="100" value="0" oninput="updateCommentProg(this.value)" style="width:100%; accent-color:#22c55e;">
+            </div>
+            <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">ประวัติ comment</div>
+            <div id="commentHistory" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:14px; padding-right:4px;"></div>
+            <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">เพิ่ม comment</div>
+            <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า เช่น เดินสายไฟชั้น 3 เสร็จแล้ว กำลังทำชั้น 4..."></textarea>
+            <button onclick="saveComment()" style="width:100%; padding:12px; background:#334155; color:white; border:none; border-radius:10px; font-family:'Kanit'; font-size:1rem; font-weight:600; cursor:pointer; transition:background .2s;">
+                <i class="fas fa-save"></i> บันทึก
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_PATH = 'api.php';
+        let userSession = {}; // เก็บข้อมูล User
+
+        let personalTasks = [];
+        let personalSettings = { hideDone: false, defaultSort: 'due_date', viewMode: 'kanban' };
+        let personalDraftKey = 'personalTaskDraft';
+        let personalSettingsKey = 'personalTaskSettings';
+        let personalScope = 'mine';
+        let personalPollInterval = null;
+        let personalSnapshot = {};
+        let personalStatusChart = null;
+        let personalOwnerChart = null;
+
+
+
+        window.onload = initPage;
+
+        async function initPage() {
+            try {
+                const res = await fetch(API_PATH + '?action=check_session');
+                userSession = await res.json();
+                
+                if (!userSession.loggedin) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+            } catch(e) { console.error("Auth Error", e); }
+
+            loadPersonalSettingsFromStorage();
+            bindPersonalUIEvents();
+            setupScopeButtons();
+            await loadPersonalTasks(false);
+            if (!personalPollInterval) {
+                personalPollInterval = setInterval(() => loadPersonalTasks(true), 15000);
+            }
+        }
+
+
+        function setupScopeButtons() {
+            const btnMine = document.getElementById('btn-scope-mine');
+            const btnDept = document.getElementById('btn-scope-dept');
+            const btnCompany = document.getElementById('btn-scope-company');
+            if (userSession.primary_department && btnDept) {
+                btnDept.classList.remove('hidden');
+            }
+            if ((userSession.role === 'admin' || userSession.role === 'staff') && btnCompany) {
+                btnCompany.classList.remove('hidden');
+            }
+            if (btnMine) btnMine.addEventListener('click', () => changeScope('mine'));
+            if (btnDept) btnDept.addEventListener('click', () => changeScope('department'));
+            if (btnCompany) btnCompany.addEventListener('click', () => changeScope('company'));
+        }
+
+        function changeScope(scope) {
+            personalScope = scope;
+            const btnMine = document.getElementById('btn-scope-mine');
+            const btnDept = document.getElementById('btn-scope-dept');
+            const btnCompany = document.getElementById('btn-scope-company');
+            [btnMine, btnDept, btnCompany].filter(Boolean).forEach(b => b.classList.remove('bg-white', 'text-slate-800', 'shadow-sm'));
+            if (scope === 'mine' && btnMine) btnMine.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
+            if (scope === 'department' && btnDept) btnDept.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
+            if (scope === 'company' && btnCompany) btnCompany.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
+            loadPersonalTasks(false);
+        }
+
+        async function loadPersonalTasks(isAuto) {
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const res = await fetch(API_PATH + '?action=personal_tasks_get&scope=' + encodeURIComponent(personalScope));
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error(text);
+                }
+                if (Array.isArray(data)) {
+                    applyPersonalData(data, !!isAuto);
+                }
+            } catch (e) {
+                console.error(e);
+                showToast(e.message || 'โหลดข้อมูลงานส่วนตัวไม่สำเร็จ', true);
+            }
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function applyPersonalData(newList, isAuto) {
+            const newMap = {};
+            newList.forEach(t => {
+                newMap[t.id] = t.updated_at || '';
+            });
+            if (isAuto && Object.keys(personalSnapshot).length) {
+                let changedCount = 0;
+                newList.forEach(t => {
+                    const prev = personalSnapshot[t.id];
+                    if (prev && prev !== (t.updated_at || '')) {
+                        changedCount++;
+                    }
+                });
+                if (changedCount > 0) {
+                    showToast('มีงาน ' + changedCount + ' รายการถูกอัปเดต');
+                }
+            }
+            personalTasks = newList;
+            personalSnapshot = newMap;
+            renderPersonalBoard();
+        }
+
+        function bindPersonalUIEvents() {
+            const searchInput = document.getElementById('personalSearch');
+            const prioritySelect = document.getElementById('personalFilterPriority');
+            const sortSelect = document.getElementById('personalSort');
+            const settingsBtn = document.getElementById('btn-personal-settings');
+            const form = document.getElementById('personalForm');
+            const titleInput = document.getElementById('personalTitle');
+            const assigneeInput = document.getElementById('personalAssignee');
+            const descInput = document.getElementById('personalDescription');
+            const dueInput = document.getElementById('personalDueDate');
+            const priorityInput = document.getElementById('personalPriority');
+            const tagsInput = document.getElementById('personalTags');
+            const shareInput = document.getElementById('personalShare');
+            if (shareInput) {
+                shareInput.addEventListener('change', updatePersonalShareInfo);
+            }
+
+            if (searchInput) searchInput.addEventListener('input', renderPersonalBoard);
+            if (prioritySelect) prioritySelect.addEventListener('change', renderPersonalBoard);
+            if (sortSelect) sortSelect.addEventListener('change', () => {
+                personalSettings.defaultSort = sortSelect.value;
+                savePersonalSettingsToStorage();
+                renderPersonalBoard();
+            });
+            if (settingsBtn) settingsBtn.addEventListener('click', openPersonalSettings);
+
+            const inputs = [titleInput, assigneeInput, descInput, dueInput, priorityInput, tagsInput, shareInput];
+            inputs.filter(Boolean).forEach(el => el.addEventListener('input', savePersonalDraftToStorage));
+
+            if (form) form.addEventListener('submit', handlePersonalFormSubmit);
+        }
+
+        function renderPersonalBoard() {
+            const colTodo = document.getElementById('personalColumnTodo');
+            const colDoing = document.getElementById('personalColumnDoing');
+            const colDone = document.getElementById('personalColumnDone');
+            if (!colTodo || !colDoing || !colDone) return;
+            const emptyState = document.getElementById('personalEmpty');
+            const searchEl = document.getElementById('personalSearch');
+            const search = searchEl ? searchEl.value.toLowerCase() : '';
+            const priorityEl = document.getElementById('personalFilterPriority');
+            const priorityFilter = priorityEl ? priorityEl.value : '';
+            const sortEl = document.getElementById('personalSort');
+            const sortBy = sortEl ? sortEl.value : (personalSettings.defaultSort || 'due_date');
+            const hideDone = personalSettings.hideDone;
+
+            colTodo.innerHTML = '';
+            colDoing.innerHTML = '';
+            colDone.innerHTML = '';
+
+            let tasks = personalTasks.slice();
+
+            if (search) {
+                tasks = tasks.filter(t => {
+                    const text = (t.title || '') + ' ' + (t.description || '') + ' ' + (t.tags || '');
+                    return text.toLowerCase().includes(search);
+                });
+            }
+
+            if (priorityFilter) {
+                tasks = tasks.filter(t => (t.priority || 'normal') === priorityFilter);
+            }
+
+            tasks.sort((a, b) => {
+                if (sortBy === 'priority') {
+                    const order = { urgent: 3, high: 2, normal: 1, low: 0 };
+                    return (order[(b.priority || 'normal')] || 0) - (order[(a.priority || 'normal')] || 0);
+                }
+                if (sortBy === 'created_at') {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                }
+                if (sortBy === 'updated_at') {
+                    return new Date(b.updated_at) - new Date(a.updated_at);
+                }
+                const da = a.due_date ? new Date(a.due_date) : null;
+                const db = b.due_date ? new Date(b.due_date) : null;
+                if (da && db) return da - db;
+                if (da && !db) return -1;
+                if (!da && db) return 1;
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            const counts = { todo: 0, doing: 0, done: 0 };
+
+            tasks.forEach(t => {
+                const status = t.status || 'todo';
+                if (hideDone && status === 'done') return;
+                counts[status] = (counts[status] || 0) + 1;
+                const card = buildPersonalCard(t);
+                if (personalSettings.viewMode === 'list') {
+                    colTodo.appendChild(card);
+                } else {
+                    if (status === 'doing') colDoing.appendChild(card);
+                    else if (status === 'done') colDone.appendChild(card);
+                    else colTodo.appendChild(card);
+                }
+            });
+
+            const badgeTodo = document.getElementById('badge-count-todo');
+            const badgeDoing = document.getElementById('badge-count-doing');
+            const badgeDone = document.getElementById('badge-count-done');
+            if (badgeTodo) badgeTodo.textContent = counts.todo ? counts.todo + ' งาน' : '';
+            if (badgeDoing) badgeDoing.textContent = counts.doing ? counts.doing + ' งาน' : '';
+            if (badgeDone) badgeDone.textContent = counts.done ? counts.done + ' งาน' : '';
+
+            const totalVisible = counts.todo + counts.doing + (hideDone ? 0 : counts.done);
+            if (emptyState) emptyState.classList.toggle('hidden', totalVisible > 0);
+
+            updatePersonalCharts(tasks, counts);
+        }
+
+        function buildPersonalCard(task) {
+            const card = document.createElement('div');
+            const priority = task.priority || 'normal';
+            card.className = `personal-card priority-${priority}`;
+
+            // Priority
+            const priorityMap = { urgent: { label: '🔴 เร่งด่วน' }, high: { label: '🟡 สำคัญ' }, normal: { label: '🔵 ปกติ' }, low: { label: '⚪ ต่ำ' } };
+            const pInfo = priorityMap[priority] || priorityMap.normal;
+
+            // Deadline
+            let deadlineHtml = '';
+            if (task.due_date) {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const due = new Date(task.due_date + 'T00:00:00'); due.setHours(0,0,0,0);
+                const diff = (due - today) / 86400000;
+                let cls = 'pc-deadline';
+                let icon = '📅';
+                let txt = task.due_date;
+                if (diff < 0) { cls += ' late'; icon = '🚨'; txt = task.due_date + ' (เกิน ' + Math.abs(Math.round(diff)) + ' วัน)'; }
+                else if (diff === 0) { cls += ' soon'; icon = '⏰'; txt = 'วันนี้'; }
+                else if (diff <= 3) { cls += ' soon'; icon = '⚡'; txt = 'อีก ' + Math.round(diff) + ' วัน'; }
+                deadlineHtml = `<span class="${cls}">${icon} ${txt}</span>`;
+            } else {
+                deadlineHtml = `<span class="pc-deadline">📅 ไม่ระบุวัน</span>`;
+            }
+
+            // Tags
+            const tags = (task.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+            const tagsHtml = tags.map(t => `<span class="pc-tag">#${t}</span>`).join('');
+
+            // Progress
+            const pct = task.progress_pct || 0;
+            const progColor = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#3b82f6';
+
+            // Status
+            const status = task.status || 'todo';
+            const statusMap = { todo: { label: 'ยังไม่เริ่ม', cls: '' }, doing: { label: 'กำลังทำ', cls: 'doing' }, done: { label: 'เสร็จแล้ว', cls: 'done' } };
+            const sInfo = statusMap[status] || statusMap.todo;
+            const isOwner = !task.user_id || (userSession && task.user_id === userSession.user_id);
+
+            // Meta (compact)
+            const owner = task.owner_name_th || task.owner_name || '';
+            const assignee = task.assignee_name || '';
+            const shareLabel = getShareLabel(task.share_scope, task.company, task.department);
+            const updatedAt = task.updated_at ? new Date(task.updated_at).toLocaleDateString('th-TH', {day:'numeric',month:'short'}) : '';
+
+            const metaItems = [];
+            if (owner) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-user" style="font-size:9px"></i> ${owner}</span>`);
+            if (assignee && assignee !== owner) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-user-check" style="font-size:9px"></i> ${assignee}</span>`);
+            if (shareLabel !== 'เฉพาะฉัน') metaItems.push(`<span class="pc-meta-item"><i class="fas fa-share-alt" style="font-size:9px"></i> ${shareLabel}</span>`);
+            if (updatedAt) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-history" style="font-size:9px"></i> ${updatedAt}</span>`);
+
+            card.innerHTML = `
+                <div style="display:flex; height:100%;">
+                    <div class="card-stripe"></div>
+                    <div style="flex:1; padding:14px 16px; min-width:0;">
+                        <div class="pc-header">
+                            <div style="min-width:0; flex:1;">
+                                <div class="pc-title">${task.title || ''}</div>
+                                <div style="display:flex; gap:6px; align-items:center; margin-top:5px; flex-wrap:wrap;">
+                                    <span class="pc-priority">${pInfo.label}</span>
+                                    ${deadlineHtml}
+                                </div>
+                            </div>
+                            <div class="pc-actions">
+                                ${isOwner ? `
+                                    <button type="button" class="pc-status-btn ${sInfo.cls}" onclick="event.stopPropagation(); cycleTaskStatus(${task.id})">${sInfo.label}</button>
+                                    <button type="button" class="pc-delete-btn" onclick="event.stopPropagation(); deletePersonalTask(${task.id})"><i class="fas fa-times"></i></button>
+                                ` : `<span style="font-size:10px; color:#94a3b8">อ่านอย่างเดียว</span>`}
+                            </div>
+                        </div>
+
+                        ${task.description ? `<div class="pc-desc">${task.description}</div>` : ''}
+                        ${tagsHtml ? `<div style="margin-bottom:8px;">${tagsHtml}</div>` : ''}
+
+                        <div style="margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <span style="font-size:10px; color:#94a3b8; font-weight:500;">ความคืบหน้า</span>
+                                <span style="font-size:11px; font-weight:700; color:${progColor};">${pct}%</span>
+                            </div>
+                            <div class="pc-progress-bar">
+                                <div class="pc-progress-fill" style="width:${pct}%; background:${progColor};"></div>
+                            </div>
+                        </div>
+
+                        <div class="pc-footer">
+                            <div class="pc-meta">${metaItems.join('')}</div>
+                            <button type="button" class="pc-update-btn" onclick="event.stopPropagation(); openCommentModal(${task.id}, ${JSON.stringify(task.title||'')})">
+                                <i class="fas fa-pen"></i> อัปเดต
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            card.onclick = () => openPersonalTaskModal(task.id);
+            return card;
+        }
+
+        function openPersonalTaskModal(id) {
+            const modal = document.getElementById('personalModal');
+            const titleEl = document.getElementById('personalModalTitle');
+            const idEl = document.getElementById('personalTaskId');
+            const titleInput = document.getElementById('personalTitle');
+            const assigneeInput = document.getElementById('personalAssignee');
+            const descInput = document.getElementById('personalDescription');
+            const dueInput = document.getElementById('personalDueDate');
+            const priorityInput = document.getElementById('personalPriority');
+            const tagsInput = document.getElementById('personalTags');
+            const metaEl = document.getElementById('personalMeta');
+            const shareInfoEl = document.getElementById('personalShareInfo');
+
+            let task = null;
+            if (id) task = personalTasks.find(t => t.id === id);
+
+            if (task) {
+                titleEl.textContent = 'แก้ไขบันทึก';
+                idEl.value = task.id;
+                titleInput.value = task.title || '';
+                assigneeInput.value = task.assignee_name || '';
+                descInput.value = task.description || '';
+                dueInput.value = task.due_date || '';
+                priorityInput.value = task.priority || 'normal';
+                tagsInput.value = task.tags || '';
+                const shareInput = document.getElementById('personalShare');
+                if (shareInput && task.share_scope) shareInput.value = task.share_scope;
+                const meta = [];
+                if (task.created_at) meta.push('สร้าง ' + new Date(task.created_at).toLocaleString('th-TH'));
+                if (task.updated_at && task.updated_at !== task.created_at) meta.push('แก้ไข ' + new Date(task.updated_at).toLocaleString('th-TH'));
+                metaEl.textContent = meta.join(' • ');
+                loadPersonalTaskHistory(task.id);
+                const isOwner = !task.user_id || (userSession && task.user_id === userSession.user_id);
+                setPersonalFormEditable(isOwner);
+            } else {
+                titleEl.textContent = 'เพิ่มบันทึกใหม่';
+                idEl.value = '';
+                const draft = loadPersonalDraftFromStorage();
+                titleInput.value = draft.title || '';
+                assigneeInput.value = draft.assignee_name || '';
+                descInput.value = draft.description || '';
+                dueInput.value = draft.due_date || '';
+                priorityInput.value = draft.priority || 'normal';
+                tagsInput.value = draft.tags || '';
+                const shareInput = document.getElementById('personalShare');
+                if (shareInput) shareInput.value = draft.share_scope || 'private';
+                metaEl.textContent = '';
+                const historyEl = document.getElementById('personalHistory');
+                if (historyEl) historyEl.innerHTML = '';
+                setPersonalFormEditable(true);
+            }
+
+            if (shareInfoEl) {
+                const scope = task ? task.share_scope : document.getElementById('personalShare').value;
+                shareInfoEl.textContent = 'กำลังแชร์กับ: ' + getShareLabel(scope, task ? task.company : userSession.company, task ? task.department : userSession.primary_department);
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closePersonalTaskModal() {
+            document.getElementById('personalModal').classList.remove('show');
+        }
+
+        function savePersonalDraftToStorage() {
+            const draft = {
+                title: document.getElementById('personalTitle').value,
+                assignee_name: document.getElementById('personalAssignee').value,
+                description: document.getElementById('personalDescription').value,
+                due_date: document.getElementById('personalDueDate').value,
+                priority: document.getElementById('personalPriority').value,
+                tags: document.getElementById('personalTags').value,
+                share_scope: document.getElementById('personalShare').value
+            };
+            localStorage.setItem(personalDraftKey, JSON.stringify(draft));
+        }
+
+        function loadPersonalDraftFromStorage() {
+            try {
+                const raw = localStorage.getItem(personalDraftKey);
+                if (!raw) return {};
+                return JSON.parse(raw) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function clearPersonalDraft() {
+            localStorage.removeItem(personalDraftKey);
+            document.getElementById('personalTitle').value = '';
+            document.getElementById('personalDescription').value = '';
+            document.getElementById('personalDueDate').value = '';
+            document.getElementById('personalPriority').value = 'normal';
+            document.getElementById('personalTags').value = '';
+        }
+
+        async function loadPersonalTaskHistory(id) {
+            const historyEl = document.getElementById('personalHistory');
+            if (!historyEl) return;
+            historyEl.innerHTML = '';
+            try {
+                const res = await fetch(API_PATH + '?action=personal_task_history_get&task_id=' + encodeURIComponent(id));
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error(text);
+                }
+                if (data.status === 'success' && Array.isArray(data.items) && data.items.length) {
+                    historyEl.innerHTML = data.items.map(h => {
+                        const ts = h.created_at ? new Date(h.created_at).toLocaleString('th-TH') : '';
+                        const user = h.user_name || h.user_id || '';
+                        const parts = [];
+                        if (h.old_status || h.new_status) {
+                            parts.push('สถานะ: ' + (h.old_status || '-') + ' → ' + (h.new_status || '-'));
+                        }
+                        if (h.old_priority || h.new_priority) {
+                            parts.push('ความสำคัญ: ' + (h.old_priority || '-') + ' → ' + (h.new_priority || '-'));
+                        }
+                        const detail = parts.join(' | ');
+                        return `<div class="flex flex-col mb-1"><span>${ts} • ${user}</span>${detail ? `<span class="text-slate-400">${detail}</span>` : ''}</div>`;
+                    }).join('');
+                }
+            } catch (e) {}
+        }
+
+        async function handlePersonalFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('personalTaskId').value;
+            const shareInput = document.getElementById('personalShare');
+            const existing = id ? personalTasks.find(t => t.id == id) : null;
+            const oldShare = existing ? (existing.share_scope || 'private') : null;
+            const newShare = shareInput ? (shareInput.value || 'private') : 'private';
+            if (oldShare && oldShare !== newShare) {
+                const msg = 'ต้องการเปลี่ยนการแชร์จาก "' + getShareLabel(oldShare, existing.company, existing.department) +
+                    '" เป็น "' + getShareLabel(newShare, existing.company, existing.department) + '" ใช่หรือไม่?';
+                if (!confirm(msg)) {
+                    return;
+                }
+            }
+            const payload = {
+                id: id || null,
+                title: document.getElementById('personalTitle').value,
+                assignee_name: document.getElementById('personalAssignee').value,
+                description: document.getElementById('personalDescription').value,
+                due_date: document.getElementById('personalDueDate').value || null,
+                priority: document.getElementById('personalPriority').value || 'normal',
+                tags: document.getElementById('personalTags').value || '',
+                share_scope: newShare,
+                status: (personalTasks.find(t => t.id == id)?.status) || 'todo'
+            };
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            try {
+                const fd = new FormData();
+                fd.append('data', JSON.stringify(payload));
+                const res = await fetch(API_PATH + '?action=personal_tasks_save', { method: 'POST', body: fd });
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error(text);
+                }
+                if (data.status === 'success' && data.task) {
+                    const idx = personalTasks.findIndex(t => t.id === data.task.id);
+                    if (idx >= 0) personalTasks[idx] = data.task;
+                    else personalTasks.push(data.task);
+                    clearPersonalDraft();
+                    renderPersonalBoard();
+                    closePersonalTaskModal();
+                    showToast('บันทึกงานเรียบร้อยแล้ว');
+                } else {
+                    throw new Error(data.message || 'บันทึกไม่สำเร็จ');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, true);
+            }
+            btn.disabled = false;
+        }
+
+        async function deletePersonalTask(id) {
+            if (!confirm('คุณต้องการลบบันทึกนี้หรือไม่?')) return;
+            try {
+                const fd = new FormData();
+                fd.append('id', id);
+                const res = await fetch(API_PATH + '?action=personal_tasks_delete', { method: 'POST', body: fd });
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error(text);
+                }
+                if (data.status === 'success') {
+                    personalTasks = personalTasks.filter(t => t.id !== id);
+                    renderPersonalBoard();
+                    showToast('ลบบันทึกเรียบร้อยแล้ว');
+                } else {
+                    throw new Error(data.message || 'ลบไม่สำเร็จ');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, true);
+            }
+        }
+
+        async function cycleTaskStatus(id) {
+            const task = personalTasks.find(t => t.id === id);
+            if (!task) return;
+            const order = ['todo', 'doing', 'done'];
+            const current = task.status || 'todo';
+            const index = order.indexOf(current);
+            const next = order[(index + 1) % order.length];
+            const payload = Object.assign({}, task, { status: next });
+
+            try {
+                const fd = new FormData();
+                fd.append('data', JSON.stringify(payload));
+                const res = await fetch(API_PATH + '?action=personal_tasks_save', { method: 'POST', body: fd });
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error(text);
+                }
+                if (data.status === 'success' && data.task) {
+                    const idx = personalTasks.findIndex(t => t.id === data.task.id);
+                    if (idx >= 0) personalTasks[idx] = data.task;
+                    renderPersonalBoard();
+                } else {
+                    throw new Error(data.message || 'อัปเดตสถานะไม่สำเร็จ');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, true);
+            }
+        }
+
+        function openPersonalSettings() {
+            const modal = document.getElementById('personalSettingsModal');
+            document.getElementById('setting-hide-done').checked = personalSettings.hideDone;
+            document.getElementById('setting-default-sort').value = personalSettings.defaultSort || 'due_date';
+            document.getElementById('setting-view-mode').value = personalSettings.viewMode || 'kanban';
+            modal.classList.add('show');
+        }
+
+        function closePersonalSettings() {
+            document.getElementById('personalSettingsModal').classList.remove('show');
+        }
+
+        function savePersonalSettings() {
+            personalSettings.hideDone = document.getElementById('setting-hide-done').checked;
+            personalSettings.defaultSort = document.getElementById('setting-default-sort').value || 'due_date';
+            personalSettings.viewMode = document.getElementById('setting-view-mode').value || 'kanban';
+            document.getElementById('personalSort').value = personalSettings.defaultSort;
+            savePersonalSettingsToStorage();
+            closePersonalSettings();
+            renderPersonalBoard();
+        }
+
+        function resetPersonalSettings() {
+            personalSettings = { hideDone: false, defaultSort: 'due_date', viewMode: 'kanban' };
+            document.getElementById('setting-hide-done').checked = false;
+            document.getElementById('setting-default-sort').value = 'due_date';
+            document.getElementById('setting-view-mode').value = 'kanban';
+            document.getElementById('personalSort').value = 'due_date';
+            savePersonalSettingsToStorage();
+            renderPersonalBoard();
+        }
+
+        function savePersonalSettingsToStorage() {
+            try {
+                localStorage.setItem(personalSettingsKey, JSON.stringify(personalSettings));
+            } catch (e) {}
+        }
+
+        function loadPersonalSettingsFromStorage() {
+            try {
+                const raw = localStorage.getItem(personalSettingsKey);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                personalSettings = Object.assign({}, personalSettings, parsed || {});
+                document.getElementById('personalSort').value = personalSettings.defaultSort || 'due_date';
+            } catch (e) {}
+        }
+
+        function shareCurrentTask() {
+            const id = document.getElementById('personalTaskId').value;
+            const task = personalTasks.find(t => t.id == id);
+            const title = task ? task.title : document.getElementById('personalTitle').value;
+            const desc = task ? task.description : document.getElementById('personalDescription').value;
+            const due = task ? task.due_date : document.getElementById('personalDueDate').value;
+            const text = `งาน: ${title || '-'}\nรายละเอียด: ${desc || '-'}\nกำหนด: ${due || '-'}`;
+
+            if (navigator.share) {
+                navigator.share({ title: title || 'Job Note', text }).catch(function() {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('คัดลอกข้อความสำหรับแชร์แล้ว');
+                }).catch(function() {
+                    showToast('ไม่สามารถคัดลอกข้อความได้', true);
+                });
+            } else {
+                alert(text);
+            }
+        }
+
+        function getShareLabel(scope, company, department) {
+            if (scope === 'department') {
+                return 'แผนก ' + (department || '');
+            }
+            if (scope === 'company') {
+                return 'บริษัท ' + (company || '');
+            }
+            return 'เฉพาะฉัน';
+        }
+
+        function updatePersonalShareInfo() {
+            const el = document.getElementById('personalShareInfo');
+            const select = document.getElementById('personalShare');
+            if (!el || !select) return;
+            const scope = select.value || 'private';
+            el.textContent = 'กำลังแชร์กับ: ' + getShareLabel(scope, userSession.company, userSession.primary_department);
+        }
+
+        function setPersonalFormEditable(canEdit) {
+            const form = document.getElementById('personalForm');
+            if (!form) return;
+            const controls = form.querySelectorAll('input, textarea, select');
+            controls.forEach(el => {
+                if (el.id === 'personalTaskId') return;
+                el.disabled = !canEdit;
+            });
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.style.display = canEdit ? 'block' : 'none';
+        }
+
+        function updatePersonalCharts(tasks, counts) {
+            const statusCanvas = document.getElementById('personalStatusChart');
+            const ownerCanvas = document.getElementById('personalOwnerChart');
+            if (!statusCanvas || !ownerCanvas) return;
+            const statusCtx = statusCanvas.getContext('2d');
+            const ownerCtx = ownerCanvas.getContext('2d');
+            const statusData = [
+                counts.todo || 0,
+                counts.doing || 0,
+                counts.done || 0
+            ];
+            if (personalStatusChart) personalStatusChart.destroy();
+            personalStatusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ยังไม่เริ่ม', 'กำลังทำ', 'เสร็จแล้ว'],
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: ['#e5e7eb', '#fbbf24', '#22c55e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            const ownerMap = {};
+            tasks.forEach(t => {
+                const owner = t.owner_name_th || t.owner_name || t.user_id || 'ไม่ระบุ';
+                ownerMap[owner] = (ownerMap[owner] || 0) + 1;
+            });
+            const ownerLabels = Object.keys(ownerMap);
+            const ownerValues = ownerLabels.map(k => ownerMap[k]);
+            if (personalOwnerChart) personalOwnerChart.destroy();
+            personalOwnerChart = new Chart(ownerCtx, {
+                type: 'bar',
+                data: {
+                    labels: ownerLabels,
+                    datasets: [{
+                        data: ownerValues,
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // COMMENT & PROGRESS
+        // ==========================================
+        let commentTaskId = null;
+
+        function openCommentModal(taskId, taskTitle) {
+            commentTaskId = taskId;
+            document.getElementById('commentModalTitle').textContent = taskTitle || 'อัปเดตความคืบหน้า';
+            document.getElementById('commentText').value = '';
+            document.getElementById('commentHistory').innerHTML = '<div style="color:#94a3b8; font-size:12px">กำลังโหลด...</div>';
+
+            const task = personalTasks.find(t => t.id === taskId);
+            const pct = task ? (task.progress_pct || 0) : 0;
+            updateCommentProg(pct);
+            document.getElementById('commentProgSlider').value = pct;
+
+            document.getElementById('commentModal').classList.add('show');
+            loadCommentHistory(taskId);
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').classList.remove('show');
+            commentTaskId = null;
+        }
+
+        function updateCommentProg(v) {
+            const pct = parseInt(v);
+            document.getElementById('commentProgFill').style.width = pct + '%';
+            document.getElementById('commentProgNum').textContent = pct + '%';
+            const col = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+            document.getElementById('commentProgFill').style.background = col;
+        }
+
+        async function loadCommentHistory(taskId) {
+            try {
+                const res = await fetch(API_PATH + '?action=task_comment_get&task_id=' + taskId);
+                const text = await res.text();
+                let data;
+                try { data = JSON.parse(text); } catch(e) { throw new Error(text); }
+                if (data.status === 'success') {
+                    // อัปเดต progress จาก server
+                    const serverPct = data.progress_pct || 0;
+                    updateCommentProg(serverPct);
+                    document.getElementById('commentProgSlider').value = serverPct;
+
+                    const histEl = document.getElementById('commentHistory');
+                    if (!data.comments || data.comments.length === 0) {
+                        histEl.innerHTML = '<div style="color:#94a3b8; font-size:12px; padding:8px 0">ยังไม่มี comment</div>';
+                        return;
+                    }
+                    histEl.innerHTML = data.comments.map(c => {
+                        const ts = c.created_at ? new Date(c.created_at).toLocaleString('th-TH') : '';
+                        const initials = (c.user_name||'?').slice(0,2);
+                        const progBadge = c.progress_pct !== null ? `<span style="font-size:10px; padding:1px 6px; background:#dcfce7; color:#16a34a; border-radius:999px; margin-left:6px;">${c.progress_pct}%</span>` : '';
+                        return `<div style="display:flex; gap:8px; align-items:flex-start;">
+                            <div style="width:28px; height:28px; border-radius:50%; background:#dbeafe; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0;">${initials}</div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:11px; color:#94a3b8; margin-bottom:2px;">${c.user_name||''} ${progBadge} · ${ts}</div>
+                                <div style="font-size:13px; color:#334155;">${c.comment||''}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    histEl.scrollTop = histEl.scrollHeight;
+                }
+            } catch(e) {
+                document.getElementById('commentHistory').innerHTML = '<div style="color:#ef4444; font-size:12px">โหลดไม่สำเร็จ</div>';
+            }
+        }
+
+        async function saveComment() {
+            if (!commentTaskId) return;
+            const comment = document.getElementById('commentText').value.trim();
+            const progress = parseInt(document.getElementById('commentProgSlider').value);
+
+            if (!comment && progress === (personalTasks.find(t=>t.id===commentTaskId)?.progress_pct||0)) {
+                showToast('กรุณาใส่ comment หรือเปลี่ยน %', true);
+                return;
+            }
+
+            try {
+                const fd = new FormData();
+                fd.append('task_id', commentTaskId);
+                fd.append('comment', comment);
+                fd.append('progress', progress);
+                const res = await fetch(API_PATH + '?action=task_comment_save', { method:'POST', body:fd });
+                const text = await res.text();
+                let data;
+                try { data = JSON.parse(text); } catch(e) { throw new Error(text); }
+                if (data.status === 'success') {
+                    // อัปเดต local task
+                    const idx = personalTasks.findIndex(t => t.id === commentTaskId);
+                    if (idx >= 0) personalTasks[idx].progress_pct = progress;
+                    showToast('บันทึก comment เรียบร้อยแล้ว');
+                    document.getElementById('commentText').value = '';
+                    loadCommentHistory(commentTaskId);
+                    renderPersonalBoard();
+                } else {
+                    throw new Error(data.message || 'บันทึกไม่สำเร็จ');
+                }
+            } catch(e) {
+                showToast(e.message, true);
+            }
+        }
+
+        function showToast(msg, isError=false) {
+            const t = document.getElementById('toast');
+            t.innerHTML = isError ? `<i class="fas fa-exclamation-circle"></i> ${msg}` : `<i class="fas fa-check-circle"></i> ${msg}`;
+            t.className = isError ? 'error show' : 'success show';
+            setTimeout(() => t.className = t.className.replace('show', ''), 3000);
+        }
+    </script>
+</body>
+</html>

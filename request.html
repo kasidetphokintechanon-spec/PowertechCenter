@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แจ้งซ่อม - SystemCenter</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        body {
+            background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%), 
+                              radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        @media print {
+            body.printing-ticket > *:not(.print-container) { display: none !important; }
+            body.printing-ticket .print-container { display: block !important; width: 100%; height: 100%; }
+        }
+        .fade-in-up { animation: fade-in-up 0.5s ease-out both; }
+        .fade-in { animation: fade-in 0.4s ease-out both; }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Character Counter Styles */
+        .char-counter { font-size: 10px; font-weight: 600; transition: color 0.3s; }
+        .char-counter.insufficient { color: #ef4444; }
+        .char-counter.sufficient { color: #10b981; }
+        .input-hint { font-size: 10px; margin-top: 4px; color: #94a3b8; line-height: 1.4; }
+        .input-hint b { color: #64748b; }
+
+        /* ── Design-system supplements ── */
+        body { font-family: var(--ptc-font-th) !important; }
+
+        /* Form card wrapper: use design system surface */
+        .form-card-outer {
+            background: var(--ptc-surface) !important;
+            border: 1px solid var(--ptc-border) !important;
+            box-shadow: var(--ptc-shadow-xl) !important;
+        }
+
+        /* Mode selection buttons */
+        .mode-btn {
+            border-radius: var(--ptc-radius-xl) !important;
+            transition: var(--ptc-transition) !important;
+        }
+        .mode-btn:hover { transform: translateY(-2px) !important; }
+
+        /* Section cards inside the form */
+        .form-section {
+            background: var(--ptc-surface-2) !important;
+            border: 1px solid var(--ptc-border) !important;
+            border-radius: var(--ptc-radius-xl) !important;
+        }
+
+        /* Inputs unified */
+        input[type="text"], input[type="email"], input[type="tel"],
+        select, textarea {
+            border-color: var(--ptc-border) !important;
+            border-radius: var(--ptc-radius-md) !important;
+            font-family: var(--ptc-font-th) !important;
+            transition: var(--ptc-transition) !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--ptc-primary) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring) !important;
+            outline: none !important;
+        }
+
+        /* Submit button */
+        button[type="submit"], .submit-btn {
+            border-radius: var(--ptc-radius-md) !important;
+            font-weight: 600 !important;
+            transition: var(--ptc-transition) !important;
+        }
+
+        /* Improve header banner */
+        .form-header-banner {
+            border-radius: 0 !important; /* inside card top */
+        }
+
+        /* Mobile: reduce outer padding */
+        @media (max-width: 640px) {
+            .form-outer-padding { padding: 1rem !important; }
+            .form-inner-padding  { padding: 1.25rem !important; }
+        }
+
+        /* Dark mode surface */
+        html.dark .form-card-outer,
+        html.dark .form-section {
+            background: var(--ptc-surface) !important;
+            border-color: var(--ptc-border) !important;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); border-radius: 99px; }
+
+        /* char counter: use design-system semantic colours */
+        .char-counter.insufficient { color: var(--ptc-danger) !important; }
+        .char-counter.sufficient   { color: var(--ptc-success) !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-500 font-sans ptc-normalize">
+
+    <header class="fixed top-0 inset-x-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800/80 fade-in">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/40">
+                    <i class="fas fa-shield-alt text-sm"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-bold tracking-wide text-slate-800 dark:text-slate-100">SystemCenter</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">IT Service Request</div>
+                </div>
+            </div>
+            <nav class="hidden sm:flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-300">
+                <a href="index.html" class="px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Dashboard</a>
+                <a href="my_tickets.html" class="px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">งานแจ้งซ่อม</a>
+                <a href="loan.html" class="px-3 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">ยืมอุปกรณ์</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <div id="lang-toggle" class="hidden sm:inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden">
+                    <button type="button" data-lang="TH" class="px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200">TH</button>
+                    <button type="button" data-lang="EN" class="px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200">EN</button>
+                </div>
+                <a href="index.html" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-lg shadow-slate-900/30 hover:shadow-slate-900/50 hover:-translate-y-0.5 active:translate-y-0 transition transform">
+                <i class="fas fa-home text-[10px]"></i>
+                <span>กลับหน้าแรก</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col items-center pt-20 pb-10 px-4 sm:px-6 lg:px-8">
+        
+        <div class="w-full max-w-4xl bg-white/80 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 dark:border-slate-700 fade-in-up">
+            <div id="header-bg" class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 md:p-8 text-center transition-all duration-500">
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md shadow-inner">
+                    <i id="header-icon" class="fas fa-laptop-medical text-3xl text-white transition-all duration-300"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                    <span id="header-title">แจ้งซ่อม IT / IT Service Request</span>
+                    <span id="company-badge" class="ml-2 text-sm bg-white/20 px-3 py-1 rounded-lg hidden align-middle backdrop-blur-md border border-white/30 shadow-sm"></span>
+                </h1>
+                <p id="header-desc" class="text-white/80">กรุณากรอกรายละเอียดปัญหาเพื่อให้เจ้าหน้าที่ตรวจสอบ (Please fill in the details)</p>
+            </div>
+
+            <!-- Service Mode Selection -->
+            <div id="mode-selection" class="p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button type="button" onclick="setMode('IT')" class="flex items-center gap-4 p-5 rounded-2xl border-2 border-blue-100 dark:border-slate-700 bg-blue-50/30 dark:bg-slate-800/50 hover:border-blue-500 transition-all group text-left">
+                    <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                        <i class="fas fa-wrench text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-800 dark:text-white">แจ้งซ่อม IT</div>
+                        <div class="text-xs text-slate-500">Hardware, Software, Network</div>
+                    </div>
+                </button>
+                <button type="button" onclick="setMode('PROG')" class="flex items-center gap-4 p-5 rounded-2xl border-2 border-purple-100 dark:border-slate-700 bg-purple-50/30 dark:bg-slate-800/50 hover:border-purple-500 transition-all group text-left">
+                    <div class="w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                        <i class="fas fa-code text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-800 dark:text-white">แจ้งปัญหาโปรแกรม</div>
+                        <div class="text-xs text-slate-500">ERP, MRP, iControl, Report</div>
+                    </div>
+                </button>
+            </div>
+
+            <form id="requestForm" class="hidden p-4 md:p-8 space-y-6 md:space-y-8">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-5 flex items-center gap-3">
+                        <div id="step1-icon" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold shadow-sm transition-colors">1</div> 
+                        ข้อมูลผู้แจ้ง (Requester Info) <span class="text-xs font-normal text-slate-600 ml-auto bg-blue-50 dark:bg-slate-700 px-2 py-1 rounded-md border border-blue-100/80 dark:border-slate-600">Auto-filled</span>
+                    </h3>
+                    <div class="bg-blue-50/70 dark:bg-slate-800/40 p-4 md:p-6 rounded-2xl border border-blue-100/80 dark:border-blue-500/40 shadow-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5"><i class="fas fa-building text-slate-400 mr-1.5"></i> บริษัท (Company)</label>
+                                <select id="req-company" required disabled class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-slate-100 disabled:text-slate-500"><option value="">Loading...</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5"><i class="fas fa-sitemap text-slate-400 mr-1.5"></i> แผนก (Department)</label>
+                                <select id="req-department" required disabled class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-slate-50 disabled:text-slate-400"><option value="">-- Select Company First --</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5"><i class="fas fa-user text-slate-400 mr-1.5"></i> ชื่อผู้แจ้ง (Requester Name)</label>
+                                <select id="req-requester" required disabled class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-slate-50 disabled:text-slate-400"><option value="">-- Select Department First --</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5"><i class="fas fa-phone text-slate-400 mr-1.5"></i> เบอร์โทรศัพท์ (Phone)</label>
+                                <input type="text" id="req-contact" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="เบอร์ภายใน หรือมือถือ (Internal or Mobile)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IT Section -->
+                <div id="it-details-section">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shadow-sm transition-colors">2</div> 
+                        รายละเอียดปัญหา (Problem Details)
+                    </h3>
+                    <div class="bg-amber-50/70 dark:bg-slate-800/40 p-4 md:p-6 rounded-2xl border border-amber-100/80 dark:border-amber-500/40 shadow-sm space-y-6">
+                        <div class="mb-3 p-3 rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50/70 dark:bg-blue-900/10">
+                            <div class="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Quick Start</div>
+                            <div id="quick-request-presets" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+                                <button type="button" data-main="System" data-sub="Request New Account" class="px-2.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-left text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30">พนักงานใหม่ / ขอ User</button>
+                                <button type="button" data-main="System" data-sub="Password Reset" class="px-2.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-left text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30">ลืมรหัสผ่าน</button>
+                                <button type="button" data-main="System" data-sub="Permission Issue" class="px-2.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-left text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30">ขอสิทธิ์เข้าระบบ</button>
+                                <button type="button" data-main="Software" data-sub="Microsoft Office" class="px-2.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-left text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30">ปัญหา Office</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ประเภทปัญหาหลัก (Main Category)</label>
+                                <select id="req-main-category" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                                    <option value="">-- เลือกประเภท --</option>
+                                    <option value="Hardware">Hardware (อุปกรณ์)</option>
+                                    <option value="Software">Software (โปรแกรม)</option>
+                                    <option value="Network">Network (อินเทอร์เน็ต)</option>
+                                    <option value="System">System / Account (ระบบ/บัญชีผู้ใช้)</option>
+                                    <option value="Security">Security / CCTV</option>
+                                    <option value="Other">Other (อื่นๆ)</option>
+                                </select>
+                                <div id="sub-category-wrapper" class="hidden mt-4">
+                                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ประเภทย่อย (Sub-category)</label>
+                                    <select id="req-type" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 transition-all"></select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ความเร่งด่วน (Urgency)</label>
+                                <select id="req-urgency" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 transition-all">
+                                    <option value="ปกติ">ปกติ (General)</option>
+                                    <option value="ด่วน">ด่วน (Urgent)</option>
+                                    <option value="ด่วนที่สุด">ด่วนที่สุด (Critical)</option>
+                                </select>
+                            </div>
+                            <div id="it-asset-field" class="md:col-span-2 relative">
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">รหัสทรัพย์สิน (Asset ID)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="req-asset" placeholder="ค้นหา S/N / ชื่อุปกรณ์ / ผู้ถือครอง..." class="flex-1 rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm">
+                                    <button type="button" id="my-device-btn" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl"><i class="fas fa-desktop"></i></button>
+                                    <button type="button" id="scan-qr-btn" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl"><i class="fas fa-qrcode"></i></button>
+                                </div>
+                                <div id="asset-results" class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">รายละเอียดปัญหา (Problem Description)</label>
+                                <textarea id="req-problem" rows="3" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm" placeholder="อธิบายอาการที่พบอย่างละเอียด..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Programmer Section -->
+                <div id="prog-details-section" class="hidden space-y-6">
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold shadow-sm">2</div> 
+                        รายละเอียด (Programmer Request)
+                    </h3>
+                    <div class="bg-purple-50/70 dark:bg-slate-800/40 p-4 md:p-6 rounded-2xl border border-purple-100/80 dark:border-purple-500/40 shadow-sm space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">โปรแกรมที่พบปัญหา</label>
+                                <select id="prog-software" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all">
+                                    <option value="">-- เลือกโปรแกรม --</option>
+                                    <option value="ERP">ERP System</option>
+                                    <option value="MRP">MRP System</option>
+                                    <option value="iControl">iControl</option>
+                                    <option value="Other">โปรแกรมอื่นๆ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">โมดูล / ระบบงาน (Module)</label>
+                                <select id="prog-module" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all">
+                                        <option value="">-- เลือกโมดูล --</option>
+                                        <option value="Purchasing">จัดซื้อ (PR/PO/Receive)</option>
+                                        <option value="Inventory">คลังสินค้า (Stock/Move)</option>
+                                        <option value="Sales">ขาย (Quotation/DO/Invoice)</option>
+                                        <option value="Production">ผลิต (Plan/Job)</option>
+                                        <option value="Accounting">บัญชี/การเงิน</option>
+                                        <option value="HR">บุคคล</option>
+                                        <option value="Report">รายงาน</option>
+                                        <option value="Other">อื่นๆ</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">ความเร่งด่วน (Urgency)</label>
+                                    <select id="prog-urgency" class="w-full rounded-xl border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all">
+                                        <option value="ปกติ">ปกติ (General)</option>
+                                        <option value="ด่วน">ด่วน (Urgent)</option>
+                                        <option value="ด่วนที่สุด">ด่วนที่สุด (Critical)</option>
+                                    </select>
+                                </div>
+                            <div class="md:col-span-2 space-y-6">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <label class="block text-sm font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                                            <i class="fas fa-exclamation-circle"></i> 1. อาการเสียที่พบ (Problem Found)
+                                        </label>
+                                        <span id="prog-problem-counter" class="char-counter insufficient">0/20</span>
+                                    </div>
+                                    <textarea id="prog-problem" rows="2" class="w-full rounded-xl border-red-200 dark:border-red-900/50 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-red-500 transition-all" placeholder="อธิบายอาการเสียที่เกิดขึ้น หรือข้อผิดพลาดที่แสดงบนหน้าจอ..."></textarea>
+                                    <p class="input-hint"><b>คำแนะนำ:</b> ระบุอาการให้ชัดเจน เช่น "กดบันทึกแล้วขึ้น Error Code 501" หรือ "หน้าจอค้างตอนดึงรายงาน"</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <label class="block text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                                            <i class="fas fa-bullseye"></i> 2. ความต้องการ (Requirement)
+                                        </label>
+                                        <span id="prog-requirement-counter" class="char-counter insufficient">0/20</span>
+                                    </div>
+                                    <textarea id="prog-requirement" rows="2" class="w-full rounded-xl border-blue-200 dark:border-blue-900/50 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-blue-500 transition-all" placeholder="อธิบายสิ่งที่ต้องการให้โปรแกรมทำได้ หรือผลลัพธ์ที่ต้องการ..."></textarea>
+                                    <p class="input-hint"><b>คำแนะนำ:</b> บอกสิ่งที่ต้องการ เช่น "ต้องการให้เพิ่มคอลัมน์ชื่อเล่นในรายงาน" หรือ "แก้ไขยอดรวมให้ตรงกับใบกำกับภาษี"</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <label class="block text-sm font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                                            <i class="fas fa-link"></i> 3. แหล่งข้อมูล/การเชื่อมโยง (Source Data)
+                                        </label>
+                                        <span id="prog-source-counter" class="char-counter insufficient">0/20</span>
+                                    </div>
+                                    <textarea id="prog-source" rows="2" class="w-full rounded-xl border-purple-200 dark:border-purple-900/50 bg-white dark:bg-slate-800 text-sm p-3 shadow-sm focus:ring-2 focus:ring-purple-500 transition-all" placeholder="ระบุเลขที่เอกสาร หรือหน้าจอที่พบปัญหา (เช่น PR2405-001, หน้าจอรับสินค้า)..."></textarea>
+                                    <p class="input-hint"><b>สำคัญมาก:</b> หากไม่มีเลขที่เอกสารหรือหน้าจออ้างอิง โปรแกรมเมอร์จะไม่สามารถตรวจสอบข้อมูลได้</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Section: Attachments -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">รูปภาพประกอบ (Attachment - Optional)</label>
+                    <div onclick="document.getElementById('req-attachment').click()" class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:bg-slate-50 cursor-pointer transition bg-white dark:bg-slate-800">
+                        <i class="fas fa-cloud-upload-alt text-slate-400 text-3xl mb-2"></i>
+                        <p class="text-sm text-slate-500">คลิกเพื่ออัปโหลดรูปภาพ (Max 5MB)</p>
+                        <input type="file" id="req-attachment" class="hidden" accept="image/*">
+                        <div id="file-preview" class="mt-4"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <a href="index.html" class="text-slate-500 hover:text-slate-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition">ยกเลิก (Cancel)</a>
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/40 hover:shadow-blue-500/60 transition transform hover:-translate-y-1 active:translate-y-0">
+                        <i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งซ่อม (Submit Request)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="qr-scanner-modal" class="fixed inset-0 z-50 hidden bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-4 relative">
+            <button onclick="closeScanner()" class="absolute top-4 right-4 z-10 text-slate-500"><i class="fas fa-times"></i></button>
+            <h3 class="text-lg font-bold mb-4 text-center">สแกน QR Code</h3>
+            <div id="reader" class="rounded-lg overflow-hidden bg-black"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'IT';
+        let allEmployees = [];
+        let sessionData = {};
+        let currentServiceType = 'IT';
+        let isSubmittingTicket = false;
+        const gid = id => document.getElementById(id);
+
+        function setMode(mode) {
+            currentMode = mode;
+            currentServiceType = (mode === 'PROG') ? 'Programmer' : 'IT';
+            
+            gid('mode-selection').classList.add('hidden');
+            gid('requestForm').classList.remove('hidden');
+
+            const headerBg = gid('header-bg');
+            const itSection = gid('it-details-section');
+            const progSection = gid('prog-details-section');
+            const submitBtn = gid('submitBtn');
+
+            if (mode === 'IT') {
+                itSection.classList.remove('hidden');
+                progSection.classList.add('hidden');
+                headerBg.className = 'bg-gradient-to-r from-blue-600 to-indigo-600 p-6 md:p-8 text-center transition-all duration-500';
+                gid('header-title').textContent = 'แจ้งซ่อม IT / IT Service Request';
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งซ่อม (Submit Request)';
+            } else {
+                itSection.classList.add('hidden');
+                progSection.classList.remove('hidden');
+                headerBg.className = 'bg-gradient-to-r from-purple-600 to-indigo-600 p-6 md:p-8 text-center transition-all duration-500';
+                gid('header-title').textContent = 'แจ้งปัญหาโปรแกรม ERP / MRP / iControl';
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งปัญหาโปรแกรม (Submit)';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const sessRes = await fetch('api.php?action=check_session');
+                sessionData = await sessRes.json();
+                if (!sessionData.loggedin) { window.location.href = 'login.html'; return; }
+
+                const empRes = await fetch('api.php?action=get&file=employees&status_filter=active');
+                allEmployees = await empRes.json();
+                
+                autoFillUser();
+                setupEvents();
+
+                // Check for mode in URL
+                const params = new URLSearchParams(window.location.search);
+                const mode = params.get('mode');
+                if (mode === 'it') setMode('IT');
+                else if (mode === 'prog') setMode('PROG');
+            } catch (e) { console.error(e); }
+        });
+
+        function autoFillUser() {
+            const coSelect = gid('req-company');
+            const companies = ['PTA', 'PT4', 'PTE'];
+            coSelect.innerHTML = companies.map(c => `<option value="${c}" ${c === sessionData.company ? 'selected' : ''}>${c}</option>`).join('');
+            
+            const deptSelect = gid('req-department');
+            deptSelect.innerHTML = `<option value="${sessionData.primary_department}" selected>${sessionData.primary_department}</option>`;
+            
+            const reqSelect = gid('req-requester');
+            reqSelect.innerHTML = `<option value="${sessionData.user_id}" selected>${sessionData.display_name || sessionData.username}</option>`;
+            
+            const emp = allEmployees.find(e => e.id === sessionData.user_id);
+            if (emp) gid('req-contact').value = emp.phone || '';
+        }
+
+        function setupEvents() {
+            gid('req-main-category').onchange = () => {
+                const main = gid('req-main-category').value;
+                const subWrap = gid('sub-category-wrapper');
+                const subSelect = gid('req-type');
+                const subs = {
+                    'Hardware': ['Computer', 'Printer', 'Monitor', 'Other Hardware'],
+                    'Software': ['Windows', 'Office', 'ERP', 'Antivirus'],
+                    'Network': ['WiFi', 'Internet', 'VPN'],
+                    'System': ['Password Reset', 'Request New Account', 'Permission'],
+                    'Security': ['CCTV', 'Door Access']
+                };
+                if (subs[main]) {
+                    subWrap.classList.remove('hidden');
+                    subSelect.innerHTML = subs[main].map(s => `<option value="${s}">${s}</option>`).join('');
+                } else {
+                    subWrap.classList.add('hidden');
+                }
+            };
+
+            const fInput = gid('req-attachment');
+            fInput.onchange = () => {
+                const file = fInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        gid('file-preview').innerHTML = `<img src="${e.target.result}" class="h-32 mx-auto rounded-lg shadow">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            gid('requestForm').onsubmit = handleFormSubmit;
+            
+            gid('req-asset').oninput = async () => {
+                const term = gid('req-asset').value;
+                if (term.length < 2) { gid('asset-results').classList.add('hidden'); return; }
+                const res = await fetch(`api.php?action=search_assets&term=${encodeURIComponent(term)}`);
+                const assets = await res.json();
+                if (assets.length) {
+                    gid('asset-results').classList.remove('hidden');
+                    gid('asset-results').innerHTML = assets.map(a => `<div class="p-2 hover:bg-slate-100 cursor-pointer text-sm" onclick="selectAsset('${a.asset_id || a.equipment_id}')">${a.asset_id || a.equipment_id} (${a.name})</div>`).join('');
+                } else gid('asset-results').classList.add('hidden');
+            };
+
+            // Programmer Field Counters
+            ['prog-problem', 'prog-requirement', 'prog-source'].forEach(id => {
+                const el = gid(id);
+                const counter = gid(`${id}-counter`);
+                if (el && counter) {
+                    el.addEventListener('input', () => {
+                        const len = el.value.trim().length;
+                        counter.textContent = `${len}/20`;
+                        if (len >= 20) {
+                            counter.classList.replace('insufficient', 'sufficient');
+                        } else {
+                            counter.classList.replace('sufficient', 'insufficient');
+                        }
+                    });
+                }
+            });
+        }
+
+        window.selectAsset = (id) => {
+            gid('req-asset').value = id;
+            gid('asset-results').classList.add('hidden');
+        };
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (isSubmittingTicket) return;
+
+            const btn = gid('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังส่ง...';
+            isSubmittingTicket = true;
+
+            try {
+                let problem = "";
+                let type = "";
+                if (currentMode === 'IT') {
+                    problem = gid('req-problem').value;
+                    type = gid('req-type').value || gid('req-main-category').value;
+                } else {
+                    const pFound = gid('prog-problem').value.trim();
+                    const pReq = gid('prog-requirement').value.trim();
+                    const pSrc = gid('prog-source').value.trim();
+
+                    if (pFound.length < 20 || pReq.length < 20 || pSrc.length < 20) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'รายละเอียดไม่เพียงพอ',
+                            text: 'กรุณากรอกข้อมูลในหัวข้อ 1, 2 และ 3 ให้ครบถ้วน (อย่างน้อยหัวข้อละ 20 ตัวอักษร) เพื่อให้โปรแกรมเมอร์เข้าใจปัญหาและแก้ไขได้ถูกต้อง',
+                            confirmButtonText: 'รับทราบ',
+                            confirmButtonColor: '#8e44ad'
+                        });
+                        isSubmittingTicket = false;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> ส่งเรื่องแจ้งปัญหาโปรแกรม (Submit)';
+                        return;
+                    }
+
+                    problem = `[${gid('prog-software').value} / ${gid('prog-module').value}]\n1. อาการ: ${pFound}\n2

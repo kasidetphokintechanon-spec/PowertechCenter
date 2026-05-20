@@ -1,0 +1,1338 @@
+/* ============================================================
+   PowertechCenter Design System v2.0
+   Unified enterprise UI foundation — imported by all pages
+   ============================================================ */
+
+/* ---- IMPORT FONTS ---- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600;700&display=swap');
+
+/* ============================================================
+   DESIGN TOKENS (CSS Custom Properties)
+   ============================================================ */
+:root {
+  /* --- Primary palette --- */
+  --ptc-primary:        #2563eb;
+  --ptc-primary-dark:   #1d4ed8;
+  --ptc-primary-light:  rgba(37, 99, 235, 0.10);
+  --ptc-primary-ring:   rgba(37, 99, 235, 0.25);
+
+  /* --- Semantic colours --- */
+  --ptc-success:        #10b981;
+  --ptc-success-bg:     rgba(16, 185, 129, 0.10);
+  --ptc-warning:        #f59e0b;
+  --ptc-warning-bg:     rgba(245, 158, 11, 0.10);
+  --ptc-danger:         #ef4444;
+  --ptc-danger-bg:      rgba(239, 68, 68, 0.10);
+  --ptc-info:           #6366f1;
+  --ptc-info-bg:        rgba(99, 102, 241, 0.10);
+  --ptc-purple:         #8b5cf6;
+  --ptc-purple-bg:      rgba(139, 92, 246, 0.10);
+  --ptc-orange:         #f97316;
+  --ptc-orange-bg:      rgba(249, 115, 22, 0.10);
+
+  /* --- Surface / background --- */
+  --ptc-bg:             #f1f5f9;
+  --ptc-bg-alt:         #e8edf5;
+  --ptc-surface:        #ffffff;
+  --ptc-surface-2:      #f8fafc;
+  --ptc-surface-3:      #f1f5f9;
+
+  /* --- Borders --- */
+  --ptc-border:         #e2e8f0;
+  --ptc-border-strong:  #cbd5e1;
+
+  /* --- Text --- */
+  --ptc-text:           #0f172a;
+  --ptc-text-2:         #334155;
+  --ptc-text-muted:     #64748b;
+  --ptc-text-faint:     #94a3b8;
+
+  /* --- Elevation / shadows --- */
+  --ptc-shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+  --ptc-shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --ptc-shadow-md:  0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --ptc-shadow-lg:  0 10px 30px rgba(0,0,0,0.09), 0 4px 8px rgba(0,0,0,0.05);
+  --ptc-shadow-xl:  0 20px 60px rgba(0,0,0,0.11), 0 8px 16px rgba(0,0,0,0.06);
+
+  /* --- Radii --- */
+  --ptc-radius-xs:  4px;
+  --ptc-radius-sm:  6px;
+  --ptc-radius-md:  10px;
+  --ptc-radius-lg:  14px;
+  --ptc-radius-xl:  18px;
+  --ptc-radius-2xl: 24px;
+
+  /* --- Spacing --- */
+  --ptc-page-x:  1.5rem;   /* 24px horizontal page padding */
+  --ptc-page-y:  1.5rem;   /* 24px vertical page padding   */
+  --ptc-nav-h:   64px;     /* fixed navbar height           */
+
+  /* --- Typography --- */
+  --ptc-font:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ptc-font-th: 'Kanit', 'Inter', -apple-system, sans-serif;
+
+  /* --- Transition --- */
+  --ptc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Legacy aliases so old CSS still works --- */
+  --bg-color:       var(--ptc-bg);
+  --card-bg-color:  var(--ptc-surface);
+  --text-primary:   var(--ptc-text);
+  --text-secondary: var(--ptc-text-muted);
+  --border-color:   var(--ptc-border);
+  --accent-color:   var(--ptc-primary);
+  --danger:         var(--ptc-danger);
+  --warning:        var(--ptc-warning);
+  --success:        var(--ptc-success);
+  --info:           var(--ptc-info);
+}
+
+/* ---- DARK MODE TOKENS ---- */
+.dark,
+[data-theme="dark"],
+.dark-theme,
+html.dark {
+  --ptc-bg:            #0c1220;
+  --ptc-bg-alt:        #0f172a;
+  --ptc-surface:       #1e293b;
+  --ptc-surface-2:     #162032;
+  --ptc-surface-3:     #0f172a;
+  --ptc-border:        #2d3f57;
+  --ptc-border-strong: #3d526e;
+  --ptc-text:          #f1f5f9;
+  --ptc-text-2:        #cbd5e1;
+  --ptc-text-muted:    #94a3b8;
+  --ptc-text-faint:    #64748b;
+  --ptc-shadow-sm:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.25);
+  --ptc-shadow-md:  0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.25);
+  --ptc-shadow-lg:  0 10px 30px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+
+  /* legacy aliases */
+  --bg-color:       var(--ptc-bg);
+  --card-bg-color:  var(--ptc-surface);
+  --text-primary:   var(--ptc-text);
+  --text-secondary: var(--ptc-text-muted);
+  --border-color:   var(--ptc-border);
+}
+
+/* ============================================================
+   BASE RESET & TYPOGRAPHY
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
+}
+
+body.ptc-body {
+  font-family: var(--ptc-font);
+  background-color: var(--ptc-bg);
+  color: var(--ptc-text);
+  min-height: 100vh;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+body.ptc-body.lang-th {
+  font-family: var(--ptc-font-th);
+}
+
+/* Typography scale */
+.ptc-h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; color: var(--ptc-text); }
+.ptc-h2 { font-size: 1.375rem; font-weight: 700; line-height: 1.3;  letter-spacing: -0.015em; color: var(--ptc-text); }
+.ptc-h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.4;  letter-spacing: -0.01em; color: var(--ptc-text); }
+.ptc-h4 { font-size: 0.9375rem; font-weight: 600; line-height: 1.4; color: var(--ptc-text); }
+.ptc-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ptc-text-muted); }
+.ptc-body-sm { font-size: 0.875rem; line-height: 1.5; color: var(--ptc-text-2); }
+.ptc-caption { font-size: 0.75rem; line-height: 1.4; color: var(--ptc-text-muted); }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ptc-text-faint); }
+
+/* ============================================================
+   LAYOUT HELPERS
+   ============================================================ */
+.ptc-page {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--ptc-page-y) var(--ptc-page-x);
+}
+.ptc-page--wide { max-width: 1440px; }
+.ptc-page--narrow { max-width: 860px; }
+
+.ptc-pt-nav { padding-top: calc(var(--ptc-nav-h) + var(--ptc-page-y)); }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.ptc-nav {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  z-index: 100;
+  height: var(--ptc-nav-h);
+  display: flex;
+  align-items: center;
+  padding-inline: var(--ptc-page-x);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--ptc-border);
+  gap: 1rem;
+}
+.dark .ptc-nav,
+html.dark .ptc-nav {
+  background: rgba(30, 41, 59, 0.88);
+  border-color: var(--ptc-border);
+}
+
+.ptc-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.ptc-nav__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.ptc-nav__name { font-size: 0.9375rem; font-weight: 700; color: var(--ptc-text); }
+.ptc-nav__sub  { font-size: 0.6875rem; color: var(--ptc-text-muted); margin-top: -1px; }
+
+.ptc-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ptc-nav__links a {
+  padding: 0.375rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ptc-text-muted);
+  text-decoration: none;
+  transition: var(--ptc-transition);
+  white-space: nowrap;
+}
+.ptc-nav__links a:hover { background: var(--ptc-surface-3); color: var(--ptc-text); }
+.ptc-nav__links a.active { background: var(--ptc-primary-light); color: var(--ptc-primary); font-weight: 600; }
+
+.ptc-nav__spacer { flex: 1; }
+
+.ptc-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.ptc-card {
+  background: var(--ptc-surface);
+  border: 1px solid var(--ptc-border);
+  border-radius: var(--ptc-radius-lg);
+  box-shadow: var(--ptc-shadow-sm);
+  transition: var(--ptc-transition);
+}
+.ptc-card--hover:hover {
+  box-shadow: var(--ptc-shadow-md);
+  transform: translateY(-2px);
+}
+.ptc-card--flat {
+  box-shadow: none;
+}
+.ptc-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.125rem 1.25rem;
+  border-bottom: 1px solid var(--ptc-border);
+  gap: 0.75rem;
+}
+.ptc-card__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ptc-text);
+  margin: 0;
+}
+.ptc-card__body  { padding: 1.25rem; }
+.ptc-card__footer {
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--ptc-border);
+  background: var(--ptc-surface-2);
+  border-radius: 0 0 var(--ptc-radius-lg) var(--ptc-radius-lg);
+}
+
+/* Frosted glass variant */
+.ptc-card--glass {
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.dark .ptc-card--glass,
+html.dark .ptc-card--glass {
+  background: rgba(30, 41, 59, 0.80);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   STAT / KPI CARDS
+   ============================================================ */
+.ptc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1.125rem 1.25rem;
+  background: var(--ptc-surface);
+  border: 1px solid var(--ptc-border);
+  border-radius: var(--ptc-radius-lg);
+  box-shadow: var(--ptc-shadow-sm);
+  transition: var(--ptc-transition);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.ptc-stat:hover { box-shadow: var(--ptc-shadow-md); transform: translateY(-2px); }
+
+.ptc-stat__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.ptc-stat__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.ptc-stat__value {
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ptc-text);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.ptc-stat__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ptc-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ptc-stat__trend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 99px;
+}
+.ptc-stat__trend--up   { color: var(--ptc-success); background: var(--ptc-success-bg); }
+.ptc-stat__trend--down { color: var(--ptc-danger);  background: var(--ptc-danger-bg); }
+
+/* colour variants */
+.ptc-stat--blue   { border-top: 3px solid var(--ptc-primary); }
+.ptc-stat--green  { border-top: 3px solid var(--ptc-success); }
+.ptc-stat--orange { border-top: 3px solid var(--ptc-warning); }
+.ptc-stat--red    { border-top: 3px solid var(--ptc-danger); }
+.ptc-stat--purple { border-top: 3px solid var(--ptc-purple); }
+
+.ptc-stat--blue   .ptc-stat__icon { background: var(--ptc-primary-light); color: var(--ptc-primary); }
+.ptc-stat--green  .ptc-stat__icon { background: var(--ptc-success-bg);    color: var(--ptc-success); }
+.ptc-stat--orange .ptc-stat__icon { background: var(--ptc-warning-bg);    color: var(--ptc-warning); }
+.ptc-stat--red    .ptc-stat__icon { background: var(--ptc-danger-bg);     color: var(--ptc-danger); }
+.ptc-stat--purple .ptc-stat__icon { background: var(--ptc-purple-bg);     color: var(--ptc-purple); }
+
+/* ============================================================
+   SECTION HEADER (page title row)
+   ============================================================ */
+.ptc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.ptc-section-header__left { display: flex; flex-direction: column; gap: 0.125rem; }
+.ptc-section-header__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ptc-text);
+  margin: 0;
+  line-height: 1.3;
+}
+.ptc-section-header__sub  { font-size: 0.8125rem; color: var(--ptc-text-muted); margin: 0; }
+.ptc-section-header__actions { display: flex; align-items: center; gap: 0.5rem; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.ptc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--ptc-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: var(--ptc-transition);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+.ptc-btn:focus-visible { outline: 2px solid var(--ptc-primary); outline-offset: 2px; }
+.ptc-btn:active { transform: scale(0.97); }
+
+.ptc-btn--primary {
+  background: var(--ptc-primary);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+}
+.ptc-btn--primary:hover {
+  background: var(--ptc-primary-dark);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.ptc-btn--secondary {
+  background: var(--ptc-surface);
+  color: var(--ptc-text-2);
+  border-color: var(--ptc-border);
+  box-shadow: var(--ptc-shadow-xs);
+}
+.ptc-btn--secondary:hover { background: var(--ptc-surface-2); border-color: var(--ptc-border-strong); }
+.dark .ptc-btn--secondary,
+html.dark .ptc-btn--secondary {
+  background: var(--ptc-surface-2);
+  border-color: var(--ptc-border);
+}
+
+.ptc-btn--ghost {
+  background: transparent;
+  color: var(--ptc-text-muted);
+  border-color: transparent;
+}
+.ptc-btn--ghost:hover { background: var(--ptc-surface-3); color: var(--ptc-text); }
+
+.ptc-btn--danger {
+  background: var(--ptc-danger);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+.ptc-btn--danger:hover { background: #dc2626; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35); }
+
+.ptc-btn--success {
+  background: var(--ptc-success);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.ptc-btn--sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; border-radius: var(--ptc-radius-sm); }
+.ptc-btn--lg { padding: 0.75rem 1.375rem; font-size: 0.9375rem; }
+.ptc-btn--xl { padding: 0.875rem 1.625rem; font-size: 1rem; }
+.ptc-btn--icon { padding: 0.5rem; width: 36px; height: 36px; }
+.ptc-btn--icon.ptc-btn--sm { width: 30px; height: 30px; padding: 0.3125rem; }
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+.ptc-input,
+.ptc-select,
+.ptc-textarea {
+  width: 100%;
+  padding: 0.5625rem 0.875rem;
+  background: var(--ptc-surface);
+  border: 1px solid var(--ptc-border);
+  border-radius: var(--ptc-radius-md);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--ptc-text);
+  transition: var(--ptc-transition);
+  outline: none;
+  line-height: 1.5;
+}
+.ptc-input:focus,
+.ptc-select:focus,
+.ptc-textarea:focus {
+  border-color: var(--ptc-primary);
+  box-shadow: 0 0 0 3px var(--ptc-primary-ring);
+}
+.ptc-input::placeholder,
+.ptc-textarea::placeholder { color: var(--ptc-text-faint); }
+
+.ptc-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+.ptc-textarea { resize: vertical; min-height: 100px; }
+
+.dark .ptc-input,
+.dark .ptc-select,
+.dark .ptc-textarea,
+html.dark .ptc-input,
+html.dark .ptc-select,
+html.dark .ptc-textarea {
+  background: var(--ptc-surface-2);
+  border-color: var(--ptc-border);
+  color: var(--ptc-text);
+}
+
+.ptc-label-text {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ptc-text-2);
+}
+.ptc-label-text .required { color: var(--ptc-danger); margin-left: 2px; }
+
+.ptc-form-group { margin-bottom: 1rem; }
+.ptc-form-hint { font-size: 0.75rem; color: var(--ptc-text-muted); margin-top: 0.25rem; }
+.ptc-form-error { font-size: 0.75rem; color: var(--ptc-danger); margin-top: 0.25rem; }
+
+/* Search input with icon */
+.ptc-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ptc-search-wrap .ptc-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--ptc-text-faint);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+.ptc-search-wrap .ptc-input { padding-left: 2.25rem; }
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.ptc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.ptc-badge--dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Status variants */
+.ptc-badge--pending    { background: var(--ptc-primary-light); color: var(--ptc-primary); }
+.ptc-badge--progress   { background: var(--ptc-warning-bg);    color: var(--ptc-warning); }
+.ptc-badge--completed  { background: var(--ptc-success-bg);    color: var(--ptc-success); }
+.ptc-badge--danger,
+.ptc-badge--cancelled  { background: var(--ptc-danger-bg);     color: var(--ptc-danger); }
+.ptc-badge--info       { background: var(--ptc-info-bg);       color: var(--ptc-info); }
+.ptc-badge--purple     { background: var(--ptc-purple-bg);     color: var(--ptc-purple); }
+.ptc-badge--orange     { background: var(--ptc-orange-bg);     color: var(--ptc-orange); }
+.ptc-badge--muted      { background: var(--ptc-surface-3);     color: var(--ptc-text-muted); }
+.ptc-badge--success    { background: var(--ptc-success-bg);    color: var(--ptc-success); }
+
+/* Urgency badge */
+.ptc-badge--urgent { background: var(--ptc-danger-bg); color: var(--ptc-danger); }
+.ptc-badge--normal { background: var(--ptc-surface-3); color: var(--ptc-text-muted); }
+
+/* ============================================================
+   RESPONSIVE TABLE
+   Data tables that collapse to cards on mobile
+   Add data-label="Column name" on each <td>
+   ============================================================ */
+.ptc-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--ptc-radius-lg);
+  border: 1px solid var(--ptc-border);
+  background: var(--ptc-surface);
+}
+.ptc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.ptc-table thead {
+  background: var(--ptc-surface-2);
+}
+.ptc-table thead th {
+  padding: 0.75rem 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ptc-text-muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--ptc-border);
+  text-align: left;
+}
+.ptc-table thead th:first-child { padding-left: 1.25rem; }
+.ptc-table thead th:last-child  { padding-right: 1.25rem; }
+
+.ptc-table tbody td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--ptc-border);
+  color: var(--ptc-text-2);
+  vertical-align: middle;
+  line-height: 1.4;
+}
+.ptc-table tbody td:first-child { padding-left: 1.25rem; }
+.ptc-table tbody td:last-child  { padding-right: 1.25rem; }
+.ptc-table tbody tr:last-child td { border-bottom: none; }
+.ptc-table tbody tr {
+  transition: background 0.15s ease;
+}
+.ptc-table tbody tr:hover { background: var(--ptc-surface-2); }
+
+.dark .ptc-table,
+html.dark .ptc-table {
+  color: var(--ptc-text);
+}
+.dark .ptc-table thead,
+html.dark .ptc-table thead { background: rgba(255,255,255,0.03); }
+.dark .ptc-table tbody tr:hover,
+html.dark .ptc-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+
+/* Mobile: collapse to stacked cards */
+@media (max-width: 640px) {
+  .ptc-table-wrap { border: none; background: transparent; }
+  .ptc-table thead { display: none; }
+  .ptc-table,
+  .ptc-table tbody { display: block; }
+  .ptc-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--ptc-surface);
+    border: 1px solid var(--ptc-border);
+    border-radius: var(--ptc-radius-lg);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--ptc-shadow-xs);
+    overflow: hidden;
+  }
+  .ptc-table tbody tr:last-child { margin-bottom: 0; }
+  .ptc-table tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.5625rem 1rem;
+    border-bottom: 1px solid var(--ptc-border);
+    font-size: 0.875rem;
+  }
+  .ptc-table tbody td:last-child { border-bottom: none; }
+  .ptc-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ptc-text-faint);
+    flex-shrink: 0;
+    min-width: 90px;
+    padding-right: 0.75rem;
+    margin-top: 1px;
+  }
+  .ptc-table tbody td:first-child { padding-left: 1rem; }
+  .ptc-table tbody td:last-child  { padding-right: 1rem; }
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+.ptc-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+.ptc-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--ptc-border);
+  background: var(--ptc-surface);
+  color: var(--ptc-text-muted);
+  transition: var(--ptc-transition);
+  white-space: nowrap;
+  user-select: none;
+}
+.ptc-filter-chip:hover { border-color: var(--ptc-primary); color: var(--ptc-primary); }
+.ptc-filter-chip.active {
+  background: var(--ptc-primary-light);
+  border-color: var(--ptc-primary);
+  color: var(--ptc-primary);
+  font-weight: 600;
+}
+.ptc-filter-chip .badge-count {
+  background: currentColor;
+  color: var(--ptc-surface);
+  font-size: 0.625rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   SKELETON LOADERS
+   ============================================================ */
+@keyframes ptc-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.ptc-skeleton {
+  background: linear-gradient(90deg,
+    var(--ptc-border) 25%,
+    var(--ptc-surface-2) 50%,
+    var(--ptc-border) 75%
+  );
+  background-size: 800px 100%;
+  animation: ptc-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--ptc-radius-sm);
+}
+.dark .ptc-skeleton,
+html.dark .ptc-skeleton {
+  background: linear-gradient(90deg,
+    var(--ptc-border) 25%,
+    rgba(255,255,255,0.06) 50%,
+    var(--ptc-border) 75%
+  );
+  background-size: 800px 100%;
+}
+.ptc-skeleton--text  { height: 14px; width: 60%; }
+.ptc-skeleton--title { height: 20px; width: 40%; }
+.ptc-skeleton--rect  { height: 80px; }
+.ptc-skeleton--circle { border-radius: 50%; }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.ptc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  gap: 0.75rem;
+}
+.ptc-empty__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  background: var(--ptc-surface-3);
+  color: var(--ptc-text-faint);
+  margin-bottom: 0.5rem;
+}
+.ptc-empty__title { font-size: 1rem; font-weight: 600; color: var(--ptc-text); }
+.ptc-empty__sub   { font-size: 0.875rem; color: var(--ptc-text-muted); max-width: 320px; }
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.ptc-divider {
+  height: 1px;
+  background: var(--ptc-border);
+  border: none;
+  margin-block: 1.25rem;
+}
+
+/* ============================================================
+   BREADCRUMB
+   ============================================================ */
+.ptc-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--ptc-text-muted);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ptc-breadcrumb li + li::before { content: '/'; margin-right: 0.375rem; }
+.ptc-breadcrumb a { color: var(--ptc-text-muted); text-decoration: none; transition: color 0.15s; }
+.ptc-breadcrumb a:hover { color: var(--ptc-primary); }
+.ptc-breadcrumb li:last-child { color: var(--ptc-text-2); font-weight: 500; }
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
+.ptc-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 600;
+  background: var(--ptc-primary-light);
+  color: var(--ptc-primary);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.ptc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ptc-avatar--sm  { width: 28px; height: 28px; font-size: 0.6875rem; }
+.ptc-avatar--md  { width: 36px; height: 36px; font-size: 0.875rem; }
+.ptc-avatar--lg  { width: 44px; height: 44px; font-size: 1rem; }
+.ptc-avatar--xl  { width: 56px; height: 56px; font-size: 1.25rem; }
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+[data-tooltip] { position: relative; cursor: default; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--ptc-radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+}
+[data-tooltip]:hover::after { opacity: 1; }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.ptc-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--ptc-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ptc-tabs::-webkit-scrollbar { display: none; }
+.ptc-tab {
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ptc-text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: var(--ptc-transition);
+}
+.ptc-tab:hover { color: var(--ptc-text); }
+.ptc-tab.active {
+  color: var(--ptc-primary);
+  border-bottom-color: var(--ptc-primary);
+  font-weight: 600;
+}
+
+/* ============================================================
+   ALERT / CALLOUT
+   ============================================================ */
+.ptc-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--ptc-radius-md);
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+}
+.ptc-alert i { margin-top: 1px; flex-shrink: 0; }
+.ptc-alert--info    { background: var(--ptc-primary-light); border-color: rgba(37,99,235,0.2); color: var(--ptc-primary); }
+.ptc-alert--success { background: var(--ptc-success-bg);    border-color: rgba(16,185,129,0.2); color: var(--ptc-success); }
+.ptc-alert--warning { background: var(--ptc-warning-bg);    border-color: rgba(245,158,11,0.2); color: #92400e; }
+.ptc-alert--danger  { background: var(--ptc-danger-bg);     border-color: rgba(239,68,68,0.2); color: var(--ptc-danger); }
+.dark .ptc-alert--warning,
+html.dark .ptc-alert--warning { color: var(--ptc-warning); }
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.ptc-progress {
+  width: 100%;
+  height: 6px;
+  background: var(--ptc-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.ptc-progress__bar {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--ptc-primary);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ptc-progress__bar--success { background: var(--ptc-success); }
+.ptc-progress__bar--warning { background: var(--ptc-warning); }
+.ptc-progress__bar--danger  { background: var(--ptc-danger); }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.ptc-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptc-clamp-2  { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ptc-clamp-3  { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.ptc-visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ============================================================
+   RESPONSIVE GRID HELPERS
+   ============================================================ */
+.ptc-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+@media (max-width: 480px) {
+  .ptc-grid-stats { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+}
+
+.ptc-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.ptc-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.ptc-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+@media (max-width: 768px) {
+  .ptc-grid-2,
+  .ptc-grid-3,
+  .ptc-grid-4 { grid-template-columns: 1fr; }
+}
+@media (min-width: 480px) and (max-width: 768px) {
+  .ptc-grid-3,
+  .ptc-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes ptc-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ptc-fade-in-fast {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ptc-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.ptc-animate      { animation: ptc-fade-in 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.ptc-animate-fast { animation: ptc-fade-in-fast 0.25s ease both; }
+.ptc-animate--1   { animation-delay: 0.05s; }
+.ptc-animate--2   { animation-delay: 0.1s; }
+.ptc-animate--3   { animation-delay: 0.15s; }
+.ptc-animate--4   { animation-delay: 0.2s; }
+
+/* ============================================================
+   MOBILE BOTTOM SHEET (slide-up panel)
+   ============================================================ */
+@media (max-width: 640px) {
+  .ptc-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    border-radius: var(--ptc-radius-xl) var(--ptc-radius-xl) 0 0;
+    background: var(--ptc-surface);
+    box-shadow: var(--ptc-shadow-xl);
+    z-index: 200;
+    max-height: 80dvh;
+    overflow-y: auto;
+  }
+  .ptc-sheet__handle {
+    width: 36px; height: 4px;
+    border-radius: 99px;
+    background: var(--ptc-border-strong);
+    margin: 0.625rem auto;
+  }
+}
+
+/* ============================================================
+   PRINT HELPERS
+   ============================================================ */
+@media print {
+  .ptc-nav,
+  .ptc-no-print { display: none !important; }
+  .ptc-page { padding: 0; max-width: 100%; }
+  .ptc-card { box-shadow: none; border: 1px solid #ddd; }
+}
+
+/* ============================================================
+   RESPONSIVE PAGE PADDING
+   ============================================================ */
+@media (max-width: 640px) {
+  :root {
+    --ptc-page-x: 1rem;
+    --ptc-page-y: 1rem;
+  }
+  .ptc-page { padding: var(--ptc-page-y) var(--ptc-page-x); }
+}
+
+/* ============================================================
+   NORMALIZE & HARMONIZE LAYER  v1.0
+   ────────────────────────────────────────────────────────────
+   Add  class="ptc-normalize"  to <body> on any page.
+
+   Why compound selectors?
+   Tailwind CDN utility classes have specificity 0-1-0 (one class).
+   A compound selector like  .ptc-normalize th  has specificity
+   0-1-1 (class + element) and therefore wins the cascade without
+   needing fragile !important everywhere.
+   ============================================================ */
+
+/* ── 1. TYPOGRAPHY SCALE ──────────────────────────────────── */
+.ptc-normalize h1,
+.ptc-normalize h2,
+.ptc-normalize h3,
+.ptc-normalize h4,
+.ptc-normalize h5,
+.ptc-normalize h6 {
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--ptc-text);
+}
+.ptc-normalize h1 { font-size: 1.875rem; font-weight: 800; letter-spacing: -0.025em; }
+.ptc-normalize h2 { font-size: 1.5rem;   font-weight: 700; letter-spacing: -0.02em; }
+.ptc-normalize h3 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.015em; }
+.ptc-normalize h4 { font-size: 0.9375rem; font-weight: 600; letter-spacing: -0.01em; }
+.ptc-normalize p  { line-height: 1.65; }
+
+/* ── 2. FORM INPUTS ──────────────────────────────────────── */
+/* Consistent border-radius */
+.ptc-normalize input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="color"]):not([type="file"]),
+.ptc-normalize select,
+.ptc-normalize textarea {
+  border-radius: var(--ptc-radius-md) !important;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Consistent focus ring — overrides focus:ring-2 focus:ring-blue-500,
+   focus:ring-indigo-500, outline-none + any other variant */
+.ptc-normalize input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="color"]):not([type="file"]):focus,
+.ptc-normalize select:focus,
+.ptc-normalize textarea:focus {
+  outline: none !important;
+  border-color: var(--ptc-primary) !important;
+  box-shadow: 0 0 0 3px var(--ptc-primary-ring) !important;
+}
+
+/* ── 3. BUTTONS ─────────────────────────────────────────── */
+.ptc-normalize button,
+.ptc-normalize [role="button"] {
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+.ptc-normalize button:active:not(:disabled),
+.ptc-normalize [role="button"]:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.ptc-normalize button:focus-visible,
+.ptc-normalize [role="button"]:focus-visible {
+  outline: 2px solid var(--ptc-primary);
+  outline-offset: 2px;
+}
+
+/* ── Border-radius: collapse rounded-lg / xl / 2xl / 3xl
+      to a single consistent value on interactive elements ── */
+.ptc-normalize button.rounded-lg,  .ptc-normalize a.rounded-lg,
+.ptc-normalize button.rounded-xl,  .ptc-normalize a.rounded-xl,
+.ptc-normalize button.rounded-2xl, .ptc-normalize a.rounded-2xl,
+.ptc-normalize button.rounded-3xl, .ptc-normalize a.rounded-3xl {
+  border-radius: var(--ptc-radius-md) !important; /* 10px */
+}
+.ptc-normalize button.rounded-full, .ptc-normalize a.rounded-full {
+  border-radius: 9999px !important; /* keep pill shape */
+}
+
+/* ── Primary colour: unify bg-blue-600 and bg-indigo-600 ─── */
+.ptc-normalize button.bg-blue-600,
+.ptc-normalize a.bg-blue-600,
+.ptc-normalize button.bg-indigo-600,
+.ptc-normalize a.bg-indigo-600 {
+  background-color: var(--ptc-primary) !important;
+}
+.ptc-normalize button.hover\:bg-blue-700:hover,
+.ptc-normalize a.hover\:bg-blue-700:hover,
+.ptc-normalize button.hover\:bg-indigo-700:hover,
+.ptc-normalize a.hover\:bg-indigo-700:hover {
+  background-color: var(--ptc-primary-dark) !important;
+}
+
+/* ── Success colour: unify bg-emerald-600 and bg-green-600 ── */
+.ptc-normalize button.bg-emerald-600,
+.ptc-normalize a.bg-emerald-600,
+.ptc-normalize button.bg-green-600,
+.ptc-normalize a.bg-green-600 {
+  background-color: var(--ptc-success) !important;
+}
+.ptc-normalize button.hover\:bg-emerald-700:hover,
+.ptc-normalize a.hover\:bg-emerald-700:hover,
+.ptc-normalize button.hover\:bg-green-700:hover,
+.ptc-normalize a.hover\:bg-green-700:hover {
+  background-color: #059669 !important;
+}
+
+/* ── Danger colour: unify bg-red-600 / bg-red-500 ────────── */
+.ptc-normalize button.bg-red-600,
+.ptc-normalize a.bg-red-600,
+.ptc-normalize button.bg-red-500,
+.ptc-normalize a.bg-red-500 {
+  background-color: var(--ptc-danger) !important;
+}
+.ptc-normalize button.hover\:bg-red-700:hover,
+.ptc-normalize a.hover\:bg-red-700:hover {
+  background-color: #dc2626 !important;
+}
+
+/* ── 4. CARDS ────────────────────────────────────────────── */
+/* Collapse the zoo of rounded-* on card containers to one
+   standard radius. Target white/surface cards specifically. */
+.ptc-normalize .rounded-xl.bg-white,
+.ptc-normalize .rounded-2xl.bg-white,
+.ptc-normalize .rounded-3xl.bg-white,
+.ptc-normalize .rounded-xl.bg-white\/80,
+.ptc-normalize .rounded-xl.bg-white\/90 {
+  border-radius: var(--ptc-radius-lg) !important; /* 14px */
+}
+html.dark .ptc-normalize .dark\:bg-slate-800,
+html.dark .ptc-normalize .dark\:bg-slate-900 {
+  border-radius: var(--ptc-radius-lg) !important;
+}
+
+/* Normalize border colours to design tokens */
+.ptc-normalize .border-slate-100 { border-color: var(--ptc-border) !important; }
+.ptc-normalize .border-slate-200 { border-color: var(--ptc-border) !important; }
+.ptc-normalize .border-slate-300 { border-color: var(--ptc-border-strong) !important; }
+html.dark .ptc-normalize .dark\:border-slate-600,
+html.dark .ptc-normalize .dark\:border-slate-700 { border-color: var(--ptc-border) !important; }
+
+/* Normalize shadow depths to design-system scale */
+.ptc-normalize .shadow    { box-shadow: var(--ptc-shadow-sm) !important; }
+.ptc-normalize .shadow-sm { box-shadow: var(--ptc-shadow-sm) !important; }
+.ptc-normalize .shadow-md { box-shadow: var(--ptc-shadow-md) !important; }
+.ptc-normalize .shadow-lg { box-shadow: var(--ptc-shadow-lg) !important; }
+.ptc-normalize .shadow-xl { box-shadow: var(--ptc-shadow-xl) !important; }
+.ptc-normalize .shadow-2xl { box-shadow: var(--ptc-shadow-xl) !important; }
+
+/* ── 5. TABLES ───────────────────────────────────────────── */
+/* .ptc-normalize element selectors beat single-class
+   Tailwind rules like .px-6 (.px-6 = 0-1-0 vs .ptc-normalize th = 0-1-1) */
+.ptc-normalize table {
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+/* Consistent thead background */
+.ptc-normalize thead {
+  background: var(--ptc-surface-2) !important;
+}
+html.dark .ptc-normalize thead {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Consistent th styling */
+.ptc-normalize thead th {
+  padding: 0.625rem 1rem;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--ptc-text-muted) !important;
+  border-bottom: 1px solid var(--ptc-border) !important;
+  text-align: left !important;
+  white-space: nowrap;
+  background: transparent;
+}
+/* First/last column indent */
+.ptc-normalize thead th:first-child { padding-left: 1.25rem; }
+.ptc-normalize thead th:last-child  { padding-right: 1.25rem; }
+
+/* Consistent tbody row */
+.ptc-normalize tbody tr {
+  border-bottom: 1px solid var(--ptc-border);
+  transition: background 0.15s ease;
+}
+.ptc-normalize tbody tr:last-child { border-bottom: none; }
+
+/* Consistent row hover */
+.ptc-normalize tbody tr:hover {
+  background: var(--ptc-surface-2) !important;
+}
+html.dark .ptc-normalize tbody tr:hover {
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Consistent td padding */
+.ptc-normalize tbody td {
+  padding: 0.75rem 1rem;
+  color: var(--ptc-text-2);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--ptc-border);
+}
+html.dark .ptc-normalize tbody td { color: var(--ptc-text); }
+.ptc-normalize tbody td:first-child { padding-left: 1.25rem; }
+.ptc-normalize tbody td:last-child  { padding-right: 1.25rem; }
+
+/* ── 6. BADGES / STATUS PILLS ────────────────────────────── */
+/* Normalise text size and weight for any element using
+   Tailwind rounded-full with small text */
+.ptc-normalize .rounded-full.text-xs,
+.ptc-normalize .rounded-full.text-\[10px\],
+.ptc-normalize .rounded-full.text-\[11px\] {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+/* ── 7. NAV / STICKY HEADERS ─────────────────────────────── */
+.ptc-normalize .sticky.top-0 {
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+}
+
+/* ── 8. SPACING SCALE GUARD ──────────────────────────────── */
+/* Ensure page-level containers use consistent inset */
+.ptc-normalize .max-w-7xl.mx-auto { padding-inline: var(--ptc-page-x); }
+@media (min-width: 640px) {
+  .ptc-normalize .max-w-7xl.mx-auto { padding-inline: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .ptc-normalize .max-w-7xl.mx-auto { padding-inline: 2rem; }
+}
+
+/* ── 9. TRANSITION CONSISTENCY ───────────────────────────── */
+/* Ensure all .transition elements use the same easing */
+.ptc-normalize .transition,
+.ptc-normalize .transition-all,
+.ptc-normalize .transition-colors {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-duration: 180ms !important;
+}
+/* But keep animations that specify their own duration */
+.ptc-normalize .duration-300 { transition-duration: 300ms !important; }
+.ptc-normalize .duration-500 { transition-duration: 500ms !important; }
+
+/* ── 10. SCROLLBAR (global) ───────────────────────────────── */
+.ptc-normalize ::-webkit-scrollbar { width: 6px; height: 6px; }
+.ptc-normalize ::-webkit-scrollbar-track { background: transparent; }
+.ptc-normalize ::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); border-radius: 99px; }
+.ptc-normalize ::-webkit-scrollbar-thumb:hover { background: var(--ptc-text-faint); }
+
+/* ── DARK MODE SURFACE GUARD ──────────────────────────────── */
+/* Ensure dark surfaces use design token, not hardcoded slate-800 */
+html.dark .ptc-normalize .dark\:bg-slate-800 { background-color: var(--ptc-surface) !important; }
+html.dark .ptc-normalize .dark\:bg-slate-900 { background-color: var(--ptc-bg-alt) !important; }
+html.dark .ptc-normalize .dark\:text-slate-100,
+html.dark .ptc-normalize .dark\:text-white    { color: var(--ptc-text) !important; }
+html.dark .ptc-normalize .dark\:text-slate-400 { color: var(--ptc-text-muted) !important; }
+
+/* ── RESPONSIVE TABLE OVERRIDES (mobile) ─────────────────── */
+@media (max-width: 640px) {
+  .ptc-normalize table:not(.no-collapse) thead { display: none; }
+  .ptc-normalize table:not(.no-collapse) tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--ptc-surface);
+    border: 1px solid var(--ptc-border);
+    border-radius: var(--ptc-radius-lg);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--ptc-shadow-xs);
+    overflow: hidden;
+  }
+  .ptc-normalize table:not(.no-collapse) tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--ptc-border);
+    border-radius: 0 !important;
+  }
+  .ptc-normalize table:not(.no-collapse) tbody td:last-child { border-bottom: none; }
+  .ptc-normalize table:not(.no-collapse) tbody td::before {
+    content: attr(data-label);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ptc-text-faint);
+    flex-shrink: 0;
+    min-width: 80px;
+    padding-right: 0.75rem;
+    margin-top: 1px;
+  }
+}

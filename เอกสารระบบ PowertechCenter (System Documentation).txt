@@ -1,0 +1,104 @@
+ เอกสารระบบ PowertechCenter (System Documentation)
+1. ภาพรวมระบบ (System Overview)
+ชื่อระบบ: PowertechCenter (Intranet Portal)
+เป้าหมาย: ระบบบริหารจัดการภายในองค์กรแบบรวมศูนย์ รองรับการจองห้องประชุม, แจ้งซ่อม (Ticket), ยืม-คืนอุปกรณ์, ทะเบียนทรัพย์สิน และข้อมูลพนักงาน
+ผู้ใช้งาน:
+User: พนักงานทั่วไป (จองห้อง, แจ้งซ่อม, ดูประวัติ)
+Staff: เจ้าหน้าที่ IT/Facilities (จัดการงานซ่อม, อนุมัติการจอง/ยืม)
+Admin: ผู้ดูแลระบบ (จัดการสิทธิ์, ตั้งค่าระบบ, แก้ไขข้อมูลหลัก)
+Tech Stack:
+Frontend: HTML5, CSS (TailwindCSS), JavaScript (Vanilla + SweetAlert2, FullCalendar, Chart.js)
+Backend: PHP (Native + Modular Actions via api.php)
+Database: MySQL / MariaDB (powertech_system)
+Real-time: WebSocket (Node.js ws library)
+Integrations: LINE Notify/Messaging API, Telegram Bot
+2. โครงสร้างโปรเจกต์ (Project Structure)
+อ้างอิงจากไฟล์ที่ให้มา:
+
+text
+PowertechCenter/
+├── api.php                 # Gateway หลักของ API (Router & Common Functions)
+├── config.php              # การตั้งค่า DB, Session, Auto-login
+├── index.html              # Dashboard หลัก
+├── login.html              # หน้า Login
+├── admin.html              # ระบบหลังบ้าน (Asset, Users, Settings)
+├── booking_v2.html         # ระบบจองห้องประชุม (ปฏิทิน)
+├── my_tickets.html         # ติดตามงานแจ้งซ่อม
+├── borrow_management.html  # ระบบจัดการยืม-คืน (Staff)
+├── api/
+│   └── actions/            # Logic แยกตามโมดูล (ถูกเรียกผ่าน api.php?action=...)
+│       ├── auth/           # login.php
+│       ├── booking/        # create.php, update.php
+│       ├── ticket/         # ...
+│       └── ...
+├── js/
+│   └── shared.js           # Logic กลาง (Sidebar, Session, Theme)
+├── uploads/                # เก็บไฟล์ (attachments, signatures, images)
+└── DB/
+    └── powertech_system.sql # Schema ฐานข้อมูล
+3. สคีมาฐานข้อมูล (Database Schema)
+Database Name: powertech_system
+ตารางหลัก:
+employees: ข้อมูลพนักงาน, Login, Role (admin, staff, user).
+it_assets: ทะเบียนทรัพย์สิน IT, สถานะ (ว่าง, ใช้งานปกติ, ส่งซ่อม), is_loanable.
+bookings: การจองห้องประชุม (start_time, end_time, status, room_id).
+it_logs (Job Tickets): ใบงานแจ้งซ่อม (problem, solution, status, servicedBy).
+it_loan_history: ประวัติการยืม-คืน พร้อมลายเซ็น (borrower_signature).
+meeting_rooms: ข้อมูลห้องประชุมและอุปกรณ์ภายใน.
+4. โปรโตคอล API (API Contracts)
+ระบบใช้รูปแบบ Action-based API ผ่าน api.php
+
+Endpoint: POST /api.php หรือ GET /api.php
+Parameter บังคับ: action (เช่น login, create_booking, get_pending_counts)
+Authentication: PHP Session + Cookie remember_token
+Response Format:
+json
+{
+  "status": "success" | "error",
+  "message": "...",
+  "data": { ... }
+}
+5. โฟลว์งานหลัก (Workflows)
+จองห้องประชุม:
+User เลือกเวลา/ห้องใน booking_v2.html -> api?action=create_booking
+สถานะเริ่มต้น Pending (หรือ Confirmed ตามตั้งค่า)
+Staff อนุมัติใน approve_booking.html -> ระบบส่งแจ้งเตือน LINE/Telegram
+แจ้งซ่อม (Ticket):
+User แจ้งปัญหา -> สถานะ Pending
+Staff รับงาน (In Progress) -> ดำเนินการ/รออะไหล่ -> ปิดงาน (Completed)
+User ให้คะแนนความพึงพอใจ (Rating)
+ยืม-คืนอุปกรณ์:
+User ขอยืม -> Staff อนุมัติ (LOAN_APPROVED)
+รับของ: เซ็นชื่อรับ (borrower_signature) -> สถานะ Active
+คืนของ: Staff ตรวจรับและเซ็นชื่อ (return_approver_signature) -> สถานะ Completed
+6. การตั้งค่า (Configuration)
+DB Connection: แก้ไขใน config.php
+php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'powertech_system');
+Permissions: โฟลเดอร์ uploads/ ต้องเปิดสิทธิ์ Write (777 หรือ 755)
+📋 เทมเพลตข้อความสำหรับสั่งงาน AI (AI Context Template)
+ใช้ข้อความด้านล่างนี้แปะลงในแชทเมื่อต้องการสั่งงานพัฒนาต่อ เพื่อให้ AI เข้าใจบริบททันที:
+
+text
+หัวข้อ: บริบทระบบ PowertechCenter
+
+Tech stack: PHP (Native + Modular Actions), MySQL, HTML/TailwindCSS, JS (Vanilla)
+Base URL: http://localhost/PowertechCenter/
+Config: config.php (DB: powertech_system)
+โครงสร้าง: api.php เป็น Router หลัก เรียกไฟล์ย่อยใน api/actions/*
+ฟีเจอร์หลัก:
+1. Booking (booking_v2.html, approve_booking.html)
+2. Job Ticket (my_tickets.html, request.html)
+3. Asset & Loan (admin.html, borrow_management.html)
+4. Auth (login.php, session based)
+
+API Pattern: POST api.php (Body: action=ชื่อaction, data=...)
+Database: ตารางหลัก employees, it_assets, bookings, it_logs, it_loan_history
+
+งานที่ต้องการ: [ระบุสิ่งที่ต้องการทำ เช่น เพิ่มฟีเจอร์, แก้บั๊ก]
+ไฟล์ที่เกี่ยวข้อง: [ระบุชื่อไฟล์]
+เงื่อนไข/ข้อจำกัด: [เช่น ห้ามแก้โครงสร้าง DB หลัก, รองรับ Mobile]
+เกณฑ์ยอมรับ: [Given-When-Then]

@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Booking - Powertech System</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Timeline Grid */
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr; /* Room Info | Timeline */
+            height: calc(100vh - 140px);
+        }
+        .time-slot { flex: 1; border-right: 1px dashed #e2e8f0; position: relative; }
+        .dark .time-slot { border-right-color: #334155; }
+        
+        .booking-block {
+            position: absolute; top: 4px; bottom: 4px;
+            border-radius: 6px; font-size: 0.75rem; padding: 2px 6px;
+            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+            transition: all 0.2s; cursor: pointer; z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .booking-block:hover { z-index: 20; transform: scale(1.02); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+        
+        .timeline-background {
+            background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px);
+            background-size: calc(100% / 15) 100%; /* 15 Hours (8-23) */
+        }
+        .dark .timeline-background {
+            background-image: linear-gradient(to right, #334155 1px, transparent 1px);
+        }
+
+        /* Mobile Adjustments: Desktop */
+        @media (min-width: 768px) {
+            .timeline-grid { grid-template-columns: 250px 1fr; }
+        }
+
+        .fc-event { cursor: pointer; border: none; }
+    </style>
+    <style>
+        /* === PTC Design System supplements for smart_booking.html === */
+        body { font-family: var(--ptc-font-th, 'Kanit', sans-serif) !important; }
+
+        /* Booking block uses design-system shadows */
+        .booking-block { box-shadow: var(--ptc-shadow-sm, 0 2px 4px rgba(0,0,0,.08)); }
+        .booking-block:hover { box-shadow: var(--ptc-shadow-md, 0 4px 12px rgba(0,0,0,.12)); }
+
+        /* Focus ring */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ptc-primary, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)) !important;
+        }
+
+        /* Mobile: sidebar as bottom sheet */
+        @media (max-width: 640px) {
+            .booking-sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                border-radius: var(--ptc-radius-xl, 1rem) var(--ptc-radius-xl, 1rem) 0 0;
+                max-height: 80dvh; overflow-y: auto;
+                z-index: 50;
+            }
+        }
+
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border, #cbd5e1); border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 h-screen flex flex-col overflow-hidden transition-colors duration-300 ptc-normalize">
+
+    <!-- Header -->
+    <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-20 shadow-sm">
+        <div class="flex items-center gap-2 md:gap-4">
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-blue-600 transition mr-2"><i class="fas fa-bars text-xl"></i></button>
+            <a href="index.html" class="text-slate-500 hover:text-blue-600 transition hidden md:block"><i class="fas fa-arrow-left text-xl"></i></a>
+            <h1 class="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 truncate flex items-center">
+                <i class="fas fa-calendar-check mr-2 text-blue-600 hidden md:inline"></i>Smart Booking
+            </h1>
+        </div>
+        <div class="hidden md:flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+            <button onclick="switchView('status')" id="btn-view-status" class="px-3 py-1.5 text-sm font-medium rounded-md bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400">สถานะห้อง (Status)</button>
+            <button onclick="switchView('timeline')" id="btn-view-timeline" class="px-3 py-1.5 text-sm font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 transition">Timeline</button>
+            <button onclick="switchView('calendar')" id="btn-view-calendar" class="px-3 py-1.5 text-sm font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 transition">Calendar</button>
+            <button onclick="switchView('search')" id="btn-view-search" class="px-3 py-1.5 text-sm font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 transition">Search</button>
+            <button onclick="switchView('my-items')" id="btn-view-my-items" class="px-3 py-1.5 text-sm font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 transition">รายการของฉัน (My Items)</button>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Date Navigation -->
+            <div class="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                <button onclick="changeDate(-1)" class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white dark:hover:bg-slate-600 shadow-sm transition"><i class="fas fa-chevron-left text-xs"></i></button>
+                <input type="date" id="current-date" class="bg-transparent border-none text-sm font-bold text-center w-32 focus:ring-0 cursor-pointer dark:text-white" onchange="loadTimeline()">
+                <button onclick="changeDate(1)" class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white dark:hover:bg-slate-600 shadow-sm transition"><i class="fas fa-chevron-right text-xs"></i></button>
+            </div>
+            <button onclick="changeDate(0)" class="text-sm font-medium text-blue-600 hover:underline hidden md:block">วันนี้</button>
+        </div>
+    </header>
+    
+    <!-- Mobile View Switcher -->
+    <div class="md:hidden flex bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-2 justify-around">
+        <button onclick="switchView('status')" id="mob-btn-view-status" class="flex-1 py-1 text-xs font-medium rounded text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-700">สถานะ</button>
+        <button onclick="switchView('timeline')" id="mob-btn-view-timeline" class="flex-1 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400">Timeline</button>
+        <button onclick="switchView('calendar')" id="mob-btn-view-calendar" class="flex-1 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400">Calendar</button>
+        <button onclick="switchView('search')" id="mob-btn-view-search" class="flex-1 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400">Search</button>
+        <button onclick="switchView('my-items')" id="mob-btn-view-my-items" class="flex-1 py-1 text-xs font-medium rounded text-slate-500 dark:text-slate-400">รายการของฉัน</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar Filters -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+        <aside id="sidebar-filters" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col p-4 z-30 transform -translate-x-full md:translate-x-0 md:static md:flex transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4 md:hidden">
+                <h3 class="font-bold text-slate-700 dark:text-slate-200">ตัวกรอง</h3>
+                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="fas fa-filter text-blue-500"></i> ตัวกรองห้อง</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-500 mb-1 block">บริษัท</label>
+                    <select id="filter-company" class="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm" onchange="loadTimeline()">
+                        <option value="">ทั้งหมด</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-500 mb-1 block">ความจุ (คน)</label>
+                    <input type="range" id="filter-capacity" min="0" max="50" value="0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="document.getElementById('cap-val').innerText = this.value > 0 ? '> ' + this.value : 'ทั้งหมด'; loadTimeline()">
+                    <div class="text-right text-xs text-blue-600 font-bold" id="cap-val">ทั้งหมด</div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-500 mb-1 block">อุปกรณ์</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="rounded text-blue-600 filter-equip" value="Projector" onchange="loadTimeline()"> Projector</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="rounded text-blue-600 filter-equip" value="Whiteboard" onchange="loadTimeline()"> Whiteboard</label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="rounded text-blue-600 filter-equip" value="Conference" onchange="loadTimeline()"> Conference Call</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                    <div class="w-3 h-3 rounded bg-emerald-500"></div> ว่าง (คลิกเพื่อจอง)
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                    <div class="w-3 h-3 rounded bg-blue-500"></div> จองแล้ว
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <div class="w-3 h-3 rounded bg-amber-500"></div> รออนุมัติ
+                </div>
+            </div>
+        </aside>
+
+        <!-- Timeline Area -->
+        <main id="view-timeline" class="flex-1 overflow-hidden flex flex-col relative select-none">
+            <!-- Time Header -->
+            <div class="h-10 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600 grid items-center pl-[150px] md:pl-[250px] sticky top-0 z-10 shadow-sm overflow-hidden flex-shrink-0" id="time-header">
+                <!-- JS will populate time slots -->
+            </div>
+
+            <!-- Rooms & Timeline -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar relative" id="timeline-container">
+                <!-- JS will populate rooms -->
+                <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                    <i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i>
+                    <p>กำลังโหลดข้อมูล...</p>
+                </div>
+            </div>
+            
+            <!-- Current Time Indicator Line -->
+            <div id="current-time-line" class="absolute top-10 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none hidden">
+                <div class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+            </div>
+        </main>
+
+        <!-- Room Status Dashboard View -->
+        <main id="view-status" class="h-[calc(100vh-112px)] overflow-y-auto custom-scrollbar p-6">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 dark:text-white">สถานะห้องประชุม (Real-time)</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">ข้อมูลสถานะห้อง ณ เวลาปัจจุบัน</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-3xl font-bold text-blue-600 dark:text-blue-400" id="clock-time">00:00</p>
+                    <p class="text-sm text-slate-500" id="clock-date">-</p>
+                </div>
+            </div>
+            <div id="room-status-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Cards will be injected here -->
+                <div class="col-span-full text-center py-20 text-slate-400"><i class="fas fa-circle-notch fa-spin text-3xl"></i><p class="mt-2">กำลังโหลดสถานะ...</p></div>
+            </div>
+        </main>
+
+        <main id="view-my-items" class="hidden h-[calc(100vh-112px)] overflow-y-auto custom-scrollbar p-6">
+            <div id="my-items-container" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+            </div>
+        </main>
+
+        <!-- Calendar View -->
+        <main id="view-calendar" class="hidden flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 h-full">
+                <div id="calendar" class="h-full"></div>
+            </div>
+        </main>
+
+        <!-- Search View -->
+        <main id="view-search" class="hidden flex-1 p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-6">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-700 dark:text-white"><i class="fas fa-search text-blue-500"></i> ค้นหาห้องว่างอัตโนมัติ</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-300">เริ่ม (Start)</label><input type="datetime-local" id="search-start" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white"></div>
+                        <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-300">สิ้นสุด (End)</label><input type="datetime-local" id="search-end" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white"></div>
+                        <button onclick="searchRooms()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg transition"><i class="fas fa-search mr-2"></i> ค้นหา</button>
+                    </div>
+                </div>
+                <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-2xl transition-all w-full max-w-lg flex flex-col max-h-[90vh] md:h-auto h-full">
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    <div class="flex flex-col items-start gap-1">
+                        <h3 class="text-lg font-bold"><i class="fas fa-calendar-plus mr-2"></i>จองห้องประชุม</h3>
+                        <span id="booking-timer-text" class="text-xs text-blue-100 hidden"></span>
+                    </div>
+                    <button onclick="closeModal()" class="text-white/80 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                
+                <form id="booking-form" onsubmit="submitBooking(event)" class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-4">
+                    <input type="hidden" id="modal-booking-id">
+                    <input type="hidden" name="room_id" id="form-room-id">
+                    <input type="hidden" name="draft_started_at" id="draft-started-at">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-3 border border-blue-100 dark:border-blue-800">
+                        <div class="w-10 h-10 rounded bg-white dark:bg-slate-700 flex items-center justify-center text-blue-600 shadow-sm">
+                            <i class="fas fa-door-open text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">ห้องประชุม</div>
+                            <div class="font-bold text-slate-800 dark:text-white" id="form-room-name">-</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">หัวข้อการประชุม <span class="text-red-500">*</span></label>
+                        <input type="text" name="title" id="modal-title" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white" required placeholder="เช่น ประชุมประจำเดือน...">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">วาระการประชุม (Agenda)</label>
+                        <textarea name="agenda" id="modal-agenda" rows="2" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white" placeholder="รายละเอียดวาระการประชุม..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">เริ่มเวลา <span class="text-red-500">*</span></label>
+                            <input type="datetime-local" name="start_time" id="form-start" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">สิ้นสุดเวลา <span class="text-red-500">*</span></label>
+                            <input type="datetime-local" name="end_time" id="form-end" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white" required>
+                        </div>
+                    </div>
+
+                    <!-- Recurring Options -->
+                    <div class="bg-slate-50 dark:bg-slate-700/30 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
+                        <label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" id="modal-recurring" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4" onchange="document.getElementById('recurring-options').classList.toggle('hidden', !this.checked)"><span class="text-sm font-bold text-slate-700 dark:text-slate-200">จองแบบทำซ้ำ (Recurring)</span></label>
+                        <div id="recurring-options" class="hidden mt-2 pt-2 border-t border-slate-200 dark:border-slate-600 grid grid-cols-2 gap-3">
+                            <div><label class="block text-xs mb-1 text-slate-500">ความถี่</label><select id="modal-repeat-freq" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-slate-800 dark:text-white"><option value="daily">ทุกวัน</option><option value="weekly">ทุกสัปดาห์</option><option value="monthly">ทุกเดือน</option></select></div>
+                            <div><label class="block text-xs mb-1 text-slate-500">สิ้นสุดเมื่อ</label><input type="date" id="modal-repeat-until" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm bg-white dark:bg-slate-800 dark:text-white"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ประธานในที่ประชุม</label>
+                            <input type="text" name="chairman" id="modal-chairman" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">จำนวนผู้เข้าประชุม</label>
+                            <input type="number" name="attendee_count" id="modal-attendee-count" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white" min="1">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">เบอร์ติดต่อ</label>
+                        <input type="text" name="contact_phone" id="modal-phone" class="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">แนบไฟล์ (ถ้ามี)</label>
+                        <input type="file" name="attachments[]" multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-slate-200">
+                    </div>
+                </form>
+
+                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800">
+                    <button type="button" id="btn-delete-booking" class="hidden px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 font-bold rounded-lg transition border border-red-200 dark:border-red-800" onclick="deleteBookingFromModal()">ลบการจอง</button>
+                    <button onclick="closeModal()" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg text-sm font-medium transition">ยกเลิก</button>
+                    <button id="btn-save-booking" onclick="document.getElementById('booking-form').requestSubmit()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-blue-500/30 transition flex items-center gap-2">
+                        <i class="fas fa-check"></i> ยืนยันการจอง
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/shared.js"></script>
+    <script>
+        const API_PATH = 'api.php';
+        // Helper to prevent XSS
+        const escapeHtml = (text) => {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        };
+        const gid = (id) => document.getElementById(id);
+        
+        // Offline Placeholder Image (SVG Data URI)
+        const NO_IMAGE_SRC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2394a3b8'%3ENo Image%3C/text%3E%3C/svg%3E";
+
+        let allRooms = [];
+        let allBookings = [];
+        let calendar = null;
+        const BOOKING_TIMEOUT_SECONDS = 600;
+        let bookingTimerInterval = null;
+        let bookingDeadline = null;
+        
+        // Config Timeline
+        const START_HOUR = 8; // 08:00
+        const END_HOUR = 23;  // 23:00
+        const TOTAL_HOURS = END_HOUR - START_HOUR;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Set today's date
+            document.getElementById('current-date').valueAsDate = new Date();
+            
+            // Check Session
+            const session = await checkSession();
+            if (!session.loggedin) { window.location.href = 'login.html'; return; }
+
+            sessionData = session; // Store session data globally
+            
+            // Initial Load
+            await loadRooms();
+            await loadEmployeeData(); // Load employee data for avatars
+            await loadBookings();
+
+            // Init Calendar
+            initCalendar();
+            
+            // Set default search times
+            const now = new Date();
+            const toLocalISO = (date) => new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            gid('search-start').value = toLocalISO(now);
+            gid('search-end').value = toLocalISO(new Date(now.getTime() + 60*60*1000));
+            
+            // Start Clock for current time line
+            updateCurrentTimeLine();
+            setInterval(updateCurrentTimeLine, 10000); // Update every 10 seconds for real-time feel
+
+            // Set default view
+            switchView('status');
+            
+            // Start clock for dashboard
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+
+        async function checkSession() {
+            try {
+                const res = await fetch(`${API_PATH}?action=check_session`);
+                return await res.json();
+            } catch (e) { return { loggedin: false }; }
+        }
+
+        async function loadEmployeeData() {
+            try {
+                const res = await fetch(`${API_PATH}?action=get&file=employees&status_filter=active`);
+                window.allEmployeesData = await res.json();
+            } catch (e) { console.error("Failed to load employees", e); }
+        }
+
+        async function loadRooms() {
+            try {
+                const res = await fetch(`${API_PATH}?action=get&file=meeting_rooms`);
+                rooms = await res.json();
+            } catch (e) { console.error("Error loading rooms:", e); }
+        }
+
+        function switchView(view) {
+            const allViews = ['status', 'timeline', 'calendar', 'search', 'my-items'];
+            
+            // Hide all views and reset all buttons
+            allViews.forEach(v => {
+                const viewEl = gid(`view-${v}`);
+                if (viewEl) viewEl.classList.add('hidden');
+                
+                // Desktop button reset
+                const btn = gid(`btn-view-${v}`);
+                if (btn) {
+                    btn.classList.remove('bg-white', 'dark:bg-slate-600', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+                    btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700');
+                }
+
+                // Mobile button reset
+                const mobBtn = gid(`mob-btn-view-${v}`);
+                if (mobBtn) {
+                    mobBtn.classList.remove('bg-blue-50', 'dark:bg-slate-700', 'text-blue-600', 'dark:text-blue-400');
+                    mobBtn.classList.add('text-slate-500', 'dark:text-slate-400');
+                }
+            });
+            
+            // Show the selected view and highlight the active button
+            const viewEl = gid(`view-${view}`);
+            if (viewEl) viewEl.classList.remove('hidden');
+            
+            const btn = gid(`btn-view-${view}`);
+            if (btn) {
+                btn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700');
+                btn.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+            }
+
+            const mobBtn = gid(`mob-btn-view-${view}`);
+            if (mobBtn) {
+                mobBtn.classList.remove('text-slate-500', 'dark:text-slate-400');
+                mobBtn.classList.add('bg-blue-50', 'dark:bg-slate-700', 'text-blue-600', 'dark:text-blue-400');
+            }
+
+            // Call the specific load function for the view
+            if (view === 'calendar' && calendar) calendar.render();
+            if (view === 'timeline') loadBookings();
+            if (view === 'status') loadRoomStatus();
+            if (view === 'my-items') loadMyItems();
+        }
+
+        async function loadMyItems() {
+            const container = gid('my-items-container');
+            const now = new Date();
+            container.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i><p class="mt-2">กำลังโหลดรายการของฉัน...</p></div>`;
+
+            try {
+                const res = await fetch(`${API_PATH}?action=get_my_bookings`);
+                const myBookings = await res.json();
+
+                if (!res.ok) throw new Error(myBookings.message || 'Could not fetch bookings.');
+
+                if (myBookings.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400">
+                        <i class="fas fa-calendar-times text-4xl mb-3 opacity-50"></i>
+                        <h3 class="font-bold">ไม่พบรายการจอง</h3>
+                        <p class="text-sm">คุณยังไม่มีรายการจองห้องประชุม</p>
+                    </div>`;
+                    return;
+                }
+
+                // Create a title header
+                const header = `<div class="p-4 border-b border-slate-100 dark:border-slate-700">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-book-bookmark text-blue-500"></i> รายการจองของฉัน
+                    </h2>
+                </div>`;
+
+                const bookingsHtml = myBookings.map(b => {
+                    const start = new Date(b.start_time);
+                    const end = new Date(b.end_time);
+                    const room = rooms.find(r => r.id == b.room_id);
+                    const roomName = room ? room.name : 'ไม่พบชื่อห้อง';
+                    const roomImage = (room && room.images && room.images.length > 0) ? room.images[0] : NO_IMAGE_SRC;
+                    const isPast = end < now;
+
+                    let statusClass = '';
+                    let statusText = '';
+                    switch (b.status) {
+                        case 'Confirmed':
+                            statusClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300';
+                            statusText = 'ยืนยันแล้ว';
+                            break;
+                        case 'Pending':
+                            statusClass = 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+                            statusText = 'รออนุมัติ';
+                            break;
+                        case 'Rejected':
+                            statusClass = 'bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300';
+                            statusText = 'ถูกปฏิเสธ';
+                            break;
+                        case 'Cancelled':
+                            statusClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+                            statusText = 'ยกเลิกแล้ว';
+                            break;
+                        case 'Cancellation Requested':
+                            statusClass = 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+                            statusText = 'รออนุมัติยกเลิก';
+                            break;
+                        default:
+                            statusClass = 'bg-slate-100 text-slate-800 dark:bg-slate-600 dark:text-slate-300';
+                            statusText = b.status;
+                    }
+
+                    // Show reason for rejection/cancellation
+                    let noteHtml = '';
+                    if ((b.status === 'Rejected' || b.status === 'Cancelled') && b.admin_note) {
+                        const reasonText = b.admin_note.includes(':') ? b.admin_note.split(':').pop().trim() : b.admin_note;
+                        if (reasonText && reasonText !== 'null' && reasonText !== 'Cancelled by user before approval') {
+                             noteHtml = `<div class="text-xs text-red-500 mt-1.5" title="${escapeHtml(b.admin_note)}">
+                                <i class="fas fa-info-circle mr-1"></i> เหตุผล: ${escapeHtml(reasonText)}
+                            </div>`;
+                        }
+                    }
+
+                    const canCancel = !isPast && (b.status === 'Confirmed' || b.status === 'Pending');
+                    const canEdit = !isPast && (b.status === 'Confirmed' || b.status === 'Pending');
+
+                    return `
+                        <div class="booking-item flex items-center gap-4 p-4 border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition ${isPast ? 'opacity-60' : ''}">
+                            <img src="${roomImage}" class="w-24 h-16 rounded-lg object-cover hidden sm:block">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-slate-800 dark:text-white truncate">${escapeHtml(b.title)}</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400"><i class="fas fa-door-open mr-2 opacity-60"></i>${roomName}</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400"><i class="fas fa-calendar-alt mr-2 opacity-60"></i>${start.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400"><i class="fas fa-clock mr-2 opacity-60"></i>${start.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2 text-right">
+                                <span class="text-xs font-bold px-2 py-1 rounded-full ${statusClass}">${statusText}</span>
+                                ${noteHtml}
+                                <div class="flex gap-2">
+                                    ${canEdit ? `<button onclick="editBooking(${b.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition" title="แก้ไข"><i class="fas fa-pen"></i></button>` : ''}
+                                    ${canCancel ? `<button onclick="cancelBookingRequest(${b.id})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition" title="ยกเลิก"><i class="fas fa-times"></i></button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = header + '<div class="divide-y divide-slate-100 dark:divide-slate-700/50">' + bookingsHtml + '</div>';
+
+            } catch (err) {
+                console.error("Error loading my items:", err);
+                container.innerHTML = `<div class="p-6 text-center text-red-500">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                    <h3 class="font-bold">เกิดข้อผิดพลาด</h3>
+                    <p class="text-sm">${err.message}</p>
+                </div>`;
+            }
+        }
+
+
+        async function loadTimeline() {
+            const date = document.getElementById('current-date').value;
+            const company = document.getElementById('filter-company').value;
+            const capacity = parseInt(document.getElementById('filter-capacity').value) || 0;
+            
+            // Get selected equipment
+            const equipFilters = Array.from(document.querySelectorAll('.filter-equip:checked')).map(cb => cb.value);
+
+            // Show Loading
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><p>กำลังโหลดข้อมูล...</p></div>`;
+
+            try {
+                // Fetch Bookings
+                const res = await fetch(`${API_PATH}?action=get_bookings_by_date&date=${date}&company=${company}`);
+                allBookings = await res.json();
+
+                // Filter Rooms
+                let filteredRooms = allRooms.filter(r => r.is_active == 1);
+                if (company) filteredRooms = filteredRooms.filter(r => r.company === company);
+                if (capacity > 0) filteredRooms = filteredRooms.filter(r => parseInt(r.capacity) >= capacity);
+                if (equipFilters.length > 0) {
+                    filteredRooms = filteredRooms.filter(r => {
+                        const rEquip = Array.isArray(r.equipment) ? r.equipment : (r.equipment ? JSON.parse(r.equipment) : []);
+                        // Check if room has ALL selected equipment (or ANY, depending on logic. Here use ANY match for broader search or ALL for strict)
+                        // Let's use ANY match for better UX
+                        return equipFilters.some(f => rEquip.some(re => re.toLowerCase().includes(f.toLowerCase())));
+                    });
+                }
+
+                renderTimelineGrid(filteredRooms);
+                if(calendar) calendar.refetchEvents();
+
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `<div class="text-center text-red-500 mt-10">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+            }
+        }
+
+        // --- New Function: Load Room Status Dashboard ---
+        async function loadRoomStatus() {
+            const container = gid('room-status-grid');
+            const company = gid('filter-company').value;
+            
+            container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400"><i class="fas fa-circle-notch fa-spin text-3xl"></i><p class="mt-2">กำลังโหลดสถานะ...</p></div>`;
+
+            const today = new Date().toISOString().split('T')[0];
+            const res = await fetch(`${API_PATH}?action=get_bookings_by_date&date=${today}&company=${company}`);
+            const todayBookings = await res.json();
+            
+            const now = new Date();
+            
+                let displayRooms = rooms;
+            if (company !== 'all') displayRooms = rooms.filter(r => r.company === company);
+
+            if (displayRooms.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400">ไม่พบห้องประชุม</div>`;
+                return;
+            }
+
+            container.innerHTML = displayRooms.map(room => {
+                const roomBookings = todayBookings.filter(b => b.room_id == room.id && b.status !== 'Cancelled' && b.status !== 'Rejected' );
+                
+                let currentMeeting = null;
+                let nextMeeting = null;
+                
+                roomBookings.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+                
+                for(let b of roomBookings) {
+                    const start = new Date(b.start_time);
+                    const end = new Date(b.end_time);
+                    
+                    if (now >= start && now < end) {
+                        currentMeeting = b;
+                    } else if(now < start && !nextMeeting){
+                        nextMeeting = b;
+                    }
+                }
+
+                const isBusy = !!currentMeeting;
+                const statusClass = isBusy ? 'status-busy' : 'status-free';
+                const statusText = isBusy ? 'ไม่ว่าง (Busy)' : 'ว่าง (Available)';
+                const statusColor = isBusy ? 'text-red-500' : 'text-emerald-500';
+                
+                let infoText = '';
+                if (isBusy) {
+                    const end = new Date(currentMeeting.end_time);
+                    infoText = `<p class="text-xs text-slate-500 mt-1">ถึงเวลา: <strong>${end.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</strong></p>
+                                <p class="text-xs text-slate-400 truncate" title="${currentMeeting.title}">${currentMeeting.title}</p>`;
+                }else{
+                    if (nextMeeting) {
+                        const start = new Date(nextMeeting.start_time);
+                        infoText = `<p class="text-xs text-slate-500 mt-1">ว่างจนถึง: <strong>${start.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</strong></p>`;
+                    } else {
+                        infoText = `<p class="text-xs text-emerald-600 mt-1">ว่างตลอดทั้งวัน</p>`;
+                    }
+                }
+
+                const img = (room.images && room.images.length > 0) ? room.images[0] : NO_IMAGE_SRC;
+                
+                const bookNowBtn = !isBusy ? `<button onclick="openModal(${room.id}, '${room.name}', null, '${new Date().toISOString().slice(0,16)}')" class="flex-1 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-400 rounded-lg text-sm font-bold transition">จองเลย</button>` : '';
+
+                return `
+                    <div class="room-status-card bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
+                        <div class="h-40 relative">
+                            <img src="${img}" class="w-full h-full object-cover">
+                            <div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                <i class="fas fa-users text-slate-400 mr-1"></i> ${room.capacity}
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-slate-800 dark:text-white leading-tight">${room.name}</h3>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="status-indicator ${statusClass}"></span>
+                                    <span class="font-bold text-sm ${statusColor}">${statusText}</span>
+                                </div>
+                                ${infoText}
+                            </div>
+                            <div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+                                ${bookNowBtn}
+                                <button onclick="switchView('timeline'); gid('date-picker').value='${today}'; loadTimeline();" class="px-3 py-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition" title="ดูตารางเวลา">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            gid('clock-time').textContent = now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+            gid('clock-date').textContent = now.toLocaleDateString('th-TH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-filters');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function renderTimeHeader() {
+            const header = document.getElementById('time-header');
+            header.style.gridTemplateColumns = `repeat(${TOTAL_HOURS}, minmax(0, 1fr))`;
+            let html = '';
+            for (let i = START_HOUR; i < END_HOUR; i++) {
+                html += `<div class="text-xs font-mono text-slate-400 border-l border-slate-200 dark:border-slate-600 pl-1">${i}:00</div>`;
+            }
+            header.innerHTML = html;
+        }
+
+        function renderTimeline(rooms) {
+            const container = document.getElementById('timeline-container');
+            if (rooms.length === 0) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-400"><i class="fas fa-door-closed text-4xl mb-2 opacity-30"></i><p>ไม่พบห้องประชุมตามเงื่อนไข</p></div>`;
+                return;
+            }
+
+            let html = '';
+            rooms.forEach(room => {
+                // Room Info Column
+                let img = NO_IMAGE_SRC;
+                if (room.images && room.images.length > 0) img = room.images[0];
+                
+                const equipBadges = (Array.isArray(room.equipment) ? room.equipment : [])
+                    .slice(0, 3)
+                    .map(e => `<span class="text-[10px] bg-slate-100 dark:bg-slate-700 px-1 rounded text-slate-500">${e}</span>`)
+                    .join('');
+
+                html += `
+                <div class="flex border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition group h-24">
+                    <!-- Room Info -->
+                    <div class="w-[150px] md:w-[250px] flex-shrink-0 p-2 md:p-3 border-r border-slate-200 dark:border-slate-700 flex gap-2 md:gap-3 items-center bg-white dark:bg-slate-800 z-10 sticky left-0">
+                        <img src="${img}" class="w-12 h-12 md:w-16 md:h-16 rounded-lg object-cover border dark:border-slate-600 hidden sm:block">
+                        <div class="min-w-0">
+                            <div class="font-bold text-xs md:text-sm text-slate-800 dark:text-white truncate" title="${room.name}">${room.name}</div>
+                            <div class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-users w-3"></i> ${room.capacity} คน</div>
+                            <div class="flex flex-wrap gap-1 mt-1">${equipBadges}</div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Bar -->
+                    <div class="flex-1 relative bg-white dark:bg-slate-800/50 timeline-track cursor-crosshair timeline-background" 
+                         onclick="handleTimelineClick(event, '${room.id}', '${room.name}')">
+
+                        <!-- Bookings -->
+                        ${renderRoomBookings(room.id)}
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderRoomBookings(roomId) {
+            const roomBookings = bookings.filter(b => b.room_id == roomId);
+            
+            return roomBookings.map(b => {
+                const start = new Date(b.start_time);
+                const end = new Date(b.end_time);
+                
+                // Calculate position
+                const startHour = start.getHours() + (start.getMinutes() / 60);
+                const endHour = end.getHours() + (end.getMinutes() / 60);
+                
+                // Skip if out of view range
+                if (endHour < START_HOUR || startHour > END_HOUR) return '';
+
+                // Clamp to view
+                const viewStart = Math.max(startHour, START_HOUR);
+                const viewEnd = Math.min(endHour, END_HOUR);
+                
+                const leftPercent = ((viewStart - START_HOUR) / TOTAL_HOURS) * 100;
+                const widthPercent = ((viewEnd - viewStart) / TOTAL_HOURS) * 100;
+
+                // Style based on status
+                let bgClass = 'bg-blue-500';
+                if (b.status === 'Pending') bgClass = 'bg-amber-500';
+                
+                // Check if it's my booking
+                // Note: In a real app, check against session user_id. Here we assume generic view.
+                
+                // Find Booker Avatar
+                let avatarHtml = '';
+                const booker = window.allEmployeesData ? window.allEmployeesData.find(e => e.name === b.booker_name) : null;
+                if (booker) {
+                    const avatarSrc = booker.image ? `uploads/employees/${booker.image}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(b.booker_name)}&background=random&color=fff&size=20`;
+                    avatarHtml = `<img src="${avatarSrc}" class="w-4 h-4 rounded-full border border-white/50 object-cover flex-shrink-0">`;
+                }
+
+                return `
+                    <div class="booking-block ${bgClass} text-white shadow-sm flex items-center gap-1.5 px-1.5" 
+                         style="left: ${leftPercent}%; width: ${widthPercent}%;"
+                         title="${b.title} (${b.booker_name})\n${formatTime(b.start_time)} - ${formatTime(b.end_time)}"
+                         onclick="event.stopPropagation(); showBookingDetails('${b.id}')">
+                        ${avatarHtml}
+                        <span class="font-bold truncate text-[10px] leading-tight">${b.title}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleTimelineClick(event, roomId, roomName) {
+            // Calculate clicked time
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const width = rect.width;
+            
+            const clickRatio = x / width;
+            const clickedHour = START_HOUR + (clickRatio * TOTAL_HOURS);
+            
+            // Round to nearest 30 mins
+            const hour = Math.floor(clickedHour);
+            const minutes = (clickedHour - hour) >= 0.5 ? 30 : 0;
+            
+            const dateStr = document.getElementById('current-date').value;
+            
+            // Create Date objects
+            const start = new Date(`${dateStr}T${String(hour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:00`);
+            const end = new Date(start.getTime() + 60 * 60 * 1000); // Default 1 hour
+
+            openBookingModal(roomId, roomName, start, end);
+        }
+
+        function resetBookingTimerUI() {
+            const timerEl = gid('booking-timer-text');
+            if (timerEl) {
+                timerEl.textContent = '';
+                timerEl.classList.add('hidden');
+                timerEl.classList.remove('text-red-200');
+                timerEl.classList.add('text-blue-100');
+            }
+            const form = gid('booking-form');
+            if (form) {
+                Array.from(form.elements).forEach(el => {
+                    el.disabled = false;
+                });
+            }
+            const saveBtn = gid('btn-save-booking');
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        }
+
+        function startBookingTimer() {
+            if (bookingTimerInterval) {
+                clearInterval(bookingTimerInterval);
+                bookingTimerInterval = null;
+            }
+            bookingDeadline = Date.now() + BOOKING_TIMEOUT_SECONDS * 1000;
+            const draftInput = gid('draft-started-at');
+            if (draftInput) {
+                draftInput.value = new Date().toISOString();
+            }
+            const timerEl = gid('booking-timer-text');
+            if (timerEl) {
+                timerEl.classList.remove('hidden');
+            }
+            const updateTimer = () => {
+                const remainingMs = bookingDeadline - Date.now();
+                if (remainingMs <= 0) {
+                    clearInterval(bookingTimerInterval);
+                    bookingTimerInterval = null;
+                    if (timerEl) {
+                        timerEl.textContent = 'หมดเวลาในการทำรายการ ระบบยกเลิกการจองอัตโนมัติ';
+                        timerEl.classList.remove('text-blue-100');
+                        timerEl.classList.add('text-red-200');
+                    }
+                    const form = gid('booking-form');
+                    if (form) {
+                        Array.from(form.elements).forEach(el => {
+                            el.disabled = true;
+                        });
+                    }
+                    const saveBtn = gid('btn-save-booking');
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                        saveBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                    }
+                    setTimeout(() => {
+                        closeModal();
+                    }, 2000);
+                    return;
+                }
+                const totalSeconds = Math.floor(remainingMs / 1000);
+                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                if (timerEl) {
+                    timerEl.textContent = `เวลาที่เหลือในการทำรายการ: ${minutes}:${seconds} นาที`;
+                }
+            };
+            updateTimer();
+            bookingTimerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function openBookingModal(roomId, roomName, start, end) {
+            if (bookingTimerInterval) {
+                clearInterval(bookingTimerInterval);
+                bookingTimerInterval = null;
+            }
+            bookingDeadline = null;
+            resetBookingTimerUI();
+            const draftInput = gid('draft-started-at');
+            if (draftInput) {
+                draftInput.value = '';
+            }
+
+            gid('btn-delete-booking').classList.add('hidden');
+            gid('btn-save-booking').innerHTML = '<i class="fas fa-check"></i> ยืนยันการจอง';
+            gid('modal-booking-id').value = '';
+            
+            document.getElementById('form-room-id').value = roomId;
+            document.getElementById('form-room-name').textContent = roomName;
+            
+            const fmt = d => {
+                const pad = n => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+            
+            document.getElementById('form-start').value = fmt(start);
+            document.getElementById('form-end').value = fmt(end);
+            
+            gid('modal-title').value = '';
+            gid('modal-agenda').value = '';
+            gid('modal-chairman').value = '';
+            gid('modal-phone').value = '';
+            gid('modal-attendee-count').value = '';
+            gid('modal-recurring').checked = false;
+            gid('recurring-options').classList.add('hidden');
+            
+            document.getElementById('booking-modal').classList.remove('hidden');
+            startBookingTimer();
+        }
+        
+        function closeModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+            document.getElementById('booking-form').reset();
+            if (bookingTimerInterval) {
+                clearInterval(bookingTimerInterval);
+                bookingTimerInterval = null;
+            }
+            bookingDeadline = null;
+            resetBookingTimerUI();
+        }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const bookingId = gid('modal-booking-id').value;
+            if (!bookingId && bookingDeadline && Date.now() > bookingDeadline) {
+                Swal.fire('หมดเวลา', 'หมดเวลาการทำรายการ กรุณาเริ่มจองใหม่อีกครั้ง', 'warning');
+                closeModal();
+                return;
+            }
+            fd.append('action', bookingId ? 'update_booking' : 'create_booking');
+            if(bookingId) fd.append('booking_id', bookingId);
+
+            // Recurring
+            if(gid('modal-recurring').checked) {
+                fd.append('is_recurring', '1');
+                fd.append('repeat_freq', gid('modal-repeat-freq').value);
+                fd.append('repeat_until', gid('modal-repeat-until').value);
+            }
+            
+            // Fix datetime format
+            fd.set('start_time', fd.get('start_time').replace('T', ' '));
+            fd.set('end_time', fd.get('end_time').replace('T', ' '));
+
+            try {
+                Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    Swal.fire('สำเร็จ', bookingId ? 'แก้ไขการจองเรียบร้อยแล้ว' : 'ส่งคำขอจองเรียบร้อยแล้ว', 'success');
+                    closeModal();
+                    loadTimeline(); // Reload
+                    if(calendar) calendar.refetchEvents();
+                } else {
+                    throw new Error(json.message);
+                }
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+            }
+        }
+
+        function changeDate(days) {
+            const input = document.getElementById('current-date');
+            if (days === 0) {
+                input.valueAsDate = new Date();
+            } else {
+                const d = new Date(input.value);
+                d.setDate(d.getDate() + days);
+                input.valueAsDate = d;
+            }
+            loadTimeline();
+        }
+
+        function updateCurrentTimeLine() {
+            const line = document.getElementById('current-time-line');
+            const now = new Date();
+            const currentHour = now.getHours() + (now.getMinutes() / 60);
+            
+            // Check if today matches selected date
+            const selectedDate = document.getElementById('current-date').value;
+            
+            // Fix Timezone: Use local date string instead of UTC (toISOString)
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            
+            if (selectedDate === todayStr && currentHour >= START_HOUR && currentHour <= END_HOUR) {
+                const percent = ((currentHour - START_HOUR) / TOTAL_HOURS) * 100;
+                line.style.left = `calc(var(--sidebar-width, 250px) + (100% - var(--sidebar-width, 250px)) * ${percent / 100})`; // Adjust for sidebar width
+                line.classList.remove('hidden');
+
+                // Add/Update Time Label
+                let label = document.getElementById('current-time-label');
+                if (!label) {
+                    label = document.createElement('div');
+                    label.id = 'current-time-label';
+                    label.className = 'absolute -top-6 -left-6 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm z-30 whitespace-nowrap pointer-events-none';
+                    line.appendChild(label);
+                }
+                label.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            } else {
+                line.classList.add('hidden');
+            }
+            
+            // Update CSS variable for sidebar width based on screen size
+            if (window.innerWidth < 768) {
+                document.documentElement.style.setProperty('--sidebar-width', '150px');
+            } else {
+                document.documentElement.style.setProperty('--sidebar-width', '250px');
+            }
+        }
+
+        function formatTime(dateStr) {
+            return dateStr.substring(11, 16);
+        }
+
+        function showBookingDetails(id) {
+            let booking = bookings.find(b => b.id == id);
+            
+            // If not found in timeline data, try to get from calendar event data
+            if (!booking && calendar) {
+                const calEvent = calendar.getEventById(id);
+                if (calEvent) {
+                    booking = {
+                        id: parseInt(calEvent.id),
+                        title: calEvent.title,
+                        ...calEvent.extendedProps,
+                        start_time: calEvent.startStr,
+                        end_time: calEvent.endStr,
+                    };
+                }
+            }
+
+            if (!booking) return;
+
+            const isOwner = booking.booker_id == sessionData.user_id; // Assuming sessionData is available globally or passed
+            const canEdit = isOwner || ['admin', 'staff'].includes(sessionData.role);
+
+            let actionButtons = '<button onclick="Swal.close()" class="px-4 py-2 bg-slate-200 rounded-lg text-sm">ปิด</button>';
+            if (canEdit) {
+                actionButtons = `
+                    <button onclick="editBooking(${booking.id}); Swal.close();" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 mr-2">แก้ไข</button>
+                    <button onclick="cancelBookingRequest(${booking.id}); Swal.close();" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">ยกเลิก</button>
+                `;
+            }
+
+            Swal.fire({
+                title: booking.title,
+                html: `
+                    <div class="text-left text-sm space-y-2">
+                        <p><strong>ผู้จอง:</strong> ${booking.booker_name}</p>
+                        <p><strong>เวลา:</strong> ${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}</p>
+                        <p><strong>สถานะ:</strong> <span class="px-2 py-0.5 rounded text-xs font-bold ${booking.status==='Confirmed'?'bg-blue-100 text-blue-600':'bg-amber-100 text-amber-600'}">${booking.status}</span></p>
+                        ${booking.agenda ? `<p><strong>รายละเอียด:</strong> ${booking.agenda}</p>` : ''}
+                        <div class="mt-4 flex justify-end">${actionButtons}</div>
+                    </div>
+                `,
+                confirmButtonText: 'ปิด'
+            });
+        }
+
+        function editBooking(id) {
+            const booking = bookings.find(b => b.id == id);
+            if (!booking) return;
+
+            const room = rooms.find(r => r.id == booking.room_id);
+            openModal(booking.room_id, room ? room.name : 'Unknown Room', new Date(booking.start_time), new Date(booking.end_time));
+            
+            gid('modal-booking-id').value = booking.id;
+            gid('modal-title').value = booking.title;
+            gid('modal-agenda').value = booking.agenda || '';
+            gid('modal-chairman').value = booking.chairman || '';
+            gid('modal-phone').value = booking.contact_phone || '';
+            gid('modal-attendee-count').value = booking.attendee_count || '';
+            
+            gid('btn-delete-booking').classList.remove('hidden');
+            gid('btn-save-booking').innerHTML = '<i class="fas fa-save"></i> บันทึกการแก้ไข';
+        }
+
+        async function deleteBookingFromModal() {
+            const id = gid('modal-booking-id').value;
+            if(id) {
+                closeModal();
+                cancelBookingRequest(id);
+            }
+        }
+
+        async function cancelBookingRequest(bookingId) {
+            const result = await Swal.fire({
+                title: 'ยืนยันการยกเลิก?',
+                text: 'คุณต้องการยกเลิกการจองนี้ใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ยกเลิกเลย',
+                cancelButtonText: 'ไม่'
+            });
+
+            if (result.isConfirmed) {
+                const fd = new FormData();
+                fd.append('action', 'cancel_booking_request');
+                fd.append('id', bookingId);
+                try {
+                    const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (!res.ok) throw new Error(json.message);
+                    
+                    Swal.fire('สำเร็จ', json.message, 'success');
+                    loadTimeline();
+                    if(calendar) calendar.refetchEvents();
+                } catch (err) {
+                    Swal.fire('ผิดพลาด', err.message, 'error');
+                }
+            }
+        }
+
+        async function handleEventMove(info) {
+            const event = info.event;
+            
+            // Helper to format date for MySQL (YYYY-MM-DD HH:mm:ss)
+            const toMySQLDate = (date) => {
+                if (!date) return null;
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+            };
+
+            const startStr = toMySQLDate(event.start);
+            const endStr = toMySQLDate(event.end || event.start); // Fallback if end is null
+
+            const fd = new FormData();
+            fd.append('action', 'move_booking');
+            fd.append('id', event.id);
+            fd.append('start', startStr);
+            fd.append('end', endStr);
+
+            try {
+                const res = await fetch(API_PATH, { method: 'POST', body: fd });
+                const json = await res.json();
+                
+                if (json.status !== 'success') throw new Error(json.message || 'Update failed');
+
+                // Success feedback
+                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+                Toast.fire({ icon: 'success', title: 'อัปเดตเวลาเรียบร้อย' });
+                loadTimeline(); // Refresh timeline data as well
+            } catch (err) {
+                info.revert(); // Revert the drag if failed
+                Swal.fire('ไม่สามารถเปลี่ยนเวลาได้', err.message, 'error');
+            }
+        }
+
+        // --- Calendar Logic ---
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listMonth' },
+                locale: 'th',
+                editable: true, // Enable Drag & Drop
+                eventDrop: function(info) { handleEventMove(info); },
+                eventResize: function(info) { handleEventMove(info); },
+                events: function(info, successCallback, failureCallback) {
+                    const company = document.getElementById('filter-company').value;
+                    fetch(`${API_PATH}?action=get_calendar_events&start=${info.startStr}&end=${info.endStr}&company=${company}`)
+                    .then(res => res.json())
+                    .then(data => successCallback(data))
+                    .catch(err => failureCallback(err));
+                },
+                eventClick: function(info) { showBookingDetails(parseInt(info.event.id)); },
+                eventContent: function(arg) {
+                    const status = arg.event.extendedProps.status;
+                    let color = status === 'Confirmed' ? 'bg-blue-500' : 'bg-amber-500';
+                    return { html: `<div class="text-xs text-white px-1 rounded ${color} truncate">${arg.event.title}</div>` };
+                }
+            });
+            calendar.render();
+        }
+
+        // --- Search Logic ---
+        async function searchRooms() {
+            const start = gid('search-start').value;
+            const end = gid('search-end').value;
+            if(!start || !end) return Swal.fire('แจ้งเตือน', 'กรุณาระบุเวลาเริ่มและสิ้นสุด', 'warning');
+
+          

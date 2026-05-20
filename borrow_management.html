@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการการยืม-คืน - SystemCenter</title>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        /* === PTC Design System supplements for borrow_management.html === */
+        body { font-family: var(--ptc-font-th, 'Kanit', sans-serif) !important; }
+
+        /* Responsive loan/borrow table */
+        @media (max-width: 640px) {
+            table thead { display: none; }
+            table tbody tr {
+                display: flex; flex-direction: column;
+                border: 1px solid var(--ptc-border, #e2e8f0);
+                border-radius: var(--ptc-radius-lg, 0.75rem);
+                margin-bottom: .75rem;
+                padding: .5rem .75rem;
+                background: var(--ptc-surface, #fff);
+            }
+            table td { padding: .35rem 0; border: none; font-size: .875rem; }
+            table td::before {
+                content: attr(data-label);
+                display: block; font-size: .7rem; font-weight: 600;
+                color: var(--ptc-text-muted, #94a3b8);
+                text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px;
+            }
+        }
+
+        /* Focus ring */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ptc-primary, #2563eb) !important;
+            box-shadow: 0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)) !important;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 { letter-spacing: -0.01em; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--ptc-border, #cbd5e1); border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col ptc-normalize">
+
+    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 min-h-16 flex flex-col sm:flex-row sm:items-center px-3 sm:px-6 py-2 sm:py-0 justify-between sticky top-0 z-10 gap-2 sm:gap-0">
+        <div class="flex items-center gap-3">
+            <a href="admin.html" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"><i class="fas fa-arrow-left"></i></a>
+            <h1 class="font-bold text-lg hidden sm:block">Loan Management</h1>
+        </div>
+        <div class="flex gap-2 sm:gap-3 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            <div class="relative">
+                <button onclick="switchTab('pending')" id="tab-pending" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap relative">รออนุมัติ</button>
+                <span id="badge-pending" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+            </div>
+            <div class="relative">
+                <button onclick="switchTab('active')" id="tab-active" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap">กำลังถูกยืม</button>
+                <span id="badge-active" class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+            </div>
+            <button onclick="switchTab('history')" id="tab-history" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap">ประวัติ</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
+        <!-- History Filters -->
+        <div id="history-filters" class="hidden mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-medium text-slate-500 mb-1">ค้นหา</label>
+                <input type="text" id="hist-search" placeholder="ชื่ออุปกรณ์, ผู้ยืม, รหัส..." class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white" onkeyup="renderHistoryTable()">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">วันที่เริ่ม</label>
+                <input type="date" id="hist-start" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white" onchange="renderHistoryTable()">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">ถึงวันที่</label>
+                <input type="date" id="hist-end" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white" onchange="renderHistoryTable()">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">สถานะ</label>
+                <select id="hist-status" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white" onchange="renderHistoryTable()">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="active">กำลังยืม</option>
+                    <option value="overdue">เกินกำหนดคืน</option>
+                    <option value="returned">คืนแล้ว</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportHistory()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 shadow flex items-center gap-2"><i class="fas fa-file-excel"></i> Export</button>
+                <button onclick="clearAllHistory()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 shadow flex items-center gap-2"><i class="fas fa-trash-alt"></i> ล้างประวัติ</button>
+            </div>
+        </div>
+        <div id="active-loan-summary" class="mb-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hidden">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <h3 class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2"><i class="fas fa-list-check text-amber-500"></i> รายการที่กำลังถูกยืม</h3>
+                <span id="active-loan-count-text" class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-bold">0 รายการ</span>
+            </div>
+            <ul id="active-loan-list" class="space-y-2 text-sm"></ul>
+        </div>
+        <div id="content-area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <div id="sigModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between items-center">
+                <h3 id="sigTitle" class="font-bold text-lg">ยืนยัน</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p id="sigDesc" class="text-sm text-slate-500">กรุณาเซ็นชื่อเพื่อยืนยัน</p>
+                <div id="loanDetailPreview" class="hidden text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/40 p-3 space-y-1">
+                    <div><span class="text-slate-500">ผู้ยืม:</span> <span id="loan-detail-borrower" class="font-medium text-slate-700 dark:text-slate-200">-</span></div>
+                    <div><span class="text-slate-500">แผนก:</span> <span id="loan-detail-dept" class="font-medium text-slate-700 dark:text-slate-200">-</span></div>
+                    <div><span class="text-slate-500">กำหนดคืน:</span> <span id="loan-detail-due" class="font-medium text-slate-700 dark:text-slate-200">-</span></div>
+                    <div><span class="text-slate-500">วัตถุประสงค์:</span> <span id="loan-detail-purpose" class="font-medium text-slate-700 dark:text-slate-200">-</span></div>
+                </div>
+                <div id="return-check-form" class="hidden space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">ผลตรวจสภาพก่อนคืน</label>
+                        <select id="return-condition" class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white">
+                            <option value="">-- เลือกผลตรวจสภาพ --</option>
+                            <option value="ปกติ">ปกติ</option>
+                            <option value="มีรอย/ตำหนิเล็กน้อย">มีรอย/ตำหนิเล็กน้อย</option>
+                            <option value="ชำรุด">ชำรุด</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">รายละเอียดการตรวจสภาพ</label>
+                        <textarea id="return-notes" rows="3" placeholder="ระบุจุดที่พบ, อุปกรณ์ครบหรือไม่, สภาพการใช้งาน..." class="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm dark:text-white"></textarea>
+                    </div>
+                </div>
+                <div id="signature-area" class="border-2 border-dashed border-slate-300 rounded-xl bg-white touch-none">
+                    <canvas id="signature-pad" class="w-full h-40 block"></canvas>
+                </div>
+                <div id="signature-actions" class="flex justify-end"><button onclick="clearSig()" class="text-xs text-red-500 underline">ล้างลายเซ็น</button></div>
+            </div>
+            <div class="p-4 border-t dark:border-slate-700 flex justify-end gap-2 bg-slate-50 dark:bg-slate-900">
+                <button id="btn-cancel-modal" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-200">ยกเลิก</button>
+                <button onclick="submitAction()" id="btn-confirm" class="px-6 py-2 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-700">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Detail Modal -->
+    <div id="historyDetailModal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                <h3 class="font-bold text-lg text-slate-800 dark:text-white">รายละเอียดการยืม-คืน</h3>
+                <button onclick="closeHistoryDetailsModal()" class="text-slate-400 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="historyDetailBody" class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="p-4 border-t dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-end">
+                <button onclick="closeHistoryDetailsModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'pending';
+        let currentItem = null;
+        let signaturePad = null;
+        let allHistoryItems = [];
+        let currentLoanItems = [];
+        const api = 'api.php';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSignaturePad();
+            loadData();
+            setInterval(updateBadgeCount, 10000); // Auto refresh badge
+        });
+
+        function initSignaturePad() {
+            const canvas = document.getElementById('signature-pad');
+            signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+        }
+
+        function resizeCanvas() {
+            const canvas = document.getElementById('signature-pad');
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+        }
+
+        function hasValidDate(value) {
+            if (!value) return false;
+            const raw = String(value).trim().toLowerCase();
+            return raw && raw !== 'null' && raw !== '0000-00-00' && raw !== '0000-00-00 00:00:00';
+        }
+
+        function toDateOnly(value) {
+            if (!hasValidDate(value)) return '';
+            return String(value).split(' ')[0];
+        }
+
+        function getHistoryStatusMeta(item) {
+            const isReturned = hasValidDate(item.return_date);
+            const expectedReturnDate = toDateOnly(item.expected_return_date);
+            const expectedDateObj = expectedReturnDate ? new Date(`${expectedReturnDate}T00:00:00`) : null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isOverdue = !isReturned && !!expectedDateObj && expectedDateObj < today;
+            return { isReturned, isOverdue, expectedReturnDate };
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const activeClass = "bg-blue-600 text-white shadow-md";
+            const inactiveClass = "bg-slate-100 text-slate-600 hover:bg-slate-200";
+            document.getElementById('tab-pending').className = `px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${tab==='pending'?activeClass:inactiveClass}`;
+            document.getElementById('tab-active').className = `px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${tab==='active'?activeClass:inactiveClass}`;
+            document.getElementById('tab-history').className = `px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${tab==='history'?activeClass:inactiveClass}`;
+            
+            const filterDiv = document.getElementById('history-filters');
+            const contentArea = document.getElementById('content-area');
+            if (tab === 'history') {
+                filterDiv.classList.remove('hidden');
+                filterDiv.classList.add('flex');
+                contentArea.className = 'block space-y-4';
+                document.getElementById('active-loan-summary').classList.add('hidden');
+            } else {
+                filterDiv.classList.add('hidden');
+                filterDiv.classList.remove('flex');
+                contentArea.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+                document.getElementById('active-loan-summary').classList.remove('hidden');
+            }
+            loadData();
+        }
+
+        function setBadgeValue(elId, count) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            if (count > 0) {
+                el.textContent = count;
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function setLoanBadgesAndSummary(items) {
+            if (!Array.isArray(items)) return;
+            const pendingItems = items.filter(i => i.loan_status === 'Pending');
+            const activeItems = items.filter(i => i.loan_status === 'Active');
+            setBadgeValue('badge-pending', pendingItems.length);
+            setBadgeValue('badge-active', activeItems.length);
+
+            const summary = document.getElementById('active-loan-summary');
+            const countText = document.getElementById('active-loan-count-text');
+            const listEl = document.getElementById('active-loan-list');
+            if (!summary || !countText || !listEl) return;
+            countText.textContent = `${activeItems.length} รายการ`;
+            if (currentTab === 'history') {
+                summary.classList.add('hidden');
+                return;
+            }
+            summary.classList.remove('hidden');
+            if (activeItems.length === 0) {
+                listEl.innerHTML = `<li class="text-slate-400 text-sm">ตอนนี้ไม่มีรายการที่กำลังถูกยืม</li>`;
+                return;
+            }
+            const previewItems = activeItems.slice(0, 5);
+            listEl.innerHTML = previewItems.map(i => {
+                const dueText = hasValidDate(i.return_date)
+                    ? new Date(`${toDateOnly(i.return_date)}T00:00:00`).toLocaleDateString('th-TH')
+                    : '-';
+                return `<li class="flex items-center justify-between gap-3 border border-slate-100 dark:border-slate-700 rounded-lg px-3 py-2">
+                    <div class="min-w-0">
+                        <p class="font-medium text-slate-700 dark:text-slate-200 truncate">${i.asset_name || '-'}</p>
+                        <p class="text-xs text-slate-500 truncate">${i.equipment_id || '-'} • ${i.borrower_name || '-'}</p>
+                    </div>
+                    <div class="text-xs text-slate-500 whitespace-nowrap">คืน ${dueText}</div>
+                </li>`;
+            }).join('') + (activeItems.length > 5 ? `<li class="text-xs text-slate-400">และอีก ${activeItems.length - 5} รายการ</li>` : '');
+        }
+
+        async function updateBadgeCount() {
+            try {
+                const sess = await (await fetch(`${api}?action=check_session`)).json();
+                if (!sess?.loggedin) return;
+                let companyParam = sess.company || '';
+                if (sess.role === 'admin') companyParam = 'All';
+                const res = await fetch(`${api}?action=getLoanRequests&company=${encodeURIComponent(companyParam)}&t=${Date.now()}`);
+                const items = await res.json();
+                setLoanBadgesAndSummary(items);
+            } catch(e) {}
+        }
+
+        async function loadData() {
+            const area = document.getElementById('content-area');
+            area.innerHTML = '<div class="col-span-full flex justify-center py-20"><i class="fas fa-circle-notch fa-spin text-blue-500 text-2xl"></i></div>';
+            const sess = await (await fetch(`${api}?action=check_session`)).json();
+
+            // จำกัดสิทธิ์หน้า Loan Management เฉพาะ admin หรือแผนก IT
+            const isItUser = (sess.role === 'admin') || (sess.primary_department === 'IT');
+            if (!isItUser) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'หน้าจัดการการยืม-คืนใช้สำหรับทีม IT/ผู้ดูแลเท่านั้น',
+                    confirmButtonText: 'กลับหน้าแรก'
+                });
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (currentTab === 'history') {
+                currentLoanItems = [];
+                // โหลดข้อมูลประวัติ
+                try {
+                    const res = await fetch(`${api}?action=getLoanManagementHistory`);
+                    const items = await res.json();
+                    allHistoryItems = items;
+                    renderHistoryTable();
+                    return;
+                } catch(e) { console.error(e); }
+            }
+
+            try {
+                // ✅ แก้ไข: ดึงคำขอทั้งหมดของบริษัทปัจจุบัน
+                //    - ถ้าเป็น admin ให้เห็นทุกบริษัท (company=All)
+                let companyParam = sess.company || '';
+                if (sess.role === 'admin') {
+                    companyParam = 'All';
+                }
+                const res = await fetch(`${api}?action=getLoanRequests&company=${encodeURIComponent(companyParam)}&t=${Date.now()}`);
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Server Error: ${res.status} ${res.statusText}\n${text}`);
+                }
+                const items = await res.json();
+
+                if (!Array.isArray(items)) {
+                    area.innerHTML = `<div class="col-span-full text-center py-10 text-red-500">API Error: ${items.message || 'Unknown error'}</div>`;
+                    return;
+                }
+                setLoanBadgesAndSummary(items);
+
+                // ✅ แก้ไข: กรองข้อมูลโดยใช้ loan_status
+                const filtered = items.filter(i => currentTab === 'pending' ? i.loan_status === 'Pending' : i.loan_status === 'Active');
+                currentLoanItems = filtered;
+
+                if (filtered.length === 0) {
+                    area.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 flex flex-col items-center"><i class="fas fa-inbox text-4xl mb-2"></i><p>ไม่มีรายการ${currentTab==='pending'?'รออนุมัติ':'ที่กำลังถูกยืม'}</p></div>`;
+                    return;
+                }
+
+                area.innerHTML = filtered.map(i => {
+                    const img = i.image_path || 'https://via.placeholder.com/300x200?text=No+Image';
+                    const borrowerImgSrc = i.borrower_image 
+                        ? `uploads/employees/${i.borrower_image}` 
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(i.borrower_name || 'U')}&background=random&color=fff&size=32`;
+                    const dueDateText = hasValidDate(i.return_date)
+                        ? new Date(`${toDateOnly(i.return_date)}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
+                        : '-';
+                    const purposeText = i.purpose ? escapeHtml(i.purpose) : '-';
+
+                    // ✅ แก้ไข: ใช้ตัวแปรภาษาอังกฤษให้ตรงกับ API (loan_id, asset_name)
+                    return `
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                        <div class="h-40 bg-slate-100 relative">
+                            <img src="${img}" class="w-full h-full object-cover">
+                            <div class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">${i.equipment_id}</div>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h3 class="font-bold text-slate-800 dark:text-white mb-1 line-clamp-1">${i.asset_name || 'ไม่ระบุชื่อ'}</h3>
+                            <div class="text-sm text-slate-600 dark:text-slate-400 space-y-2 mb-4 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <img src="${borrowerImgSrc}" class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-slate-600 shadow">
+                                    <div>
+                                        <p class="font-medium text-slate-700 dark:text-slate-200">${i.borrower_name}</p>
+                                        <p class="text-xs text-slate-500">${i.department}</p>
+                                    </div>
+                                </div>
+                                <p><i class="fas fa-calendar w-5 text-orange-400"></i> กำหนดคืน: ${dueDateText}</p>
+                                <p class="text-xs line-clamp-2"><i class="fas fa-clipboard-list w-5 text-blue-400"></i> วัตถุประสงค์: ${purposeText}</p>
+                            </div>
+                            ${currentTab === 'pending' ? `
+                                <div class="flex gap-2">
+                                    <button onclick="denyRequest(${i.loan_id})" class="w-1/3 h-11 sm:h-10 rounded-lg font-bold text-white shadow transition active:scale-95 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-sm" title="ปฏิเสธ">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button onclick="openActionModal('${i.loan_id}', '${i.equipment_id}', 'pending')" class="w-2/3 h-11 sm:h-10 rounded-lg font-bold text-white shadow transition active:scale-95 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-sm">
+                                        <i class="fas fa-check"></i> อนุมัติ
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <button onclick="openActionModal('${i.loan_id}', '${i.equipment_id}', 'active')" class="w-full h-11 sm:h-10 rounded-lg font-bold text-white shadow transition active:scale-95 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-sm">
+                                        <i class="fas fa-undo"></i> รับคืน
+                                    </button>
+                                    <button onclick="openActionModal('${i.loan_id}', '${i.equipment_id}', 'view')" class="w-full h-11 sm:h-10 rounded-lg font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 transition active:scale-95 flex items-center justify-center gap-2 hover:bg-slate-300 dark:hover:bg-slate-600 text-sm">
+                                        <i class="fas fa-eye"></i> รายละเอียด
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>`;
+                }).join('');
+
+            } catch(e) { console.error(e); area.innerHTML = '<div class="col-span-full text-center text-red-500">Load Error</div>'; }
+        }
+
+        function renderHistoryTable() {
+            const area = document.getElementById('content-area');
+            const search = document.getElementById('hist-search').value.toLowerCase();
+            const start = document.getElementById('hist-start').value;
+            const end = document.getElementById('hist-end').value;
+            const status = document.getElementById('hist-status').value;
+
+            const filtered = allHistoryItems.filter(i => {
+                const txt = (i.equipment_name + i.equipment_id + i.borrower).toLowerCase();
+                const matchSearch = !search || txt.includes(search);
+                
+                const date = i.lend_date.split(' ')[0];
+                const matchStart = !start || date >= start;
+                const matchEnd = !end || date <= end;
+                const { isReturned, isOverdue } = getHistoryStatusMeta(i);
+                const matchStatus =
+                    status === 'all' ||
+                    (status === 'returned' && isReturned) ||
+                    (status === 'overdue' && isOverdue) ||
+                    (status === 'active' && !isReturned && !isOverdue);
+
+                return matchSearch && matchStart && matchEnd && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                area.innerHTML = `<div class="text-center py-20 text-slate-400">ไม่พบข้อมูลประวัติ</div>`;
+                return;
+            }
+
+            let html = `
+            <div class="overflow-x-auto bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700">
+                <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                    <thead class="bg-slate-50 dark:bg-slate-700/50 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 sticky top-0 z-10 shadow-sm">
+                        <tr>
+                            <th class="px-3 py-3 sm:px-6 sm:py-4">อุปกรณ์</th>
+                            <th class="px-6 py-4 hidden sm:table-cell">ผู้ยืม</th>
+                            <th class="px-6 py-4 hidden md:table-cell">วันที่ยืม</th>
+                            <th class="px-6 py-4 hidden lg:table-cell">กำหนดคืน / คืนจริง</th>
+                            <th class="px-6 py-4 hidden sm:table-cell">สถานะ</th>
+                            <th class="px-6 py-4 hidden xl:table-cell">ผู้อนุมัติ / รับคืน</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        ${filtered.map(i => {
+                            const { isReturned, isOverdue, expectedReturnDate } = getHistoryStatusMeta(i);
+                            const statusBadge = isReturned
+                                ? `<span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded text-xs font-bold">คืนแล้ว</span>`
+                                : isOverdue
+                                    ? `<span class="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 px-2 py-1 rounded text-xs font-bold">เกินกำหนดคืน</span>`
+                                    : `<span class="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded text-xs font-bold">กำลังยืม</span>`;
+                            
+                            let mobileStatusDot = isReturned 
+                                ? '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-emerald-500 ml-1" title="คืนแล้ว"></span>'
+                                : isOverdue
+                                    ? '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-rose-500 ml-1" title="เกินกำหนดคืน"></span>'
+                                    : '<span class="sm:hidden inline-block w-2 h-2 rounded-full bg-amber-500 ml-1" title="กำลังยืม"></span>';
+
+                            return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition cursor-pointer text-xs sm:text-sm" onclick="showHistoryDetails(${i.history_id})">
+                                <td class="px-3 py-3 sm:px-6 sm:py-4">
+                                    <div class="font-bold text-slate-800 dark:text-white line-clamp-1">${i.equipment_name}</div>
+                                    <div class="text-xs text-slate-400 font-mono">${i.equipment_id} ${mobileStatusDot}</div>
+                                    <div class="sm:hidden text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                        <i class="fas fa-user text-[10px]"></i> ${i.borrower}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 hidden sm:table-cell">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${i.borrower_image ? 'uploads/employees/'+i.borrower_image : 'https://ui-avatars.com/api/?name='+encodeURIComponent(i.borrower)+'&background=random&color=fff&size=32'}" class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-600">
+                                        <span>${i.borrower}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell">${new Date(i.lend_date).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})} <span class="text-xs text-slate-400 block">${new Date(i.lend_date).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span></td>
+                                <td class="px-6 py-4 hidden lg:table-cell">
+                                    ${isReturned
+                                        ? new Date(i.return_date).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})
+                                        : expectedReturnDate
+                                            ? `<span class="${isOverdue ? 'text-rose-600 dark:text-rose-300 font-semibold' : ''}">${new Date(`${expectedReturnDate}T00:00:00`).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})}</span>`
+                                            : '-'}
+                                </td>
+                                <td class="px-6 py-4 hidden sm:table-cell">${statusBadge}</td>
+                                <td class="px-6 py-4 text-xs hidden xl:table-cell">
+                                    <div><span class="text-slate-400">อนุมัติ:</span> ${i.approver_name || '-'}</div>
+                                    ${isReturned ? `<div><span class="text-slate-400">รับคืน:</span> ${i.return_receiver_name || '-'}</div>` : ''}
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+            area.innerHTML = html;
+        }
+
+        async function clearAllHistory() {
+            const { isConfirmed } = await Swal.fire({
+                title: 'ล้างประวัติทั้งหมด?',
+                text: "คุณต้องการลบประวัติการยืม-คืนทั้งหมดใช่หรือไม่? (ใช้สำหรับการ Reset ระบบใหม่)",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ลบทั้งหมด',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (isConfirmed) {
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'clear_loan_history');
+                    const res = await fetch(api, { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                        Swal.fire('สำเร็จ', 'ล้างประวัติเรียบร้อยแล้ว', 'success');
+                        allHistoryItems = [];
+                        renderHistoryTable();
+                    } else {
+                        throw new Error(json.message || 'Server Error');
+                    }
+                } catch (e) {
+                    Swal.fire('Error', 'ไม่สามารถล้างประวัติได้ (กรุณาตรวจสอบว่า API รองรับ action: clear_loan_history หรือไม่)', 'error');
+                }
+            }
+        }
+
+        function exportHistory() {
+            const search = document.getElementById('hist-search').value.toLowerCase();
+            const start = document.getElementById('hist-start').value;
+            const end = document.getElementById('hist-end').value;
+            const status = document.getElementById('hist-status').value;
+
+            const filtered = allHistoryItems.filter(i => {
+                const txt = (i.equipment_name + i.equipment_id + i.borrower).toLowerCase();
+                const matchSearch = !search || txt.includes(search);
+                const date = i.lend_date.split(' ')[0];
+                const matchStart = !start || date >= start;
+                const matchEnd = !end || date <= end;
+                const { isReturned, isOverdue } = getHistoryStatusMeta(i);
+                const matchStatus =
+                    status === 'all' ||
+                    (status === 'returned' && isReturned) ||
+                    (status === 'overdue' && isOverdue) ||
+                    (status === 'active' && !isReturned && !isOverdue);
+                return matchSearch && matchStart && matchEnd && matchStatus;
+            });
+
+            if (filtered.length === 0) { Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ Export', 'warning'); return; }
+
+            let csvContent = "\uFEFFEquipment ID,Equipment Name,Borrower,Lend Date,Return Date,Status,Approver,Receiver\n";
+            filtered.forEach(i => {
+                const { isReturned, isOverdue } = getHistoryStatusMeta(i);
+                const rowStatus = isReturned ? 'Returned' : isOverdue ? 'Overdue' : 'Borrowed';
+                const row = [
+                    `"${i.equipment_id}"`,
+                    `"${i.equipment_name}"`,
+                    `"${i.borrower}"`,
+                    `"${i.lend_date}"`,
+                    `"${i.return_date || ''}"`,
+                    `"${rowStatus}"`,
+                    `"${i.approver_name || ''}"`,
+                    `"${i.return_receiver_name || ''}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Loan_History_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function closeHistoryDetailsModal() {
+            document.getElementById('historyDetailModal').classList.add('hidden');
+        }
+
+        async function showHistoryDetails(historyId) {
+            const modal = document.getElementById('historyDetailModal');
+            const body = document.getElementById('historyDetailBody');
+            modal.classList.remove('hidden');
+            body.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin text-2xl"></i></div>';
+
+            try {
+                const res = await fetch(`${api}?action=getLoanHistoryDetails&id=${historyId}`);
+                const result = await res.json();
+
+                if (result.status !== 'success') {
+                    throw new Error(result.message);
+                }
+                const d = result.data;
+                const assetImg = d.asset_image_url || 'https://via.placeholder.com/300x200?text=No+Image';
+                
+                const getSigImg = (path) => {
+                    if (!path || path === 'null') return '<span class="text-slate-400 text-sm">ไม่มีลายเซ็น</span>';
+                    
+                    if (path.startsWith('data:') || path.startsWith('http')) {
+                         return `<img src="${path}" class="h-24 border rounded bg-white p-1 object-contain">`;
+                    }
+                    
+                    // ดึงเฉพาะชื่อไฟล์ออกมา เพื่อสร้าง Path ที่ถูกต้องเสมอ (uploads/signatures/filename)
+                    const filename = path.split(/[/\\]/).pop();
+                    // เพิ่ม timestamp เพื่อป้องกัน cache และ encode ชื่อไฟล์
+                    const fullPath = `uploads/signatures/${encodeURIComponent(filename)}?t=${new Date().getTime()}`;
+                    
+                    return `<img src="${fullPath}" class="h-24 border rounded bg-white p-1 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span style="display:none" class="text-red-400 text-xs">ไม่พบรูปภาพ</span>`;
+                };
+
+                const borrowerSig = getSigImg(d.borrower_signature);
+                const returnerSig = getSigImg(d.return_approver_signature);
+
+                body.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1">
+                            <img src="${assetImg}" class="w-full rounded-lg shadow-md border dark:border-slate-600">
+                        </div>
+                        <div class="md:col-span-2 space-y-3 text-sm">
+                            <h4 class="text-xl font-bold text-slate-800 dark:text-white">${d.equipment_name}</h4>
+                            <p class="font-mono text-slate-500">${d.equipment_id}</p>
+                            <div class="grid grid-cols-2 gap-3 pt-2 border-t dark:border-slate-700">
+                                <div><p class="font-medium text-slate-400">ผู้ยืม</p><p>${d.borrower}</p></div>
+                                <div><p class="font-medium text-slate-400">แผนก</p><p>${d.department}</p></div>
+                                <div class="col-span-2"><p class="font-medium text-slate-400">วัตถุประสงค์</p><p>${d.purpose || '-'}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t dark:border-slate-700">
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg">
+                            <h5 class="font-bold mb-2 flex items-center gap-2"><i class="fas fa-calendar-plus text-blue-500"></i> ข้อมูลการยืม</h5>
+                            <p class="text-xs text-slate-500">วันที่ยืม: <span class="font-medium text-slate-700 dark:text-slate-200">${new Date(d.lend_date).toLocaleString('th-TH')}</span></p>
+                            <p class="text-xs text-slate-500">ผู้อนุมัติ: <span class="font-medium text-slate-700 dark:text-slate-200">${d.approver_name || '-'}</span></p>
+                            <div class="mt-2"><p class="text-xs font-medium text-slate-400 mb-1">ลายเซ็นผู้ยืม:</p>${borrowerSig}</div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg">
+                            <h5 class="font-bold mb-2 flex items-center gap-2"><i class="fas fa-calendar-check text-emerald-500"></i> ข้อมูลการคืน</h5>
+                            ${d.return_date ? `
+                                <p class="text-xs text-slate-500">วันที่คืน: <span class="font-medium text-slate-700 dark:text-slate-200">${new Date(d.return_date).toLocaleString('th-TH')}</span></p>
+                                <p class="text-xs text-slate-500">ผู้รับคืน: <span class="font-medium text-slate-700 dark:text-slate-200">${d.return_receiver_name || '-'}</span></p>
+                                <p class="text-xs text-slate-500">ผลตรวจสภาพ: <span class="font-medium text-slate-700 dark:text-slate-200">${d.return_condition || '-'}</span></p>
+                                <p class="text-xs text-slate-500">หมายเหตุ: <span class="font-medium text-slate-700 dark:text-slate-200">${d.return_notes || '-'}</span></p>
+                                <div class="mt-2"><p class="text-xs font-medium text-slate-400 mb-1">ลายเซ็นผู้รับคืน:</p>${returnerSig}</div>
+                            ` : '<p class="text-sm text-amber-500">ยังไม่คืนอุปกรณ์</p>'}
+                        </div>
+                    </div>`;
+            } catch (e) { body.innerHTML = `<div class="text-center py-10 text-red-500">${e.message}</div>`; }
+        }
+
+        function openActionModal(loanId, equipId, type) {
+            const itemData = currentLoanItems.find(x => String(x.loan_id) === String(loanId)) || null;
+            currentItem = { loanId, equipId, type, itemData };
+            document.getElementById('sigModal').classList.remove('hidden');
+            setTimeout(() => { resizeCanvas(); signaturePad.clear(); }, 100);
+
+            const title = document.getElementById('sigTitle');
+            const desc = document.getElementById('sigDesc');
+            const detailPreview = document.getElementById('loanDetailPreview');
+            const returnCheckForm = document.getElementById('return-check-form');
+            const returnCondition = document.getElementById('return-condition');
+            const returnNotes = document.getElementById('return-notes');
+            const signatureArea = document.getElementById('signature-area');
+            const signatureActions = document.getElementById('signature-actions');
+            const btnConfirm = document.getElementById('btn-confirm');
+            const btnCancel = document.getElementById('btn-cancel-modal');
+            const borrower = itemData?.borrower_name || '-';
+            const department = itemData?.department || '-';
+            const dueDate = hasValidDate(itemData?.return_date)
+                ? new Date(`${toDateOnly(itemData.return_date)}T00:00:00`).toLocaleDateString('th-TH')
+                : '-';
+            const purpose = itemData?.purpose || '-';
+
+            document.getElementById('loan-detail-borrower').textContent = borrower;
+            document.getElementById('loan-detail-dept').textContent = department;
+            document.getElementById('loan-detail-due').textContent = dueDate;
+            document.getElementById('loan-detail-purpose').textContent = purpose;
+            detailPreview.classList.remove('hidden');
+            returnCondition.value = '';
+            returnNotes.value = '';
+            
+            if(type === 'pending') {
+                title.textContent = 'ยืนยันการอนุมัติ (Approve)';
+                desc.textContent = `อนุมัติให้ยืมอุปกรณ์รหัส ${equipId}`;
+                returnCheckForm.classList.add('hidden');
+                signatureArea.classList.remove('hidden');
+                signatureActions.classList.remove('hidden');
+                btnConfirm.classList.remove('hidden');
+                btnCancel.textContent = 'ยกเลิก';
+            } else {
+                title.textContent = type === 'active' ? 'ยืนยันการรับคืน (Return)' : 'รายละเอียดการยืม';
+                desc.textContent = type === 'active' ? `รับคืนอุปกรณ์รหัส ${equipId} พร้อมตรวจสภาพก่อนคืน` : `ข้อมูลการยืมอุปกรณ์รหัส ${equipId}`;
+                if (type === 'active') {
+                    returnCheckForm.classList.remove('hidden');
+                    signatureArea.classList.remove('hidden');
+                    signatureActions.classList.remove('hidden');
+                    btnConfirm.classList.remove('hidden');
+                    btnCancel.textContent = 'ยกเลิก';
+                } else {
+                    returnCheckForm.classList.add('hidden');
+                    signatureArea.classList.add('hidden');
+                    signatureActions.classList.add('hidden');
+                    btnConfirm.classList.add('hidden');
+                    btnCancel.textContent = 'ปิด';
+                }
+            }
+        }
+
+        function closeModal() { document.getElementById('sigModal').classList.add('hidden'); }
+        function clearSig() { signaturePad.clear(); }
+
+        async function denyRequest(loanId) {
+            const { isConfirmed } = await Swal.fire({
+                title: 'ปฏิเสธคำขอยืม?',
+                text: "คุณต้องการปฏิเสธคำขอยืมนี้ใช่หรือไม่? อุปกรณ์จะกลับสู่สถานะ 'ว่าง'",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonText: 'ใช่, ปฏิเสธเลย'
+            });
+
+            if (isConfirmed) {
+                const fd = new FormData();
+                fd.append('action', 'denyRequest'); fd.append('id', loanId);
+
+                try {
+                    const res = await fetch(api, { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                        Swal.fire('สำเร็จ', 'ปฏิเสธคำขอเรียบร้อย', 'success');
+                        loadData();
+                    } else {
+                        throw new Error(json.message || 'API Error');
+                    }
+                } catch (e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
+            }
+        }
+
+        async function submitAction() {
+            if(signaturePad.isEmpty()) return Swal.fire('แจ้งเตือน', 'กรุณาเซ็นชื่อ', 'warning');
+            if (currentItem?.type === 'active') {
+                const returnCondition = document.getElementById('return-condition').value;
+                const returnNotes = document.getElementById('return-notes').value.trim();
+                if (!returnCondition) {
+                    return Swal.fire('แจ้งเตือน', 'กรุณาเลือกผลตรวจสภาพก่อนคืน', 'warning');
+                }
+                if (returnCondition !== 'ปกติ' && !returnNotes) {
+                    return Swal.fire('แจ้งเตือน', 'กรุณาระบุรายละเอียดสภาพอุปกรณ์', 'warning');
+                }
+            }
+            
+            const btn = document.getElementById('btn-confirm');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> บันทึก...';
+
+            try {
+                const sigData = signaturePad.toDataURL();
+                
+                // 1. Upload Signature (Use FormData for better PHP compatibility)
+                const sigFd = new FormData();
+                sigFd.append('action', 'upload_signature');
+                sigFd.append('signature_data', sigData);
+                sigFd.append('prefix', currentItem.type);
+
+                const upRes = await fetch(api, { method: 'POST', body: sigFd });
+                const upJson = await upR
