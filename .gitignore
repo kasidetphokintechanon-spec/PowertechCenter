@@ -33,3 +33,6 @@ tmp_query.php
 # Claude Code local
 .claude/settings.local.json
 .claude/worktrees/
+
+# ค่าลับประจำเครื่อง
+config.local.php

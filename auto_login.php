@@ -49,7 +49,11 @@ if (abs($now - $tsInt) > TOKEN_TTL_SECONDS) {
 }
 
 // ── 4. ตรวจสอบ HMAC Signature ─────────────────────────────────────────────────
-$payload      = $empCode . '|' . $company . '|' . $ts;
+// ไม่มี secret (ไม่มี config.local.php) = ห้ามผ่าน ไม่งั้นใครก็เซ็นด้วย key ว่างได้
+if (AUTO_LOGIN_SECRET === '') {
+    failRedirect('Auto-login disabled');
+}
+$payload     = $empCode . '|' . $company . '|' . $ts;
 $expectedSig  = hash_hmac('sha256', $payload, AUTO_LOGIN_SECRET);
 if (!hash_equals($expectedSig, strtolower($sig))) {
     failRedirect('Invalid signature');
