@@ -1,0 +1,7 @@
+<?php
+$updateSql = "UPDATE it_assets SET equipment_id=?, name=?, brand=?, model=?, serial_number=?, asset_id=?, location=?, spec_details=?, ip_address=?, mac_address=?, hostname=?, supplier=?, purchase_date=?, warranty_expires_on=?, purchase_price=?, po_number=?, invoice_number=?, accessories=?, status=?, is_loanable=?, company=?, owning_department=?, asset_category=?, image_url=?, images=?, borrower=?, borrower_id=?, department=?, custodian_employee_id=?, custodian_type=?, custodian_dept_id=?, parent_id=? WHERE id=?";
+$insertSql = "INSERT INTO it_assets (equipment_id, name, brand, model, serial_number, asset_id, location, spec_details, ip_address, mac_address, hostname, supplier, purchase_date, warranty_expires_on, purchase_price, po_number, invoice_number, accessories, status, is_loanable, company, owning_department, asset_category, image_url, images, borrower, borrower_id, department, custodian_employee_id, custodian_type, custodian_dept_id, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$ut = "ssssssssssssssdssssisssiisssssiii";
+$it = "ssssssssssssssdssssisssiisssssii";
+echo 'UPDATE '.substr_count($updateSql,'?').' vs '.strlen($ut).' '.(substr_count($updateSql,'?')===strlen($ut)?'OK':'FAIL')."\n";
+echo 'INSERT '.substr_count($insertSql,'?').' vs '.strlen($it).' '.(substr_count($insertSql,'?')===strlen($it)?'OK':'FAIL')."\n";

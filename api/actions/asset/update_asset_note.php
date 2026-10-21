@@ -1,12 +1,15 @@
 <?php
 // api/actions/update_asset_note.php
 
-$history_id = $_POST['history_id'] ?? '';
+$history_id = intval($_POST['history_id'] ?? 0);
 $note = $_POST['note'] ?? '';
 
-// ดึงข้อมูลเดิมเพื่อคงรูปภาพไว้
-$res = $conn->query("SELECT details FROM asset_history WHERE history_id = '$history_id'");
-$row = $res->fetch_assoc();
+if ($history_id <= 0) { echo json_encode(['status' => 'error', 'message' => 'Invalid ID']); exit; }
+
+$sel = $conn->prepare("SELECT details FROM asset_history WHERE history_id = ?");
+$sel->bind_param("i", $history_id);
+$sel->execute();
+$row = $sel->get_result()->fetch_assoc();
 $details = json_decode($row['details'], true);
 $details['text'] = $note;
 

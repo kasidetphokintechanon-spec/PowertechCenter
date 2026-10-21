@@ -1,6 +1,6 @@
 <?php
 // api/actions/update_loan_status.php
-$loan_id = $_POST['id'] ?? 0;
+$loan_id = intval($_POST['id'] ?? 0);
 $new_status = $_POST['status'] ?? ''; // 'Active' or 'Completed'
 $signature_path = $_POST['signature'] ?? '';
 $return_condition = trim((string)($_POST['return_condition'] ?? ''));
@@ -10,16 +10,22 @@ $user_name = $_SESSION['display_name'] ?? 'Admin';
 if (!$loan_id || !$new_status) throw new Exception("Loan ID and Status are required.");
 
 if ($new_status === 'Active') {
-    $stmt = $conn->prepare("UPDATE it_assets SET status = 'ถูกยืม' WHERE id = ? AND status = 'รออนุมัติ'");
+    // Ensure checkout_time column exists (one-time auto-migration)
+    $conn->query("ALTER TABLE it_assets ADD COLUMN IF NOT EXISTS checkout_time DATETIME NULL");
+
+    $stmt = $conn->prepare("UPDATE it_assets SET status = 'ถูกยืม', checkout_time = NOW() WHERE id = ? AND status = 'รออนุมัติ'");
     if (!$stmt) throw new Exception("Prepare failed (Approve Loan): " . $conn->error);
     $stmt->bind_param("i", $loan_id);
     if ($stmt->execute()) {
-        $asset_res = $conn->query("SELECT * FROM it_assets WHERE id = $loan_id");
+        $asset_sel = $conn->prepare("SELECT * FROM it_assets WHERE id = ?");
+        $asset_sel->bind_param("i", $loan_id);
+        $asset_sel->execute();
+        $asset_res = $asset_sel->get_result();
         if ($asset = $asset_res->fetch_assoc()) {
             $hist_stmt = $conn->prepare("INSERT INTO it_loan_history (equipment_id, equipment_name, borrower, department, borrower_id, purpose, expected_return_date, approver_name, lend_date, borrower_signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)");
             if ($hist_stmt) {
                 $hist_stmt->bind_param("sssssssss", $asset['equipment_id'], $asset['name'], $asset['borrower'], $asset['department'], $asset['borrower_id'], $asset['purpose'], $asset['return_date'], $user_name, $signature_path);
-                $hist_stmt->execute();
+                if (!$hist_stmt->execute()) throw new Exception("Failed to record loan history: " . $hist_stmt->error);
             }
             logAssetHistory($conn, $loan_id, 'LOAN_APPROVED', "Loan approved for " . ($asset['borrower'] ?? 'user') . " by " . $user_name);
             
@@ -32,8 +38,10 @@ if ($new_status === 'Active') {
     if ($return_condition === '') {
         throw new Exception("กรุณาระบุผลตรวจสภาพก่อนคืนอุปกรณ์");
     }
-    $asset_res = $conn->query("SELECT equipment_id, name, borrower, company FROM it_assets WHERE id = $loan_id");
-    $asset_data = $asset_res ? $asset_res->fetch_assoc() : null;
+    $asset_sel2 = $conn->prepare("SELECT equipment_id, name, borrower, company FROM it_assets WHERE id = ?");
+    $asset_sel2->bind_param("i", $loan_id);
+    $asset_sel2->execute();
+    $asset_data = $asset_sel2->get_result()->fetch_assoc();
     $equipment_id = $asset_data['equipment_id'] ?? '';
     
     $stmt = $conn->prepare("UPDATE it_assets SET status = 'ใช้งานปกติ', borrower = NULL, borrower_id = NULL, department = NULL, return_date = NULL, purpose = NULL WHERE id = ? AND status = 'ถูกยืม'");
@@ -42,7 +50,10 @@ if ($new_status === 'Active') {
     if ($stmt->execute()) {
         if ($equipment_id) {
             $hist_stmt = $conn->prepare("UPDATE it_loan_history SET return_date = NOW(), return_receiver_name = ?, return_approver_signature = ?, return_condition = ?, return_notes = ? WHERE equipment_id = ? AND return_date IS NULL ORDER BY history_id DESC LIMIT 1");
-            if ($hist_stmt) { $hist_stmt->bind_param("sssss", $user_name, $signature_path, $return_condition, $return_notes, $equipment_id); $hist_stmt->execute(); }
+            if ($hist_stmt) {
+                $hist_stmt->bind_param("sssss", $user_name, $signature_path, $return_condition, $return_notes, $equipment_id);
+                if (!$hist_stmt->execute()) throw new Exception("Failed to update loan history: " . $hist_stmt->error);
+            }
         }
         logAssetHistory($conn, $loan_id, 'LOAN_RETURNED', "Asset returned and received by " . $user_name . " | Condition: " . $return_condition);
         
