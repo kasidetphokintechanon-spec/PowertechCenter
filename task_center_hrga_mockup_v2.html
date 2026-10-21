@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Center HR&GA — Mockup v2 (ประชุม + Load + Routine)</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Inter', 'Kanit', sans-serif; margin: 0; background: #0f172a; color: #0f172a; min-height: 100vh; }
+        .top {
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: #fff;
+            padding: 12px 16px;
+        }
+        .top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .top h1 { margin: 0; font-size: 15px; font-weight: 800; }
+        .top p { margin: 4px 0 0; font-size: 12px; opacity: .9; }
+        .screen-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+        .sn {
+            border: 1px solid rgba(255,255,255,.3);
+            background: rgba(255,255,255,.1);
+            color: #fff;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .sn.active { background: #fff; color: #1d4ed8; border-color: #fff; }
+        .shell { background: #f1f5f9; min-height: calc(100vh - 90px); padding: 16px; }
+        .wrap { max-width: 1180px; margin: 0 auto; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .meet-header {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .meet-title { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+        .meet-meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .meet-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef3c7;
+            color: #b45309;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .kpi-meet {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        @media (max-width: 900px) { .kpi-meet { grid-template-columns: repeat(2, 1fr); } }
+        .km {
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .km .v { font-size: 28px; font-weight: 800; line-height: 1; }
+        .km .l { font-size: 11px; color: #64748b; margin-top: 6px; font-weight: 600; }
+        .km.danger { border-color: #fecaca; background: #fef2f2; }
+        .km.danger .v { color: #dc2626; }
+        .layout-2 { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+        @media (max-width: 960px) { .layout-2 { grid-template-columns: 1fr; } }
+        .panel {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .ph {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .ph h2 { margin: 0; font-size: 14px; font-weight: 700; }
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 16px 12px; }
+        .tab {
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .tab.on { background: #0f172a; color: #fff; border-color: #0f172a; }
+        .person-block { border-bottom: 1px solid #f1f5f9; }
+        .person-block:last-child { border-bottom: none; }
+        .person-head {
+            padding: 10px 16px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .person-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .load-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .load-ok { background: #dcfce7; color: #15803d; }
+        .load-warn { background: #fef3c7; color: #b45309; }
+        .load-high { background: #fee2e2; color: #dc2626; }
+        .task-line {
+            padding: 10px 16px 10px 24px;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            font-size: 13px;
+            border-top: 1px solid #f8fafc;
+        }
+        .task-line:hover { background: #fafafa; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .b-pta { background: #dcfce7; color: #15803d; }
+        .b-pt4 { background: #ffedd5; color: #c2410c; }
+        .b-pte { background: #dbeafe; color: #1d4ed8; }
+        .b-routine { background: #f3e8ff; color: #7c3aed; }
+        .b-adhoc { background: #f1f5f9; color: #475569; }
+        .b-doing { background: #fef3c7; color: #b45309; }
+        .b-todo { background: #f1f5f9; color: #475569; }
+        .b-over { background: #fee2e2; color: #dc2626; }
+        .side-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .side-card h3 { margin: 0 0 10px; font-size: 13px; font-weight: 700; }
+        .agenda li {
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 8px;
+            padding-left: 18px;
+            position: relative;
+            list-style: none;
+        }
+        .agenda li::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 6px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #2563eb;
+        }
+        .load-row { margin-bottom: 12px; }
+        .load-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .load-bar { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; display: flex; }
+        .load-routine { background: #a78bfa; }
+        .load-adhoc { background: #f59e0b; }
+        .legend { display: flex; gap: 12px; font-size: 11px; color: #64748b; margin-bottom: 14px; }
+        .legend span { display: flex; align-items: center; gap: 4px; }
+        .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; background: #f8fafc; }
+        .routine-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .routine-item input { width: 18px; height: 18px; }
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+        }
+        .note { font-size: 11px; color: #94a3b8; margin-top: 8px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="top">
+    <div class="top-row">
+        <div>
+            <h1>Task Center — HR and GA · Mockup v2</h1>
+            <p>ประชุมปรับงาน · ภาระงาน Load · Routine ลูกน้อง · ข้าม PTA · PT4 · PTE</p>
+        </div>
+        <span style="font-size:11px;opacity:.85">ยังไม่เชื่อม API</span>
+    </div>
+    <div class="screen-nav">
+        <button type="button" class="sn active" data-screen="meeting"><i class="fas fa-users"></i> โหมดประชุม</button>
+        <button type="button" class="sn" data-screen="load"><i class="fas fa-chart-bar"></i> ภาระงานทีม</button>
+        <button type="button" class="sn" data-screen="dash"><i class="fas fa-table"></i> ตารางภาพรวม</button>
+        <button type="button" class="sn" data-screen="routine"><i class="fas fa-rotate"></i> Routine ลูกน้อง</button>
+    </div>
+</div>
+
+<div class="shell">
+<div class="wrap">
+
+    <!-- MEETING MODE -->
+    <div id="screen-meeting" class="screen active">
+        <div class="meet-header">
+            <div>
+                <div class="meet-title"><i class="fas fa-display" style="color:#2563eb"></i> ประชุมทีม HR and GA</div>
+                <div class="meet-meta">หัวหน้า: Ms. Ratiros Kaisorn (PT4) · อัปเดตล่าสุดวันนี้ 10:45 · ข้อมูลจาก Task Center</div>
+            </div>
+            <div class="meet-badge"><i class="fas fa-circle-exclamation"></i> คุย 3 เรื่อง: เลยกำหนด · มอบงาน PTA · Routine เดือนมิ.ย.</div>
+        </div>
+
+        <div class="kpi-meet">
+            <div class="km"><div class="v">6</div><div class="l">คนในทีม</div></div>
+            <div class="km"><div class="v">14</div><div class="l">งานค้าง</div></div>
+            <div class="km danger"><div class="v">3</div><div class="l">เลยกำหนด</div></div>
+            <div class="km"><div class="v">5</div><div class="l">Routine รอบนี้</div></div>
+            <div class="km"><div class="v">9</div><div class="l">งานพิเศษ</div></div>
+        </div>
+
+        <div class="tabs" id="meetCoTabs">
+            <button type="button" class="tab on" data-f="all">ทุกบริษัท</button>
+            <button type="button" class="tab" data-f="pta">PTA</button>
+            <button type="button" class="tab" data-f="pt4">PT4</button>
+            <button type="button" class="tab" data-f="pte">PTE</button>
+        </div>
+
+        <div class="layout-2">
+            <div class="panel">
+                <div class="ph">
+                    <h2><i class="fas fa-list-check"></i> งานแยกตามคน — ใครเอาอะไรไปทำ</h2>
+                    <span style="font-size:12px;color:#64748b">เรียงตาม load สูง → ต่ำ</span>
+                </div>
+                <div id="meetByPerson"></div>
+            </div>
+            <div>
+                <div class="side-card">
+                    <h3><i class="fas fa-clipboard-list"></i> วาระประชุม (ตัวอย่าง)</h3>
+                    <ul class="agenda">
+                        <li>เคลียร์งานเลยกำหนด 3 รายการ (Thasipha, Warinthon, …)</li>
+                        <li>มอบ onboarding PTA → ใครรับได้? (ดู load)</li>
+                        <li>เช็ค Routine มิ.ย. — ใครยังไม่อัปเดต</li>
+                    </ul>
+                </div>
+                <div class="side-card">
+                    <h3><i class="fas fa-user-plus"></i> มอบงานใหม่ (หลังประชุม)</h3>
+                    <p style="font-size:12px;color:#64748b;margin:0 0 10px">เลือกคนที่ load ต่ำกว่า — Nutnicha แนะนำสำหรับงาน PTE</p>
+                    <button type="button" class="btn-primary">+ บันทึกงานที่มอบในที่ประชุม</button>
+                    <p class="note">บันทึกแล้วทุกคนเห็นในตารางทันที — ไม่ต้องจดกระดาษ</p>
+                </div>
+                <div class="side-card" style="background:#eff6ff;border-color:#bfdbfe">
+                    <h3 style="color:#1d4ed8">สรุปสำหรับหัวหน้า</h3>
+                    <p style="font-size:12px;color:#1e40af;margin:0;line-height:1.5">
+                        เปิดจอนี้ในประชุม → ชี้แถว → ตกลงว่าใครรับ → กดบันทึก → ลูกน้องอัปเดตก่อนประชุมครั้งหน้า
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOAD VIEW -->
+    <div id="screen-load" class="screen">
+        <div class="meet-header">
+            <div>
+                <div class="meet-title">ภาระงานทีม (Load)</div>
+                <div class="meet-meta">ม่วง = Routine · ส้ม = งานพิเศษ · ใช้ตัดสินใจแจกงาน</div>
+            </div>
+        </div>
+        <div class="legend">
+            <span><i class="load-routine"></i> Routine</span>
+            <span><i class="load-adhoc"></i> งานพิเศษ</span>
+        </div>
+        <div class="panel" style="padding:16px" id="loadBars"></div>
+        <div class="panel" style="margin-top:14px">
+            <div class="ph"><h2>แนะนำการมอบงาน</h2></div>
+            <table>
+                <thead><tr><th>สถานการณ์</th><th>แนะนำ</th></tr></thead>
+                <tbody>
+                    <tr><td>งาน PTA ใหม่</td><td><strong>Chanita</strong> — load ต่ำ + คุ้น PTA</td></tr>
+                    <tr><td>งาน PTE เร่ง</td><td><strong>Nutnicha</strong> — บ้าน PTE แต่ดู load ก่อน (ตอนนี้สูง)</td></tr>
+                    <tr><td>งาน PT4 ประจำ</td><td><strong>Thannaree / Pronpapat</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DASH TABLE -->
+    <div id="screen-dash" class="screen">
+        <div class="panel">
+            <div class="ph"><h2>ตารางภาพรวมทุกงาน</h2></div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>งาน</th><th>ประเภท</th><th>ผู้ทำ</th><th>บ้าน</th><th>บริษัทงาน</th><th>สถานะ</th><th>Due</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROUTINE STAFF -->
+    <div id="screen-routine" class="screen">
+        <div class="meet-header">
+            <div>
+                <div class="meet-title">ลูกน้อง — Routine + อัปเดตรอบมิ.ย.</div>
+                <div class="meet-meta">Mrs. Nutnicha Aree · บ้าน PTE · แชร์แผนก HR and GA</div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="ph"><h2>งานประจำของฉัน (Routine)</h2><span class="badge b-routine">รายเดือน</span></div>
+            <div class="routine-item"><input type="checkbox" checked> <span>รายงานสวัสดิ PTE</span> <span class="badge b-pte">PTE</span> <span class="badge b-doing" style="margin-left:auto">กำลังทำ</span></div>
+            <div class="routine-item"><input type="checkbox"> <span>ตรวจสัญญาจ้างรายเดือน</span> <span class="badge b-pt4">PT4</span> <span class="badge b-todo" style="margin-left:auto">รอทำ</span></div>
+            <div class="routine-item"><input type="checkbox"> <span>ประสาน onboarding PTA</span> <span class="badge b-pta">PTA</span> <span class="badge b-todo" style="margin-left:auto">รอทำ</span></div>
+            <div style="padding:12px 14px"><button type="button" class="btn-primary" style="width:auto">+ เพิ่ม Routine</button></div>
+        </div>
+        <div class="panel" style="margin-top:14px">
+            <div class="ph"><h2>งานพิเศษ (Ad-hoc)</h2></div>
+            <table>
+                <tbody>
+                    <tr><td>อบรมนโยบาย HR กลุ่ม</td><td><span class="badge b-pta">PTA</span></td><td><span class="badge b-doing">กำลังทำ</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="note" style="padding:0 4px">หัวหน้าเห็น Routine + พิเศษที่แชร์แผนก — ไม่ต้องถาม “ทำอะไรอยู่”</p>
+    </div>
+
+</div>
+</div>
+
+<script>
+(function () {
+    const people = [
+        {
+            name: 'Mrs. Nutnicha Aree', home: 'PTE', load: 92, loadCls: 'load-high',
+            tasks: [
+                { t: 'เอกสารสวัสดิ Q2', kind: 'routine', co: 'pte', st: 'doing', due: '15 มิ.ย.' },
+                { t: 'Onboarding PTA (มอบในประชุม)', kind: 'adhoc', co: 'pta', st: 'todo', due: '5 มิ.ย.' },
+                { t: 'รายงาน headcount', kind: 'routine', co: 'pte', st: 'doing', due: '31 พ.ค.' }
+            ]
+        },
+        {
+            name: 'Ms. Chanita Waiyamas', home: 'PTA', load: 68, loadCls: 'load-warn',
+            tasks: [
+                { t: 'Onboarding พนักงานใหม่ 5 คน', kind: 'adhoc', co: 'pta', st: 'doing', due: '30 พ.ค.' },
+                { t: 'จัดเก็บสัญญาจ้าง', kind: 'routine', co: 'pta', st: 'done', due: '20 พ.ค.' }
+            ]
+        },
+        {
+            name: 'Ms. Thasipha Amornnaranon', home: 'PT4', load: 75, loadCls: 'load-warn',
+            tasks: [
+                { t: 'ประกันสังคม PT4', kind: 'adhoc', co: 'pt4', st: 'todo', due: '28 พ.ค.', over: true },
+                { t: 'อบรมความปลอดภัย', kind: 'routine', co: 'pt4', st: 'todo', due: '25 พ.ค.', over: true }
+            ]
+        },
+        {
+            name: 'Ms. Thannaree S.', home: 'PT4', load: 45, loadCls: 'load-ok',
+            tasks: [
+                { t: 'รายงาน headcount รายเดือน', kind: 'routine', co: 'pt4', st: 'todo', due: '31 พ.ค.' }
+            ]
+        },
+        {
+            name: 'Ms. Pronpapat S.', home: 'PT4', load: 40, loadCls: 'load-ok',
+            tasks: [
+                { t: 'เบิก uniform', kind: 'routine', co: 'pt4', st: 'doing', due: '10 มิ.ย.' }
+            ]
+        },
+        {
+            name: 'Ms. Warinthon P.', home: 'PT4', load: 55, loadCls: 'load-warn',
+            tasks: [
+                { t: 'ตรวจนโยบาย HR', kind: 'adhoc', co: 'pta', st: 'todo', due: '25 พ.ค.', over: true }
+            ]
+        }
+    ];
+
+    const coBadge = { pta: 'b-pta', pt4: 'b-pt4', pte: 'b-pte' };
+    const coLabel = { pta: 'PTA', pt4: 'PT4', pte: 'PTE' };
+    const stBadge = { doing: 'b-doing', todo: 'b-todo', done: 'b-todo' };
+
+    function filterCo(tasks, f) {
+        if (f === 'all') return tasks;
+        return tasks.filter(x => x.co === f);
+    }
+
+    function renderMeeting(f) {
+        const sorted = [...people].sort((a, b) => b.load - a.load);
+        let html = '';
+        sorted.forEach(p => {
+            const tasks = filterCo(p.tasks, f);
+            if (!tasks.length && f !== 'all') return;
+            html += `<div class="person-block">
+                <div class="person-head">
+                    <div class="person-name">
+                        ${p.name}
+                        <span class="badge ${coBadge[p.home.toLowerCase()] || 'b-todo'}">${p.home}</span>
+                    </div>
+                    <span class="load-pill ${p.loadCls}">Load ${p.load}%</span>
+                </div>`;
+            if (!tasks.length) {
+                html += `<div class="task-line" style="color:#94a3b8">ไม่มีงานในบริษัทที่เลือก</div>`;
+            } else {
+                tasks.forEach(t => {
+                    html += `<div class="task-line">
+                        <div>
+                            <strong>${t.t}</strong>
+                            ${t.over ? ' <span class="badge b-over">เลยกำหนด</span>' : ''}
+                            <div style="margin-top:4px">
+                                <span class="badge ${t.kind === 'routine' ? 'b-routine' : 'b-adhoc'}">${t.kind === 'routine' ? 'Routine' : 'พิเศษ'}</span>
+                            </div>
+                        </div>
+                        <span class="badge ${coBadge[t.co]}">${coLabel[t.co]}</span>
+                        <span class="badge ${stBadge[t.st]}">${t.st === 'doing' ? 'กำลังทำ' : t.st === 'done' ? 'เสร็จ' : 'รอทำ'}</span>
+                    </div>`;
+                });
+            }
+            html += '</div>';
+        });
+        document.getElementById('meetByPerson').innerHTML = html;
+    }
+
+    function renderLoad() {
+        document.getElementById('loadBars').innerHTML = [...people]
+            .sort((a, b) => b.load - a.load)
+            .map(p => {
+                const r = Math.round(p.load * 0.55);
+                const a = p.load - r;
+                return `<div class="load-row">
+                    <div class="load-label"><span>${p.name} (${p.home})</span><span class="load-pill ${p.loadCls}">${p.load}%</span></div>
+                    <div class="load-bar">
+                        <div class="load-routine" style="width:${r}%"></div>
+                        <div class="load-adhoc" style="width:${a}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+    }
+
+    function renderDash() {
+        let rows = '';
+        people.forEach(p => {
+            p.tasks.forEach(t => {
+                rows += `<tr>
+                    <td>${t.t}${t.over ? ' <span class="badge b-over">!</span>' : ''}</td>
+                    <td><span class="badge ${t.kind === 'routine' ? 'b-routine' : 'b-adhoc'}">${t.kind === 'routine' ? 'Routine' : 'พิเศษ'}</span></td>
+                    <td>${p.name}</td>
+                    <td><span class="badge ${coBadge[p.home.toLowerCase()]}">${p.home}</span></td>
+                    <td><span class="badge ${coBadge[t.co]}">${coLabel[t.co]}</span></td>
+                    <td><span class="badge ${stBadge[t.st]}">${t.st}</span></td>
+                    <td>${t.due}</td>
+                </tr>`;
+            });
+        });
+        document.getElementById('dashTable').innerHTML = rows;
+    }
+
+    document.querySelectorAll('.sn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const id = btn.getAttribute('data-screen');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + id).classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('#meetCoTabs .tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('#meetCoTabs .tab').forEach(t => t.classList.remove('on'));
+            tab.classList.add('on');
+            renderMeeting(tab.getAttribute('data-f'));
+        });
+    });
+
+    renderMeeting('all');
+    renderLoad();
+    renderDash();
+})();
+</script>
+</body>
+</html>

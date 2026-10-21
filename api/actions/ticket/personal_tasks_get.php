@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/personal_tasks_schema.php';
+require_once __DIR__ . '/task_center_hrga_helper.php';
+ensurePersonalTasksSchema($conn);
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([]);
     exit;
@@ -40,17 +44,29 @@ if ($scope === 'mine') {
     }
     $stmt->bind_param("s", $userId);
 } elseif ($scope === 'department') {
-    if (!$company || !$department) {
-        echo json_encode([]);
-        exit;
+    $hrgaDept = taskCenterIsHrGaDepartment($department);
+    if ($hrgaDept) {
+        $dept = TASK_CENTER_HRGA_DEPT;
+        $sql = "SELECT pt.id, pt.user_id, pt.task_type, pt.title, pt.description, pt.status, pt.status_detail, pt.priority, pt.due_date, pt.tags, pt.share_scope, pt.company, pt.responsible_companies, pt.department, pt.assignee_id, pt.assignee_name, pt.building, pt.workflow_stage, pt.legacy_job_ticket_id, pt.progress_pct, pt.remind_month_start, pt.remind_month_end, pt.is_recurring, pt.recurring_interval_months, pt.remind_days_before, pt.recurring_parent_id, pt.created_at, pt.updated_at, e.name AS owner_name, e.name_th AS owner_name_th FROM personal_tasks pt LEFT JOIN employees e ON pt.user_id = e.id WHERE pt.department = ? AND pt.share_scope IN ('department','company') ORDER BY COALESCE(pt.due_date, pt.created_at) ASC, pt.id DESC";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            echo json_encode([]);
+            exit;
+        }
+        $stmt->bind_param('s', $dept);
+    } else {
+        if (!$company || !$department) {
+            echo json_encode([]);
+            exit;
+        }
+        $sql = "SELECT pt.id, pt.user_id, pt.task_type, pt.title, pt.description, pt.status, pt.status_detail, pt.priority, pt.due_date, pt.tags, pt.share_scope, pt.company, pt.responsible_companies, pt.department, pt.assignee_id, pt.assignee_name, pt.building, pt.workflow_stage, pt.legacy_job_ticket_id, pt.progress_pct, pt.remind_month_start, pt.remind_month_end, pt.is_recurring, pt.recurring_interval_months, pt.remind_days_before, pt.recurring_parent_id, pt.created_at, pt.updated_at, e.name AS owner_name, e.name_th AS owner_name_th FROM personal_tasks pt LEFT JOIN employees e ON pt.user_id = e.id WHERE pt.company = ? AND pt.department = ? AND pt.share_scope IN ('department','company') ORDER BY COALESCE(pt.due_date, pt.created_at) ASC, pt.id DESC";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            echo json_encode([]);
+            exit;
+        }
+        $stmt->bind_param('ss', $company, $department);
     }
-    $sql = "SELECT pt.id, pt.user_id, pt.task_type, pt.title, pt.description, pt.status, pt.status_detail, pt.priority, pt.due_date, pt.tags, pt.share_scope, pt.company, pt.responsible_companies, pt.department, pt.assignee_id, pt.assignee_name, pt.building, pt.workflow_stage, pt.legacy_job_ticket_id, pt.progress_pct, pt.remind_month_start, pt.remind_month_end, pt.is_recurring, pt.recurring_interval_months, pt.remind_days_before, pt.recurring_parent_id, pt.created_at, pt.updated_at, e.name AS owner_name, e.name_th AS owner_name_th FROM personal_tasks pt LEFT JOIN employees e ON pt.user_id = e.id WHERE pt.company = ? AND pt.department = ? AND pt.share_scope IN ('department','company') ORDER BY COALESCE(pt.due_date, pt.created_at) ASC, pt.id DESC";
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        echo json_encode([]);
-        exit;
-    }
-    $stmt->bind_param("ss", $company, $department);
 } else {
     if (!in_array($role, ['admin', 'staff'], true)) {
         echo json_encode([]);

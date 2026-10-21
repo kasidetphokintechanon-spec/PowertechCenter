@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="ptc-no-sw" content="1">
+    <title>งานช่าง IT (v2) — Powertech</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20260527v2">
+    <link rel="stylesheet" href="css/log-v2.css?v=20260528a">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/enterprise-swal.js?v=20260527fix"></script>
+    <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<link rel="stylesheet" href="css/log-v2-unified-theme.css?v=20260529">
+</head>
+<body  class="logv2-page ptc-unified-v1">
+    <header class="ptc-nav">
+        <a href="index.html" class="nav-back" title="หน้าหลัก"><i class="fas fa-arrow-left"></i></a>
+        <div class="ptc-nav-brand">
+            <div class="ptc-nav-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div>
+                <div class="ptc-nav-title">งานช่าง IT <span style="font-size:10px;font-weight:600;color:#2563eb;background:#eff6ff;padding:2px 6px;border-radius:4px;margin-left:4px">v2</span></div>
+                <div class="ptc-nav-sub" id="logv2-user-label">—</div>
+            </div>
+        </div>
+        <div style="flex:1"></div>
+        <a href="request.html" class="ptc-btn" style="font-size:12px;padding:6px 12px"><i class="fas fa-plus"></i> แจ้งปัญหา</a>
+        <button type="button" id="logv2-refresh" class="ptc-ghost" style="font-size:12px;padding:6px 10px" title="รีเฟรช"><i class="fas fa-sync-alt"></i></button>
+    </header>
+
+    <main class="logv2-main">
+        <div class="logv2-toolbar">
+            <input type="search" id="logv2-search" class="ptc-input logv2-search" placeholder="ค้นหา Ticket, ผู้แจ้ง, ปัญหา..." autocomplete="off">
+            <select id="logv2-status" aria-label="สถานะ">
+                <option value="">ทุกสถานะ</option>
+                <option value="Pending">Pending</option>
+                <option value="Received">Received</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Waiting for Parts">Waiting for Parts</option>
+                <option value="Awaiting Confirmation">Awaiting Confirmation</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="logv2-company" aria-label="บริษัท">
+                <option value="">ทุกบริษัท</option>
+                <option value="PTA">PTA</option>
+                <option value="PT4">PT4</option>
+                <option value="PTE">PTE</option>
+            </select>
+            <button type="button" id="logv2-my-queue" class="logv2-toggle-my" title="เฉพาะงานของฉัน">งานของฉัน</button>
+            <span class="logv2-legacy-link">เวอร์ชันเก่า: <a href="log.html">log.html</a> · <a href="tools/log-v2-diag.html">ตรวจ API</a></span>
+        </div>
+
+        <div class="logv2-kpi" id="logv2-kpi" aria-live="polite"></div>
+
+        <div id="logv2-loading" class="logv2-loading"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลด...</div>
+        <div id="logv2-empty" class="logv2-empty hidden">ไม่พบ Ticket ตามเงื่อนไข</div>
+
+        <div class="logv2-card hidden" id="logv2-table-wrap">
+            <div class="logv2-table-wrap">
+                <table class="logv2-table" id="logv2-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th class="logv2-hide-sm">ผู้แจ้ง</th>
+                            <th>ปัญหา</th>
+                            <th>สถานะ</th>
+                            <th class="logv2-hide-sm">ช่าง</th>
+                            <th>ดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logv2-tbody"></tbody>
+                </table>
+            </div>
+            <div class="logv2-foot">
+                <span id="logv2-page-info">—</span>
+                <div class="logv2-pager">
+                    <button type="button" id="logv2-prev">ก่อนหน้า</button>
+                    <button type="button" id="logv2-next">ถัดไป</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/log-v2.js?v=20260527b"></script>
+</body>
+</html>

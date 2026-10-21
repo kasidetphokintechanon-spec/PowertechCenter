@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/personal_tasks_schema.php';
+require_once __DIR__ . '/task_center_hrga_helper.php';
+ensurePersonalTasksSchema($conn);
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
@@ -81,6 +85,13 @@ if (!in_array($priority, $allowedPriority, true)) {
 $allowedShare = ['private', 'department', 'company'];
 if (!in_array($shareScope, $allowedShare, true)) {
     $shareScope = 'private';
+}
+
+if (taskCenterIsHrGaDepartment($department) && in_array($shareScope, ['department', 'company'], true)) {
+    $department = TASK_CENTER_HRGA_DEPT;
+    if ($responsibleCompaniesCsv === '') {
+        $responsibleCompaniesCsv = taskCenterHrGaDefaultResponsibleCompanies();
+    }
 }
 
 $allowedTaskTypes = ['personal', 'job_ticket'];
@@ -216,13 +227,17 @@ try {
 
         $canEdit = ($old['user_id'] ?? '') === $userId;
         if (!$canEdit && in_array($role, ['admin', 'staff'], true)) {
-            $taskCompanies = explode(',', (string)($old['responsible_companies'] ?: $old['company']));
-            $taskCompanies = array_values(array_filter(array_map('trim', $taskCompanies)));
             $scope = $old['share_scope'] ?? 'private';
-            $sameCompany = in_array($company, $taskCompanies, true);
-            $sameDepartment = !empty($department) && !empty($old['department']) && $department === $old['department'];
-            $canEdit = ($role === 'admin')
-                || (($scope === 'company' && $sameCompany) || ($scope === 'department' && $sameCompany && $sameDepartment));
+            if (taskCenterIsHrGaDepartment($department) && taskCenterIsHrGaDepartment($old['department'] ?? '') && in_array($scope, ['department', 'company'], true)) {
+                $canEdit = true;
+            } else {
+                $taskCompanies = explode(',', (string)($old['responsible_companies'] ?: $old['company']));
+                $taskCompanies = array_values(array_filter(array_map('trim', $taskCompanies)));
+                $sameCompany = in_array($company, $taskCompanies, true);
+                $sameDepartment = !empty($department) && !empty($old['department']) && $department === $old['department'];
+                $canEdit = ($role === 'admin')
+                    || (($scope === 'company' && $sameCompany) || ($scope === 'department' && $sameCompany && $sameDepartment));
+            }
         }
         if (!$canEdit) {
             throw new Exception('ไม่มีสิทธิ์แก้ไขรายการนี้');

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Form มาตรฐาน Powertech</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', sans-serif; background: #e8ecf0; padding: 24px; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.toolbar {
+    max-width: 860px; margin: 0 auto 20px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.toolbar h1 { font-size: .9375rem; font-weight: 700; color: #1e293b; flex: 1; }
+.tab-btn {
+    padding: 5px 14px; border-radius: 7px; border: 1.5px solid #cbd5e1;
+    background: #fff; font-family: 'Sarabun', sans-serif; font-size: .8rem;
+    font-weight: 600; cursor: pointer; color: #64748b; transition: all .15s;
+}
+.tab-btn.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.tab-btn:hover:not(.active) { border-color: #94a3b8; color: #1e293b; }
+
+/* ── Page wrap ── */
+.page-wrap { max-width: 860px; margin: 0 auto; display: none; }
+.page-wrap.active { display: block; }
+
+/* ── A4 ── */
+.a4 {
+    width: 794px; min-height: 1123px; background: #fff;
+    margin: 0 auto; padding: 28px 36px 32px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.13);
+    font-size: 12.5px; line-height: 1.5; color: #1e293b;
+}
+
+/* ── Copy Strip ── */
+.copy-strip {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1.5px solid #e2e8f0; border-radius: 5px;
+    padding: 4px 10px; margin-bottom: 10px; background: #f8fafc;
+    font-size: .65rem;
+}
+.copy-strip-left { color: #94a3b8; }
+.copy-btns { display: flex; gap: 5px; }
+.copy-btn {
+    padding: 2px 9px; border-radius: 4px; border: 1px solid #e2e8f0;
+    font-size: .62rem; font-weight: 700; cursor: pointer; background: #fff;
+    color: #94a3b8; font-family: 'Sarabun', sans-serif; transition: all .1s;
+}
+.copy-btn.selected { background: #1e293b; color: #fff; border-color: #1e293b; }
+.copy-btn.selected-orig { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+/* ── Header ── */
+.doc-header {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: start; gap: 10px;
+    border-bottom: 2.5px solid #1d4ed8;
+    padding-bottom: 12px; margin-bottom: 10px;
+}
+.company-info {
+    display: flex; align-items: flex-start; gap: 0;
+    border-left: 4px solid #1d4ed8; padding-left: 12px;
+}
+.company-logo { display: none; }
+.company-name { font-size: 1.05rem; font-weight: 800; color: #1e293b; letter-spacing: -.01em; }
+.company-sub  { font-size: .72rem; color: #475569; margin-top: 2px; font-weight: 500; }
+.company-addr { font-size: .65rem; color: #94a3b8; margin-top: 2px; }
+.theme-pta .company-info { border-color: #059669; }
+.theme-pt4 .company-info { border-color: #dc2626; }
+
+.doc-meta-box {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+}
+.doc-no-label { font-size: .6rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+.doc-no { font-size: .9375rem; font-weight: 700; color: #1d4ed8; }
+.doc-date { font-size: .68rem; color: #64748b; }
+
+/* ISO doc-control table (top-right corner) */
+.iso-ctrl {
+    border: 1px solid #e2e8f0; border-radius: 5px;
+    font-size: .6rem; overflow: hidden; margin-top: 4px;
+}
+.iso-ctrl table { border-collapse: collapse; }
+.iso-ctrl td {
+    padding: 2px 7px; border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+.iso-ctrl td.lbl {
+    background: #f1f5f9; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .04em;
+}
+.iso-ctrl td.val { color: #334155; font-weight: 600; }
+.iso-ctrl td.val.rev { color: #dc2626; }
+
+/* QR */
+.qr-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px; margin-top: 4px;
+}
+.qr-wrap img { width: 60px; height: 60px; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; }
+.qr-wrap span { font-size: .55rem; color: #94a3b8; text-align: center; }
+
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+/* ── Title bar ── */
+.doc-title-bar {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: #fff; text-align: center; padding: 7px 16px;
+    border-radius: 5px; margin-bottom: 12px;
+}
+.doc-title-bar h2 { font-size: .9375rem; font-weight: 700; letter-spacing: .02em; }
+.doc-title-bar p  { font-size: .67rem; opacity: .85; margin-top: 1px; }
+
+/* ── Info grid ── */
+.info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid #e2e8f0; border-radius: 5px;
+    overflow: hidden; margin-bottom: 12px;
+}
+.info-cell {
+    display: flex; align-items: center; padding: 6px 10px;
+    border-bottom: 1px solid #e2e8f0; gap: 7px;
+}
+.info-cell:nth-last-child(-n+2) { border-bottom: none; }
+.info-cell:nth-child(odd) { border-right: 1px solid #e2e8f0; }
+.info-label {
+    font-size: .62rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap; min-width: 82px;
+}
+.info-value {
+    font-size: .775rem; color: #1e293b;
+    border-bottom: 1px dashed #cbd5e1;
+    flex: 1; min-height: 17px; padding: 0;
+}
+
+/* ── Table ── */
+.doc-table { width: 100%; border-collapse: collapse; margin-bottom: 11px; font-size: .75rem; }
+.doc-table thead tr { background: #1d4ed8; color: #fff; }
+.doc-table thead th {
+    padding: 6px 8px; text-align: left; font-weight: 600;
+    font-size: .67rem; letter-spacing: .03em;
+}
+.doc-table thead th.center { text-align: center; }
+.doc-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+.doc-table tbody tr:nth-child(even) { background: #f8fafc; }
+.doc-table tbody td { padding: 5px 8px; color: #334155; }
+.doc-table tbody td.center { text-align: center; }
+.doc-table tfoot tr { background: #eff6ff; border-top: 2px solid #bfdbfe; }
+.doc-table tfoot td { padding: 6px 8px; font-weight: 700; color: #1d4ed8; font-size: .75rem; }
+.doc-table .empty-row td { color: #cbd5e1; font-style: italic; font-size: .68rem; }
+
+/* ── Notes ── */
+.notes-box {
+    border: 1px solid #e2e8f0; border-radius: 5px;
+    padding: 8px 10px; margin-bottom: 12px; background: #fafafa;
+}
+.notes-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 4px; }
+.notes-line { border-bottom: 1px dashed #e2e8f0; height: 19px; }
+
+/* ── Signature ── */
+.sig-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+.sig-box {
+    border: 1px solid #e2e8f0; border-radius: 5px;
+    padding: 8px 10px 6px; text-align: center; background: #fafafa;
+}
+.sig-title {
+    font-size: .6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #94a3b8; margin-bottom: 24px;
+}
+.sig-line { border-bottom: 1.5px solid #cbd5e1; margin: 0 8px 5px; }
+.sig-name { font-size: .67rem; color: #64748b; }
+.sig-date { font-size: .62rem; color: #94a3b8; margin-top: 1px; }
+
+/* ── Footer ── */
+.doc-footer {
+    margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.doc-footer-left  { font-size: .6rem; color: #94a3b8; }
+.doc-footer-right { font-size: .6rem; color: #94a3b8; text-align: right; }
+
+/* ── Status badge ── */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 99px;
+    font-size: .62rem; font-weight: 700;
+}
+.status-draft    { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+.status-approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* ── COPY watermark ── */
+.copy-watermark {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%) rotate(-35deg);
+    font-size: 5.5rem; font-weight: 900; color: rgba(37,99,235,.06);
+    pointer-events: none; letter-spacing: .15em; white-space: nowrap;
+    user-select: none;
+}
+.copy-watermark.red { color: rgba(220,38,38,.07); }
+
+/* ── PTA theme ── */
+.theme-pta .doc-header { border-color: #059669; }
+.theme-pta .doc-title-bar { background: linear-gradient(135deg, #065f46, #059669); }
+.theme-pta .doc-table thead tr { background: #059669; }
+.theme-pta .doc-no { color: #059669; }
+.theme-pta .doc-table tfoot tr { background: #f0fdf4; border-top: 2px solid #bbf7d0; }
+.theme-pta .doc-table tfoot td { color: #059669; }
+.theme-pta .company-logo { background: linear-gradient(135deg, #065f46, #059669); }
+.theme-pta .iso-ctrl td.val { color: #059669; }
+
+/* ── PT4 theme ── */
+.theme-pt4 .doc-header { border-color: #dc2626; }
+.theme-pt4 .doc-title-bar { background: linear-gradient(135deg, #991b1b, #dc2626); }
+.theme-pt4 .doc-table thead tr { background: #dc2626; }
+.theme-pt4 .doc-no { color: #dc2626; }
+.theme-pt4 .doc-table tfoot tr { background: #fef2f2; border-top: 2px solid #fecaca; }
+.theme-pt4 .doc-table tfoot td { color: #dc2626; }
+.theme-pt4 .company-logo { background: linear-gradient(135deg, #991b1b, #dc2626); }
+
+@media print {
+    body { background: none; padding: 0; }
+    .toolbar, .copy-strip { display: none; }
+    .a4 { box-shadow: none; width: 100%; margin: 0; padding: 18mm 16mm; }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h1><i class="fas fa-file-alt" style="color:#2563eb;margin-right:6px"></i>Form Standard — Powertech (ISO-Ready)</h1>
+    <button class="tab-btn active" onclick="show('issue',this)">📦 ใบเบิกพัสดุ</button>
+    <button class="tab-btn" onclick="show('workorder',this)">🔧 ใบแจ้งซ่อม</button>
+    <button class="tab-btn" onclick="show('asset',this)">🖥 ใบมอบทรัพย์สิน</button>
+    <button class="tab-btn" onclick="window.print()" style="background:#0f172a;color:#fff;border-color:#0f172a">🖨 Print</button>
+</div>
+
+<!-- ════════════════════════════
+     FORM 1 — ใบเบิกพัสดุ
+════════════════════════════ -->
+<div class="page-wrap active" id="form-issue">
+
+<!-- Copy selector -->
+<div class="copy-strip" style="max-width:794px;margin:0 auto 8px">
+    <span class="copy-strip-left"><i class="fas fa-copy" style="margin-right:4px"></i>เลือกสำเนา / Select Copy</span>
+    <div class="copy-btns">
+        <button class="copy-btn selected-orig" onclick="setCopy('issue','orig',this)">ต้นฉบับ (Original)</button>
+        <button class="copy-btn" onclick="setCopy('issue','copy1',this)">สำเนา 1 — คลังพัสดุ</button>
+        <button class="copy-btn" onclick="setCopy('issue','copy2',this)">สำเนา 2 — บัญชี</button>
+    </div>
+</div>
+
+<div class="a4 theme-pta" id="a4-issue" style="position:relative">
+    <div class="copy-watermark" id="wm-issue" style="display:none">COPY</div>
+
+    <!-- Header -->
+    <div class="doc-header">
+        <div class="company-info">
+            <div class="company-logo">
+                <img src="uploads/logos/pta_logo.png" onerror="this.parentElement.innerHTML='<i class=\'fas fa-cogs\'></i>'">
+            </div>
+            <div>
+                <div class="company-name">Powertech Engine Assembly Co., Ltd.</div>
+                <div class="company-sub">บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด</div>
+                <div class="company-addr">123 ถ.อุตสาหกรรม นิคมอุตสาหกรรม จ.ระยอง 21150 | Tel. 038-XXX-XXX</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="doc-meta-box">
+                <div class="doc-no-label">เลขที่เอกสาร / Doc. No.</div>
+                <div class="doc-no">ISS-2026-0042</div>
+                <div class="doc-date">วันที่ออก: 08/06/2569</div>
+                <div style="margin-top:4px"><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> อนุมัติแล้ว</span></div>
+            </div>
+            <!-- ISO Document Control -->
+            <div class="iso-ctrl">
+                <table>
+                    <tr>
+                        <td class="lbl">Form No.</td>
+                        <td class="val">FM-STK-001</td>
+                    </tr>
+                    <tr>
+                        <td class="lbl">Revision</td>
+                        <td class="val rev">Rev. 02</td>
+                    </tr>
+                    <tr>
+                        <td class="lbl">Eff. Date</td>
+                        <td class="val">01/01/2569</td>
+                    </tr>
+                </table>
+            </div>
+            <!-- QR Code -->
+            <div class="qr-wrap">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=http://localhost/PowertechCenter/stock.html%3Fdoc%3DISS-2026-0042" alt="QR">
+                <span>Scan เพื่อดูสถานะ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Title -->
+    <div class="doc-title-bar">
+        <h2>ใบเบิกพัสดุ / Material Issue Voucher</h2>
+        <p>แผนกคลังพัสดุ — Stock Management Dept. | FM-STK-001 Rev.02</p>
+    </div>
+
+    <!-- Info -->
+    <div class="info-grid">
+        <div class="info-cell"><span class="info-label">แผนกผู้ขอ</span><span class="info-value">IT &amp; Systems</span></div>
+        <div class="info-cell"><span class="info-label">วันที่ขอเบิก</span><span class="info-value">08 มิ.ย. 2569</span></div>
+        <div class="info-cell"><span class="info-label">ผู้ขอเบิก</span><span class="info-value">นาย กสิเดช โพธิ์กิ่ง</span></div>
+        <div class="info-cell"><span class="info-label">วัตถุประสงค์</span><span class="info-value">ซ่อมบำรุงอุปกรณ์</span></div>
+        <div class="info-cell"><span class="info-label">Cost Center</span><span class="info-value">CC-IT-001</span></div>
+        <div class="info-cell"><span class="info-label">อ้างอิง Work Order</span><span class="info-value">WO-2026-0105</span></div>
+    </div>
+
+    <!-- Table -->
+    <table class="doc-table">
+        <thead><tr>
+            <th class="center" style="width:32px">ลำดับ</th>
+            <th style="width:90px">รหัสพัสดุ</th>
+            <th>รายการ / Description</th>
+            <th class="center" style="width:55px">จำนวนขอ</th>
+            <th class="center" style="width:55px">จำนวนจ่าย</th>
+            <th class="center" style="width:44px">หน่วย</th>
+            <th style="width:90px">หมายเหตุ</th>
+        </tr></thead>
+        <tbody>
+            <tr><td class="center">1</td><td>MAT-NET-001</td><td>สายแลน CAT6 / LAN Cable CAT6</td><td class="center">5</td><td class="center">5</td><td class="center">เส้น</td><td>Server Room</td></tr>
+            <tr><td class="center">2</td><td>MAT-PWR-012</td><td>อะแดปเตอร์ 12V 3A / Adapter 12V 3A</td><td class="center">2</td><td class="center">2</td><td class="center">ชิ้น</td><td>—</td></tr>
+            <tr><td class="center">3</td><td>MAT-INK-008</td><td>หมึกพิมพ์ Canon PG-745 / Ink Canon PG-745</td><td class="center">4</td><td class="center">4</td><td class="center">กล่อง</td><td>—</td></tr>
+            <tr class="empty-row"><td class="center">4</td><td>—</td><td>—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td>—</td></tr>
+            <tr class="empty-row"><td class="center">5</td><td>—</td><td>—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td>—</td></tr>
+        </tbody>
+        <tfoot><tr>
+            <td colspan="3" style="text-align:right;font-size:.7rem">รวมทั้งหมด</td>
+            <td class="center">11</td><td class="center">11</td><td colspan="2">รายการ</td>
+        </tr></tfoot>
+    </table>
+
+    <!-- Notes -->
+    <div class="notes-box">
+        <div class="notes-label">หมายเหตุ / Additional Notes</div>
+        <div class="notes-line"></div><div class="notes-line"></div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="sig-row">
+        <div class="sig-box"><div class="sig-title">ผู้ขอเบิก / Requested By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">ผู้จ่ายพัสดุ / Issued By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">ผู้อนุมัติ / Approved By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="doc-footer">
+        <div class="doc-footer-left">ออกโดยระบบ Powertech System Center · พิมพ์: 08/06/2569 · <span id="copy-label-issue">ต้นฉบับ (Original)</span></div>
+        <div class="doc-footer-right">FM-STK-001 Rev.02 · หน้า 1/1 · ISS-2026-0042</div>
+    </div>
+</div>
+</div>
+
+<!-- ════════════════════════════
+     FORM 2 — ใบแจ้งซ่อม / Work Order
+════════════════════════════ -->
+<div class="page-wrap" id="form-workorder">
+
+<div class="copy-strip" style="max-width:794px;margin:0 auto 8px">
+    <span class="copy-strip-left"><i class="fas fa-copy" style="margin-right:4px"></i>เลือกสำเนา / Select Copy</span>
+    <div class="copy-btns">
+        <button class="copy-btn selected-orig" onclick="setCopy('workorder','orig',this)">ต้นฉบับ (Original)</button>
+        <button class="copy-btn" onclick="setCopy('workorder','copy1',this)">สำเนา 1 — ช่าง</button>
+        <button class="copy-btn" onclick="setCopy('workorder','copy2',this)">สำเนา 2 — ผู้แจ้ง</button>
+    </div>
+</div>
+
+<div class="a4" id="a4-workorder" style="position:relative">
+    <div class="copy-watermark" id="wm-workorder" style="display:none">COPY</div>
+
+    <div class="doc-header">
+        <div class="company-info">
+            <div class="company-logo" style="color:#2563eb;font-size:1.4rem"><i class="fas fa-bolt"></i></div>
+            <div>
+                <div class="company-name">Powertech System Center — IT Support</div>
+                <div class="company-sub">ฝ่ายเทคโนโลยีสารสนเทศและระบบ</div>
+                <div class="company-addr">IT Support &amp; Maintenance Department</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="doc-meta-box">
+                <div class="doc-no-label">เลขที่ใบแจ้งซ่อม / WO No.</div>
+                <div class="doc-no">WO-2026-0105</div>
+                <div class="doc-date">วันที่แจ้ง: 08/06/2569</div>
+                <div style="margin-top:4px"><span class="status-badge status-draft"><i class="fas fa-clock"></i> รอดำเนินการ</span></div>
+            </div>
+            <div class="iso-ctrl">
+                <table>
+                    <tr><td class="lbl">Form No.</td><td class="val">FM-IT-001</td></tr>
+                    <tr><td class="lbl">Revision</td><td class="val rev">Rev. 03</td></tr>
+                    <tr><td class="lbl">Eff. Date</td><td class="val">01/01/2569</td></tr>
+                </table>
+            </div>
+            <div class="qr-wrap">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=http://localhost/PowertechCenter/request.html%3Fid%3DWO-2026-0105" alt="QR">
+                <span>Scan เพื่อดูสถานะ</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="doc-title-bar">
+        <h2>ใบแจ้งซ่อม / IT Work Order</h2>
+        <p>IT Support &amp; Maintenance Dept. | FM-IT-001 Rev.03</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-cell"><span class="info-label">ผู้แจ้ง</span><span class="info-value">นาย กสิเดช โพธิ์กิ่ง</span></div>
+        <div class="info-cell"><span class="info-label">แผนก</span><span class="info-value">IT &amp; Systems</span></div>
+        <div class="info-cell"><span class="info-label">อาคาร / ห้อง</span><span class="info-value">อาคาร A — ห้อง 201</span></div>
+        <div class="info-cell"><span class="info-label">ประเภทงาน</span><span class="info-value">ซ่อมอุปกรณ์ IT</span></div>
+        <div class="info-cell"><span class="info-label">วันที่รับงาน</span><span class="info-value">08 มิ.ย. 2569</span></div>
+        <div class="info-cell"><span class="info-label">กำหนดเสร็จ</span><span class="info-value" style="color:#dc2626;font-weight:600">09 มิ.ย. 2569</span></div>
+        <div class="info-cell"><span class="info-label">ความเร่งด่วน</span><span class="info-value" style="color:#dc2626;font-weight:700">🔴 เร่งด่วน</span></div>
+        <div class="info-cell"><span class="info-label">ช่างผู้รับผิดชอบ</span><span class="info-value">นาย สมชาย ไทยดี</span></div>
+    </div>
+
+    <!-- Problem description -->
+    <div style="margin-bottom:10px">
+        <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px">รายละเอียดปัญหา / Problem Description</div>
+        <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;min-height:52px;background:#fafafa;font-size:.775rem;color:#334155;line-height:1.7">
+            คอมพิวเตอร์เปิดไม่ติด หน้าจอไม่แสดงผล มีเสียงดังผิดปกติตอนเริ่มต้น
+        </div>
+    </div>
+
+    <table class="doc-table">
+        <thead><tr>
+            <th class="center" style="width:28px">#</th>
+            <th>รายการดำเนินการ / Action Taken</th>
+            <th class="center" style="width:70px">เวลาเริ่ม</th>
+            <th class="center" style="width:70px">เวลาสิ้นสุด</th>
+            <th class="center" style="width:52px">ชม.</th>
+            <th>ผลการดำเนินการ</th>
+        </tr></thead>
+        <tbody>
+            <tr><td class="center">1</td><td>ตรวจสอบ PSU และ RAM</td><td class="center">09:00</td><td class="center">09:30</td><td class="center">0.5</td><td>พบ RAM เสีย 1 แถว</td></tr>
+            <tr class="empty-row"><td class="center">2</td><td>—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td>—</td></tr>
+            <tr class="empty-row"><td class="center">3</td><td>—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td>—</td></tr>
+        </tbody>
+        <tfoot><tr>
+            <td colspan="4" style="text-align:right;font-size:.7rem">รวมชั่วโมงทำงาน</td>
+            <td class="center">0.5</td><td>ชั่วโมง</td>
+        </tr></tfoot>
+    </table>
+
+    <div class="notes-box">
+        <div class="notes-label">สรุปผลการซ่อม / Resolution Summary</div>
+        <div class="notes-line"></div><div class="notes-line"></div>
+    </div>
+
+    <div class="sig-row">
+        <div class="sig-box"><div class="sig-title">ผู้แจ้งซ่อม / Reporter</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">ช่างผู้ซ่อม / Technician</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">หัวหน้าแผนก / Supervisor</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+    </div>
+
+    <div class="doc-footer">
+        <div class="doc-footer-left">ออกโดยระบบ Powertech System Center · พิมพ์: 08/06/2569 · <span id="copy-label-workorder">ต้นฉบับ (Original)</span></div>
+        <div class="doc-footer-right">FM-IT-001 Rev.03 · หน้า 1/1 · WO-2026-0105</div>
+    </div>
+</div>
+</div>
+
+<!-- ════════════════════════════
+     FORM 3 — ใบมอบทรัพย์สิน
+════════════════════════════ -->
+<div class="page-wrap" id="form-asset">
+
+<div class="copy-strip" style="max-width:794px;margin:0 auto 8px">
+    <span class="copy-strip-left"><i class="fas fa-copy" style="margin-right:4px"></i>เลือกสำเนา / Select Copy</span>
+    <div class="copy-btns">
+        <button class="copy-btn selected-orig" onclick="setCopy('asset','orig',this)">ต้นฉบับ (Original)</button>
+        <button class="copy-btn" onclick="setCopy('asset','copy1',this)">สำเนา 1 — IT</button>
+        <button class="copy-btn" onclick="setCopy('asset','copy2',this)">สำเนา 2 — ผู้รับ</button>
+    </div>
+</div>
+
+<div class="a4 theme-pt4" id="a4-asset" style="position:relative">
+    <div class="copy-watermark red" id="wm-asset" style="display:none">COPY</div>
+
+    <div class="doc-header">
+        <div class="company-info">
+            <div class="company-logo">
+                <img src="uploads/logos/pt4_logo.png" onerror="this.parentElement.innerHTML='<i class=\'fas fa-industry\'></i>'">
+            </div>
+            <div>
+                <div class="company-name">Powertech 2004 Co., Ltd.</div>
+                <div class="company-sub">บริษัท พาวเวอร์เทค 2004 จำกัด</div>
+                <div class="company-addr">99 หมู่ 5 นิคมอุตสาหกรรม จ.ระยอง 21150 | Tel. 038-XXX-XXX</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="doc-meta-box">
+                <div class="doc-no-label">เลขที่เอกสาร / Doc. No.</div>
+                <div class="doc-no" style="color:#dc2626">AST-2026-0018</div>
+                <div class="doc-date">วันที่มอบ: 08/06/2569</div>
+                <div style="margin-top:4px"><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> มอบแล้ว</span></div>
+            </div>
+            <div class="iso-ctrl">
+                <table>
+                    <tr><td class="lbl">Form No.</td><td class="val">FM-AST-002</td></tr>
+                    <tr><td class="lbl">Revision</td><td class="val rev">Rev. 01</td></tr>
+                    <tr><td class="lbl">Eff. Date</td><td class="val">01/06/2568</td></tr>
+                </table>
+            </div>
+            <div class="qr-wrap">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=http://localhost/PowertechCenter/asset.html%3Fdoc%3DAST-2026-0018" alt="QR">
+                <span>Scan เพื่อดูสถานะ</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="doc-title-bar">
+        <h2>ใบมอบ/รับทรัพย์สิน / Asset Transfer Form</h2>
+        <p>ฝ่ายจัดการทรัพย์สินและอุปกรณ์ | FM-AST-002 Rev.01</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-cell"><span class="info-label">ผู้รับทรัพย์สิน</span><span class="info-value">นาย สมชาย ไทยดี</span></div>
+        <div class="info-cell"><span class="info-label">แผนก</span><span class="info-value">Production</span></div>
+        <div class="info-cell"><span class="info-label">ตำแหน่ง</span><span class="info-value">วิศวกร</span></div>
+        <div class="info-cell"><span class="info-label">วันที่รับมอบ</span><span class="info-value">08 มิ.ย. 2569</span></div>
+        <div class="info-cell"><span class="info-label">สถานที่ใช้งาน</span><span class="info-value">อาคาร B ชั้น 2</span></div>
+        <div class="info-cell"><span class="info-label">ประเภทการมอบ</span><span class="info-value">มอบใหม่</span></div>
+    </div>
+
+    <table class="doc-table">
+        <thead><tr>
+            <th class="center" style="width:28px">ลำดับ</th>
+            <th style="width:88px">รหัสทรัพย์สิน</th>
+            <th>รายการ / Description</th>
+            <th style="width:100px">Serial / Model</th>
+            <th class="center" style="width:55px">สภาพ</th>
+            <th style="width:80px">หมายเหตุ</th>
+        </tr></thead>
+        <tbody>
+            <tr><td class="center">1</td><td>AST-PC-0043</td><td>คอมพิวเตอร์ตั้งโต๊ะ Dell OptiPlex</td><td>SN: DL20248XZ</td><td class="center">ดี</td><td>พร้อมใช้งาน</td></tr>
+            <tr><td class="center">2</td><td>AST-MON-021</td><td>จอมอนิเตอร์ Samsung 24"</td><td>SN: SM240BXK</td><td class="center">ดี</td><td>—</td></tr>
+            <tr class="empty-row"><td class="center">3</td><td>—</td><td>—</td><td>—</td><td class="center">—</td><td>—</td></tr>
+        </tbody>
+    </table>
+
+    <div class="notes-box">
+        <div class="notes-label">เงื่อนไขการรับมอบ / Terms &amp; Conditions</div>
+        <div style="font-size:.72rem;color:#475569;line-height:1.7;padding:4px 0">
+            ผู้รับทรัพย์สินรับทราบและยินยอมว่าจะดูแลรักษาทรัพย์สินของบริษัทด้วยความระมัดระวัง
+            หากเกิดความเสียหายจากการใช้งานที่ไม่เหมาะสม ผู้รับจะต้องรับผิดชอบตามระเบียบของบริษัท
+        </div>
+    </div>
+
+    <div class="sig-row">
+        <div class="sig-box"><div class="sig-title">ผู้มอบ / Issued By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">ผู้รับ / Received By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+        <div class="sig-box"><div class="sig-title">ผู้อนุมัติ / Approved By</div><div class="sig-line"></div><div class="sig-name">( ................................................ )</div><div class="sig-date">วันที่ ........./........./.........&nbsp;</div></div>
+    </div>
+
+    <div class="doc-footer">
+        <div class="doc-footer-left">ออกโดยระบบ Powertech System Center · พิมพ์: 08/06/2569 · <span id="copy-label-asset">ต้นฉบับ (Original)</span></div>
+        <div class="doc-footer-right">FM-AST-002 Rev.01 · หน้า 1/1 · AST-2026-0018</div>
+    </div>
+</div>
+</div>
+
+<script>
+function show(name, btn) {
+    document.querySelectorAll('.page-wrap').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('form-' + name).classList.add('active');
+    btn.classList.add('active');
+}
+
+function setCopy(form, type, btn) {
+    const btns = btn.closest('.copy-btns').querySelectorAll('.copy-btn');
+    btns.forEach(b => { b.classList.remove('selected','selected-orig'); });
+    btn.classList.add(type === 'orig' ? 'selected-orig' : 'selected');
+
+    const wm = document.getElementById('wm-' + form);
+    const lbl = document.getElementById('copy-label-' + form);
+    const copyLabels = { orig: 'ต้นฉบับ (Original)', copy1: 'สำเนา 1', copy2: 'สำเนา 2' };
+    const wmTexts   = { orig: '', copy1: 'COPY 1', copy2: 'COPY 2' };
+
+    lbl.textContent = copyLabels[type];
+    if (type === 'orig') {
+        wm.style.display = 'none';
+    } else {
+        wm.style.display = 'block';
+        wm.textContent = wmTexts[type];
+    }
+}
+</script>
+</body>
+</html>

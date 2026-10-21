@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Center — HR and GA Mockup (ข้าม 3 บริษัท)</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Kanit', sans-serif;
+            margin: 0;
+            background: #f1f5f9;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+        .mock-banner {
+            background: linear-gradient(90deg, #7c3aed, #2563eb);
+            color: #fff;
+            padding: 10px 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .mock-banner strong { font-weight: 700; }
+        .role-switch {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .role-btn {
+            border: 1px solid rgba(255,255,255,.35);
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .role-btn.active { background: #fff; color: #1d4ed8; border-color: #fff; }
+        .nav {
+            height: 56px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            border-top: 3px solid #2563eb;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+        }
+        .nav-title { font-size: 15px; font-weight: 700; }
+        .nav-sub { font-size: 11px; color: #64748b; }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        .context-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .context-card i { color: #2563eb; font-size: 20px; margin-top: 2px; }
+        .context-card p { margin: 4px 0 0; font-size: 13px; color: #64748b; line-height: 1.5; }
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .tab {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .tab.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+        .tab .co { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+        .co-pta { background: #16a34a; }
+        .co-pt4 { background: #ea580c; }
+        .co-pte { background: #2563eb; }
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 768px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+        .kpi {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .kpi-val { font-size: 24px; font-weight: 800; line-height: 1; }
+        .kpi-lbl { font-size: 11px; color: #64748b; margin-top: 4px; }
+        .kpi.warn .kpi-val { color: #dc2626; }
+        .kpi.ok .kpi-val { color: #16a34a; }
+        .panel {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .panel-head {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .panel-head h2 { margin: 0; font-size: 14px; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #94a3b8; font-weight: 600; background: #f8fafc; }
+        tr:hover td { background: #f8fafc; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .b-pta { background: #dcfce7; color: #15803d; }
+        .b-pt4 { background: #ffedd5; color: #c2410c; }
+        .b-pte { background: #dbeafe; color: #1d4ed8; }
+        .b-todo { background: #f1f5f9; color: #475569; }
+        .b-doing { background: #fef3c7; color: #b45309; }
+        .b-done { background: #dcfce7; color: #15803d; }
+        .b-over { background: #fee2e2; color: #dc2626; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .org-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .avatar {
+            width: 28px; height: 28px; border-radius: 8px;
+            background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: #475569;
+        }
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 8px 24px rgba(37,99,235,.35);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px;
+        }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+        .field label { display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .field.full { grid-column: 1 / -1; }
+        .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+        .share-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mock-banner">
+    <div>
+        <strong>MOCKUP</strong> — Task Center แผนก HR and GA (ข้าม PTA · PT4 · PTE) · ยังไม่เชื่อม API
+    </div>
+    <div class="role-switch">
+        <button type="button" class="role-btn active" data-view="manager">มุมมองหัวหน้า (Ratiros · PT4)</button>
+        <button type="button" class="role-btn" data-view="staff">มุมมองลูกน้อง (Nutnicha · PTE)</button>
+    </div>
+</div>
+
+<header class="nav">
+    <div>
+        <div class="nav-title">Task Center</div>
+        <div class="nav-sub" id="navSub">ภาพรวมแผนก HR and GA</div>
+    </div>
+</header>
+
+<div class="wrap">
+
+    <div class="context-card">
+        <i class="fas fa-sitemap"></i>
+        <div>
+            <strong>แนวคิดจาก Directory</strong>
+            <p>ทีมเดียวกัน = แผนก <strong>HR and GA</strong> · แต่ละคนมีบ้านบริษัทต่างกัน (ป้าย PTA/PT4/PTE) · แต่ละงานระบุ <strong>บริษัทของงาน</strong> · หัวหน้าดู Dashboard ข้ามทั้ง 3 บริษัทโดยไม่ไล่ถาม</p>
+        </div>
+    </div>
+
+    <!-- MANAGER VIEW -->
+    <div id="view-manager" class="view active">
+        <div class="tabs" id="companyTabs">
+            <button type="button" class="tab active" data-co="all">ทั้งหมด</button>
+            <button type="button" class="tab" data-co="pta"><span class="co co-pta"></span>PTA</button>
+            <button type="button" class="tab" data-co="pt4"><span class="co co-pt4"></span>PT4</button>
+            <button type="button" class="tab" data-co="pte"><span class="co co-pte"></span>PTE</button>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi"><div class="kpi-val" id="kpiOpen">8</div><div class="kpi-lbl">งานค้างทีม</div></div>
+            <div class="kpi warn"><div class="kpi-val" id="kpiOver">2</div><div class="kpi-lbl">เลยกำหนด</div></div>
+            <div class="kpi"><div class="kpi-val" id="kpiDoing">4</div><div class="kpi-lbl">กำลังทำ</div></div>
+            <div class="kpi ok"><div class="kpi-val">6</div><div class="kpi-lbl">เสร็จเดือนนี้</div></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <h2><i class="fas fa-users" style="color:#2563eb;margin-right:6px"></i> งานแผนก HR and GA — ที่ลูกน้องรายงาน (แชร์แผนก)</h2>
+                <span style="font-size:12px;color:#64748b">Ms. Ratiros · ดูอย่างเดียว</span>
+            </div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>งาน</th>
+                            <th>ผู้ทำ</th>
+                            <th>บ้าน</th>
+                            <th>บริษัทงาน</th>
+                            <th>สถานะ</th>
+                            <th>Due</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head"><h2><i class="fas fa-sticky-note" style="color:#94a3b8;margin-right:6px"></i> โน้ตส่วนตัวของฉัน (private)</h2></div>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>ติดตาม MOU กับ vendor</td>
+                        <td><span class="badge b-todo">รอทำ</span></td>
+                        <td style="color:#94a3b8;font-size:12px">เฉพาะฉันเห็น</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- STAFF VIEW -->
+    <div id="view-staff" class="view">
+        <div class="context-card" style="margin-bottom:14px;background:#eff6ff;border-color:#bfdbfe">
+            <i class="fas fa-user" style="color:#1d4ed8"></i>
+            <div>
+                <strong>Mrs. Nutnicha Aree</strong> — Supervisor (L1) · บ้าน <span class="badge b-pte">PTE</span>
+                <p>สร้างงานของตัวเอง → อัปเดต status → แชร์ <span class="share-pill"><i class="fas fa-building"></i> แผนก HR and GA</span> เพื่อให้หัวหน้าเห็น</p>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head"><h2>+ สร้างงานใหม่ (ตัวอย่างฟอร์ม)</h2></div>
+            <div class="form-grid">
+                <div class="field full">
+                    <label>ชื่องาน</label>
+                    <input type="text" value="จัดทำเอกสารสวัสดิ Q2 — นิติ PTE" readonly>
+                </div>
+                <div class="field">
+                    <label>บริษัทของงาน (ไม่ใช่บ้านพนักงาน)</label>
+                    <select>
+                        <option>PTA</option>
+                        <option>PT4</option>
+                        <option selected>PTE</option>
+                    </select>
+                    <div class="hint">งานนี้เกี่ยวกับนิติ PTE แม้คุณอยู่ PTE อยู่แล้ว</div>
+                </div>
+                <div class="field">
+                    <label>แผนก</label>
+                    <input type="text" value="HR and GA" readonly>
+                </div>
+                <div class="field">
+                    <label>แชร์กับ</label>
+                    <select>
+                        <option selected>แผนก HR and GA (หัวหน้าเห็น)</option>
+                        <option>เฉพาะฉัน (โน้ตส่วนตัว)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>กำหนดเสร็จ</label>
+                    <input type="date" value="2026-06-15">
+                </div>
+                <div class="field full">
+                    <label>รายละเอียด / ความคืบหน้า</label>
+                    <textarea rows="2">รอข้อมูลจากฝ่ายบัญชี PTA — อัปเดต 27 พ.ค.</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head"><h2>งานของฉัน</h2></div>
+            <table>
+                <thead>
+                    <tr><th>งาน</th><th>บริษัทงาน</th><th>สถานะ</th><th>อัปเดต</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>จัดทำเอกสารสวัสดิ Q2</td>
+                        <td><span class="badge b-pte">PTE</span></td>
+                        <td><span class="badge b-doing">กำลังทำ</span></td>
+                        <td>วันนี้ 10:24</td>
+                    </tr>
+                    <tr>
+                        <td>ประสาน onboarding พนักงานใหม่ PTA</td>
+                        <td><span class="badge b-pta">PTA</span></td>
+                        <td><span class="badge b-todo">รอทำ</span></td>
+                        <td>เมื่อวาน</td>
+                    </tr>
+                    <tr style="opacity:.7">
+                        <td>รายการซื้อของแผนก (โน้ตส่วนตัว)</td>
+                        <td>PT4</td>
+                        <td><span class="badge b-todo">รอทำ</span></td>
+                        <td>— private —</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="fab" id="fabBtn"><i class="fas fa-plus"></i> งานใหม่</button>
+
+<script>
+(function () {
+    const tasks = [
+        { title: 'Onboarding พนักงานใหม่ 5 คน', who: 'Chanita W.', home: 'PTA', workCo: 'pta', co: 'PTA', status: 'doing', due: '30 พ.ค.', over: false },
+        { title: 'เอกสารสวัสดิ Q2', who: 'Nutnicha A.', home: 'PTE', workCo: 'pte', co: 'PTE', status: 'doing', due: '15 มิ.ย.', over: false },
+        { title: 'ประสานประกันสังคม PT4', who: 'Thasipha A.', home: 'PT4', workCo: 'pt4', co: 'PT4', status: 'todo', due: '28 พ.ค.', over: true },
+        { title: 'อบรมความปลอดภัย', who: 'Warinthon P.', home: 'PT4', workCo: 'pt4', co: 'PT4', status: 'todo', due: '25 พ.ค.', over: true },
+        { title: 'จัดเก็บสัญญาจ้าง PTA', who: 'Natsuda K.', home: 'PTA', workCo: 'pta', co: 'PTA', status: 'done', due: '20 พ.ค.', over: false },
+        { title: 'เบิก uniform PTE', who: 'Thanyakarn T.', home: 'PTE', workCo: 'pte', co: 'PTE', status: 'doing', due: '5 มิ.ย.', over: false },
+        { title: 'ตรวจสอบนโยบาย HR กลาง', who: 'Pronpapat S.', home: 'PT4', workCo: 'pta', co: 'PTA', status: 'doing', due: '10 มิ.ย.', over: false },
+        { title: 'รายงาน headcount รายเดือน', who: 'Thannaree S.', home: 'PT4', workCo: 'pt4', co: 'PT4', status: 'todo', due: '31 พ.ค.', over: false }
+    ];
+
+    const statusLabel = { todo: ['รอทำ', 'b-todo'], doing: ['กำลังทำ', 'b-doing'], done: ['เสร็จ', 'b-done'] };
+    const coClass = { PTA: 'b-pta', PT4: 'b-pt4', PTE: 'b-pte' };
+
+    function renderTable(filter) {
+        const rows = tasks.filter(t => filter === 'all' || t.workCo === filter);
+        const open = rows.filter(t => t.status !== 'done').length;
+        const over = rows.filter(t => t.over && t.status !== 'done').length;
+        const doing = rows.filter(t => t.status === 'doing').length;
+        document.getElementById('kpiOpen').textContent = open;
+        document.getElementById('kpiOver').textContent = over;
+        document.getElementById('kpiDoing').textContent = doing;
+
+        document.getElementById('taskTableBody').innerHTML = rows.map(t => {
+            const st = statusLabel[t.status] || statusLabel.todo;
+            const dueCls = t.over && t.status !== 'done' ? ' style="color:#dc2626;font-weight:600"' : '';
+            return `<tr>
+                <td><strong>${t.title}</strong>${t.over && t.status !== 'done' ? ' <span class="badge b-over">เลยกำหนด</span>' : ''}</td>
+                <td><div class="org-mini"><span class="avatar">${t.who.charAt(0)}</span>${t.who}</div></td>
+                <td><span class="badge ${coClass[t.home] || 'b-todo'}">${t.home}</span></td>
+                <td><span class="badge ${coClass[t.co] || 'b-todo'}">${t.co}</span></td>
+                <td><span class="badge ${st[1]}">${st[0]}</span></td>
+                <td${dueCls}>${t.due}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    let currentCo = 'all';
+    document.querySelectorAll('#companyTabs .tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#companyTabs .tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCo = btn.getAttribute('data-co');
+            renderTable(currentCo);
+        });
+    });
+    renderTable('all');
+
+    document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const v = btn.getAttribute('data-view');
+            document.getElementById('view-manager').classList.toggle('active', v === 'manager');
+            document.getElementById('view-staff').classList.toggle('active', v === 'staff');
+            document.getElementById('navSub').textContent = v === 'manager'
+                ? 'ภาพรวมแผนก HR and GA — ข้าม 3 บริษัท'
+                : 'งานของฉัน — รายงานหัวหน้า';
+            document.getElementById('fabBtn').style.display = v === 'staff' ? 'block' : 'none';
+        });
+    });
+    document.getElementById('fabBtn').style.display = 'none';
+})();
+</script>
+</body>
+</html>

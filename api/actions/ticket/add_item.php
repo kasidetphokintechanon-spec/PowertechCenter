@@ -5,6 +5,22 @@ $key = $_POST['key'] ?? '';
 $role = $_SESSION['role'] ?? 'guest';
 $isLoggedIn = isset($_SESSION['user_id']);
 
+function permissionForAdminWriteKey(string $key): ?string {
+    $map = [
+        'departments' => 'employee.manage',
+        'meeting_rooms' => 'employee.manage',
+        'meeting_amenities' => 'employee.manage',
+        'announcements' => 'employee.manage',
+        'holidays' => 'employee.manage',
+        'services' => 'employee.manage',
+        'job_tickets' => 'employee.manage',
+        'asset_categories' => 'asset.manage',
+        'kb_categories' => 'kb.manage',
+        'kb_articles' => 'kb.manage',
+    ];
+    return $map[$key] ?? null;
+}
+
 if ($key === 'it_logs') {
     if (!$isLoggedIn) throw new Exception("Unauthorized");
     $data = json_decode($_POST['data'], true);
@@ -54,7 +70,8 @@ if ($key === 'it_logs') {
         'pr_no' => "ALTER TABLE it_logs ADD COLUMN pr_no VARCHAR(50) DEFAULT NULL AFTER evaluation_reason",
         'po_no' => "ALTER TABLE it_logs ADD COLUMN po_no VARCHAR(50) DEFAULT NULL AFTER pr_no",
         'vendor_name' => "ALTER TABLE it_logs ADD COLUMN vendor_name VARCHAR(255) DEFAULT NULL AFTER po_no",
-        'eta_date' => "ALTER TABLE it_logs ADD COLUMN eta_date DATE DEFAULT NULL AFTER vendor_name"
+        'eta_date' => "ALTER TABLE it_logs ADD COLUMN eta_date DATE DEFAULT NULL AFTER vendor_name",
+        'kb_article_id' => "ALTER TABLE it_logs ADD COLUMN kb_article_id INT(11) DEFAULT NULL AFTER solution"
     ];
     foreach ($schemaChecks as $col => $ddl) {
         $colRes = $conn->query("SHOW COLUMNS FROM it_logs LIKE '" . $conn->real_escape_string($col) . "'");
@@ -63,7 +80,7 @@ if ($key === 'it_logs') {
         }
     }
 
-    $fields = ['id', 'date', 'company', 'department', 'requester', 'servicedBy', 'asset_id', 'problem', 'contact', 'solution', 'status', 'type', 'urgency', 'repair_cost', 'appointment_date', 'servicedById', 'requester_id', 'request_uid', 'completed_date', 'last_work_start_time', 'total_work_duration_seconds', 'evaluation_hardware', 'evaluation_software', 'evaluation_repair_cost', 'evaluation_recommendation', 'evaluation_reason', 'pr_no', 'po_no', 'vendor_name', 'eta_date'];
+    $fields = ['id', 'date', 'company', 'department', 'requester', 'servicedBy', 'asset_id', 'problem', 'contact', 'solution', 'root_cause', 'status', 'type', 'urgency', 'repair_cost', 'appointment_date', 'servicedById', 'requester_id', 'request_uid', 'completed_date', 'last_work_start_time', 'total_work_duration_seconds', 'evaluation_hardware', 'evaluation_software', 'evaluation_repair_cost', 'evaluation_recommendation', 'evaluation_reason', 'pr_no', 'po_no', 'vendor_name', 'eta_date'];
 
     $cols = []; $vals = []; $types = ""; $params = [];
     foreach ($fields as $f) {
@@ -118,8 +135,8 @@ if ($key === 'it_logs') {
         if ($isProgrammer) {
             // Reformat programmer request for better display in Line/Telegram
             $formattedProblem = str_replace(
-                ['[PROGRAMMER REQUEST]', 'Software:', 'Module:', '1. อาการที่พบ:', '2. ความต้องการ:', '3. แหล่งข้อมูล:', '----------------------'],
-                ['<b>💻 Programmer Request</b>', '<b>Software:</b>', '<b>Module:</b>', '<b>1. อาการที่พบ:</b>', '<b>2. ความต้องการ:</b>', '<b>3. แหล่งข้อมูล:</b>', '➖➖➖➖➖➖➖➖➖➖'],
+                ['[PROGRAMMER REQUEST]', 'Software:', 'Module:', '1. อาการที่พบ:', '2. ขั้นตอนที่ทำ:', '3. ความต้องการ:', '4. เอกสาร/อ้างอิง:', '----------------------'],
+                ['<b>💻 Programmer Request</b>', '<b>Software:</b>', '<b>Module:</b>', '<b>1. อาการที่พบ:</b>', '<b>2. ขั้นตอนที่ทำ:</b>', '<b>3. ความต้องการ:</b>', '<b>4. เอกสาร/อ้างอิง:</b>', '➖➖➖➖➖➖➖➖➖➖'],
                 $problemRaw
             );
             
@@ -135,6 +152,16 @@ if ($key === 'it_logs') {
                    $formattedProblem . "\n" .
                    "\n#NewTicket #Programmer";
         } else {
+            $typeStr     = trim((string)($data['type'] ?? ''));
+            $contactStr  = trim((string)($data['contact'] ?? ''));
+            $assetStr    = trim((string)($data['asset_id'] ?? ''));
+            $apptStr     = trim((string)($data['appointment_date'] ?? ''));
+
+            $typeLine    = $typeStr    ? "\n<b>🔧 ประเภทงาน:</b> {$typeStr}"        : '';
+            $contactLine = $contactStr ? "\n<b>📞 เบอร์โทร:</b> {$contactStr}"       : '';
+            $assetLine   = $assetStr   ? "\n<b>💻 อุปกรณ์:</b> {$assetStr}"          : '';
+            $apptLine    = $apptStr    ? "\n<b>📅 นัดหมาย:</b> {$apptStr}"           : '';
+
             $msg = "<b>🆕 New Ticket Alert {$uEmoji}</b>\n" .
                    "➖➖➖➖➖➖➖➖➖➖\n" .
                    "<b>🏢 Company:</b> " . ($data['company']??'-') . "\n" .
@@ -142,21 +169,35 @@ if ($key === 'it_logs') {
                    "<b>🕒 Time:</b> {$now}\n" .
                    "<b>👤 User:</b> " . ($data['requester']??'-') . "\n" .
                    "<b>🏢 Dept:</b> " . ($data['department']??'-') . "\n" .
-                   "<b>🚨 Level:</b> {$urgency}\n" .
+                   "<b>🚨 Level:</b> {$urgency}" .
+                   $typeLine . $contactLine . $assetLine . $apptLine . "\n" .
                    "➖➖➖➖➖➖➖➖➖➖\n" .
                    "<b>📝 Problem:</b>\n" . $problemRaw . "\n" .
                    "\n#NewTicket #ITSupport";
         }
 
-        sendTelegramNotification($conn, $msg, 'repair');
+        sendNotify($conn, $msg, 'it_repair', $data['company'] ?? null);
 
         // Log to Asset History (บันทึกประวัติการแจ้งซ่อมลงใน Asset)
         if (!empty($data['asset_id'])) {
-            $assetIdStr = $conn->real_escape_string($data['asset_id']);
-            $assetQ = $conn->query("SELECT id FROM it_assets WHERE equipment_id = '$assetIdStr' LIMIT 1");
+            $assetIdStr = $data['asset_id'];
+            $assetStmt = $conn->prepare("SELECT id FROM it_assets WHERE equipment_id = ? LIMIT 1");
+            $assetStmt->bind_param("s", $assetIdStr);
+            $assetStmt->execute();
+            $assetQ = $assetStmt->get_result();
             if ($assetQ && $assetRow = $assetQ->fetch_assoc()) {
                 logAssetHistory($conn, $assetRow['id'], 'REPAIR_REQUEST', "Ticket #$new_id: " . ($data['problem']??''));
             }
+        }
+
+        // Log initial Pending event
+        $ev_actor    = trim((string)($_SESSION['display_name'] ?? $_SESSION['username'] ?? $_SESSION['user_id'] ?? 'ผู้ใช้'));
+        $ev_actor_id = trim((string)($_SESSION['user_id'] ?? ''));
+        $ev_type_new = 'CREATE';
+        $ev_stmt = $conn->prepare("INSERT INTO mt_ticket_events (log_id,event_type,from_status,to_status,actor_id,actor_name,created_at) VALUES (?,'CREATE',NULL,'Pending',?,?,NOW())");
+        if ($ev_stmt) {
+            $ev_stmt->bind_param("sss", $new_id, $ev_actor_id, $ev_actor);
+            $ev_stmt->execute();
         }
 
         echo json_encode(['status' => 'success', 'new_id' => $new_id]);
@@ -164,29 +205,47 @@ if ($key === 'it_logs') {
         throw new Exception("Execute failed (Add Log): " . $stmt->error);
     }
 } else {
-    if (!$isLoggedIn || !in_array($role, ['admin', 'staff'], true)) throw new Exception("Access Denied");
+    if (!$isLoggedIn) throw new Exception("Access Denied");
+    if ($role !== 'admin') {
+        $requiredPermission = permissionForAdminWriteKey($key);
+        if ($requiredPermission !== null) {
+            if (!hasPermission($conn, $requiredPermission)) throw new Exception("Access Denied");
+        } elseif (!in_array($role, ['admin', 'staff'], true)) {
+            throw new Exception("Access Denied");
+        }
+    }
     // Original generic handler for other keys
     $json = $_POST['data'] ?? '{}';
     $data = json_decode($json, true);
     
     $config = [
         'departments' => ['table' => 'departments', 'pk' => 'dept_id', 'fields' => ['dept_name', 'dept_abbr']],
-        'asset_categories' => ['table' => 'asset_categories', 'pk' => 'cat_id', 'fields' => ['cat_name', 'cat_abbr']],
+        'asset_categories' => ['table' => 'asset_categories', 'pk' => 'cat_id', 'fields' => ['cat_name', 'cat_abbr', 'default_useful_life']],
         'meeting_rooms' => ['table' => 'meeting_rooms', 'pk' => 'id', 'fields' => ['name', 'company', 'location', 'capacity', 'equipment', 'is_active', 'details', 'custodian', 'contact_phone', 'status', 'images']],
         'announcements' => ['table' => 'announcements', 'pk' => 'id', 'fields' => ['title', 'content', 'category', 'level', 'expirationDate']],
         'holidays' => ['table' => 'holidays', 'pk' => 'id', 'fields' => ['name', 'date', 'type']],
-        'services' => ['table' => 'services', 'pk' => 'id', 'fields' => ['id', 'icon', 'title', 'description', 'color', 'sort_order', 'url_primary', 'url_fallback']],
+        'services' => ['table' => 'services', 'pk' => 'id', 'fields' => ['id', 'icon', 'title', 'description', 'color', 'sort_order', 'is_active', 'url_primary', 'url_fallback']],
         'kb_categories' => ['table' => 'kb_categories', 'pk' => 'id', 'fields' => ['name', 'description', 'icon', 'sort_order']],
         'kb_articles' => ['table' => 'kb_articles', 'pk' => 'id', 'fields' => ['category_id', 'title', 'content', 'tags', 'is_published', 'author_id']],
         'job_tickets' => ['table' => 'job_tickets', 'pk' => 'id', 'fields' => ['company', 'department', 'building', 'job_name', 'responsible', 'deadline', 'is_receive', 'is_doing', 'is_send', 'is_approve', 'is_done', 'created_by_id', 'created_by_name']]
     ];
 
     if (!isset($config[$key])) throw new Exception("Unknown key: $key");
+
+    if ($key === 'services') {
+        ptc_ensure_services_is_active_column($conn);
+    }
     
     $table = $config[$key]['table'];
     $fields = $config[$key]['fields'];
     
-    if ($key === 'kb_articles') {
+    if ($key === 'services') {
+        $data['id'] = trim((string)($data['id'] ?? ''));
+        if ($data['id'] === '') {
+            throw new Exception('กรุณาระบุรหัสบริการ (ID)');
+        }
+        $data['is_active'] = (isset($data['is_active']) && (int)$data['is_active'] === 0) ? 0 : 1;
+    } else if ($key === 'kb_articles') {
         $data['is_published'] = isset($data['is_published']) && $data['is_published'] == 1 ? 1 : 0;
         $data['author_id'] = $_SESSION['user_id'] ?? null;
     } else if ($key === 'job_tickets') {

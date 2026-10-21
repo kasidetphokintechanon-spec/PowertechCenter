@@ -31,9 +31,31 @@ if (!$isPrivileged && ($log['status'] ?? '') !== 'Pending') throw new Exception(
 $reason = $_POST['reason'] ?? '';
 if (empty($reason)) throw new Exception("Cancellation reason required");
 
+// Fetch ticket info before update (for notification)
+$stmt_info = $conn->prepare("SELECT requester, problem, company FROM it_logs WHERE id = ? LIMIT 1");
+$stmt_info->bind_param("s", $id);
+$stmt_info->execute();
+$ticketInfo = $stmt_info->get_result()->fetch_assoc();
+$stmt_info->close();
+
 $stmt = $conn->prepare("UPDATE it_logs SET status = 'Cancelled', solution = ? WHERE id = ?");
 $stmt->bind_param("ss", $reason, $id);
 if ($stmt->execute()) {
+    // Notification
+    if ($ticketInfo) {
+        require_once __DIR__ . '/../../../includes/notify_helper.php';
+        $cancellerName = $_SESSION['display_name'] ?? $_SESSION['username'] ?? 'ผู้ใช้';
+        $msg = "<b>🚫 ยกเลิกงานซ่อม IT</b>\n" .
+               "➖➖➖➖➖➖➖➖➖➖\n" .
+               "<b>🏢 Company:</b> " . ($ticketInfo['company'] ?? '-') . "\n" .
+               "<b>🎫 Ticket:</b> <code>{$id}</code>\n" .
+               "<b>👤 User:</b> " . ($ticketInfo['requester'] ?? '-') . "\n" .
+               "<b>🚫 ยกเลิกโดย:</b> {$cancellerName}\n" .
+               "<b>📝 เหตุผล:</b> {$reason}\n" .
+               "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
+               "\n#Cancelled";
+        sendNotify($conn, $msg, 'it_cancel', $ticketInfo['company'] ?? null);
+    }
     echo json_encode(['status' => 'success']);
 } else {
     throw new Exception("Update failed");

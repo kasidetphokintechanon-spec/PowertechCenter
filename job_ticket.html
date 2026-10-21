@@ -1,551 +1,475 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
-    <head>
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- <base target="_top"> เอาออกเพื่อให้ทำงานบน Local ได้ -->
-    <title>Job Ticket - Powertech System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Notebook - Powertech System</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="manifest" href="app-manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/favicon-version.js"></script>
     <script src="js/pwa.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/job-ticket-v2.css?v=20260601">
+    <link rel="stylesheet" href="css/job-ticket-theme.css?v=20260601">
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script src="js/enterprise-swal.js?v=20260526"></script>
     <style>
-        :root {
-            --bg-light: #f1f5f9;
-            --text-main: #334155;
-            --text-light: #64748b;
-            --gray-border: #e2e8f0;
-            
-            /* Company Colors */
-            --pt4-main: #dc2626; --pt4-light: #fee2e2;
-            --pta-main: #16a34a; --pta-light: #dcfce7;
-            --pte-main: #0ea5e9; --pte-light: #e0f2fe;
+        body { font-family: 'Kanit', sans-serif; background: #f1f5f9; color: #0f172a; }
 
-            /* Status Colors */
-            --col-receive: #0ea5e9; 
-            --col-doing: #f59e0b;
-            --col-send: #3b82f6;
-            --col-approve: #8b5cf6;
-            --col-done: #22c55e;
+        /* ── Metric pills (ported from task_center) ── */
+        .metric-pill {
+            display: flex; align-items: center; gap: 10px;
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 10px 14px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+            font-family: 'Kanit', sans-serif; border: none;
         }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; color: var(--text-main); margin: 0; padding-bottom: 80px; }
-        
-        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .metric-pill:hover { border: 1px solid #94a3b8; box-shadow: 0 2px 8px rgba(15,23,42,.06); }
+        .metric-pill.active { border: 1px solid #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+        .pill-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .pill-num  { font-size: 1.5rem; font-weight: 700; line-height: 1; color: #0f172a; }
+        .pill-label { font-size: 0.72rem; color: #64748b; margin-top: 1px; }
+        .pill-total  .pill-icon { background: #dbeafe; color: #2563eb; }
+        .pill-todo   .pill-icon { background: #f1f5f9; color: #475569; }
+        .pill-doing  .pill-icon { background: #fef3c7; color: #b45309; }
+        .pill-overdue .pill-icon { background: #fee2e2; color: #dc2626; }
+        .pill-done   .pill-icon { background: #dcfce7; color: #15803d; }
 
-        /* Tabs (Mobile Scrollable) */
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            padding: 10px 24px; border: none; background: white; border-radius: 999px; cursor: pointer;
-            font-family: 'Kanit'; font-size: 0.95rem; font-weight: 500; color: var(--text-light); white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0; border: 2px solid transparent; transition: all 0.2s;
+        /* ── Quick filter chips ── */
+        .qf-chip {
+            padding: 7px 14px; border-radius: 9999px; border: 1px solid #e2e8f0;
+            background: #fff; font-size: 0.82rem; font-weight: 500; color: #475569;
+            cursor: pointer; transition: all .15s; white-space: nowrap; font-family: 'Kanit', sans-serif;
         }
-        .tab-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tab-btn.active.pt4 { background: var(--pt4-main); color: white; border-color: var(--pt4-main); }
-        .tab-btn.active.pta { background: var(--pta-main); color: white; border-color: var(--pta-main); }
-        .tab-btn.active.pte { background: var(--pte-main); color: white; border-color: var(--pte-main); }
+        .qf-chip:hover { border-color: #94a3b8; }
+        .qf-chip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
 
-        /* Dashboard (Mobile Compact) */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        @media (min-width: 768px) { .dashboard-grid { grid-template-columns: repeat(4, 1fr); } }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative; overflow: hidden; border: 1px solid #f1f5f9; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .card h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: var(--text-light); font-weight: 500; }
-        .card .value { font-size: 2rem; font-weight: 700; line-height: 1; }
-        .card-icon { position: absolute; right: 15px; top: 15px; font-size: 2rem; opacity: 0.1; }
-        [data-theme="PT4"] .card .value { color: var(--pt4-main); }
-        [data-theme="PTA"] .card .value { color: var(--pta-main); }
-        [data-theme="PTE"] .card .value { color: var(--pte-main); }
-
-        /* Controls */
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .controls select { flex: 1; min-width: 150px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--gray-border); background: white; font-family: 'Kanit'; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: border-color 0.2s; }
-        .controls select:focus { border-color: #3b82f6; }
-        
-        /* Floating Add Button (Mobile Friendly) */
-        .btn-add-float {
-            position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%;
-            background: #334155; color: white; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 90; cursor: pointer; transition: transform 0.2s;
+        /* ── Filter inputs (shared with task_center) ── */
+        .filter-input, .filter-select {
+            width: 100%; border-radius: 10px; border: 1px solid #e2e8f0;
+            background: #fff; padding: 9px 11px; font-size: 0.875rem;
+            font-family: 'Kanit', sans-serif; color: #0f172a; outline: none; transition: border-color .15s;
         }
-        [data-theme="PT4"] .btn-add-float { background: var(--pt4-main); }
-        [data-theme="PTA"] .btn-add-float { background: var(--pta-main); }
-        [data-theme="PTE"] .btn-add-float { background: var(--pte-main); }
-        .btn-add-float:active { transform: scale(0.95); }
-        .btn-add-float i { font-size: 1.5rem; }
+        .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
+        .filter-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 5px; }
 
-        .chart-wrapper {
-            position: relative;
-            height: 220px;
-        }
-        @media (min-width: 1024px) {
-            .chart-wrapper {
-                height: 260px;
-            }
+        /* ── Section card ── */
+        .section-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 20px; }
+
+        /* ── View / icon btn ── */
+        .view-btn { width: 34px; height: 34px; border-radius: 9px; border: none; background: transparent; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; font-size: 14px; }
+        .view-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+        /* ── 2-panel layout ── */
+        .jt-layout { display: flex; height: calc(100vh - 56px - 68px); overflow: hidden; }
+        .jt-list-panel { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        @media (max-width: 768px) {
+            .jt-layout { flex-direction: column; height: auto; }
+            .jt-list-panel { height: auto; overflow-y: visible; }
         }
 
-        /* Job List as Cards (Mobile First) */
-        .job-list { display: flex; flex-direction: column; gap: 12px; }
+        /* ── Task list groups ── */
+        .task-group { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+        .task-group-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; user-select: none; }
+        .task-group-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+        .task-group-count { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+        .tg-overdue .task-group-title { color: #dc2626; }
+        .tg-overdue .task-group-count { background: #fee2e2; color: #dc2626; }
+        .tg-todo .task-group-title { color: #475569; }
+        .tg-todo .task-group-count { background: #f1f5f9; color: #475569; }
+        .tg-doing .task-group-title { color: #b45309; }
+        .tg-doing .task-group-count { background: #fef3c7; color: #b45309; }
+        .tg-done .task-group-title { color: #15803d; }
+        .tg-done .task-group-count { background: #dcfce7; color: #15803d; }
+        .task-group-body { display: flex; flex-direction: column; }
+        .task-group-body.collapsed { display: none; }
 
-        /* Personal Task Card — Rich & Colorful */
-        .personal-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid #f1f5f9;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .personal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+        /* ── Analytics collapsible ── */
+        .analytics-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; background: none; border: none; cursor: pointer; font-family: 'Kanit', sans-serif; padding: 0; }
+        #jnAnalyticsBody { transition: all .2s; }
 
-        /* สีแถบซ้ายตาม priority */
-        .personal-card .card-stripe { width: 5px; flex-shrink: 0; border-radius: 0; }
-        .personal-card.priority-urgent .card-stripe { background: linear-gradient(180deg,#ef4444,#dc2626); }
-        .personal-card.priority-high   .card-stripe { background: linear-gradient(180deg,#f59e0b,#d97706); }
-        .personal-card.priority-normal .card-stripe { background: linear-gradient(180deg,#3b82f6,#2563eb); }
-        .personal-card.priority-low    .card-stripe { background: linear-gradient(180deg,#94a3b8,#64748b); }
+        /* ── Scope segment (inline pill group) ── */
+        .scope-segment { display: inline-flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px; }
+        .scope-btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border: none; background: transparent; font-family: 'Kanit', sans-serif; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
+        .scope-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,.1); font-weight: 600; }
 
-        /* ส่วนหัว card */
-        .pc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-        .pc-title { font-size: 1rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
-        .pc-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 8px; }
+        /* ── Deadline alert strip ── */
+        #personalDeadlineAlerts:not(:empty) { margin-bottom: 0; }
 
-        /* Priority badge */
-        .pc-priority { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: .02em; }
-        .priority-urgent .pc-priority { background: #fef2f2; color: #dc2626; }
-        .priority-high   .pc-priority { background: #fffbeb; color: #d97706; }
-        .priority-normal .pc-priority { background: #eff6ff; color: #2563eb; }
-        .priority-low    .pc-priority { background: #f8fafc; color: #64748b; }
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* Deadline badge */
-        .pc-deadline { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
-        .pc-deadline.late { background: #fef2f2; color: #dc2626; font-weight: 600; }
-        .pc-deadline.soon { background: #fffbeb; color: #d97706; font-weight: 600; }
+        h1,h2,h3,h4 { letter-spacing: -.01em; }
 
-        /* Description */
-        .pc-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* Tags */
-        .pc-tag { display: inline-flex; align-items: center; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: #f1f5f9; color: #475569; margin-right: 4px; margin-bottom: 4px; }
-
-        /* Progress */
-        .pc-progress-bar { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
-        .pc-progress-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
-
-        /* Footer row */
-        .pc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
-        .pc-meta { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
-        .pc-meta-item { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
-
-        /* Status cycle button */
-        .pc-status-btn { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer; font-family: 'Kanit'; font-weight: 500; transition: all .15s; white-space: nowrap; }
-        .pc-status-btn:hover { border-color: #3b82f6; color: #2563eb; }
-        .pc-status-btn.doing { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
-        .pc-status-btn.done  { border-color: #22c55e; color: #16a34a; background: #f0fdf4; }
-
-        /* Update button */
-        .pc-update-btn { font-size: 11px; padding: 4px 12px; border-radius: 999px; border: none; background: #3b82f6; color: white; cursor: pointer; font-family: 'Kanit'; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: background .15s; white-space: nowrap; }
-        .pc-update-btn:hover { background: #2563eb; }
-
-        /* Delete button */
-        .pc-delete-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: #fef2f2; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: background .15s; flex-shrink: 0; }
-        .pc-delete-btn:hover { background: #fee2e2; }
-
-        /* Column header colors */
-        .col-header-todo  { color: #64748b; }
-        .col-header-doing { color: #d97706; }
-        .col-header-done  { color: #16a34a; }
-
-        /* ═══════════════════════════════════════════
-           JOB TICKET CARD — Redesigned
-        ═══════════════════════════════════════════ */
-        .job-card {
-            background: white;
-            border-radius: 20px;
-            padding: 0;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid var(--gray-border);
-            transition: transform 0.2s cubic-bezier(.25,.8,.25,1), box-shadow 0.2s cubic-bezier(.25,.8,.25,1);
-            overflow: hidden;
-            position: relative;
-        }
-        .job-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.1); }
-
-        /* Top accent stripe — progress bar */
-        .jc-progress-bar { height: 5px; background: #f1f5f9; }
-        .jc-progress-fill { height: 100%; border-radius: 0 3px 3px 0; transition: width 0.6s ease; }
-        .job-card[data-company="PT4"] .jc-progress-fill { background: linear-gradient(90deg,#b91c1c,#ef4444); }
-        .job-card[data-company="PTA"] .jc-progress-fill { background: linear-gradient(90deg,#15803d,#22c55e); }
-        .job-card[data-company="PTE"] .jc-progress-fill { background: linear-gradient(90deg,#0284c7,#38bdf8); }
-
-        /* Card body */
-        .jc-body { padding: 16px 18px 18px; }
-
-        /* Title */
-        .job-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; }
-
-        /* Status + deadline row */
-        .jc-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; align-items: center; }
-
-        /* Status badge */
-        .jc-status { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; }
-        .jc-status.s-pending  { background: #f1f5f9; color: #64748b; }
-        .jc-status.s-receive  { background: #e0f2fe; color: #0284c7; }
-        .jc-status.s-doing    { background: #fef3c7; color: #b45309; }
-        .jc-status.s-send     { background: #ede9fe; color: #6d28d9; }
-        .jc-status.s-approve  { background: #f3e8ff; color: #7e22ce; }
-        .jc-status.s-done     { background: #dcfce7; color: #15803d; }
-
-        /* Deadline chip */
-        .jc-deadline { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
-        .jc-deadline.dl-ok     { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-        .jc-deadline.dl-soon   { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-        .jc-deadline.dl-late   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-        .jc-deadline.dl-done   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-        @keyframes overdue-pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
-        .jc-deadline.dl-late { animation: overdue-pulse 2s infinite; }
-
-        /* Meta row (dept + buildings) */
-        .jc-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; align-items: center; }
-        .badge-building { padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
-        .job-card[data-company="PT4"] .badge-building { background: var(--pt4-light); color: var(--pt4-main); }
-        .job-card[data-company="PTA"] .badge-building { background: var(--pta-light); color: var(--pta-main); }
-        .job-card[data-company="PTE"] .badge-building { background: var(--pte-light); color: var(--pte-main); }
-        .badge-building:not([class~="job-card"]) { background: #f1f5f9; color: #64748b; }
-        .badge-dept { font-size: 0.7rem; background: #e2e8f0; color: #475569; padding: 2px 7px; border-radius: 20px; }
-
-        /* Responsible row */
-        .jc-responsible { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 0.85rem; color: #475569; }
-        .jc-avatar { width: 28px; height: 28px; border-radius: 50%; font-size: 0.68rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase; }
-        .job-card[data-company="PT4"] .jc-avatar { background: #fee2e2; color: #b91c1c; }
-        .job-card[data-company="PTA"] .jc-avatar { background: #dcfce7; color: #15803d; }
-        .job-card[data-company="PTE"] .jc-avatar { background: #e0f2fe; color: #0284c7; }
-
-        /* Legacy (keep for table) */
-        .job-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .job-meta { display: flex; gap: 10px; font-size: 0.85rem; color: var(--text-light); align-items: center; flex-wrap: wrap; }
-        .badge-deadline { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
-        .badge-deadline.late { color: #ef4444; font-weight: 600; }
-        
-        /* Stepper */
-        .stepper { display: flex; justify-content: space-between; margin-top: 16px; position: relative; padding: 0 5px; }
-        .stepper::before { content: ''; position: absolute; top: 15px; left: 10px; right: 10px; height: 3px; background: #f1f5f9; border-radius: 2px; z-index: 1; }
-        /* Filled portion — updated via JS */
-        .stepper-fill { position: absolute; top: 15px; left: 10px; height: 3px; border-radius: 2px; z-index: 1; transition: width 0.6s ease; }
-        .job-card[data-company="PT4"] .stepper-fill { background: linear-gradient(90deg,#b91c1c,#ef4444); }
-        .job-card[data-company="PTA"] .stepper-fill { background: linear-gradient(90deg,#15803d,#22c55e); }
-        .job-card[data-company="PTE"] .stepper-fill { background: linear-gradient(90deg,#0284c7,#38bdf8); }
-
-        .step-item { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; cursor: pointer; flex: 1; }
-        .step-circle { width: 32px; height: 32px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; justify-content: center; align-items: center; color: #cbd5e1; font-size: 0.78rem; transition: all 0.2s; }
-        .step-label { font-size: 0.65rem; color: var(--text-light); margin-top: 5px; font-weight: 500; }
-
-        /* Active States */
-        .step-item.active .step-circle { color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
-        .step-item.active .step-label { font-weight: 700; color: var(--text-main); }
-        
-        .step-item[data-step="receive"].active .step-circle { background: var(--col-receive); }
-        .step-item[data-step="doing"].active .step-circle { background: var(--col-doing); }
-        .step-item[data-step="send"].active .step-circle { background: var(--col-send); }
-        .step-item[data-step="approve"].active .step-circle { background: var(--col-approve); }
-        .step-item[data-step="done"].active .step-circle { background: var(--col-done); }
-
-        /* Animations for Status Flow */
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(var(--pulse-rgb), 0); }
-            100% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0); }
-        }
-        @keyframes icon-wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
-        @keyframes icon-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes icon-pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
-        .step-item { --pulse-rgb: 203, 213, 225; }
-        .step-item[data-step="receive"] { --pulse-rgb: 14, 165, 233; }
-        .step-item[data-step="doing"] { --pulse-rgb: 245, 158, 11; }
-        .step-item[data-step="send"] { --pulse-rgb: 59, 130, 246; }
-        .step-item[data-step="approve"] { --pulse-rgb: 139, 92, 246; }
-        .step-item[data-step="done"] { --pulse-rgb: 34, 197, 94; }
-
-        .step-item.current-pulse .step-circle { animation: pulse-ring 2s infinite; }
-        .step-item.current-pulse[data-step="doing"] i { animation: icon-wobble 2s ease-in-out infinite; display: inline-block; }
-        .step-item.current-pulse[data-step="send"] i { animation: icon-float 2s ease-in-out infinite; display: inline-block; }
-        .step-item.current-pulse[data-step="receive"] i { animation: icon-pop 2s ease-in-out infinite; display: inline-block; }
-
-        /* Last Update Footer */
-        .job-footer { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--gray-border); font-size: 0.72rem; color: #94a3b8; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
-
-        /* Desktop Table Styles (Hidden on Mobile) */
-        .table-wrap { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow-x: auto; border: 1px solid var(--gray-border); }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1100px; }
-        th { background: #f8fafc; text-align: left; padding: 16px; font-weight: 600; color: #475569; border-bottom: 2px solid var(--gray-border); white-space: nowrap; position: sticky; top: 0; }
-        td { padding: 16px; border-bottom: 1px solid var(--gray-border); vertical-align: middle; }
-
-        /* Job Ticket Cards - ดีทั้ง mobile และ desktop */
-        .job-list { display: flex; flex-direction: column; gap: 12px; }
-        @media (min-width: 768px) {
-            .job-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-        }
-        @media (min-width: 1200px) {
-            .job-list { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        /* Modal (Full Screen on Mobile) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5000; align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-        @media (max-width: 600px) {
-            .modal-content { width: 100%; height: 100%; max-width: none; max-height: none; border-radius: 0; padding: 20px; }
-        }
-
-        /* ── Add Job Modal – redesign ── */
-        #addModal .modal-content { padding: 0; overflow: hidden; border-radius: 22px; max-width: 460px; }
-        #addModal .add-modal-header { padding: 20px 22px 18px; display: flex; align-items: center; justify-content: space-between; transition: background .25s; }
-        #addModal[data-modal-theme="PT4"] .add-modal-header { background: linear-gradient(135deg, #b91c1c, #ef4444); }
-        #addModal[data-modal-theme="PTA"] .add-modal-header { background: linear-gradient(135deg, #15803d, #22c55e); }
-        #addModal[data-modal-theme="PTE"] .add-modal-header { background: linear-gradient(135deg, #0284c7, #38bdf8); }
-        #addModal .add-modal-header h3 { color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0; }
-        #addModal .add-modal-header p  { color: rgba(255,255,255,.7); font-size: 0.72rem; margin: 0 0 2px; }
-        .add-modal-close { background: rgba(255,255,255,.2); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; transition: background .15s; flex-shrink: 0; }
-        .add-modal-close:hover { background: rgba(255,255,255,.35); }
-        #addModal .add-modal-body { padding: 20px 22px 22px; }
-        .co-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
-        .co-tab { padding: 9px 0; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 700; font-size: 0.88rem; color: #64748b; background: #f8fafc; transition: all .15s; user-select: none; }
-        .co-tab:hover:not(.active) { border-color: #94a3b8; background: #f1f5f9; }
-        .co-tab.active.pt4 { background:#dc2626; color:#fff; border-color:#dc2626; box-shadow:0 3px 10px rgba(220,38,38,.3); }
-        .co-tab.active.pta { background:#16a34a; color:#fff; border-color:#16a34a; box-shadow:0 3px 10px rgba(22,163,74,.3); }
-        .co-tab.active.pte { background:#0ea5e9; color:#fff; border-color:#0ea5e9; box-shadow:0 3px 10px rgba(14,165,233,.3); }
-        .co-tab.disabled { opacity: .35; pointer-events: none; }
-        .add-field { margin-bottom: 13px; }
-        .add-field > label { font-size: 0.73rem; font-weight: 700; color: #64748b; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .add-field .input-wrap { position: relative; }
-        .add-field .input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; pointer-events: none; }
-        .add-field .input-wrap input, .add-field .input-wrap select { width: 100%; padding: 11px 12px 11px 36px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem; font-family: 'Kanit'; color: #0f172a; background: #f8fafc; transition: border-color .15s, box-shadow .15s; outline: none; -webkit-appearance: none; }
-        .add-field .input-wrap input:focus, .add-field .input-wrap select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); background: #fff; }
-        .date-shortcuts { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-        .ds-btn { padding: 4px 11px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.75rem; color: #475569; background: #fff; cursor: pointer; font-family: 'Kanit'; transition: all .12s; }
-        .ds-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
-        #buildingSelector .b-chip { cursor: pointer; transition: all .12s; }
-        #buildingSelector .b-chip:hover:not(.selected) { background: #f1f5f9; border-color: #94a3b8; }
-        .add-submit { width: 100%; padding: 13px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; font-family: 'Kanit'; color: #fff; cursor: pointer; margin-top: 8px; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        #addModal[data-modal-theme="PT4"] .add-submit { background: linear-gradient(135deg,#dc2626,#ef4444); box-shadow: 0 4px 14px rgba(220,38,38,.35); }
-        #addModal[data-modal-theme="PTA"] .add-submit { background: linear-gradient(135deg,#16a34a,#22c55e); box-shadow: 0 4px 14px rgba(22,163,74,.35); }
-        #addModal[data-modal-theme="PTE"] .add-submit { background: linear-gradient(135deg,#0ea5e9,#38bdf8); box-shadow: 0 4px 14px rgba(14,165,233,.35); }
-        .add-submit:hover { opacity: .9; transform: translateY(-1px); }
-
-        .form-row { margin-bottom: 20px; }
-        .form-row label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; }
-        .form-row input, .form-row select { width: 100%; padding: 14px; border: 1px solid var(--gray-border); border-radius: 10px; font-size: 1rem; font-family: 'Kanit'; -webkit-appearance: none; background: white; }
-
-        /* Chips */
-        .building-selector { display: flex; flex-wrap: wrap; gap: 8px; }
-        .b-chip { 
-            padding: 10px 18px; border: 1px solid var(--gray-border); border-radius: 25px; 
-            font-size: 0.95rem; background: white; color: var(--text-main);
-        }
-        .b-chip.selected { color: white; border-color: transparent; }
-        .modal[data-modal-theme="PT4"] .b-chip.selected { background: var(--pt4-main); }
-        .modal[data-modal-theme="PTA"] .b-chip.selected { background: var(--pta-main); }
-        .modal[data-modal-theme="PTE"] .b-chip.selected { background: var(--pte-main); }
-        #personalSettingsModal input#setting-hide-done:checked + span { background: #60a5fa; }
-        #personalSettingsModal input#setting-hide-done:checked + span .dot { transform: translateX(20px); }
-
-        /* Dashboard styles */
-        .dash-filter-btn { transition: all .2s; }
-        .dash-company-card { background:white; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,.04); border:1px solid #f1f5f9; }
-        .dash-prog-bar { height:8px; background:#f1f5f9; border-radius:4px; overflow:hidden; margin:8px 0; }
-        .dash-prog-fill { height:100%; border-radius:4px; transition:width .5s ease; }
-        .dash-stat-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-        .dash-stat-chip { font-size:11px; padding:2px 8px; border-radius:6px; background:#f1f5f9; color:#64748b; }
-        .dash-stat-chip.red { background:#fee2e2; color:#dc2626; }
-        .dash-stat-chip.amber { background:#fef3c7; color:#d97706; }
-        .overdue-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:white; border:1px solid #f1f5f9; border-radius:12px; }
-        .overdue-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; }
-        .activity-row { display:flex; align-items:center; gap:10px; padding:8px 14px; background:white; border:1px solid #f1f5f9; border-radius:10px; font-size:0.85rem; }
-        /* Progress bar on personal cards */
-        .task-progress-bar { height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden; margin-top:8px; }
-        .task-progress-fill { height:100%; border-radius:2px; background:#22c55e; }
-        .task-comment-btn { font-size:11px; padding:3px 10px; border:1px solid #e2e8f0; border-radius:999px; background:white; color:#64748b; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:4px; }
-        .task-comment-btn:hover { border-color:#3b82f6; color:#3b82f6; }
-
-        /* Loading & Toast */
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; z-index: 3000; }
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--gray-border); border-top-color: #334155; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 4000; display:flex; align-items:center; gap:10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size: 0.95rem; white-space: nowrap; }
-        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        #toast.error { background: #ef4444; }
-        #toast.success { background: #22c55e; }
+        /* ── Dark mode ── */
+        html.dark body { background: var(--ptc-bg); color: var(--ptc-text); }
+        html.dark .metric-pill { background: var(--ptc-surface); border-color: var(--ptc-border); }
+        html.dark .metric-pill:hover { border-color: var(--ptc-border-strong); }
+        html.dark .pill-num { color: var(--ptc-text); }
+        html.dark .pill-label { color: var(--ptc-text-muted); }
+        html.dark .pill-total .pill-icon { background: #1e3a5f; color: #60a5fa; }
+        html.dark .pill-todo .pill-icon { background: var(--ptc-surface-2); color: var(--ptc-text-2); }
+        html.dark .pill-doing .pill-icon { background: #4a3510; color: #fbbf24; }
+        html.dark .pill-overdue .pill-icon { background: #4a1515; color: #f87171; }
+        html.dark .pill-done .pill-icon { background: #143a24; color: #4ade80; }
+        html.dark .qf-chip { background: var(--ptc-surface); border-color: var(--ptc-border); color: var(--ptc-text-2); }
+        html.dark .qf-chip:hover { border-color: var(--ptc-border-strong); }
+        html.dark .qf-chip.active { background: var(--ptc-text); color: var(--ptc-bg); border-color: var(--ptc-text); }
+        html.dark .filter-input, html.dark .filter-select { background: var(--ptc-surface); border-color: var(--ptc-border); color: var(--ptc-text); }
+        html.dark .filter-label { color: var(--ptc-text-faint); }
+        html.dark .section-card { background: var(--ptc-surface); border-color: var(--ptc-border); }
+        html.dark .view-btn { color: var(--ptc-text-muted); }
+        html.dark .view-btn.active { background: var(--ptc-surface-2); color: var(--ptc-text); }
+        html.dark .task-group { background: var(--ptc-surface); border-color: var(--ptc-border); }
+        html.dark .task-group-header { border-bottom-color: var(--ptc-border); }
+        html.dark .tg-todo .task-group-count { background: var(--ptc-surface-2); color: var(--ptc-text-2); }
+        html.dark .tg-doing .task-group-count { background: #4a3510; color: #fbbf24; }
+        html.dark .tg-overdue .task-group-count { background: #4a1515; color: #f87171; }
+        html.dark .tg-done .task-group-count { background: #143a24; color: #4ade80; }
+        html.dark .scope-segment { background: var(--ptc-surface-2); }
+        html.dark .scope-btn { color: var(--ptc-text-muted); }
+        html.dark .scope-btn.active { background: var(--ptc-surface); color: var(--ptc-text); }
+        html.dark ::-webkit-scrollbar-thumb { background: var(--ptc-border-strong); }
+        html.dark #personalEmpty { background: var(--ptc-surface); border-color: var(--ptc-border); }
+        html.dark #jt-topbar, html.dark #jt-metrics-strip { background: var(--ptc-surface); border-color: var(--ptc-border); }
+        html.dark #jt-topbar span.font-bold, html.dark #jt-topbar .text-slate-900 { color: var(--ptc-text); }
+        html.dark #jt-topbar a, html.dark #jt-topbar button:not(#btn-personal-add-desktop) { color: var(--ptc-text-muted); }
+        html.dark #jt-topbar a:hover, html.dark #jt-topbar button:not(#btn-personal-add-desktop):hover { background: var(--ptc-surface-2); }
+        html.dark #navUserDisplay { color: var(--ptc-text-faint); }
+        html.dark #personalDeadlineAlerts .bg-white { background: var(--ptc-surface) !important; }
+        html.dark #personalDeadlineAlerts .border-emerald-100 { border-color: var(--ptc-border) !important; }
+        html.dark #personalDeadlineAlerts .text-slate-800 { color: var(--ptc-text) !important; }
+        html.dark #personalDeadlineAlerts .text-slate-500 { color: var(--ptc-text-muted) !important; }
     </style>
+    <script>
+        (function(){
+            const t = localStorage.getItem('theme') || 'light';
+            if (t === 'dark') document.documentElement.classList.add('dark','dark-theme');
+            document.documentElement.classList.add('jn-page-root');
+        })();
+    </script>
 </head>
-<body>
+<body class="ptc-unified-v1 ptc-normalize jn-page-root">
 
     <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
     <div id="toast">Message</div>
 
-    <nav class="glass-effect sticky top-0 z-50 px-6 py-4 flex flex-col gap-3 md:flex-row md:justify-between md:items-center shadow-sm">
-        <div class="flex items-center gap-3">
-            <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-600 transition text-slate-500"><i class="fas fa-arrow-left"></i></a>
-            <div>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Job Notebook</h1>
-                <p class="text-xs text-slate-500">บันทึกงานส่วนตัวและติดตาม Job Ticket</p>
+    <!-- ═══════════════════════════════════════
+         NAV  (same minimal style as task_center)
+    ════════════════════════════════════════ -->
+    <nav id="jt-topbar" class="sticky top-0 z-50 bg-white border-b border-slate-200 flex items-center justify-between px-4 h-14 gap-3">
+        <div class="flex items-center gap-2">
+            <a href="index.html" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" title="กลับหน้าหลัก">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-clipboard-list text-white text-xs"></i>
             </div>
+            <span class="font-bold text-slate-900 hidden sm:inline">Job Notebook</span>
         </div>
-        <div class="flex items-center gap-2 justify-between md:justify-end">
-            <button id="btn-personal-add-desktop" onclick="openPersonalTaskModal()" class="hidden md:inline-flex bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg shadow-blue-500/30 transition transform active:scale-95 items-center gap-2">
-                <i class="fas fa-plus"></i><span>เพิ่มบันทึก</span>
+        <div class="flex items-center gap-2">
+            <span id="navUserDisplay" class="text-xs text-slate-500" style="display:none;" title="ผู้ใช้งาน"></span>
+            <button onclick="loadPersonalTasks(false)" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" title="รีเฟรช">
+                <i class="fas fa-arrows-rotate text-sm"></i>
+            </button>
+            <button type="button" id="btn-personal-add-desktop" onclick="openPersonalTaskModal()"
+                class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                <i class="fas fa-plus"></i><span>เพิ่มงาน</span>
+            </button>
+            <button type="button" onclick="toggleDark()" title="สลับธีม"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+                <i class="fa fa-moon text-xs" id="themeIcon"></i>
+            </button>
+            <button type="button" id="btn-personal-settings" title="ตั้งค่าการแสดงผล"
+                class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+                <i class="fas fa-sliders text-sm"></i>
             </button>
         </div>
     </nav>
 
-    <div id="personalSection" class="container animate-fade-in-up">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-5">
-            <div>
-                <h2 class="text-2xl font-semibold text-slate-800 mb-1">บันทึกงานส่วนตัว</h2>
-                <p class="text-sm text-slate-500">ใช้แทนโพสต์อิทและสมุดโน้ต จัดลำดับงานสำคัญให้ชัดเจน</p>
-                <div class="mt-2 inline-flex rounded-full bg-slate-100 text-[11px] p-1">
-                    <button id="btn-scope-mine" class="px-3 py-1.5 rounded-full bg-white text-slate-800 shadow-sm flex items-center gap-1">
-                        <i class="fas fa-user"></i><span>ของฉัน</span>
-                    </button>
-                    <button id="btn-scope-dept" class="px-3 py-1.5 rounded-full text-slate-500 hover:text-slate-800 hidden">
-                        <i class="fas fa-users"></i><span>แผนก</span>
-                    </button>
-                    <button id="btn-scope-company" class="px-3 py-1.5 rounded-full text-slate-500 hover:text-slate-800 hidden">
-                        <i class="fas fa-building"></i><span>บริษัท</span>
-                    </button>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-2 items-center">
-                <div class="relative">
-                    <input id="personalSearch" type="text" class="pl-8 pr-3 py-2 rounded-full border border-slate-200 text-sm w-48 md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ค้นหาชื่องาน คำอธิบาย หรือแท็ก">
-                    <i class="fas fa-search text-slate-400 absolute left-2.5 top-2.5 text-sm"></i>
-                </div>
-                <select id="personalFilterPriority" class="border border-slate-200 rounded-full text-xs px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="">ทุกความสำคัญ</option>
-                    <option value="urgent">เร่งด่วน</option>
-                    <option value="high">สูง</option>
-                    <option value="normal">ปกติ</option>
-                    <option value="low">ต่ำ</option>
-                </select>
-                <select id="personalSort" class="border border-slate-200 rounded-full text-xs px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="due_date">เรียงตามกำหนดเวลา</option>
-                    <option value="priority">เรียงตามความสำคัญ</option>
-                    <option value="created_at">เรียงตามวันที่สร้าง</option>
-                    <option value="updated_at">เรียงตามวันที่แก้ไข</option>
-                </select>
-                <button id="btn-personal-settings" class="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-500 transition">
-                    <i class="fas fa-sliders-h text-sm"></i>
-                </button>
-            </div>
+    <!-- ═══════════════════════════════════════
+         METRICS STRIP (full-width below nav)
+    ════════════════════════════════════════ -->
+    <div id="jt-metrics-strip" class="bg-white border-b border-slate-200 px-4 py-3 overflow-x-auto">
+        <div class="flex items-center gap-3" style="width: max-content; min-width: 100%;">
+            <button class="metric-pill pill-total active" id="pill-all" onclick="filterByPill('all', this)">
+                <div class="pill-icon"><i class="fas fa-layer-group"></i></div>
+                <div><div class="pill-num" id="jn-kpi-total">0</div><div class="pill-label">ทั้งหมด</div></div>
+            </button>
+            <button class="metric-pill pill-todo" id="pill-todo" onclick="filterByPill('todo', this)">
+                <div class="pill-icon"><i class="fas fa-circle-dot"></i></div>
+                <div><div class="pill-num" id="jn-kpi-todo">0</div><div class="pill-label">ยังไม่เริ่ม</div></div>
+            </button>
+            <button class="metric-pill pill-doing" id="pill-doing" onclick="filterByPill('doing', this)">
+                <div class="pill-icon"><i class="fas fa-rotate"></i></div>
+                <div><div class="pill-num" id="jn-kpi-doing">0</div><div class="pill-label">กำลังทำ</div></div>
+            </button>
+            <button class="metric-pill pill-overdue" id="pill-overdue" onclick="filterByPill('overdue', this)">
+                <div class="pill-icon"><i class="fas fa-clock"></i></div>
+                <div><div class="pill-num" id="jn-kpi-overdue">0</div><div class="pill-label">เกินกำหนด</div></div>
+            </button>
+            <button class="metric-pill pill-done" id="pill-done" onclick="filterByPill('done', this)">
+                <div class="pill-icon"><i class="fas fa-check"></i></div>
+                <div><div class="pill-num" id="jn-kpi-done">0</div><div class="pill-label">เสร็จแล้ว</div></div>
+            </button>
         </div>
-
-        <div class="grid gap-4 md:grid-cols-2 mb-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-semibold text-slate-700">สรุปตามสถานะ</h3>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="personalStatusChart"></canvas>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-semibold text-slate-700">สรุปงานต่อบุคคล</h3>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="personalOwnerChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-3">
-            <div>
-                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#f8fafc; border-left:4px solid #94a3b8;">
-                    <div class="flex items-center gap-2">
-                        <span style="font-size:16px;">📋</span>
-                        <h3 class="text-sm font-semibold" style="color:#475569;">ยังไม่เริ่ม</h3>
-                    </div>
-                    <span id="badge-count-todo" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#e2e8f0; color:#64748b;"></span>
-                </div>
-                <div id="personalColumnTodo" class="space-y-3 min-h-[40px]"></div>
-            </div>
-            <div>
-                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#fffbeb; border-left:4px solid #f59e0b;">
-                    <div class="flex items-center gap-2">
-                        <span style="font-size:16px;">⚙️</span>
-                        <h3 class="text-sm font-semibold" style="color:#d97706;">กำลังทำ</h3>
-                    </div>
-                    <span id="badge-count-doing" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#fef3c7; color:#d97706;"></span>
-                </div>
-                <div id="personalColumnDoing" class="space-y-3 min-h-[40px]"></div>
-            </div>
-            <div>
-                <div class="flex items-center justify-between mb-3 px-3 py-2 rounded-xl" style="background:#f0fdf4; border-left:4px solid #22c55e;">
-                    <div class="flex items-center gap-2">
-                        <span style="font-size:16px;">✅</span>
-                        <h3 class="text-sm font-semibold" style="color:#16a34a;">เสร็จแล้ว</h3>
-                    </div>
-                    <span id="badge-count-done" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#dcfce7; color:#16a34a;"></span>
-                </div>
-                <div id="personalColumnDone" class="space-y-3 min-h-[40px]"></div>
-            </div>
-        </div>
-
-        <div id="personalEmpty" class="mt-10 text-center text-slate-400 text-sm hidden">
-            <div class="inline-flex flex-col items-center gap-3">
-                <i class="far fa-sticky-note text-4xl opacity-40"></i>
-                <p>ยังไม่มีบันทึก ลองกดปุ่ม “เพิ่มบันทึก” เพื่อเริ่มต้น</p>
-            </div>
-        </div>
-
-        <button id="btn-personal-add-float" onclick="openPersonalTaskModal()" class="btn-add-float">
-            <i class="fas fa-plus"></i>
-        </button>
     </div>
 
+    <!-- ═══════════════════════════════════════
+         MAIN LAYOUT (List + Sidebar)
+    ════════════════════════════════════════ -->
+    <div id="personalSection">
 
-    <!-- Personal Task Modal -->
-    <div id="personalModal" class="modal" onclick="if(event.target===this) closePersonalTaskModal()">
-        <div class="modal-content max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="personalModalTitle" class="text-lg font-semibold text-slate-800">เพิ่มบันทึกใหม่</h3>
-                <button type="button" class="text-slate-400 hover:text-slate-600" onclick="closePersonalTaskModal()">
-                    <i class="fas fa-times text-xl"></i>
+        <!-- Deadline alerts (above layout) -->
+        <div id="personalDeadlineAlerts" class="jn-alerts" style="padding:0 16px;"></div>
+
+        <!-- 2-panel layout -->
+        <div class="jt-layout">
+
+            <!-- ── LEFT: task list panel ── -->
+            <div class="jt-list-panel">
+
+                <!-- Filter bar -->
+                <div class="section-card" style="flex-shrink:0;">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="scope-segment">
+                            <button type="button" id="btn-scope-mine" class="scope-btn active">
+                                <i class="fas fa-user"></i><span>ของฉัน</span>
+                            </button>
+                            <button type="button" id="btn-scope-dept" class="scope-btn hidden">
+                                <i class="fas fa-users"></i><span>แผนก</span>
+                            </button>
+                            <button type="button" id="btn-scope-company" class="scope-btn hidden">
+                                <i class="fas fa-building"></i><span>งานส่วนกลาง</span>
+                            </button>
+                        </div>
+                        <div class="flex-1 min-w-[160px] relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input id="personalSearch" class="filter-input pl-8" type="text" placeholder="ค้นหางาน…">
+                        </div>
+                        <select id="personalFilterPriority" class="filter-select" style="width:auto;min-width:120px;">
+                            <option value="">ทุกความสำคัญ</option>
+                            <option value="urgent">🔴 เร่งด่วน</option>
+                            <option value="high">🟡 สูง</option>
+                            <option value="normal">🔵 ปกติ</option>
+                            <option value="low">⚪ ต่ำ</option>
+                        </select>
+                        <select id="personalSort" class="filter-select" style="width:auto;min-width:140px;">
+                            <option value="due_date">กำหนดใกล้สุด</option>
+                            <option value="priority">ความสำคัญ</option>
+                            <option value="created_at">สร้างล่าสุด</option>
+                            <option value="updated_at">แก้ไขล่าสุด</option>
+                        </select>
+                        <select id="personalFilterCompany" class="filter-select hidden" style="width:auto;min-width:110px;">
+                            <option value="all">ทุกบริษัท</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Task groups -->
+                <div id="taskGroupsWrap" style="display:flex;flex-direction:column;gap:10px;">
+
+                    <div class="task-group tg-overdue" id="grp-overdue" style="display:none;">
+                        <div class="task-group-header" onclick="toggleTaskGroup('overdue')">
+                            <div class="task-group-title"><i class="fas fa-clock"></i> เกินกำหนด <span id="grp-count-overdue" class="task-group-count">0</span></div>
+                            <i class="fas fa-chevron-down text-xs text-slate-400" id="grp-chevron-overdue"></i>
+                        </div>
+                        <div class="task-group-body" id="list-overdue"></div>
+                    </div>
+
+                    <div class="task-group tg-doing" id="grp-doing" style="display:none;">
+                        <div class="task-group-header" onclick="toggleTaskGroup('doing')">
+                            <div class="task-group-title"><i class="fas fa-rotate"></i> กำลังทำ <span id="grp-count-doing" class="task-group-count">0</span></div>
+                            <i class="fas fa-chevron-down text-xs text-slate-400" id="grp-chevron-doing"></i>
+                        </div>
+                        <div class="task-group-body" id="list-doing"></div>
+                    </div>
+
+                    <div class="task-group tg-todo" id="grp-todo" style="display:none;">
+                        <div class="task-group-header" onclick="toggleTaskGroup('todo')">
+                            <div class="task-group-title"><i class="fas fa-circle-dot"></i> ยังไม่เริ่ม <span id="grp-count-todo" class="task-group-count">0</span></div>
+                            <i class="fas fa-chevron-down text-xs text-slate-400" id="grp-chevron-todo"></i>
+                        </div>
+                        <div class="task-group-body" id="list-todo"></div>
+                    </div>
+
+                    <div class="task-group tg-done" id="grp-done" style="display:none;">
+                        <div class="task-group-header" onclick="toggleTaskGroup('done')">
+                            <div class="task-group-title"><i class="fas fa-circle-check"></i> เสร็จแล้ว <span id="grp-count-done" class="task-group-count">0</span></div>
+                            <i class="fas fa-chevron-down text-xs text-slate-400" id="grp-chevron-done"></i>
+                        </div>
+                        <div class="task-group-body collapsed" id="list-done"></div>
+                    </div>
+
+                </div>
+
+                <!-- Empty state -->
+                <div id="personalEmpty" class="hidden section-card" style="text-align:center;padding:48px 20px;">
+                    <div style="width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:20px;">
+                        <i class="far fa-sticky-note"></i>
+                    </div>
+                    <div style="font-weight:600;color:#334155;">ยังไม่มีงานในมุมมองนี้</div>
+                    <div style="font-size:13px;color:#94a3b8;margin-top:4px;">กด <strong>เพิ่มงาน</strong> เพื่อสร้างรายการแรก</div>
+                    <button type="button" onclick="openPersonalTaskModal()"
+                        style="margin-top:16px;" class="ptc-btn ptc-btn-primary ptc-btn-sm">
+                        <i class="fas fa-plus"></i> เพิ่มงานใหม่
+                    </button>
+                </div>
+
+                <!-- Analytics (collapsible, below list) -->
+                <div class="section-card" style="flex-shrink:0;">
+                    <button onclick="toggleJnAnalytics()" class="analytics-toggle">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                                <i class="fas fa-chart-pie text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-slate-900 text-sm">ภาพรวมสถิติ</div>
+                                <div class="text-xs text-slate-400">สถานะงาน · งานต่อบุคคล</div>
+                            </div>
+                        </div>
+                        <i id="jnAnalyticsIcon" class="fas fa-chevron-down text-slate-400 text-sm transition-transform duration-200"></i>
+                    </button>
+                    <div id="jnAnalyticsBody" class="hidden mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">สรุปตามสถานะ</div>
+                            <div style="height:200px;"><canvas id="personalStatusChart"></canvas></div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">สรุปงานต่อบุคคล</div>
+                            <div style="height:200px;"><canvas id="personalOwnerChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end jt-list-panel -->
+
+        </div><!-- end jt-layout -->
+
+    </div><!-- end personalSection -->
+
+    <!-- ═══════════════════════════════════════
+         FAB
+    ════════════════════════════════════════ -->
+    <button type="button" id="btn-personal-add-float" onclick="openPersonalTaskModal()"
+        class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-slate-900 text-white shadow-xl z-50 flex items-center justify-center text-xl hover:bg-slate-700 transition md:hidden"
+        aria-label="เพิ่มงาน">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- ═══════════════════════════════════════
+         PERSONAL TASK MODAL
+    ════════════════════════════════════════ -->
+    <div id="personalModal" class="ptc-modal" style="display:none;z-index:1050;">
+        <div class="ptc-modal-overlay" onclick="closePersonalTaskModal()"></div>
+        <div class="ptc-modal-dialog modal-sm" style="max-width:520px;">
+            <div class="ptc-modal-header">
+                <h2 id="personalModalTitle" class="ptc-modal-title">เพิ่มบันทึกใหม่</h2>
+                <button type="button" class="ptc-modal-close" aria-label="ปิด" onclick="closePersonalTaskModal()">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
+            <div class="ptc-modal-body">
             <form id="personalForm">
                 <input type="hidden" id="personalTaskId">
+                <input type="hidden" id="personalCompany">
                 <div class="form-row">
-                    <label for="personalTitle">ชื่องาน</label>
-                    <input id="personalTitle" type="text" required placeholder="เช่น ติดตั้งโปรแกรมให้แผนก HR">
-                </div>
-                <div class="form-row">
-                    <label for="personalAssignee">ผู้รับผิดชอบ</label>
-                    <input id="personalAssignee" type="text" placeholder="เช่น ชื่อคนหรือทีม">
-                </div>
-                <div class="form-row">
-                    <label for="personalDescription">รายละเอียด</label>
-                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid var(--gray-border); border-radius:10px; font-family:'Kanit'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
+                    <label><i class="fas fa-building text-blue-500"></i> บริษัทที่รับผิดชอบ</label>
+                    <div id="personalCompanyChecklist" class="grid grid-cols-3 gap-2"></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
                     <div>
-                        <label for="personalDueDate">กำหนดเสร็จ</label>
+                        <label for="personalTaskType"><i class="fas fa-layer-group text-indigo-500"></i> ประเภทงาน</label>
+                        <select id="personalTaskType">
+                            <option value="personal">งานส่วนตัว</option>
+                            <option value="job_ticket">งานส่วนกลาง</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>สถานะงาน</label>
+                        <span id="personalStatusBadge" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid #e2e8f0;font-size:12px;font-weight:600;background:#f1f5f9;color:#475569;">
+                            <i class="fas fa-circle" style="font-size:8px;"></i><span>ยังไม่เริ่ม</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="personalTitle"><i class="fas fa-heading text-violet-500"></i> หัวข้อ / ชื่องาน</label>
+                    <input id="personalTitle" type="text" required placeholder="เช่น ติดตั้งโปรแกรมให้แผนก HR">
+                </div>
+                <div class="form-row">
+                    <label for="personalAssignee"><i class="fas fa-user-check text-emerald-500"></i> ผู้รับผิดชอบ</label>
+                    <input id="personalAssignee" type="text" placeholder="เช่น ชื่อคนหรือทีม">
+                </div>
+                <div id="personalBuildingWrap" class="form-row">
+                    <label for="personalBuilding"><i class="fas fa-map-marker-alt text-rose-500"></i> พื้นที่รับผิดชอบ</label>
+                    <input id="personalBuilding" type="text" placeholder="เช่น F16 หรือ F5,F6">
+                </div>
+                <div class="form-row">
+                    <label for="personalDescription"><i class="fas fa-file-alt text-slate-500"></i> รายละเอียดงาน</label>
+                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
+                    <div>
+                        <label for="personalDueDate"><i class="fas fa-calendar-check text-amber-500"></i> กำหนดเสร็จ</label>
                         <input id="personalDueDate" type="date">
                     </div>
                     <div>
-                        <label for="personalPriority">ความสำคัญ</label>
+                        <label><i class="fas fa-bell text-orange-500"></i> แจ้งเตือนงานประจำ</label>
+                        <div class="flex flex-col gap-2 text-sm text-slate-600 pt-1">
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input id="personalRemindMonthStart" type="checkbox">
+                                <span>แจ้งเตือนทุกต้นเดือน</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input id="personalRemindMonthEnd" type="checkbox">
+                                <span>แจ้งเตือนทุกสิ้นเดือน</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 form-row">
+                    <div>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input id="personalIsRecurring" type="checkbox">
+                            <span><i class="fas fa-repeat text-indigo-500"></i> งานประจำ (ต่ออายุอัตโนมัติ)</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label for="personalRecurringIntervalMonths"><i class="fas fa-arrows-rotate text-cyan-500"></i> รอบงาน (เดือน)</label>
+                        <select id="personalRecurringIntervalMonths">
+                            <option value="1">ทุก 1 เดือน</option>
+                            <option value="3">ทุก 3 เดือน</option>
+                            <option value="6">ทุก 6 เดือน</option>
+                            <option value="12" selected>ทุก 12 เดือน (รายปี)</option>
+                            <option value="24">ทุก 24 เดือน</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="personalRemindDaysBefore"><i class="fas fa-hourglass-half text-rose-500"></i> เตือนล่วงหน้า (วัน)</label>
+                        <select id="personalRemindDaysBefore">
+                            <option value="0">ไม่เตือนล่วงหน้า</option>
+                            <option value="7">7 วัน</option>
+                            <option value="14">14 วัน</option>
+                            <option value="30" selected>30 วัน</option>
+                            <option value="45">45 วัน</option>
+                            <option value="60">60 วัน</option>
+                            <option value="90">90 วัน</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
+                    <div>
+                        <label for="personalPriority"><i class="fas fa-flag text-red-500"></i> ระดับความสำคัญ</label>
                         <select id="personalPriority">
                             <option value="normal">ปกติ</option>
                             <option value="high">สูง</option>
@@ -553,47 +477,61 @@
                             <option value="low">ต่ำ</option>
                         </select>
                     </div>
+                    <div>
+                        <label for="personalShare"><i class="fas fa-share-nodes text-sky-500"></i> การแชร์</label>
+                        <select id="personalShare">
+                            <option value="private">เฉพาะฉัน</option>
+                            <option value="department">แชร์ในแผนก</option>
+                            <option value="company">แชร์ให้หัวหน้าดูภาพรวม</option>
+                        </select>
+                    </div>
                 </div>
+                <select id="personalStatus" class="hidden"></select>
+
+                <!-- Status detail + presets -->
                 <div class="form-row">
-                    <label for="personalTags">แท็ก</label>
-                    <input id="personalTags" type="text" placeholder="เช่น IT,PTA,ด่วน แยกด้วยเครื่องหมายจุลภาค">
+                    <label for="personalStatusDetail"><i class="fas fa-comment-dots text-teal-500"></i> รายละเอียดสถานะ</label>
+                    <input id="personalStatusDetail" type="text" list="personalStatusDetailList" placeholder="เช่น รอเริ่มดำเนินการ, รออะไหล่..." autocomplete="off">
+                    <datalist id="personalStatusDetailList"></datalist>
+                    <div id="personalStatusDetailQuick" class="flex flex-wrap gap-1 mt-2"></div>
                 </div>
+
+                <!-- Tags -->
                 <div class="form-row">
-                    <label for="personalShare">การแชร์</label>
-                    <select id="personalShare">
-                        <option value="private">เฉพาะฉัน</option>
-                        <option value="department">แชร์ในแผนก</option>
-                        <option value="company">แชร์ให้หัวหน้าดูภาพรวม</option>
-                    </select>
+                    <label for="personalTags"><i class="fas fa-tags text-amber-500"></i> แท็ก</label>
+                    <input id="personalTags" type="text" placeholder="คั่นด้วย comma เช่น network, server, hr">
                 </div>
+
                 <div id="personalShareInfo" class="text-xs text-slate-500 mb-2"></div>
                 <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
                     <span id="personalMeta"></span>
                     <button type="button" class="text-blue-500 hover:text-blue-700" onclick="clearPersonalDraft()">ล้างแบบร่าง</button>
                 </div>
                 <div id="personalHistory" class="text-xs text-slate-500 max-h-32 overflow-y-auto mb-3"></div>
-                <div class="flex gap-2">
-                    <button type="submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-md transition active:scale-95">
-                        บันทึก
-                    </button>
-                    <button type="button" class="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm flex items-center gap-1" onclick="shareCurrentTask()">
+                <div class="flex gap-2" style="margin-top:8px;">
+                    <button type="submit" class="ptc-btn ptc-btn-primary" style="flex:1;">บันทึก</button>
+                    <button type="button" class="ptc-btn ptc-btn-secondary" onclick="shareCurrentTask()">
                         <i class="fas fa-share-alt"></i><span class="hidden md:inline">แชร์</span>
                     </button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="personalSettingsModal" class="modal" onclick="if(event.target===this) closePersonalSettings()">
-        <div class="modal-content max-w-sm">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-slate-800">ตั้งค่าการแสดงผล</h3>
-                <button type="button" class="text-slate-400 hover:text-slate-600" onclick="closePersonalSettings()">
-                    <i class="fas fa-times text-xl"></i>
+    <!-- ═══════════════════════════════════════
+         SETTINGS MODAL
+    ════════════════════════════════════════ -->
+    <div id="personalSettingsModal" class="ptc-modal" style="display:none;z-index:1050;">
+        <div class="ptc-modal-overlay" onclick="closePersonalSettings()"></div>
+        <div class="ptc-modal-dialog modal-sm" style="max-width:400px;">
+            <div class="ptc-modal-header">
+                <h2 class="ptc-modal-title">ตั้งค่าการแสดงผล</h2>
+                <button type="button" class="ptc-modal-close" aria-label="ปิด" onclick="closePersonalSettings()">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="space-y-4 text-sm">
+            <div class="ptc-modal-body space-y-4 text-sm">
                 <div class="flex items-center justify-between">
                     <span>ซ่อนงานที่เสร็จแล้ว</span>
                     <label class="inline-flex items-center cursor-pointer">
@@ -615,877 +553,140 @@
                 <div>
                     <p class="mb-1">โหมดการแสดงผล</p>
                     <select id="setting-view-mode" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
-                        <option value="kanban">แสดงแบบคอลัมน์</option>
-                        <option value="list">แสดงแบบรายการเดียวยาว</option>
+                        <option value="kanban">แสดงแบบคอลัมน์ (Kanban)</option>
+                        <option value="list">แสดงแบบรายการ (List)</option>
                     </select>
                 </div>
             </div>
-            <div class="mt-5 flex justify-end gap-2">
-                <button type="button" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm" onclick="resetPersonalSettings()">คืนค่าเริ่มต้น</button>
-                <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold" onclick="savePersonalSettings()">บันทึก</button>
+            <div class="ptc-modal-footer">
+                <button type="button" class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="resetPersonalSettings()">คืนค่าเริ่มต้น</button>
+                <button type="button" class="ptc-btn ptc-btn-primary ptc-btn-sm" onclick="savePersonalSettings()">บันทึก</button>
             </div>
         </div>
     </div>
 
-
-    <!-- Comment/Progress Modal (Personal Tasks) -->
-    <div id="commentModal" class="modal" onclick="if(event.target===this) closeCommentModal()">
-        <div class="modal-content" style="max-width:520px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h3 id="commentModalTitle" style="margin:0; font-size:1.1rem; font-weight:600; color:#334155;">อัปเดตความคืบหน้า</h3>
-                <i class="fas fa-times" onclick="closeCommentModal()" style="font-size:1.3rem; color:#94a3b8; cursor:pointer;"></i>
+    <!-- ═══════════════════════════════════════
+         COMMENT / PROGRESS MODAL
+    ════════════════════════════════════════ -->
+    <div id="commentModal" class="ptc-modal" style="display:none;z-index:1050;">
+        <div class="ptc-modal-overlay" onclick="closeCommentModal()"></div>
+        <div class="ptc-modal-dialog modal-sm" style="max-width:520px;">
+            <div class="ptc-modal-header">
+                <h2 id="commentModalTitle" class="ptc-modal-title">อัปเดตความคืบหน้า</h2>
+                <button type="button" class="ptc-modal-close" aria-label="ปิด" onclick="closeCommentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div style="margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="font-size:0.85rem; color:#64748b; font-weight:500;">ความคืบหน้า</span>
-                    <span id="commentProgNum" style="font-size:1rem; font-weight:700; color:#334155;">0%</span>
-                </div>
-                <div style="height:10px; background:#f1f5f9; border-radius:5px; overflow:hidden; margin-bottom:8px;">
-                    <div id="commentProgFill" style="height:100%; background:#22c55e; border-radius:5px; transition:width .3s; width:0%;"></div>
-                </div>
-                <input type="range" id="commentProgSlider" min="0" max="100" value="0" oninput="updateCommentProg(this.value)" style="width:100%; accent-color:#22c55e;">
-            </div>
-            <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">ประวัติ comment</div>
-            <div id="commentHistory" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:14px; padding-right:4px;"></div>
-            <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">เพิ่ม comment</div>
-            <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า เช่น เดินสายไฟชั้น 3 เสร็จแล้ว กำลังทำชั้น 4..."></textarea>
-            <button onclick="saveComment()" style="width:100%; padding:12px; background:#334155; color:white; border:none; border-radius:10px; font-family:'Kanit'; font-size:1rem; font-weight:600; cursor:pointer; transition:background .2s;">
-                <i class="fas fa-save"></i> บันทึก
-            </button>
-        </div>
-    </div>
-
-    <script>
-        const API_PATH = 'api.php';
-        let userSession = {}; // เก็บข้อมูล User
-
-        let personalTasks = [];
-        let personalSettings = { hideDone: false, defaultSort: 'due_date', viewMode: 'kanban' };
-        let personalDraftKey = 'personalTaskDraft';
-        let personalSettingsKey = 'personalTaskSettings';
-        let personalScope = 'mine';
-        let personalPollInterval = null;
-        let personalSnapshot = {};
-        let personalStatusChart = null;
-        let personalOwnerChart = null;
-
-
-
-        window.onload = initPage;
-
-        async function initPage() {
-            try {
-                const res = await fetch(API_PATH + '?action=check_session');
-                userSession = await res.json();
-                
-                if (!userSession.loggedin) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-            } catch(e) { console.error("Auth Error", e); }
-
-            loadPersonalSettingsFromStorage();
-            bindPersonalUIEvents();
-            setupScopeButtons();
-            await loadPersonalTasks(false);
-            if (!personalPollInterval) {
-                personalPollInterval = setInterval(() => loadPersonalTasks(true), 15000);
-            }
-        }
-
-
-        function setupScopeButtons() {
-            const btnMine = document.getElementById('btn-scope-mine');
-            const btnDept = document.getElementById('btn-scope-dept');
-            const btnCompany = document.getElementById('btn-scope-company');
-            if (userSession.primary_department && btnDept) {
-                btnDept.classList.remove('hidden');
-            }
-            if ((userSession.role === 'admin' || userSession.role === 'staff') && btnCompany) {
-                btnCompany.classList.remove('hidden');
-            }
-            if (btnMine) btnMine.addEventListener('click', () => changeScope('mine'));
-            if (btnDept) btnDept.addEventListener('click', () => changeScope('department'));
-            if (btnCompany) btnCompany.addEventListener('click', () => changeScope('company'));
-        }
-
-        function changeScope(scope) {
-            personalScope = scope;
-            const btnMine = document.getElementById('btn-scope-mine');
-            const btnDept = document.getElementById('btn-scope-dept');
-            const btnCompany = document.getElementById('btn-scope-company');
-            [btnMine, btnDept, btnCompany].filter(Boolean).forEach(b => b.classList.remove('bg-white', 'text-slate-800', 'shadow-sm'));
-            if (scope === 'mine' && btnMine) btnMine.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-            if (scope === 'department' && btnDept) btnDept.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-            if (scope === 'company' && btnCompany) btnCompany.classList.add('bg-white', 'text-slate-800', 'shadow-sm');
-            loadPersonalTasks(false);
-        }
-
-        async function loadPersonalTasks(isAuto) {
-            document.getElementById('loading').style.display = 'flex';
-            try {
-                const res = await fetch(API_PATH + '?action=personal_tasks_get&scope=' + encodeURIComponent(personalScope));
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    throw new Error(text);
-                }
-                if (Array.isArray(data)) {
-                    applyPersonalData(data, !!isAuto);
-                }
-            } catch (e) {
-                console.error(e);
-                showToast(e.message || 'โหลดข้อมูลงานส่วนตัวไม่สำเร็จ', true);
-            }
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function applyPersonalData(newList, isAuto) {
-            const newMap = {};
-            newList.forEach(t => {
-                newMap[t.id] = t.updated_at || '';
-            });
-            if (isAuto && Object.keys(personalSnapshot).length) {
-                let changedCount = 0;
-                newList.forEach(t => {
-                    const prev = personalSnapshot[t.id];
-                    if (prev && prev !== (t.updated_at || '')) {
-                        changedCount++;
-                    }
-                });
-                if (changedCount > 0) {
-                    showToast('มีงาน ' + changedCount + ' รายการถูกอัปเดต');
-                }
-            }
-            personalTasks = newList;
-            personalSnapshot = newMap;
-            renderPersonalBoard();
-        }
-
-        function bindPersonalUIEvents() {
-            const searchInput = document.getElementById('personalSearch');
-            const prioritySelect = document.getElementById('personalFilterPriority');
-            const sortSelect = document.getElementById('personalSort');
-            const settingsBtn = document.getElementById('btn-personal-settings');
-            const form = document.getElementById('personalForm');
-            const titleInput = document.getElementById('personalTitle');
-            const assigneeInput = document.getElementById('personalAssignee');
-            const descInput = document.getElementById('personalDescription');
-            const dueInput = document.getElementById('personalDueDate');
-            const priorityInput = document.getElementById('personalPriority');
-            const tagsInput = document.getElementById('personalTags');
-            const shareInput = document.getElementById('personalShare');
-            if (shareInput) {
-                shareInput.addEventListener('change', updatePersonalShareInfo);
-            }
-
-            if (searchInput) searchInput.addEventListener('input', renderPersonalBoard);
-            if (prioritySelect) prioritySelect.addEventListener('change', renderPersonalBoard);
-            if (sortSelect) sortSelect.addEventListener('change', () => {
-                personalSettings.defaultSort = sortSelect.value;
-                savePersonalSettingsToStorage();
-                renderPersonalBoard();
-            });
-            if (settingsBtn) settingsBtn.addEventListener('click', openPersonalSettings);
-
-            const inputs = [titleInput, assigneeInput, descInput, dueInput, priorityInput, tagsInput, shareInput];
-            inputs.filter(Boolean).forEach(el => el.addEventListener('input', savePersonalDraftToStorage));
-
-            if (form) form.addEventListener('submit', handlePersonalFormSubmit);
-        }
-
-        function renderPersonalBoard() {
-            const colTodo = document.getElementById('personalColumnTodo');
-            const colDoing = document.getElementById('personalColumnDoing');
-            const colDone = document.getElementById('personalColumnDone');
-            if (!colTodo || !colDoing || !colDone) return;
-            const emptyState = document.getElementById('personalEmpty');
-            const searchEl = document.getElementById('personalSearch');
-            const search = searchEl ? searchEl.value.toLowerCase() : '';
-            const priorityEl = document.getElementById('personalFilterPriority');
-            const priorityFilter = priorityEl ? priorityEl.value : '';
-            const sortEl = document.getElementById('personalSort');
-            const sortBy = sortEl ? sortEl.value : (personalSettings.defaultSort || 'due_date');
-            const hideDone = personalSettings.hideDone;
-
-            colTodo.innerHTML = '';
-            colDoing.innerHTML = '';
-            colDone.innerHTML = '';
-
-            let tasks = personalTasks.slice();
-
-            if (search) {
-                tasks = tasks.filter(t => {
-                    const text = (t.title || '') + ' ' + (t.description || '') + ' ' + (t.tags || '');
-                    return text.toLowerCase().includes(search);
-                });
-            }
-
-            if (priorityFilter) {
-                tasks = tasks.filter(t => (t.priority || 'normal') === priorityFilter);
-            }
-
-            tasks.sort((a, b) => {
-                if (sortBy === 'priority') {
-                    const order = { urgent: 3, high: 2, normal: 1, low: 0 };
-                    return (order[(b.priority || 'normal')] || 0) - (order[(a.priority || 'normal')] || 0);
-                }
-                if (sortBy === 'created_at') {
-                    return new Date(b.created_at) - new Date(a.created_at);
-                }
-                if (sortBy === 'updated_at') {
-                    return new Date(b.updated_at) - new Date(a.updated_at);
-                }
-                const da = a.due_date ? new Date(a.due_date) : null;
-                const db = b.due_date ? new Date(b.due_date) : null;
-                if (da && db) return da - db;
-                if (da && !db) return -1;
-                if (!da && db) return 1;
-                return new Date(b.created_at) - new Date(a.created_at);
-            });
-
-            const counts = { todo: 0, doing: 0, done: 0 };
-
-            tasks.forEach(t => {
-                const status = t.status || 'todo';
-                if (hideDone && status === 'done') return;
-                counts[status] = (counts[status] || 0) + 1;
-                const card = buildPersonalCard(t);
-                if (personalSettings.viewMode === 'list') {
-                    colTodo.appendChild(card);
-                } else {
-                    if (status === 'doing') colDoing.appendChild(card);
-                    else if (status === 'done') colDone.appendChild(card);
-                    else colTodo.appendChild(card);
-                }
-            });
-
-            const badgeTodo = document.getElementById('badge-count-todo');
-            const badgeDoing = document.getElementById('badge-count-doing');
-            const badgeDone = document.getElementById('badge-count-done');
-            if (badgeTodo) badgeTodo.textContent = counts.todo ? counts.todo + ' งาน' : '';
-            if (badgeDoing) badgeDoing.textContent = counts.doing ? counts.doing + ' งาน' : '';
-            if (badgeDone) badgeDone.textContent = counts.done ? counts.done + ' งาน' : '';
-
-            const totalVisible = counts.todo + counts.doing + (hideDone ? 0 : counts.done);
-            if (emptyState) emptyState.classList.toggle('hidden', totalVisible > 0);
-
-            updatePersonalCharts(tasks, counts);
-        }
-
-        function buildPersonalCard(task) {
-            const card = document.createElement('div');
-            const priority = task.priority || 'normal';
-            card.className = `personal-card priority-${priority}`;
-
-            // Priority
-            const priorityMap = { urgent: { label: '🔴 เร่งด่วน' }, high: { label: '🟡 สำคัญ' }, normal: { label: '🔵 ปกติ' }, low: { label: '⚪ ต่ำ' } };
-            const pInfo = priorityMap[priority] || priorityMap.normal;
-
-            // Deadline
-            let deadlineHtml = '';
-            if (task.due_date) {
-                const today = new Date(); today.setHours(0,0,0,0);
-                const due = new Date(task.due_date + 'T00:00:00'); due.setHours(0,0,0,0);
-                const diff = (due - today) / 86400000;
-                let cls = 'pc-deadline';
-                let icon = '📅';
-                let txt = task.due_date;
-                if (diff < 0) { cls += ' late'; icon = '🚨'; txt = task.due_date + ' (เกิน ' + Math.abs(Math.round(diff)) + ' วัน)'; }
-                else if (diff === 0) { cls += ' soon'; icon = '⏰'; txt = 'วันนี้'; }
-                else if (diff <= 3) { cls += ' soon'; icon = '⚡'; txt = 'อีก ' + Math.round(diff) + ' วัน'; }
-                deadlineHtml = `<span class="${cls}">${icon} ${txt}</span>`;
-            } else {
-                deadlineHtml = `<span class="pc-deadline">📅 ไม่ระบุวัน</span>`;
-            }
-
-            // Tags
-            const tags = (task.tags || '').split(',').map(t => t.trim()).filter(Boolean);
-            const tagsHtml = tags.map(t => `<span class="pc-tag">#${t}</span>`).join('');
-
-            // Progress
-            const pct = task.progress_pct || 0;
-            const progColor = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#3b82f6';
-
-            // Status
-            const status = task.status || 'todo';
-            const statusMap = { todo: { label: 'ยังไม่เริ่ม', cls: '' }, doing: { label: 'กำลังทำ', cls: 'doing' }, done: { label: 'เสร็จแล้ว', cls: 'done' } };
-            const sInfo = statusMap[status] || statusMap.todo;
-            const isOwner = !task.user_id || (userSession && task.user_id === userSession.user_id);
-
-            // Meta (compact)
-            const owner = task.owner_name_th || task.owner_name || '';
-            const assignee = task.assignee_name || '';
-            const shareLabel = getShareLabel(task.share_scope, task.company, task.department);
-            const updatedAt = task.updated_at ? new Date(task.updated_at).toLocaleDateString('th-TH', {day:'numeric',month:'short'}) : '';
-
-            const metaItems = [];
-            if (owner) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-user" style="font-size:9px"></i> ${owner}</span>`);
-            if (assignee && assignee !== owner) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-user-check" style="font-size:9px"></i> ${assignee}</span>`);
-            if (shareLabel !== 'เฉพาะฉัน') metaItems.push(`<span class="pc-meta-item"><i class="fas fa-share-alt" style="font-size:9px"></i> ${shareLabel}</span>`);
-            if (updatedAt) metaItems.push(`<span class="pc-meta-item"><i class="fas fa-history" style="font-size:9px"></i> ${updatedAt}</span>`);
-
-            card.innerHTML = `
-                <div style="display:flex; height:100%;">
-                    <div class="card-stripe"></div>
-                    <div style="flex:1; padding:14px 16px; min-width:0;">
-                        <div class="pc-header">
-                            <div style="min-width:0; flex:1;">
-                                <div class="pc-title">${task.title || ''}</div>
-                                <div style="display:flex; gap:6px; align-items:center; margin-top:5px; flex-wrap:wrap;">
-                                    <span class="pc-priority">${pInfo.label}</span>
-                                    ${deadlineHtml}
-                                </div>
-                            </div>
-                            <div class="pc-actions">
-                                ${isOwner ? `
-                                    <button type="button" class="pc-status-btn ${sInfo.cls}" onclick="event.stopPropagation(); cycleTaskStatus(${task.id})">${sInfo.label}</button>
-                                    <button type="button" class="pc-delete-btn" onclick="event.stopPropagation(); deletePersonalTask(${task.id})"><i class="fas fa-times"></i></button>
-                                ` : `<span style="font-size:10px; color:#94a3b8">อ่านอย่างเดียว</span>`}
-                            </div>
-                        </div>
-
-                        ${task.description ? `<div class="pc-desc">${task.description}</div>` : ''}
-                        ${tagsHtml ? `<div style="margin-bottom:8px;">${tagsHtml}</div>` : ''}
-
-                        <div style="margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-size:10px; color:#94a3b8; font-weight:500;">ความคืบหน้า</span>
-                                <span style="font-size:11px; font-weight:700; color:${progColor};">${pct}%</span>
-                            </div>
-                            <div class="pc-progress-bar">
-                                <div class="pc-progress-fill" style="width:${pct}%; background:${progColor};"></div>
-                            </div>
-                        </div>
-
-                        <div class="pc-footer">
-                            <div class="pc-meta">${metaItems.join('')}</div>
-                            <button type="button" class="pc-update-btn" onclick="event.stopPropagation(); openCommentModal(${task.id}, ${JSON.stringify(task.title||'')})">
-                                <i class="fas fa-pen"></i> อัปเดต
-                            </button>
-                        </div>
+            <div class="ptc-modal-body">
+                <div style="margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:0.85rem; color:#64748b; font-weight:500;">ความคืบหน้า</span>
+                        <span id="commentProgNum" style="font-size:1rem; font-weight:700; color:#334155;">0%</span>
                     </div>
+                    <div style="height:10px; background:#f1f5f9; border-radius:5px; overflow:hidden; margin-bottom:8px;">
+                        <div id="commentProgFill" style="height:100%; background:#22c55e; border-radius:5px; transition:width .3s; width:0%;"></div>
+                    </div>
+                    <input type="range" id="commentProgSlider" min="0" max="100" value="0" oninput="updateCommentProg(this.value)" style="width:100%; accent-color:#22c55e;">
                 </div>
-            `;
+                <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">ประวัติ comment</div>
+                <div id="commentHistory" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:14px; padding-right:4px;"></div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">เพิ่ม comment</div>
+                <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า..."></textarea>
+                <button type="button" class="ptc-btn ptc-btn-primary" style="width:100%;" onclick="saveComment()">
+                    <i class="fas fa-save"></i> บันทึก
+                </button>
+            </div>
+        </div>
+    </div>
 
-            card.onclick = () => openPersonalTaskModal(task.id);
-            return card;
+    <!-- ═══════════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════════════ -->
+    <script src="js/job-ticket-app.js?v=20260604"></script>
+    <script>
+        /* ── Theme toggle ──
+           The nav button already called this on click, but the function was never
+           defined anywhere — clicking it silently threw a ReferenceError and did
+           nothing. The page's CSS already has full dark-mode coverage (the boot
+           script in <head> applies .dark correctly on load), it just needed this. */
+        function toggleDark() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.documentElement.classList.toggle('dark-theme', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = isDark ? 'fa fa-sun text-xs' : 'fa fa-moon text-xs';
+            if (typeof renderPersonalBoard === 'function') renderPersonalBoard();
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = document.documentElement.classList.contains('dark') ? 'fa fa-sun text-xs' : 'fa fa-moon text-xs';
+        });
+
+        /* ── Task list rendering ── */
+        const _grpCollapsed = {};
+
+        function toggleTaskGroup(key) {
+            const body = document.getElementById('list-' + key);
+            const icon = document.getElementById('grp-chevron-' + key);
+            if (!body) return;
+            _grpCollapsed[key] = !body.classList.toggle('collapsed');
+            if (icon) icon.style.transform = body.classList.contains('collapsed') ? 'rotate(-90deg)' : '';
         }
 
-        function openPersonalTaskModal(id) {
-            const modal = document.getElementById('personalModal');
-            const titleEl = document.getElementById('personalModalTitle');
-            const idEl = document.getElementById('personalTaskId');
-            const titleInput = document.getElementById('personalTitle');
-            const assigneeInput = document.getElementById('personalAssignee');
-            const descInput = document.getElementById('personalDescription');
-            const dueInput = document.getElementById('personalDueDate');
-            const priorityInput = document.getElementById('personalPriority');
-            const tagsInput = document.getElementById('personalTags');
-            const metaEl = document.getElementById('personalMeta');
-            const shareInfoEl = document.getElementById('personalShareInfo');
+        /* ── toggleJnAnalytics (local, not in app.js) ── */
+        function toggleJnAnalytics() {
+            const body = document.getElementById('jnAnalyticsBody');
+            const icon = document.getElementById('jnAnalyticsIcon');
+            const open = body.classList.toggle('hidden') === false;
+            if (open) body.style.display = 'grid';
+            icon.style.transform = open ? 'rotate(180deg)' : '';
+        }
 
-            let task = null;
-            if (id) task = personalTasks.find(t => t.id === id);
-
-            if (task) {
-                titleEl.textContent = 'แก้ไขบันทึก';
-                idEl.value = task.id;
-                titleInput.value = task.title || '';
-                assigneeInput.value = task.assignee_name || '';
-                descInput.value = task.description || '';
-                dueInput.value = task.due_date || '';
-                priorityInput.value = task.priority || 'normal';
-                tagsInput.value = task.tags || '';
-                const shareInput = document.getElementById('personalShare');
-                if (shareInput && task.share_scope) shareInput.value = task.share_scope;
-                const meta = [];
-                if (task.created_at) meta.push('สร้าง ' + new Date(task.created_at).toLocaleString('th-TH'));
-                if (task.updated_at && task.updated_at !== task.created_at) meta.push('แก้ไข ' + new Date(task.updated_at).toLocaleString('th-TH'));
-                metaEl.textContent = meta.join(' • ');
-                loadPersonalTaskHistory(task.id);
-                const isOwner = !task.user_id || (userSession && task.user_id === userSession.user_id);
-                setPersonalFormEditable(isOwner);
+        /* ── filterByPill: quick-filter from metrics strip ── */
+        function filterByPill(type, btn) {
+            document.querySelectorAll('.metric-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            // Map pill type → priority/status filter and re-render
+            const priorityEl = document.getElementById('personalFilterPriority');
+            const searchEl   = document.getElementById('personalSearch');
+            if (type === 'overdue') {
+                // handled by renderPersonalBoard's overdue logic — set a data attr
+                document.getElementById('personalSection').dataset.pillFilter = 'overdue';
+            } else if (type === 'all') {
+                document.getElementById('personalSection').dataset.pillFilter = '';
             } else {
-                titleEl.textContent = 'เพิ่มบันทึกใหม่';
-                idEl.value = '';
-                const draft = loadPersonalDraftFromStorage();
-                titleInput.value = draft.title || '';
-                assigneeInput.value = draft.assignee_name || '';
-                descInput.value = draft.description || '';
-                dueInput.value = draft.due_date || '';
-                priorityInput.value = draft.priority || 'normal';
-                tagsInput.value = draft.tags || '';
-                const shareInput = document.getElementById('personalShare');
-                if (shareInput) shareInput.value = draft.share_scope || 'private';
-                metaEl.textContent = '';
-                const historyEl = document.getElementById('personalHistory');
-                if (historyEl) historyEl.innerHTML = '';
-                setPersonalFormEditable(true);
+                // todo / doing / done — filter by status
+                document.getElementById('personalSection').dataset.pillFilter = type;
             }
-
-            if (shareInfoEl) {
-                const scope = task ? task.share_scope : document.getElementById('personalShare').value;
-                shareInfoEl.textContent = 'กำลังแชร์กับ: ' + getShareLabel(scope, task ? task.company : userSession.company, task ? task.department : userSession.primary_department);
-            }
-
-            modal.classList.add('show');
+            if (typeof renderPersonalBoard === 'function') renderPersonalBoard();
         }
 
-        function closePersonalTaskModal() {
-            document.getElementById('personalModal').classList.remove('show');
-        }
-
-        function savePersonalDraftToStorage() {
-            const draft = {
-                title: document.getElementById('personalTitle').value,
-                assignee_name: document.getElementById('personalAssignee').value,
-                description: document.getElementById('personalDescription').value,
-                due_date: document.getElementById('personalDueDate').value,
-                priority: document.getElementById('personalPriority').value,
-                tags: document.getElementById('personalTags').value,
-                share_scope: document.getElementById('personalShare').value
-            };
-            localStorage.setItem(personalDraftKey, JSON.stringify(draft));
-        }
-
-        function loadPersonalDraftFromStorage() {
-            try {
-                const raw = localStorage.getItem(personalDraftKey);
-                if (!raw) return {};
-                return JSON.parse(raw) || {};
-            } catch (e) {
-                return {};
+        /* ── toggleHideDone ── */
+        function toggleHideDone() {
+            if (typeof personalSettings !== 'undefined') {
+                personalSettings.hideDone = !personalSettings.hideDone;
+                const btn = document.getElementById('btn-hide-done');
+                if (btn) btn.classList.toggle('bg-slate-100', personalSettings.hideDone);
+                if (typeof renderPersonalBoard === 'function') renderPersonalBoard();
+                if (typeof savePersonalSettingsToStorage === 'function') savePersonalSettingsToStorage();
             }
         }
 
-        function clearPersonalDraft() {
-            localStorage.removeItem(personalDraftKey);
-            document.getElementById('personalTitle').value = '';
-            document.getElementById('personalDescription').value = '';
-            document.getElementById('personalDueDate').value = '';
-            document.getElementById('personalPriority').value = 'normal';
-            document.getElementById('personalTags').value = '';
-        }
-
-        async function loadPersonalTaskHistory(id) {
-            const historyEl = document.getElementById('personalHistory');
-            if (!historyEl) return;
-            historyEl.innerHTML = '';
-            try {
-                const res = await fetch(API_PATH + '?action=personal_task_history_get&task_id=' + encodeURIComponent(id));
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    throw new Error(text);
+        /* ── Sync nav username ── */
+        (function syncNavUser() {
+            var el = document.getElementById('navUserDisplay');
+            if (!el) return;
+            var n = 0;
+            var iv = setInterval(function () {
+                if (typeof userSession !== 'undefined' && userSession && userSession.loggedin) {
+                    var name = userSession.name_th || userSession.fullname || userSession.display_name || userSession.username || '';
+                    el.textContent = name;
+                    if (name) el.style.display = '';
+                    clearInterval(iv);
                 }
-                if (data.status === 'success' && Array.isArray(data.items) && data.items.length) {
-                    historyEl.innerHTML = data.items.map(h => {
-                        const ts = h.created_at ? new Date(h.created_at).toLocaleString('th-TH') : '';
-                        const user = h.user_name || h.user_id || '';
-                        const parts = [];
-                        if (h.old_status || h.new_status) {
-                            parts.push('สถานะ: ' + (h.old_status || '-') + ' → ' + (h.new_status || '-'));
-                        }
-                        if (h.old_priority || h.new_priority) {
-                            parts.push('ความสำคัญ: ' + (h.old_priority || '-') + ' → ' + (h.new_priority || '-'));
-                        }
-                        const detail = parts.join(' | ');
-                        return `<div class="flex flex-col mb-1"><span>${ts} • ${user}</span>${detail ? `<span class="text-slate-400">${detail}</span>` : ''}</div>`;
-                    }).join('');
-                }
-            } catch (e) {}
-        }
-
-        async function handlePersonalFormSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('personalTaskId').value;
-            const shareInput = document.getElementById('personalShare');
-            const existing = id ? personalTasks.find(t => t.id == id) : null;
-            const oldShare = existing ? (existing.share_scope || 'private') : null;
-            const newShare = shareInput ? (shareInput.value || 'private') : 'private';
-            if (oldShare && oldShare !== newShare) {
-                const msg = 'ต้องการเปลี่ยนการแชร์จาก "' + getShareLabel(oldShare, existing.company, existing.department) +
-                    '" เป็น "' + getShareLabel(newShare, existing.company, existing.department) + '" ใช่หรือไม่?';
-                if (!confirm(msg)) {
-                    return;
-                }
-            }
-            const payload = {
-                id: id || null,
-                title: document.getElementById('personalTitle').value,
-                assignee_name: document.getElementById('personalAssignee').value,
-                description: document.getElementById('personalDescription').value,
-                due_date: document.getElementById('personalDueDate').value || null,
-                priority: document.getElementById('personalPriority').value || 'normal',
-                tags: document.getElementById('personalTags').value || '',
-                share_scope: newShare,
-                status: (personalTasks.find(t => t.id == id)?.status) || 'todo'
-            };
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            try {
-                const fd = new FormData();
-                fd.append('data', JSON.stringify(payload));
-                const res = await fetch(API_PATH + '?action=personal_tasks_save', { method: 'POST', body: fd });
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (err) {
-                    throw new Error(text);
-                }
-                if (data.status === 'success' && data.task) {
-                    const idx = personalTasks.findIndex(t => t.id === data.task.id);
-                    if (idx >= 0) personalTasks[idx] = data.task;
-                    else personalTasks.push(data.task);
-                    clearPersonalDraft();
-                    renderPersonalBoard();
-                    closePersonalTaskModal();
-                    showToast('บันทึกงานเรียบร้อยแล้ว');
-                } else {
-                    throw new Error(data.message || 'บันทึกไม่สำเร็จ');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast(err.message, true);
-            }
-            btn.disabled = false;
-        }
-
-        async function deletePersonalTask(id) {
-            if (!confirm('คุณต้องการลบบันทึกนี้หรือไม่?')) return;
-            try {
-                const fd = new FormData();
-                fd.append('id', id);
-                const res = await fetch(API_PATH + '?action=personal_tasks_delete', { method: 'POST', body: fd });
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (err) {
-                    throw new Error(text);
-                }
-                if (data.status === 'success') {
-                    personalTasks = personalTasks.filter(t => t.id !== id);
-                    renderPersonalBoard();
-                    showToast('ลบบันทึกเรียบร้อยแล้ว');
-                } else {
-                    throw new Error(data.message || 'ลบไม่สำเร็จ');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast(err.message, true);
-            }
-        }
-
-        async function cycleTaskStatus(id) {
-            const task = personalTasks.find(t => t.id === id);
-            if (!task) return;
-            const order = ['todo', 'doing', 'done'];
-            const current = task.status || 'todo';
-            const index = order.indexOf(current);
-            const next = order[(index + 1) % order.length];
-            const payload = Object.assign({}, task, { status: next });
-
-            try {
-                const fd = new FormData();
-                fd.append('data', JSON.stringify(payload));
-                const res = await fetch(API_PATH + '?action=personal_tasks_save', { method: 'POST', body: fd });
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (err) {
-                    throw new Error(text);
-                }
-                if (data.status === 'success' && data.task) {
-                    const idx = personalTasks.findIndex(t => t.id === data.task.id);
-                    if (idx >= 0) personalTasks[idx] = data.task;
-                    renderPersonalBoard();
-                } else {
-                    throw new Error(data.message || 'อัปเดตสถานะไม่สำเร็จ');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast(err.message, true);
-            }
-        }
-
-        function openPersonalSettings() {
-            const modal = document.getElementById('personalSettingsModal');
-            document.getElementById('setting-hide-done').checked = personalSettings.hideDone;
-            document.getElementById('setting-default-sort').value = personalSettings.defaultSort || 'due_date';
-            document.getElementById('setting-view-mode').value = personalSettings.viewMode || 'kanban';
-            modal.classList.add('show');
-        }
-
-        function closePersonalSettings() {
-            document.getElementById('personalSettingsModal').classList.remove('show');
-        }
-
-        function savePersonalSettings() {
-            personalSettings.hideDone = document.getElementById('setting-hide-done').checked;
-            personalSettings.defaultSort = document.getElementById('setting-default-sort').value || 'due_date';
-            personalSettings.viewMode = document.getElementById('setting-view-mode').value || 'kanban';
-            document.getElementById('personalSort').value = personalSettings.defaultSort;
-            savePersonalSettingsToStorage();
-            closePersonalSettings();
-            renderPersonalBoard();
-        }
-
-        function resetPersonalSettings() {
-            personalSettings = { hideDone: false, defaultSort: 'due_date', viewMode: 'kanban' };
-            document.getElementById('setting-hide-done').checked = false;
-            document.getElementById('setting-default-sort').value = 'due_date';
-            document.getElementById('setting-view-mode').value = 'kanban';
-            document.getElementById('personalSort').value = 'due_date';
-            savePersonalSettingsToStorage();
-            renderPersonalBoard();
-        }
-
-        function savePersonalSettingsToStorage() {
-            try {
-                localStorage.setItem(personalSettingsKey, JSON.stringify(personalSettings));
-            } catch (e) {}
-        }
-
-        function loadPersonalSettingsFromStorage() {
-            try {
-                const raw = localStorage.getItem(personalSettingsKey);
-                if (!raw) return;
-                const parsed = JSON.parse(raw);
-                personalSettings = Object.assign({}, personalSettings, parsed || {});
-                document.getElementById('personalSort').value = personalSettings.defaultSort || 'due_date';
-            } catch (e) {}
-        }
-
-        function shareCurrentTask() {
-            const id = document.getElementById('personalTaskId').value;
-            const task = personalTasks.find(t => t.id == id);
-            const title = task ? task.title : document.getElementById('personalTitle').value;
-            const desc = task ? task.description : document.getElementById('personalDescription').value;
-            const due = task ? task.due_date : document.getElementById('personalDueDate').value;
-            const text = `งาน: ${title || '-'}\nรายละเอียด: ${desc || '-'}\nกำหนด: ${due || '-'}`;
-
-            if (navigator.share) {
-                navigator.share({ title: title || 'Job Note', text }).catch(function() {});
-            } else if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(function() {
-                    showToast('คัดลอกข้อความสำหรับแชร์แล้ว');
-                }).catch(function() {
-                    showToast('ไม่สามารถคัดลอกข้อความได้', true);
-                });
-            } else {
-                alert(text);
-            }
-        }
-
-        function getShareLabel(scope, company, department) {
-            if (scope === 'department') {
-                return 'แผนก ' + (department || '');
-            }
-            if (scope === 'company') {
-                return 'บริษัท ' + (company || '');
-            }
-            return 'เฉพาะฉัน';
-        }
-
-        function updatePersonalShareInfo() {
-            const el = document.getElementById('personalShareInfo');
-            const select = document.getElementById('personalShare');
-            if (!el || !select) return;
-            const scope = select.value || 'private';
-            el.textContent = 'กำลังแชร์กับ: ' + getShareLabel(scope, userSession.company, userSession.primary_department);
-        }
-
-        function setPersonalFormEditable(canEdit) {
-            const form = document.getElementById('personalForm');
-            if (!form) return;
-            const controls = form.querySelectorAll('input, textarea, select');
-            controls.forEach(el => {
-                if (el.id === 'personalTaskId') return;
-                el.disabled = !canEdit;
-            });
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn) submitBtn.style.display = canEdit ? 'block' : 'none';
-        }
-
-        function updatePersonalCharts(tasks, counts) {
-            const statusCanvas = document.getElementById('personalStatusChart');
-            const ownerCanvas = document.getElementById('personalOwnerChart');
-            if (!statusCanvas || !ownerCanvas) return;
-            const statusCtx = statusCanvas.getContext('2d');
-            const ownerCtx = ownerCanvas.getContext('2d');
-            const statusData = [
-                counts.todo || 0,
-                counts.doing || 0,
-                counts.done || 0
-            ];
-            if (personalStatusChart) personalStatusChart.destroy();
-            personalStatusChart = new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['ยังไม่เริ่ม', 'กำลังทำ', 'เสร็จแล้ว'],
-                    datasets: [{
-                        data: statusData,
-                        backgroundColor: ['#e5e7eb', '#fbbf24', '#22c55e']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-            const ownerMap = {};
-            tasks.forEach(t => {
-                const owner = t.owner_name_th || t.owner_name || t.user_id || 'ไม่ระบุ';
-                ownerMap[owner] = (ownerMap[owner] || 0) + 1;
-            });
-            const ownerLabels = Object.keys(ownerMap);
-            const ownerValues = ownerLabels.map(k => ownerMap[k]);
-            if (personalOwnerChart) personalOwnerChart.destroy();
-            personalOwnerChart = new Chart(ownerCtx, {
-                type: 'bar',
-                data: {
-                    labels: ownerLabels,
-                    datasets: [{
-                        data: ownerValues,
-                        backgroundColor: '#3b82f6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        // COMMENT & PROGRESS
-        // ==========================================
-        let commentTaskId = null;
-
-        function openCommentModal(taskId, taskTitle) {
-            commentTaskId = taskId;
-            document.getElementById('commentModalTitle').textContent = taskTitle || 'อัปเดตความคืบหน้า';
-            document.getElementById('commentText').value = '';
-            document.getElementById('commentHistory').innerHTML = '<div style="color:#94a3b8; font-size:12px">กำลังโหลด...</div>';
-
-            const task = personalTasks.find(t => t.id === taskId);
-            const pct = task ? (task.progress_pct || 0) : 0;
-            updateCommentProg(pct);
-            document.getElementById('commentProgSlider').value = pct;
-
-            document.getElementById('commentModal').classList.add('show');
-            loadCommentHistory(taskId);
-        }
-
-        function closeCommentModal() {
-            document.getElementById('commentModal').classList.remove('show');
-            commentTaskId = null;
-        }
-
-        function updateCommentProg(v) {
-            const pct = parseInt(v);
-            document.getElementById('commentProgFill').style.width = pct + '%';
-            document.getElementById('commentProgNum').textContent = pct + '%';
-            const col = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
-            document.getElementById('commentProgFill').style.background = col;
-        }
-
-        async function loadCommentHistory(taskId) {
-            try {
-                const res = await fetch(API_PATH + '?action=task_comment_get&task_id=' + taskId);
-                const text = await res.text();
-                let data;
-                try { data = JSON.parse(text); } catch(e) { throw new Error(text); }
-                if (data.status === 'success') {
-                    // อัปเดต progress จาก server
-                    const serverPct = data.progress_pct || 0;
-                    updateCommentProg(serverPct);
-                    document.getElementById('commentProgSlider').value = serverPct;
-
-                    const histEl = document.getElementById('commentHistory');
-                    if (!data.comments || data.comments.length === 0) {
-                        histEl.innerHTML = '<div style="color:#94a3b8; font-size:12px; padding:8px 0">ยังไม่มี comment</div>';
-                        return;
-                    }
-                    histEl.innerHTML = data.comments.map(c => {
-                        const ts = c.created_at ? new Date(c.created_at).toLocaleString('th-TH') : '';
-                        const initials = (c.user_name||'?').slice(0,2);
-                        const progBadge = c.progress_pct !== null ? `<span style="font-size:10px; padding:1px 6px; background:#dcfce7; color:#16a34a; border-radius:999px; margin-left:6px;">${c.progress_pct}%</span>` : '';
-                        return `<div style="display:flex; gap:8px; align-items:flex-start;">
-                            <div style="width:28px; height:28px; border-radius:50%; background:#dbeafe; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0;">${initials}</div>
-                            <div style="flex:1; min-width:0;">
-                                <div style="font-size:11px; color:#94a3b8; margin-bottom:2px;">${c.user_name||''} ${progBadge} · ${ts}</div>
-                                <div style="font-size:13px; color:#334155;">${c.comment||''}</div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                    histEl.scrollTop = histEl.scrollHeight;
-                }
-            } catch(e) {
-                document.getElementById('commentHistory').innerHTML = '<div style="color:#ef4444; font-size:12px">โหลดไม่สำเร็จ</div>';
-            }
-        }
-
-        async function saveComment() {
-            if (!commentTaskId) return;
-            const comment = document.getElementById('commentText').value.trim();
-            const progress = parseInt(document.getElementById('commentProgSlider').value);
-
-            if (!comment && progress === (personalTasks.find(t=>t.id===commentTaskId)?.progress_pct||0)) {
-                showToast('กรุณาใส่ comment หรือเปลี่ยน %', true);
-                return;
-            }
-
-            try {
-                const fd = new FormData();
-                fd.append('task_id', commentTaskId);
-                fd.append('comment', comment);
-                fd.append('progress', progress);
-                const res = await fetch(API_PATH + '?action=task_comment_save', { method:'POST', body:fd });
-                const text = await res.text();
-                let data;
-                try { data = JSON.parse(text); } catch(e) { throw new Error(text); }
-                if (data.status === 'success') {
-                    // อัปเดต local task
-                    const idx = personalTasks.findIndex(t => t.id === commentTaskId);
-                    if (idx >= 0) personalTasks[idx].progress_pct = progress;
-                    showToast('บันทึก comment เรียบร้อยแล้ว');
-                    document.getElementById('commentText').value = '';
-                    loadCommentHistory(commentTaskId);
-                    renderPersonalBoard();
-                } else {
-                    throw new Error(data.message || 'บันทึกไม่สำเร็จ');
-                }
-            } catch(e) {
-                showToast(e.message, true);
-            }
-        }
-
-        function showToast(msg, isError=false) {
-            const t = document.getElementById('toast');
-            t.innerHTML = isError ? `<i class="fas fa-exclamation-circle"></i> ${msg}` : `<i class="fas fa-check-circle"></i> ${msg}`;
-            t.className = isError ? 'error show' : 'success show';
-            setTimeout(() => t.className = t.className.replace('show', ''), 3000);
-        }
+                if (++n > 200) clearInterval(iv);
+            }, 50);
+        })();
     </script>
 </body>
 </html>

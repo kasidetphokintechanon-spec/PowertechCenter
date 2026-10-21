@@ -2,13 +2,31 @@
 // api/actions/delete_item.php
 
 $key = $_POST['key'] ?? '';
-$id = $_POST['id'] ?? '';
+$id = trim((string)($_POST['id'] ?? ''));
 $role = $_SESSION['role'] ?? 'guest';
 $isLoggedIn = isset($_SESSION['user_id']);
 $sessionCompany = $_SESSION['company'] ?? '';
 
-if (!$isLoggedIn || !in_array($role, ['admin', 'staff'], true)) {
+if (!$isLoggedIn) {
     throw new Exception("Access Denied");
+}
+
+function permissionForAdminDeleteKey(string $key): ?string {
+    $map = [
+        'it_assets' => 'asset.manage',
+        'asset_categories' => 'asset.manage',
+        'departments' => 'employee.manage',
+        'meeting_rooms' => 'employee.manage',
+        'meeting_amenities' => 'employee.manage',
+        'announcements' => 'employee.manage',
+        'holidays' => 'employee.manage',
+        'services' => 'employee.manage',
+        'job_tickets' => 'employee.manage',
+        'kb_articles' => 'kb.manage',
+        'kb_categories' => 'kb.manage',
+        'employees' => 'admin.manage_permissions',
+    ];
+    return $map[$key] ?? null;
 }
 $tableMap = [
     'it_assets' => ['table' => 'it_assets', 'pk' => 'id'],
@@ -26,7 +44,22 @@ $tableMap = [
     'job_tickets' => ['table' => 'job_tickets', 'pk' => 'id']
 ];
 
-if (isset($tableMap[$key]) && !empty($id)) {
+$fallbackUrl = trim((string)($_POST['fallback_url'] ?? ''));
+$fallbackTitle = trim((string)($_POST['fallback_title'] ?? ''));
+$allowEmptyId = ($key === 'services' && ($fallbackUrl !== '' || $fallbackTitle !== ''));
+
+if (isset($tableMap[$key]) && ($id !== '' || $allowEmptyId)) {
+    if ($role !== 'admin') {
+        $requiredPermission = permissionForAdminDeleteKey($key);
+        if ($requiredPermission !== null) {
+            if (!hasPermission($conn, $requiredPermission)) {
+                throw new Exception("Access Denied");
+            }
+        } elseif (!in_array($role, ['admin', 'staff'], true)) {
+            throw new Exception("Access Denied");
+        }
+    }
+
     $assetDbIdForLog = null;
 
     if ($key === 'it_logs') {
@@ -71,10 +104,64 @@ if (isset($tableMap[$key]) && !empty($id)) {
 
         $table = $tableMap[$key]['table'];
         $col = $tableMap[$key]['pk'];
-        $stmt = $conn->prepare("DELETE FROM $table WHERE $col = ?");
-        if (!$stmt) throw new Exception("Prepare failed (Delete): " . $conn->error);
-        $stmt->bind_param("s", $id);
-        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $deleteId = $id;
+
+        // Resolve exact PK from DB (legacy IDs may include spaces / odd whitespace)
+        if ($key === 'services') {
+            $lookup = $conn->prepare("SELECT `$col` FROM `$table` WHERE `$col` = ? OR TRIM(`$col`) = ? LIMIT 1");
+            if ($lookup) {
+                $lookup->bind_param('ss', $id, $id);
+                $lookup->execute();
+                $found = $lookup->get_result();
+                if ($found && ($row = $found->fetch_assoc())) {
+                    $deleteId = (string)($row[$col] ?? $id);
+                }
+            }
+            if (trim($deleteId) === '') {
+                if ($fallbackUrl !== '') {
+                    $byUrl = $conn->prepare("SELECT `$col` FROM `$table` WHERE TRIM(url_primary) = ? OR url_primary = ? LIMIT 1");
+                    if ($byUrl) {
+                        $byUrl->bind_param('ss', $fallbackUrl, $fallbackUrl);
+                        $byUrl->execute();
+                        $urlRes = $byUrl->get_result();
+                        if ($urlRes && ($urlRow = $urlRes->fetch_assoc())) {
+                            $deleteId = (string)($urlRow[$col] ?? '');
+                        }
+                    }
+                }
+                if (trim($deleteId) === '' && $fallbackTitle !== '') {
+                    $byTitle = $conn->prepare("SELECT `$col` FROM `$table` WHERE TRIM(title) = ? LIMIT 1");
+                    if ($byTitle) {
+                        $byTitle->bind_param('s', $fallbackTitle);
+                        $byTitle->execute();
+                        $titleRes = $byTitle->get_result();
+                        if ($titleRes && ($titleRow = $titleRes->fetch_assoc())) {
+                            $deleteId = (string)($titleRow[$col] ?? '');
+                        }
+                    }
+                }
+            }
+        }
+
+        $affected = 0;
+        if ($key === 'services' && trim($deleteId) === '' && $fallbackUrl !== '') {
+            $stmt = $conn->prepare("DELETE FROM `$table` WHERE TRIM(url_primary) = ? OR url_primary = ?");
+            if (!$stmt) throw new Exception("Prepare failed (Delete): " . $conn->error);
+            $stmt->bind_param('ss', $fallbackUrl, $fallbackUrl);
+            if (!$stmt->execute()) throw new Exception($stmt->error);
+            $affected = $stmt->affected_rows;
+        } else {
+            $stmt = $conn->prepare("DELETE FROM `$table` WHERE `$col` = ?");
+            if (!$stmt) throw new Exception("Prepare failed (Delete): " . $conn->error);
+            $stmt->bind_param("s", $deleteId);
+            if (!$stmt->execute()) throw new Exception($stmt->error);
+            $affected = $stmt->affected_rows;
+        }
+
+        if ($affected < 1) {
+            $label = $id !== '' ? $id : ($fallbackUrl !== '' ? $fallbackUrl : $fallbackTitle);
+            throw new Exception("ไม่พบรายการที่ต้องการลบ ({$label})");
+        }
 
         // บันทึกประวัติการลบใบงานลงใน asset_history (ใช้เป็น Audit Log)
         if ($key === 'it_logs' && $assetDbIdForLog) {
