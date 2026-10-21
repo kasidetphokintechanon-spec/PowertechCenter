@@ -37,17 +37,49 @@ function addColumnIfNotExists($conn, $table, $column, $definition) {
 }
 
 function ensurePermissionRole($conn, $name, $description, $permissions) {
-    $stmt = $conn->prepare("SELECT id FROM permission_roles WHERE name = ? LIMIT 1");
+    $normalizedPermissions = array_values(array_unique($permissions));
+    sort($normalizedPermissions);
+    $json = json_encode($normalizedPermissions);
+
+    $stmt = $conn->prepare("SELECT id, description, permissions_json FROM permission_roles WHERE name = ? LIMIT 1");
     if ($stmt) {
         $stmt->bind_param("s", $name);
         $stmt->execute();
         $res = $stmt->get_result();
-        if ($res && $res->fetch_assoc()) {
-            echo "<p style='color: blue;'>ℹ️ Permission Role '$name' มีอยู่แล้ว</p>";
+
+        $existing = $res ? $res->fetch_assoc() : null;
+        if ($existing) {
+            $existingPermissions = [];
+            if (!empty($existing['permissions_json'])) {
+                $decoded = json_decode($existing['permissions_json'], true);
+                if (is_array($decoded)) {
+                    $existingPermissions = array_values(array_unique($decoded));
+                    sort($existingPermissions);
+                }
+            }
+
+            $needsUpdate = ($existing['description'] !== $description) || ($existingPermissions !== $normalizedPermissions);
+            if (!$needsUpdate) {
+                echo "<p style='color: blue;'>ℹ️ Permission Role '$name' มีอยู่แล้ว (ล่าสุด)</p>";
+                return;
+            }
+
+            $stmtUpd = $conn->prepare("UPDATE permission_roles SET description = ?, permissions_json = ? WHERE id = ?");
+            if ($stmtUpd) {
+                $roleId = (int)$existing['id'];
+                $stmtUpd->bind_param("ssi", $description, $json, $roleId);
+                if ($stmtUpd->execute()) {
+                    echo "<p style='color: green;'>✅ อัปเดต Permission Role '$name' เรียบร้อยแล้ว</p>";
+                } else {
+                    echo "<p style='color: red;'>❌ Error updating Permission Role '$name': " . $conn->error . "</p>";
+                }
+            } else {
+                echo "<p style='color: red;'>❌ Error preparing update for Permission Role '$name': " . $conn->error . "</p>";
+            }
             return;
         }
     }
-    $json = json_encode(array_values(array_unique($permissions)));
+
     $stmtIns = $conn->prepare("INSERT INTO permission_roles (name, description, permissions_json) VALUES (?, ?, ?)");
     if ($stmtIns) {
         $stmtIns->bind_param("sss", $name, $description, $json);
@@ -62,6 +94,10 @@ function ensurePermissionRole($conn, $name, $description, $permissions) {
 // 1. ตรวจสอบและเพิ่มคอลัมน์ responsible_department ในตาราง employees
 addColumnIfNotExists($conn, 'employees', 'responsible_department', 'VARCHAR(255) NULL AFTER role');
 addColumnIfNotExists($conn, 'employees', 'remember_token', 'VARCHAR(64) NULL AFTER responsible_department');
+addColumnIfNotExists($conn, 'employees', 'is_executive', 'TINYINT(1) NOT NULL DEFAULT 0 AFTER position');
+addColumnIfNotExists($conn, 'employees', 'is_management', 'TINYINT(1) NOT NULL DEFAULT 0 AFTER is_executive');
+addColumnIfNotExists($conn, 'employees', 'is_technician', 'TINYINT(1) NOT NULL DEFAULT 0 AFTER is_management');
+addColumnIfNotExists($conn, 'employees', 'can_manage_stock', 'TINYINT(1) NOT NULL DEFAULT 0 AFTER is_technician');
 
 // 2. ตรวจสอบและเพิ่มคอลัมน์ images ในตาราง it_assets (สำหรับเก็บรูปหลายรูป)
 addColumnIfNotExists($conn, 'it_assets', 'images', 'TEXT NULL AFTER image_url');
@@ -337,28 +373,35 @@ if ($table_check->num_rows == 0) {
 
 $checkRolesSeed = $conn->query("SHOW TABLES LIKE 'permission_roles'");
 if ($checkRolesSeed && $checkRolesSeed->num_rows > 0) {
-    ensurePermissionRole($conn, 'PTA-IT-Admin', 'Full IT administration permissions', [
+    ensurePermissionRole($conn, 'PTA-IT-Admin', 'Full IT administration permissions (all standard controls)', [
         'admin.access_admin',
         'admin.manage_permissions',
         'asset.manage',
         'employee.manage',
+        'stock.manage',
         'loan.manage',
         'kb.manage',
         'settings.notifications',
         'audit.view'
     ]);
 
-    ensurePermissionRole($conn, 'PTA-IT-Support', 'IT support staff permissions', [
+    ensurePermissionRole($conn, 'PTA-IT-Support', 'IT operations permissions (asset, stock, loan, KB, notifications)', [
         'admin.access_admin',
         'asset.manage',
+        'stock.manage',
         'loan.manage',
         'kb.manage',
         'settings.notifications'
     ]);
 
-    ensurePermissionRole($conn, 'PTA-HR', 'HR management permissions', [
+    ensurePermissionRole($conn, 'PTA-HR', 'People team permissions (employee management only)', [
         'admin.access_admin',
         'employee.manage'
+    ]);
+
+    ensurePermissionRole($conn, 'PTA-Auditor-ReadOnly', 'Read-only oversight access for audit and review', [
+        'admin.access_admin',
+        'audit.view'
     ]);
 
     ensurePermissionRole($conn, 'PTA-User', 'Standard user permissions', []);
@@ -540,6 +583,178 @@ if ($conn->query($migrateJobTicketsSql) === TRUE) {
     echo "<p style='color: green;'>✅ ย้ายข้อมูล job_tickets เข้า personal_tasks แล้ว {$migrated} รายการ</p>";
 } else {
     echo "<p style='color: red;'>❌ Error migrating job_tickets to personal_tasks: " . $conn->error . "</p>";
+}
+
+// 17. ตรวจสอบและสร้างตาราง sc_rooms, sc_items, sc_records, sc_values (Server Room Check)
+$table_check = $conn->query("SHOW TABLES LIKE 'sc_rooms'");
+if ($table_check->num_rows == 0) {
+    $conn->query("CREATE TABLE sc_rooms (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(30) NOT NULL,
+        name VARCHAR(200) NOT NULL,
+        location VARCHAR(200) DEFAULT NULL,
+        sort_order INT DEFAULT 0,
+        company VARCHAR(10) DEFAULT 'PTA',
+        is_active TINYINT(1) DEFAULT 1
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $conn->query("INSERT IGNORE INTO sc_rooms (id,code,name,location,sort_order,company) VALUES
+        (1,'F4','BMW Bike Wheel Plant (F4)','BMW Bike Wheel Plant',1,'PTA'),
+        (2,'F5','BENZ Warehouse Plant (F5)','BENZ Warehouse Plant',2,'PT4'),
+        (3,'F6','BENZ Warehouse Plant (F6)','BENZ Warehouse Plant',3,'PT4'),
+        (4,'F7','BENZ Warehouse Plant (F7)','BENZ Warehouse Plant',4,'PT4'),
+        (5,'F8','BENZ Warehouse Store (F8)','BENZ Warehouse Store',5,'PT4'),
+        (6,'F16-17','BMW Car Wheel Plant (F16-17)','BMW Car Wheel Plant',6,'PTA'),
+        (7,'F20','BMW Car Wheel Plant (F20)','BMW Car Wheel Plant',7,'PTA')");
+    echo "<p style='color:green'>✅ สร้างตาราง 'sc_rooms' + seed data เรียบร้อยแล้ว</p>";
+} else {
+    addColumnIfNotExists($conn, 'sc_rooms', 'is_active', "TINYINT(1) DEFAULT 1");
+    echo "<p style='color:blue'>ℹ️ ตาราง 'sc_rooms' มีอยู่แล้ว</p>";
+}
+
+$table_check = $conn->query("SHOW TABLES LIKE 'sc_items'");
+if ($table_check->num_rows == 0) {
+    $conn->query("CREATE TABLE sc_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_id INT NOT NULL,
+        item_no INT NOT NULL,
+        label VARCHAR(250) NOT NULL,
+        input_type ENUM('status','percent','days','backup') DEFAULT 'status',
+        threshold INT DEFAULT NULL,
+        total_count INT DEFAULT NULL,
+        sort_order INT DEFAULT 0,
+        is_active TINYINT(1) DEFAULT 1,
+        KEY idx_room (room_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $conn->query("INSERT IGNORE INTO sc_items (id,room_id,item_no,label,input_type,threshold,total_count,sort_order) VALUES
+        (1,1,1,'Switch Hub D-Link 24 Port','status',NULL,NULL,1),
+        (2,1,2,'DVR RaySharp 16 CH','status',NULL,NULL,2),
+        (3,1,3,'UPS 750 VA','status',NULL,NULL,3),
+        (4,1,4,'Server NAS','status',NULL,NULL,4),
+        (5,1,5,'UPS Server Rack','status',NULL,NULL,5),
+        (6,1,6,'CCTV – System Status','status',NULL,NULL,6),
+        (7,1,7,'CCTV – Cameras Online (%)','percent',NULL,16,7),
+        (8,1,8,'CCTV – Retention (≥90 Days)','days',90,NULL,8),
+        (9,2,1,'DVR RaySharp 16 CH','status',NULL,NULL,1),
+        (10,2,2,'UPS 750 VA Server Room','status',NULL,NULL,2),
+        (11,2,3,'Lighting','status',NULL,NULL,3),
+        (12,2,4,'CCTV – System Status','status',NULL,NULL,4),
+        (13,2,5,'CCTV – Cameras Online (%)','percent',NULL,16,5),
+        (14,2,6,'CCTV – Retention (≥90 Days)','days',90,NULL,6),
+        (15,3,1,'DVR RaySharp 16 CH','status',NULL,NULL,1),
+        (16,3,2,'UPS 750 VA Server Room','status',NULL,NULL,2),
+        (17,3,3,'Lighting','status',NULL,NULL,3),
+        (18,3,4,'CCTV – System Status','status',NULL,NULL,4),
+        (19,3,5,'CCTV – Cameras Online (%)','percent',NULL,16,5),
+        (20,3,6,'CCTV – Retention (≥30 Days)','days',30,NULL,6),
+        (21,4,1,'TOT Fiber Optic','status',NULL,NULL,1),
+        (22,4,2,'FortiGate Firewall 200E','status',NULL,NULL,2),
+        (23,4,3,'UPS 750 VA','status',NULL,NULL,3),
+        (24,4,4,'Status Monitor / Lighting / Air Condition','status',NULL,NULL,4),
+        (25,4,5,'Switch Hub D-Link 24 Port','status',NULL,NULL,5),
+        (26,4,6,'DVR RaySharp 16 CH','status',NULL,NULL,6),
+        (27,4,7,'UPS Server Rack','status',NULL,NULL,7),
+        (28,4,8,'CCTV – System Status','status',NULL,NULL,8),
+        (29,4,9,'CCTV – Cameras Online (%)','percent',NULL,16,9),
+        (30,4,10,'CCTV – Retention (≥90 Days)','days',90,NULL,10),
+        (31,4,11,'Backup HDD','backup',NULL,NULL,11),
+        (32,5,1,'Switch Hub D-Link 24 Port','status',NULL,NULL,1),
+        (33,5,2,'DVR RaySharp 16 CH','status',NULL,NULL,2),
+        (34,5,3,'UPS 750 VA','status',NULL,NULL,3),
+        (35,5,4,'CCTV – System Status','status',NULL,NULL,4),
+        (36,5,5,'CCTV – Cameras Online (%)','percent',NULL,16,5),
+        (37,5,6,'CCTV – Retention (≥90 Days)','days',90,NULL,6),
+        (38,6,1,'Status Monitor','status',NULL,NULL,1),
+        (39,6,2,'Switch Hub D-Link 24 Port','status',NULL,NULL,2),
+        (40,6,3,'DVR RaySharp 16 CH','status',NULL,NULL,3),
+        (41,6,4,'UPS 750 VA Server Room','status',NULL,NULL,4),
+        (42,6,5,'Lighting','status',NULL,NULL,5),
+        (43,6,6,'CCTV – System Status (F-16)','status',NULL,NULL,6),
+        (44,6,7,'CCTV – Online (%) (F-16)','percent',NULL,NULL,7),
+        (45,6,8,'CCTV – Retention (≥15 Days) F-16','days',15,NULL,8),
+        (46,6,9,'CCTV – System Status (F-17)','status',NULL,NULL,9),
+        (47,6,10,'CCTV – Online (%) (F-17)','percent',NULL,NULL,10),
+        (48,6,11,'CCTV – Retention (≥60 Days) F-17','days',60,NULL,11),
+        (49,6,12,'Backup HDD','backup',NULL,NULL,12),
+        (50,7,1,'Switch Hub D-Link 24 Port','status',NULL,NULL,1),
+        (51,7,2,'DVR RaySharp 23 CH','status',NULL,NULL,2),
+        (52,7,3,'UPS 750 VA','status',NULL,NULL,3),
+        (53,7,4,'CCTV – System Status','status',NULL,NULL,4),
+        (54,7,5,'CCTV – Cameras Online (%)','percent',NULL,16,5),
+        (55,7,6,'CCTV – Retention (≥90 Days)','days',90,NULL,6)");
+    echo "<p style='color:green'>✅ สร้างตาราง 'sc_items' + seed data เรียบร้อยแล้ว</p>";
+} else {
+    addColumnIfNotExists($conn, 'sc_items', 'threshold', "INT DEFAULT NULL");
+    addColumnIfNotExists($conn, 'sc_items', 'total_count', "INT DEFAULT NULL");
+    addColumnIfNotExists($conn, 'sc_items', 'is_active', "TINYINT(1) DEFAULT 1");
+    echo "<p style='color:blue'>ℹ️ ตาราง 'sc_items' มีอยู่แล้ว</p>";
+}
+
+$table_check = $conn->query("SHOW TABLES LIKE 'sc_records'");
+if ($table_check->num_rows == 0) {
+    $conn->query("CREATE TABLE sc_records (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_id INT NOT NULL,
+        check_date DATE NOT NULL,
+        checked_by VARCHAR(150) DEFAULT NULL,
+        suggestions TEXT DEFAULT NULL,
+        saved_by_id VARCHAR(50) DEFAULT NULL,
+        saved_by_name VARCHAR(150) DEFAULT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_room_date (room_id, check_date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    echo "<p style='color:green'>✅ สร้างตาราง 'sc_records' เรียบร้อยแล้ว</p>";
+} else {
+    addColumnIfNotExists($conn, 'sc_records', 'suggestions', "TEXT DEFAULT NULL");
+    addColumnIfNotExists($conn, 'sc_records', 'saved_by_id', "VARCHAR(50) DEFAULT NULL");
+    addColumnIfNotExists($conn, 'sc_records', 'saved_by_name', "VARCHAR(150) DEFAULT NULL");
+    echo "<p style='color:blue'>ℹ️ ตาราง 'sc_records' มีอยู่แล้ว</p>";
+}
+
+$table_check = $conn->query("SHOW TABLES LIKE 'sc_values'");
+if ($table_check->num_rows == 0) {
+    $conn->query("CREATE TABLE sc_values (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        record_id INT NOT NULL,
+        item_id INT NOT NULL,
+        val VARCHAR(100) DEFAULT NULL,
+        UNIQUE KEY uq_rec_item (record_id, item_id),
+        KEY idx_record (record_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    echo "<p style='color:green'>✅ สร้างตาราง 'sc_values' เรียบร้อยแล้ว</p>";
+} else {
+    echo "<p style='color:blue'>ℹ️ ตาราง 'sc_values' มีอยู่แล้ว</p>";
+}
+
+// 18. ตรวจสอบและสร้างตาราง company_holidays (วันหยุดบริษัท)
+$table_check = $conn->query("SHOW TABLES LIKE 'company_holidays'");
+if ($table_check->num_rows == 0) {
+    $sql = "CREATE TABLE company_holidays (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        holiday_date DATE NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        company VARCHAR(10) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_holiday (holiday_date, company)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    if ($conn->query($sql) === TRUE) {
+        echo "<p style='color: green;'>✅ สร้างตาราง 'company_holidays' เรียบร้อยแล้ว</p>";
+    } else {
+        echo "<p style='color: red;'>❌ Error creating company_holidays: " . $conn->error . "</p>";
+    }
+} else {
+    echo "<p style='color: blue;'>ℹ️ ตาราง 'company_holidays' มีอยู่แล้ว</p>";
+}
+
+// 18. ซ่อน Server Room Check ออกจาก main grid (ย้ายไป sidebar IT แทน)
+if ($conn->query("UPDATE services SET is_active = 0 WHERE id = 'server-check' AND COALESCE(is_active, 1) = 1") === TRUE) {
+    if ($conn->affected_rows > 0) {
+        echo "<p style='color: green;'>✅ ซ่อน 'Server Room Check' ออกจาก main grid เรียบร้อยแล้ว (ย้ายไป sidebar IT)</p>";
+    } else {
+        echo "<p style='color: blue;'>ℹ️ 'Server Room Check' ถูกซ่อนอยู่แล้ว</p>";
+    }
+} else {
+    echo "<p style='color: red;'>❌ Error updating services: " . $conn->error . "</p>";
 }
 
 echo "<hr>";

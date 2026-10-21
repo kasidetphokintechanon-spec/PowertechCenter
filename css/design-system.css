@@ -3,8 +3,10 @@
    Unified enterprise UI foundation — imported by all pages
    ============================================================ */
 
+@import url('responsive-platform.css');
+
 /* ---- IMPORT FONTS ---- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600;700&display=swap');
+/* Google Fonts removed — fonts loaded locally via css/fonts/inter-kanit-local.css */
 
 /* ============================================================
    DESIGN TOKENS (CSS Custom Properties)

@@ -1,0 +1,83 @@
+/**
+ * PowertechCenter — global unified theme (log.html baseline)
+ * Load last. Requires body.ptc-unified-v1
+ */
+body.ptc-unified-v1 {
+    font-family: 'Inter', 'Kanit', -apple-system, sans-serif;
+}
+
+/* Page canvas — align with log #f1f5f9 */
+body.ptc-unified-v1:not(.ptc-unified-skip-bg) {
+    background-color: #f1f5f9 !important;
+    background-image: none !important;
+}
+
+html.dark body.ptc-unified-v1:not(.ptc-unified-skip-bg) {
+    background-color: #0a0f1e !important;
+}
+
+body.ptc-unified-v1.bg-slate-50,
+body.ptc-unified-v1.bg-slate-100,
+body.ptc-unified-v1.stock-mgmt-page,
+body.ptc-unified-v1.stock-request-page,
+body.ptc-unified-v1.stock-history-page {
+    background-color: #f1f5f9 !important;
+}
+
+html.dark body.ptc-unified-v1.dark\:bg-slate-900,
+html.dark body.ptc-unified-v1.bg-slate-900 {
+    background-color: #0a0f1e !important;
+}
+
+/* Enterprise navbar (already .ptc-nav) */
+body.ptc-unified-v1 .ptc-nav {
+    border-top: 3px solid #2563eb;
+}
+
+/* Legacy Tailwind fixed nav → log-style bar */
+body.ptc-unified-v1 > nav.fixed,
+body.ptc-unified-v1 nav.backdrop-blur-sm,
+body.ptc-unified-v1 nav[class*='backdrop-blur'] {
+    position: sticky !important;
+    top: 0;
+    z-index: 50;
+    background: #fff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-top: 3px solid #2563eb !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.dark body.ptc-unified-v1 > nav.fixed,
+html.dark body.ptc-unified-v1 nav[class*='backdrop-blur'] {
+    background: #0f172a !important;
+    border-bottom-color: #1e293b !important;
+    border-top-color: #3b82f6 !important;
+}
+
+/* Cards & panels */
+body.ptc-unified-v1 .ptc-card,
+body.ptc-unified-v1 .loan-card,
+body.ptc-unified-v1 .stock-card,
+body.ptc-unified-v1 .stock-panel,
+body.ptc-unified-v1 .widget-card,
+body.ptc-unified-v1 .kpi-card,
+body.ptc-unified-v1 .dash-stat-card,
+body.ptc-unified-v1 .chart-card {
+    border-radius: 14px;
+}
+
+body.ptc-unified-v1 .no-print.border-b {
+    border-top: 3px solid #2563eb;
+}
+
+/* Auth / centered forms */
+body.ptc-unified-v1.auth-unified-page {
+    background: #f1f5f9 !important;
+    background-image: none !important;
+}
+
+body.ptc-unified-v1.auth-unified-page .max-w-md,
+body.ptc-unified-v1.auth-unified-page form {
+    border-radius: 14px;
+}

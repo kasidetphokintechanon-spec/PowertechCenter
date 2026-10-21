@@ -69,6 +69,8 @@ function sendTelegramNotification($conn, $message, $type = 'general') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             $result = curl_exec($ch);
@@ -226,6 +228,8 @@ function sendTelegramNotification($conn, $message, $type = 'general') {
                 'Authorization: Bearer ' . $settings['line_channel_token']
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             $result = curl_exec($ch);
@@ -242,10 +246,15 @@ function sendTelegramNotification($conn, $message, $type = 'general') {
         }
     }
 
+require_once __DIR__ . '/includes/permissions_registry.php';
+require_once __DIR__ . '/includes/notify_helper.php';
+
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
-    if ($role === 'admin') return ['*'];
-    if ($role === 'staff') return ['admin.access_admin'];
+    if ($role === 'admin') {
+        return ['*'];
+    }
+    // staff / user — สิทธิ์จากตาราง user_permissions เท่านั้น (ไม่ให้เข้า admin โดยปริยาย)
     return [];
 }
 
@@ -302,8 +311,122 @@ function hasPermission($conn, $permissionKey) {
     if ($cache === null) {
         $cache = getEffectivePermissionsForUserId($conn, $userId, $role);
     }
-    if (in_array('*', $cache, true)) return true;
+    if (in_array('*', $cache, true)) {
+        return true;
+    }
     return in_array($permissionKey, $cache, true);
+}
+
+function refreshSessionPermissions($conn): array {
+    $userId = $_SESSION['user_id'] ?? null;
+    $role = $_SESSION['role'] ?? 'guest';
+    $effective = getEffectivePermissionsForUserId($conn, $userId, $role);
+    $_SESSION['effective_permissions'] = $effective;
+    $_SESSION['can_access_admin'] = ($role === 'admin') || in_array('admin.access_admin', $effective, true);
+    $_SESSION['can_manage_stock'] = (in_array('stock.manage', $effective, true) || in_array('*', $effective, true)) ? 1 : 0;
+    return $effective;
+}
+
+function canAccessAdminPanel($conn): bool {
+    return !empty($_SESSION['can_access_admin']) || hasPermission($conn, 'admin.access_admin');
+}
+
+function requirePermission($conn, string $permissionKey): void {
+    if (!hasPermission($conn, $permissionKey)) {
+        if (ob_get_length()) {
+            ob_clean();
+        }
+        echo json_encode(['status' => 'error', 'message' => 'Insufficient permission']);
+        exit;
+    }
+}
+
+/** Ensure services.is_active exists (1 = show on index, 0 = hold/hidden). */
+function ptc_ensure_services_is_active_column(mysqli $conn): void {
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $res = @$conn->query("SHOW COLUMNS FROM `services` LIKE 'is_active'");
+    if ($res && $res->num_rows === 0) {
+        @$conn->query(
+            "ALTER TABLE `services` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=visible on index' AFTER `sort_order`"
+        );
+    }
+}
+
+function syncStockPermissionGrant($conn, string $userId, int $canManage): void {
+    if (!permissionTablesExist($conn)) {
+        return;
+    }
+    if ($canManage === 1) {
+        $del = $conn->prepare('DELETE FROM user_permissions WHERE user_id = ? AND permission_key = ?');
+        $key = 'stock.manage';
+        if ($del) {
+            $del->bind_param('ss', $userId, $key);
+            $del->execute();
+        }
+        $ins = $conn->prepare('INSERT INTO user_permissions (user_id, permission_key, is_granted) VALUES (?, ?, 1)');
+        if ($ins) {
+            $ins->bind_param('ss', $userId, $key);
+            $ins->execute();
+        }
+    } else {
+        $del = $conn->prepare("DELETE FROM user_permissions WHERE user_id = ? AND permission_key = 'stock.manage'");
+        if ($del) {
+            $del->bind_param('s', $userId);
+            $del->execute();
+        }
+    }
+}
+
+function syncEmployeeStockFlagFromPermissions($conn, string $userId): void {
+    $stmt = $conn->prepare('SELECT role FROM employees WHERE id = ? LIMIT 1');
+    if (!$stmt) {
+        return;
+    }
+    $stmt->bind_param('s', $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res ? $res->fetch_assoc() : null;
+    if (!$row) {
+        return;
+    }
+    $effective = getEffectivePermissionsForUserId($conn, $userId, $row['role'] ?? 'user');
+    $flag = (in_array('stock.manage', $effective, true) || in_array('*', $effective, true)) ? 1 : 0;
+    $upd = $conn->prepare('UPDATE employees SET can_manage_stock = ? WHERE id = ?');
+    if ($upd) {
+        $upd->bind_param('is', $flag, $userId);
+        $upd->execute();
+    }
+}
+
+// ── Rate limiting (session-based, no DB required) ────────────────────────
+// Applies only to write/sensitive actions to avoid slowing normal reads.
+function applyRateLimit(string $action, int $maxPerMinute = 30): void {
+    $sensitiveActions = ['add_item','update_item','delete_item','cancel_ticket','upload_attachment',
+                         'login','request_password_reset','reset_password','rate_ticket'];
+    if (!in_array($action, $sensitiveActions, true)) return;
+
+    if (session_status() !== PHP_SESSION_ACTIVE) return; // session not started yet
+    $key  = 'rl_' . $action;
+    $now  = time();
+    $data = $_SESSION[$key] ?? ['count' => 0, 'window_start' => $now];
+
+    if ($now - $data['window_start'] >= 60) {
+        $data = ['count' => 0, 'window_start' => $now]; // reset window
+    }
+
+    $data['count']++;
+    $_SESSION[$key] = $data;
+
+    if ($data['count'] > $maxPerMinute) {
+        if (ob_get_length()) ob_clean();
+        http_response_code(429);
+        echo json_encode(['status' => 'error', 'message' => 'Too many requests. Please wait a moment.']);
+        exit;
+    }
 }
 
 try {
@@ -338,8 +461,14 @@ try {
         throw new Exception("Error loading character set utf8mb4: " . $conn->error);
     }
 
+    // Lazy cron: ส่ง Stock Summary อัตโนมัติถ้าถึงเวลาที่ตั้งไว้
+    _checkStockSummaryCron($conn);
+
     $action = $_REQUEST['action'] ?? '';
-    
+
+    // Apply rate limit for write/sensitive actions
+    applyRateLimit($action);
+
     // --- Modular Action Handler ---
     // ตรวจสอบว่ามีไฟล์ action แยกในโฟลเดอร์ api/actions/ หรือไม่
     // ป้องกัน Directory Traversal โดยอนุญาตเฉพาะตัวอักษร a-z, 0-9 และ _
@@ -356,7 +485,10 @@ try {
         'dashboard',
         'kb',
         'system',
-        'checklist'
+        'checklist',
+        'stock',
+        'setup',
+        'server_check'
     ];
 
     if (!empty($safeAction)) {

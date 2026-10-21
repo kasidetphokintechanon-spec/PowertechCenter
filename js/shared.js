@@ -154,7 +154,8 @@ async function populateSidebarContent(activePage) {
                 if (session.role === 'admin' || session.primary_department === 'IT') {
                     itMenuHTML = `
                         <a href="dashboard.html" id="nav-dashboard" class="nav-link relative"><i class="fas fa-tachometer-alt fa-fw"></i><span>Dashboard งานซ่อม</span>${repairBadge}</a>
-                        <a href="log.html" id="nav-log" class="nav-link"><i class="fas fa-book fa-fw"></i><span>บันทึกงาน IT</span></a>`;
+                        <a href="log.html" id="nav-log" class="nav-link"><i class="fas fa-book fa-fw"></i><span>บันทึกงาน IT</span></a>
+                        <a href="it_report.html" id="nav-it_report" class="nav-link"><i class="fas fa-chart-bar fa-fw"></i><span>IT Report</span></a>`;
                 }
 
                 officerMenuHTML = `
@@ -308,17 +309,18 @@ function applyCompanyTheme(company) {
         logoImg.style.backgroundColor = lightBg;
         logoImg.style.borderColor = color;
 
-        // เพิ่ม ?t=... เพื่อป้องกัน Browser Cache รูปเก่า
-        logoImg.src = logoPaths[company] + '?t=' + new Date().getTime();
-        
+        // ต้องตั้ง onload/onerror ก่อน src เสมอ — ไม่งั้น onload อาจยิงก่อน handler ติด
         logoImg.onload = function() {
-            logoImg.style.display = 'block'; // โหลดสำเร็จค่อยแสดง
+            logoImg.style.display = 'block';
             if (logoIcon) logoIcon.style.display = 'none';
         };
         logoImg.onerror = function() {
-            logoImg.style.display = 'none'; // โหลดไม่สำเร็จ (เช่นยังไม่อัปโหลด) ให้ซ่อน
-            if (logoIcon) logoIcon.style.display = 'block'; // และกลับไปใช้ไอคอนเดิม
+            logoImg.style.display = 'none';
+            if (logoIcon) logoIcon.style.display = 'block';
         };
+
+        // เพิ่ม ?t=... เพื่อป้องกัน Browser Cache รูปเก่า (ตั้ง src หลัง handler เสมอ)
+        logoImg.src = logoPaths[company] + '?t=' + new Date().getTime();
     }
 
     // --- START: Favicon Change Logic ---

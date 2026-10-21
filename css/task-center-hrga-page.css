@@ -1,0 +1,121 @@
+/**
+ * Task Center HR&GA — standalone page shell (matches mockup v2)
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+body.hrga-page-body {
+    font-family: 'Inter', 'Kanit', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding-top: 0;
+}
+
+.hrga-page-top {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    color: #fff;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+.hrga-page-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+.hrga-page-top h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+}
+.hrga-page-top p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: .9;
+}
+.hrga-page-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.hrga-page-link {
+    border: 1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.hrga-page-link:hover {
+    background: rgba(255,255,255,.22);
+    color: #fff;
+}
+.hrga-page-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    max-width: 1180px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.hrga-page-nav .sn,
+.hrga-page-nav .hrga-sn {
+    margin-top: 0;
+    border: 1px solid rgba(255,255,255,.3);
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+.hrga-page-nav .sn.active,
+.hrga-page-nav .hrga-sn.active {
+    background: #fff;
+    color: #1d4ed8;
+    border-color: #fff;
+}
+
+#hrgaApp.hrga-shell {
+    min-height: calc(100vh - 100px);
+    padding: 16px;
+}
+
+.hrga-page-body .ptc-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: hrga-spin .7s linear infinite;
+    margin: 0 auto 12px;
+}
+@keyframes hrga-spin { to { transform: rotate(360deg); } }
+
+.hrga-staff-pick {
+    margin-top: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    font-family: inherit;
+    min-width: 200px;
+    background: #fff;
+    color: #0f172a;
+}

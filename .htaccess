@@ -1,0 +1,12 @@
+# Force browsers (และ Chrome's PWA install-prompt engine) ให้ revalidate ไฟล์พวกนี้ทุกครั้ง
+# แทนที่จะแคชไว้ถาวร — ไฟล์เหล่านี้เปลี่ยนเนื้อหาได้ตอนแอดมินอัปโหลดโลโก้ใหม่ใน admin_logo.html
+# (app-manifest.json ถูก Chrome อ่านตรงจาก <link rel="manifest"> ก่อนที่ JS ฝั่งหน้าเว็บจะทำงานอีก
+# ด้วยซ้ำ จึงต้องกันแคชที่ระดับ HTTP header ไม่ใช่แค่ query-string บน icon เหมือนที่ทำกับ favicon)
+<IfModule mod_headers.c>
+    <FilesMatch "^(app-manifest|directory-manifest)\.json$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+    <FilesMatch "^favicon\.ico$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>

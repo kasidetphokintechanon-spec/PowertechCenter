@@ -1,7 +1,7 @@
 <?php
-// api/actions/get_pending_counts.php
+// api/actions/dashboard/get_pending_counts.php
 
-$loan_count = 0; $repair_count = 0; $booking_count = 0;
+$loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0;
 
 try {
     if (isset($conn) && $conn instanceof mysqli) {
@@ -13,51 +13,62 @@ try {
         if ($role !== 'admin' && !empty($sessionCompany)) {
             $sql .= " AND company = ?";
             $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("s", $sessionCompany);
-                $stmt->execute();
-                $res = $stmt->get_result();
-                if ($res && $row = $res->fetch_assoc()) $loan_count = (int)$row['count'];
-            }
+            if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $loan_count = (int)$row['count']; }
         } else {
-            if ($res = $conn->query($sql)) {
-                $loan_count = (int)$res->fetch_assoc()['count'];
-            }
+            if ($res = $conn->query($sql)) $loan_count = (int)$res->fetch_assoc()['count'];
         }
 
-        // Repair (ตั๋วซ่อมรอจัดการ)
+        // Repair (ตั๋วซ่อม status=Pending ยังไม่รับงาน)
         $sql = "SELECT COUNT(*) as count FROM it_logs WHERE status = 'Pending'";
         if ($role !== 'admin' && !empty($sessionCompany)) {
             $sql .= " AND company = ?";
             $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("s", $sessionCompany);
-                $stmt->execute();
-                $res = $stmt->get_result();
-                if ($res && $row = $res->fetch_assoc()) $repair_count = (int)$row['count'];
-            }
+            if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $repair_count = (int)$row['count']; }
         } else {
-            if ($res = $conn->query($sql)) {
-                $repair_count = (int)$res->fetch_assoc()['count'];
-            }
+            if ($res = $conn->query($sql)) $repair_count = (int)$res->fetch_assoc()['count'];
         }
 
         // Booking (การจองรออนุมัติ)
-        // ใช้ join กับ meeting_rooms เพื่อกรองบริษัทได้แม่นยำ
         $sql = "SELECT COUNT(*) as count FROM bookings b JOIN meeting_rooms r ON b.room_id = r.id WHERE b.status = 'Pending'";
         if ($role !== 'admin' && !empty($sessionCompany)) {
             $sql .= " AND r.company = ?";
             $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("s", $sessionCompany);
-                $stmt->execute();
-                $res = $stmt->get_result();
-                if ($res && $row = $res->fetch_assoc()) $booking_count = (int)$row['count'];
-            }
+            if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $booking_count = (int)$row['count']; }
         } else {
-            if ($res = $conn->query($sql)) {
-                $booking_count = (int)$res->fetch_assoc()['count'];
+            if ($res = $conn->query($sql)) $booking_count = (int)$res->fetch_assoc()['count'];
+        }
+
+        // Stock low (items ที่ balance <= min_stock)
+        $stockSql = "SELECT COUNT(*) AS count FROM (
+            SELECT si.id
+            FROM stock_items si
+            LEFT JOIN stock_transactions st ON st.item_id = si.id
+            WHERE si.min_stock > 0 AND si.is_active = 1";
+        $stockParams = []; $stockTypes = '';
+        if ($role !== 'admin' && !empty($sessionCompany)) {
+            $stockSql .= " AND si.company = ?";
+            $stockParams[] = $sessionCompany; $stockTypes .= 's';
+        }
+        $stockSql .= " GROUP BY si.id
+            HAVING COALESCE(SUM(CASE WHEN st.type='received' THEN st.quantity WHEN st.type='issued' THEN -st.quantity WHEN st.type='adjusted' THEN st.quantity ELSE 0 END), 0) <= si.min_stock
+        ) AS low_items";
+        if ($stockTypes) {
+            $stmt = $conn->prepare($stockSql);
+            if ($stmt) { $stmt->bind_param($stockTypes, ...$stockParams); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $stock_low = (int)$row['count']; }
+        } else {
+            if ($res = $conn->query($stockSql)) $stock_low = (int)$res->fetch_assoc()['count'];
+        }
+
+        // Users no role (admin only — employees ที่ยังไม่มี role)
+        if ($role === 'admin') {
+            if ($res = $conn->query("SELECT COUNT(*) AS count FROM employees WHERE role IS NULL OR role = ''")) {
+                $users_no_role = (int)$res->fetch_assoc()['count'];
             }
+        }
+
+        // KB drafts รอตรวจ (สร้างอัตโนมัติจากการปิด ticket — ยังไม่เผยแพร่)
+        if ($res = $conn->query("SELECT COUNT(*) AS count FROM kb_articles WHERE is_published = 0")) {
+            $kb_draft_count = (int)$res->fetch_assoc()['count'];
         }
     }
 } catch (Throwable $e) {
@@ -65,9 +76,17 @@ try {
 }
 
 echo json_encode([
-    'status' => 'success',
-    'loan' => $loan_count, 'repair' => $repair_count, 'booking' => $booking_count,
+    'status'             => 'success',
+    'loan_pending'       => $loan_count,
+    'ticket_unassigned'  => $repair_count,
+    'stock_low'          => $stock_low,
+    'users_no_role'      => $users_no_role,
+    'kb_draft_count'     => $kb_draft_count,
+    // backward-compat keys
+    'loan'               => $loan_count,
+    'repair'             => $repair_count,
+    'booking'            => $booking_count,
     'loan_pending_count' => $loan_count,
-    'repair_pending_count' => $repair_count
+    'repair_pending_count' => $repair_count,
 ]);
 ?>

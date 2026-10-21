@@ -1,0 +1,153 @@
+/**
+ * Directory — enterprise employee editor modal
+ */
+
+html.dir-page-root,
+html.dir-page-root body,
+body.dir-page-root {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh;
+}
+
+#employee-editor-modal.ptc-modal {
+    z-index: 1050;
+}
+
+.dir-editor-dialog {
+    max-width: 920px !important;
+}
+
+.dir-editor-sub {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-secondary, #64748b);
+    font-weight: 400;
+}
+
+.dir-editor-footer {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dir-editor-footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+.dir-editor-footer-left { display: flex; align-items: center; gap: 8px; }
+.dir-editor-footer-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.ptc-btn-danger-outline {
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.ptc-btn-danger-outline:hover { background: #fef2f2; border-color: #ef4444; }
+
+/* ── Role pill toggles ── */
+.dir-role-pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.dir-role-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc; color: #64748b;
+    font-size: 12px; font-weight: 500; font-family: inherit;
+    cursor: pointer; user-select: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.dir-role-pill input[type="checkbox"] { display: none; }
+.dir-role-pill--exec.is-active  { background: #fef9c3; color: #b45309; border-color: #fcd34d; }
+.dir-role-pill--mgmt.is-active  { background: #f3e8ff; color: #7c3aed; border-color: #c4b5fd; }
+.dir-role-pill--tech.is-active  { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+.dir-role-pill:hover { border-color: #94a3b8; }
+
+.dir-editor-error {
+    flex: 1 1 100%;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.dir-editor-error[hidden] {
+    display: none !important;
+}
+
+html.dark .dir-editor-error {
+    background: rgba(127, 29, 29, 0.25);
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+#employee-editor-body .dir-popup {
+    gap: 14px;
+}
+
+#employee-editor-body .dir-popup-section {
+    background: var(--bg-tertiary, #f8fafc);
+    border-radius: 10px;
+    padding: 12px 14px 14px;
+}
+
+#employee-editor-body .dir-field-input,
+#employee-editor-body .ptc-input,
+#employee-editor-body .ptc-select {
+    min-height: 36px;
+    font-size: 13px;
+}
+
+#employee-editor-body .dir-field-label,
+#employee-editor-body .ptc-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#employee-editor-body .dir-assign-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.5fr) auto auto;
+    gap: 8px;
+    padding: 8px;
+    background: var(--bg-secondary, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+}
+
+@media (max-width: 720px) {
+    #employee-editor-body .dir-popup-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #employee-editor-body .dir-assign-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dir-editor-footer-actions {
+        width: 100%;
+    }
+
+    .dir-editor-footer-actions .ptc-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+#employee-editor-save.is-loading {
+    opacity: 0.75;
+    pointer-events: none;
+}

@@ -1,0 +1,24 @@
+/**
+ * Forgot / Reset password — aligned with login-unified-theme
+ */
+body.ptc-unified-v1.auth-unified-page {
+    background: #f1f5f9 !important;
+    background-image: none !important;
+}
+
+body.ptc-unified-v1.auth-unified-page .max-w-md > div,
+body.ptc-unified-v1.auth-unified-page .bg-white {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+
+html.dark body.ptc-unified-v1.auth-unified-page .bg-white,
+html.dark body.ptc-unified-v1.auth-unified-page .dark\:bg-slate-800 {
+    border-color: #334155;
+}
+
+body.ptc-unified-v1.auth-unified-page button[type='submit'],
+body.ptc-unified-v1.auth-unified-page .bg-primary {
+    background: #2563eb !important;
+}

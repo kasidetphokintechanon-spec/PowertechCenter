@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IT Portal — Powertech Group</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="css/design-system.css">
+<link rel="stylesheet" href="css/enterprise-theme.css">
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Alias the shared PTC design-system tokens (design-system.css) so this page
+   automatically matches every other page's palette — including dark mode,
+   since html.dark redefines --ptc-* at the root and these just point at them. */
+:root {
+  --bg: var(--ptc-bg);
+  --surface: var(--ptc-surface);
+  --border: var(--ptc-border);
+  --text: var(--ptc-text);
+  --text-secondary: var(--ptc-text-muted);
+  --blue: var(--ptc-primary);
+  --blue-light: var(--ptc-primary-light);
+  --green: var(--ptc-success);
+  --green-light: var(--ptc-success-bg);
+  --orange: var(--ptc-warning);
+  --orange-light: var(--ptc-warning-bg);
+  --purple: var(--ptc-info);
+  --purple-light: var(--ptc-info-bg);
+  --cyan: #0891b2;
+  --cyan-light: #ecfeff;
+}
+html.dark { --cyan: #22d3ee; --cyan-light: rgba(34,211,238,0.12); }
+
+body { font-family: 'Inter', 'Kanit', sans-serif; background: var(--bg); color: var(--text); transition: background .15s, color .15s; }
+
+/* ── TOPBAR ── uses shared .ptc-nav from enterprise-theme.css (white bg, blue top accent, dark-mode built in) */
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.topbar-clock { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+/* .ptc-main-scroll has no padding by default (enterprise-theme.css) — every page
+   that uses the shared app-shell sets its own, matching admin.html's convention. */
+.ptc-main-scroll { padding: 20px; }
+
+/* ── HOME HERO ── */
+.home-hero {
+  background: var(--blue);
+  position: relative; overflow: hidden;
+  padding: 26px 28px 44px; margin: -20px -20px 0;
+  border-radius: 0 0 var(--ptc-radius-lg, 14px) var(--ptc-radius-lg, 14px);
+}
+/* Large faint watermark icon — flat, no gradient/blur, just quiet depth */
+.home-hero::before {
+  content: "\f233"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+  position: absolute; right: -6px; top: -34px;
+  font-size: 168px; line-height: 1; color: #fff; opacity: 0.08;
+  transform: rotate(-8deg); pointer-events: none;
+}
+.home-hero-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; position: relative; }
+.home-hero-title span { color: #bfdbfe; }
+.home-hero-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 20px; position: relative; }
+.home-stats { display: flex; gap: 10px; flex-wrap: wrap; position: relative; margin-bottom: -32px; }
+.hstat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--ptc-radius-md, 10px); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: box-shadow 0.15s, transform 0.15s;
+  text-decoration: none; color: inherit; min-width: 130px;
+  box-shadow: var(--ptc-shadow-lg, 0 10px 30px rgba(0,0,0,.09));
+}
+.hstat:hover { box-shadow: 0 14px 34px rgba(0,0,0,.14); transform: translateY(-1px); }
+.hstat-icon {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.hstat-num { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
+.hstat-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ── HOME BODY ── */
+.home-body { padding: 52px 4px 20px; }
+.home-section { margin-bottom: 24px; }
+.home-section-title {
+  font-size: 11px; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.home-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.home-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--ptc-radius-md, 10px); padding: 14px 12px;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; gap: 8px;
+  border-top: 3px solid transparent;
+  position: relative;
+  text-decoration: none;
+}
+.home-card:hover { box-shadow: var(--ptc-shadow-md, 0 4px 12px rgba(0,0,0,.08)); transform: translateY(-1px); border-color: var(--ptc-border-strong); }
+.hc-tv-btn {
+  position: absolute; top: 10px; right: 10px;
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);
+  font-size: 11px; cursor: pointer; opacity: 0; transition: opacity .15s, color .15s, border-color .15s;
+}
+.home-card:hover .hc-tv-btn { opacity: 1; }
+.hc-tv-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+.home-card.c-blue  { border-top-color: var(--blue); }
+.home-card.c-green { border-top-color: var(--green); }
+.home-card.c-cyan  { border-top-color: var(--cyan); }
+.home-card.c-purple{ border-top-color: var(--purple); }
+.home-card.c-orange{ border-top-color: var(--orange); }
+.hc-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.ic-blue   { background: var(--blue-light);   color: var(--blue); }
+.ic-green  { background: var(--green-light);  color: var(--green); }
+.ic-cyan   { background: var(--cyan-light);   color: var(--cyan); }
+.ic-purple { background: var(--purple-light); color: var(--purple); }
+.ic-orange { background: var(--orange-light); color: var(--orange); }
+.hc-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.hc-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.4; }
+
+@media (max-width: 768px) {
+  .topbar-clock { display: none; }
+}
+</style>
+</head>
+<body class="ptc-unified-v1" data-page="it_home">
+
+<!-- TOPBAR — shared .ptc-nav component, same as every other page -->
+<nav class="ptc-nav">
+  <a href="index.html" class="nav-back" title="กลับหน้าหลัก"><i class="fas fa-arrow-left"></i></a>
+  <div class="ptc-nav-brand">
+    <div class="ptc-nav-icon"><i class="fas fa-headset"></i></div>
+    <div>
+      <div class="ptc-nav-title">IT Portal</div>
+      <div class="ptc-nav-sub">Powertech Group</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-clock" id="clock"></div>
+    <button id="theme-toggle" class="ptc-ghost" title="สลับธีม" style="padding:6px 10px;"><i id="theme-icon" class="fas fa-sun"></i></button>
+  </div>
+</nav>
+
+<!-- APP SHELL — same shared sidebar component every other page uses (js/sidebar.js).
+     Real full-page links now, not an iframe: no more stale-content-in-a-forgotten-tab bug. -->
+<div class="ptc-app-shell">
+  <aside id="ptc-sidebar"></aside>
+
+  <main class="ptc-main-scroll" id="main-scroll">
+    <div class="home-hero">
+      <div class="home-hero-title">IT Portal — <span>Powertech Group</span></div>
+      <div class="home-hero-sub">ศูนย์รวม tools ทีม IT — เลือกเมนูซ้ายหรือคลิก card ด้านล่าง</div>
+      <div class="home-stats">
+        <a class="hstat" href="log.html">
+          <div class="hstat-icon ic-blue"><i class="fas fa-ticket-alt"></i></div>
+          <div><div class="hstat-num" id="stat-ticket">—</div><div class="hstat-label">Ticket เปิด</div></div>
+        </a>
+        <a class="hstat" href="it_links.html">
+          <div class="hstat-icon ic-cyan"><i class="fas fa-network-wired"></i></div>
+          <div><div class="hstat-num" id="stat-ip">—</div><div class="hstat-label">อุปกรณ์ IT Links</div></div>
+        </a>
+        <a class="hstat" href="admin.html">
+          <div class="hstat-icon ic-purple"><i class="fas fa-laptop"></i></div>
+          <div><div class="hstat-num" id="stat-asset">—</div><div class="hstat-label">พัสดุทั้งหมด</div></div>
+        </a>
+        <a class="hstat" href="setup_list.html">
+          <div class="hstat-icon ic-green"><i class="fas fa-desktop"></i></div>
+          <div><div class="hstat-num" id="stat-setup">—</div><div class="hstat-label">Setup แล้ว</div></div>
+        </a>
+      </div>
+    </div>
+    <div class="home-body">
+      <div class="home-section">
+        <div class="home-section-title"><i class="fas fa-bolt"></i> งานช่าง IT</div>
+        <div class="home-grid">
+          <a class="home-card c-blue" href="log.html">
+            <div class="hc-icon ic-blue"><i class="fas fa-clipboard-list"></i></div>
+            <div class="hc-name">Service Log</div>
+            <div class="hc-desc">บันทึกและติดตาม ticket</div>
+          </a>
+          <a class="home-card c-blue" href="dashboard.html">
+            <div class="hc-icon ic-blue"><i class="fas fa-chart-line"></i></div>
+            <div class="hc-name">Dashboard</div>
+            <div class="hc-desc">ภาพรวม KPI ทีม IT</div>
+          </a>
+          <a class="home-card c-blue" href="it_report.html">
+            <div class="hc-icon ic-blue"><i class="fas fa-chart-bar"></i></div>
+            <div class="hc-name">IT Report</div>
+            <div class="hc-desc">รายงานสรุปแยกบริษัท</div>
+          </a>
+        </div>
+      </div>
+      <div class="home-section">
+        <div class="home-section-title"><i class="fas fa-desktop"></i> Setup</div>
+        <div class="home-grid">
+          <a class="home-card c-green" href="setup.html">
+            <div class="hc-icon ic-green"><i class="fas fa-list-check"></i></div>
+            <div class="hc-name">Checklist</div>
+            <div class="hc-desc">ติดตั้งเครื่องใหม่</div>
+          </a>
+          <a class="home-card c-green" href="setup_list.html">
+            <div class="hc-icon ic-green"><i class="fas fa-table-list"></i></div>
+            <div class="hc-name">Records</div>
+            <div class="hc-desc">ประวัติการติดตั้ง</div>
+          </a>
+          <a class="home-card c-green" href="setup_offboard.html">
+            <div class="hc-icon ic-green"><i class="fas fa-right-from-bracket"></i></div>
+            <div class="hc-name">Offboard</div>
+            <div class="hc-desc">Checklist คืนเครื่อง</div>
+          </a>
+        </div>
+      </div>
+      <div class="home-section">
+        <div class="home-section-title"><i class="fas fa-server"></i> Infrastructure &amp; พัสดุ</div>
+        <div class="home-grid">
+          <a class="home-card c-cyan" href="it_links.html">
+            <button class="hc-tv-btn" title="เปิดจอมอนิเตอร์ (แท็บใหม่)" onclick="event.preventDefault();event.stopPropagation();window.open('it_links.html?tv=1','_blank')"><i class="fas fa-tv"></i></button>
+            <div class="hc-icon ic-cyan"><i class="fas fa-network-wired"></i></div>
+            <div class="hc-name">IT Links</div>
+            <div class="hc-desc">เช็ค IP + เปิด web</div>
+          </a>
+          <a class="home-card c-cyan" href="server_check.html">
+            <button class="hc-tv-btn" title="เปิดจอมอนิเตอร์ (แท็บใหม่)" onclick="event.preventDefault();event.stopPropagation();window.open('server_check.html?tv=1','_blank')"><i class="fas fa-tv"></i></button>
+            <div class="hc-icon ic-cyan"><i class="fas fa-server"></i></div>
+            <div class="hc-name">Server Check</div>
+            <div class="hc-desc">ตรวจห้อง server</div>
+          </a>
+          <a class="home-card c-purple" href="admin.html">
+            <div class="hc-icon ic-purple"><i class="fas fa-laptop"></i></div>
+            <div class="hc-name">ทะเบียนพัสดุ</div>
+            <div class="hc-desc">Asset + แจ้งซ่อม</div>
+          </a>
+          <a class="home-card c-purple" href="borrow_management.html">
+            <div class="hc-icon ic-purple"><i class="fas fa-right-left"></i></div>
+            <div class="hc-name">ยืม-คืน</div>
+            <div class="hc-desc">จัดการอุปกรณ์</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Clock ─────────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}, 1000);
+
+// ── Theme toggle ──────────────────────────────────────────────
+(function initTheme() {
+  const updateIcon = () => {
+    document.getElementById('theme-icon').className =
+      document.documentElement.classList.contains('dark') ? 'fas fa-moon' : 'fas fa-sun';
+  };
+  updateIcon();
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.toggle('dark-theme');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    updateIcon();
+  });
+})();
+
+// ── Stats ─────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const res = await fetch('api.php?action=getDashboardStats', { credentials: 'include' });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.open_tickets   !== undefined) document.getElementById('stat-ticket').textContent = d.open_tickets;
+      if (d.total_assets   !== undefined) document.getElementById('stat-asset').textContent  = d.total_assets;
+      if (d.total_setups   !== undefined) document.getElementById('stat-setup').textContent  = d.total_setups;
+      if (d.total_it_links !== undefined) document.getElementById('stat-ip').textContent     = d.total_it_links;
+    }
+  } catch {}
+}
+loadStats();
+</script>
+<script src="js/sidebar.js"></script>
+</body>
+</html>
