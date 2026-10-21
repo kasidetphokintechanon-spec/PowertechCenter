@@ -1,2 +1,6 @@
 .env.local
 
+
+# Orchestration (local state)
+orchestration/last_session.md
+orchestration/.lock
