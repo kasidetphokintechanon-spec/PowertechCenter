@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
-    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
     <style>
@@ -466,8 +466,8 @@
             <div class="s-field"><label>IP Address / Subnet</label><input type="text" id="f-ip" class="s-input" placeholder="เช่น 192.168.1.10/24" oninput="markDirty()"></div>
         </div>
         <div class="s-grid s-grid-3" style="margin-bottom:10px;">
-            <div class="s-field"><label>Gateway / DNS</label><input type="text" id="f-gw" class="s-input" placeholder="เช่น 192.168.1.1"></div>
-            <div class="s-field"><label>รหัสผ่าน Internet / Proxy</label><input type="password" id="f-netpass" class="s-input" placeholder="ถ้าแตกต่างจากรหัสพนักงาน"></div>
+            <div class="s-field"><label>Gateway / DNS</label><input type="text" id="f-gw" name="ptc-gateway" class="s-input" placeholder="เช่น 192.168.1.1" autocomplete="off" data-lpignore="true"></div>
+            <!-- TISAX: ไม่เก็บรหัสผ่านในระบบ (เดิมเก็บเป็นข้อความธรรมดา + เบราว์เซอร์เติมรหัสของช่างเองลงช่องนี้) -->
         </div>
         <div class="s-grid s-grid-3" style="margin-bottom:10px;">
             <div class="s-field"><label>วันที่ติดตั้ง</label><input type="date" id="f-date" class="s-input"></div>
@@ -769,12 +769,13 @@
 <!-- Bottom action bar -->
 <div class="setup-controls no-print">
     <span id="save-badge" class="save-badge unsaved" style="display:none"><i class="fa fa-circle-dot"></i> ยังไม่ได้บันทึก</span>
-    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> รีเซ็ต</button>
-    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="switchTab('checklist');filterPending()"><i class="fa fa-clock"></i> ที่ยังไม่เสร็จ</button>
-    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="saveRecord()" id="btn-save-db"><i class="fa fa-floppy-disk"></i> บันทึก</button>
-    <a id="btn-offboard" href="#" class="ptc-btn ptc-btn-sm" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> Offboard เครื่อง</a>
-    <button class="ptc-btn ptc-btn-sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;" onclick="switchTab('email');refreshEmail()"><i class="fa fa-envelope"></i> Onboarding Mail</button>
-    <button class="ptc-btn ptc-btn-primary" onclick="printSetup()"><i class="fa fa-print"></i> ปริ้นใบส่งมอบ</button>
+    <!-- ปุ่มรองเป็นแบบโปร่ง ให้ "บันทึก" เด่นปุ่มเดียว (เดิมน้ำเงินเท่ากันหมด แยกไม่ออก) -->
+    <button class="ptc-ghost" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> รีเซ็ต</button>
+    <button class="ptc-ghost" onclick="switchTab('checklist');filterPending()"><i class="fa fa-clock"></i> ที่ยังไม่เสร็จ</button>
+    <a id="btn-offboard" href="#" class="ptc-ghost" style="display:none;color:#dc2626;border-color:#fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> Offboard เครื่อง</a>
+    <button class="ptc-ghost" onclick="switchTab('email');refreshEmail()"><i class="fa fa-envelope"></i> Onboarding Mail</button>
+    <button class="ptc-ghost" onclick="printSetup()"><i class="fa fa-print"></i> ปริ้นใบส่งมอบ</button>
+    <button class="ptc-btn" onclick="saveRecord()" id="btn-save-db"><i class="fa fa-floppy-disk"></i> บันทึก</button>
 </div>
 
 <script>

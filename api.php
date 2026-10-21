@@ -473,7 +473,57 @@ try {
     // ตรวจสอบว่ามีไฟล์ action แยกในโฟลเดอร์ api/actions/ หรือไม่
     // ป้องกัน Directory Traversal โดยอนุญาตเฉพาะตัวอักษร a-z, 0-9 และ _
     $safeAction = preg_replace('/[^a-zA-Z0-9_]/', '', $action);
-    
+
+    // TISAX: ด่านกลาง — เดิมหลาย action ไม่เช็กล็อกอินเอง ทำให้คนนอกดึง token LINE/Telegram,
+    // รายชื่อพนักงาน และแก้ทะเบียนพัสดุได้ → ปิดทุกอย่างไว้ก่อน เปิดเฉพาะที่ต้องใช้ก่อนล็อกอินจริงๆ
+    $PUBLIC_ACTIONS = [
+        'login', 'check_session', 'logout', 'request_password_reset', 'reset_password',
+        'get_it_support_settings', 'get_scan_settings', 'get_company_info',      // หน้า login / โลโก้
+        'get_public_directory', 'get_company_order', 'get_directory_categories', 'get_job_positions', // Contact List (ดูได้โดยไม่ล็อกอิน)
+        'get_kb_data', 'get_kb_article_by_id', 'suggest_kb_articles',             // KB อ่านอย่างเดียว
+        'get_audit_confirm', 'submit_audit_confirm',                               // ลิงก์ตรวจนับ (ใช้ token แทนล็อกอิน)
+        'get_kiosk_data', 'create_walkin_booking', 'get_monthly_schedule', 'get_job_plans',
+    ];
+    // action 'get' เป็นตัวดึงข้อมูลรวมหลายตาราง — เปิดให้คนไม่ล็อกอินเฉพาะรายชื่อแผนก (ตัวกรองใน Contact List)
+    $isPublicGet = $safeAction === 'get' && in_array($_GET['file'] ?? '', ['departments'], true);
+    if ($safeAction !== '' && !$isPublicGet && !in_array($safeAction, $PUBLIC_ACTIONS, true) && empty($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'กรุณาเข้าสู่ระบบ', 'loggedin' => false], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    // action ที่ไฟล์ตัวเองไม่เช็กสิทธิ์ — ล็อกอินอย่างเดียวไม่พอ (มีสิทธิ์ข้อใดข้อหนึ่งก็ผ่าน)
+    $ACTION_PERMS = [
+        'save_equipment' => ['asset.manage'], 'transfer_asset' => ['asset.manage'],
+        'export_assets' => ['asset.manage'], 'generate_next_asset_id' => ['asset.manage'],
+        'check_duplicate_asset' => ['asset.manage'], 'asset_lifecycle' => ['asset.manage'],
+        'create_repair' => ['asset.manage', 'it_log.access'],
+        'export_employees' => ['employee.manage'], 'update_department_phone' => ['employee.manage'],
+        'get_audit_logs' => ['audit.view'], 'export_audit_logs' => ['audit.view'],
+        'get_telegram_settings' => ['settings.notifications'], 'save_telegram_settings' => ['settings.notifications'],
+        'get_line_settings' => ['settings.notifications'], 'save_line_settings' => ['settings.notifications'],
+        'test_telegram' => ['settings.notifications'], 'test_line' => ['settings.notifications'],
+        'save_notify_channel' => ['settings.notifications'], 'delete_notify_channel' => ['settings.notifications'],
+        'test_notify_channel' => ['settings.notifications'], 'test_notify_routing' => ['settings.notifications'],
+        'get_notify_log' => ['settings.notifications'],
+        'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
+        'save_it_support_settings' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],
+        'reorder_services' => ['admin.access_admin'], 'probe_host' => ['admin.access_admin', 'it_log.access'],
+        'save_stock_summary_schedule' => ['stock.manage'], 'saveStockSummarySchedule' => ['stock.manage'],
+        'deleteStockSummarySchedule' => ['stock.manage'], 'initStockTables' => ['stock.manage'],
+        'clear_loan_history' => ['loan.manage'], 'denyRequest' => ['loan.manage'], 'update_loan_status' => ['loan.manage'],
+    ];
+    if (isset($ACTION_PERMS[$safeAction])) {
+        $allowed = false;
+        foreach ($ACTION_PERMS[$safeAction] as $perm) {
+            if (hasPermission($conn, $perm)) { $allowed = true; break; }
+        }
+        if (!$allowed) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'ไม่มีสิทธิ์ใช้งานส่วนนี้'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
     // กำหนดรายชื่อโฟลเดอร์ย่อยที่จะให้ระบบค้นหาไฟล์
     $subfolders = [
         'auth',

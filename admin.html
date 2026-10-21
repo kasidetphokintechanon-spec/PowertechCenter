@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
     <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-toast.js"></script>
     <script src="js/ptc-cmd.js"></script>
     <script src="js/service-gateway.js"></script>
@@ -25,7 +26,7 @@
     <script src="js/vendor/sortable.min.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/employee-form.css?v=20261021c">
-    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -246,6 +247,167 @@
         .perm-panel-wrap { display:grid;grid-template-columns:220px 1fr;height:100%; }
         .perm-panel-left { border-right:1px solid var(--ptc-border);padding:12px;overflow-y:auto; }
         .perm-panel-hd { display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px; }
+        .dash-kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:24px; }
+        @media (max-width:1100px) { .dash-kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        /* ── popup รายละเอียดพัสดุ (ad-*) ── */
+        .ad-head { display:flex; gap:12px; padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--ptc-border); }
+        .ad-title { font-size:18px; font-weight:700; color:var(--ptc-text); }
+        .ad-sub { font-size:12.5px; color:var(--ptc-text-muted); margin-top:2px; }
+        .ad-chips { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
+        .ad-code { font-family:ui-monospace,Consolas,monospace; font-size:12px; font-weight:700; color:var(--ptc-primary); background:var(--ptc-primary-light); padding:3px 8px; border-radius:6px; }
+        .ad-co { font-size:11px; font-weight:700; color:#fff; padding:3px 8px; border-radius:6px; background:#64748b; }
+        .ad-co.PTA { background:#059669; } .ad-co.PT4 { background:#dc2626; } .ad-co.PTE { background:#2563eb; }
+        .ad-status { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:99px; border:1px solid; }
+        html.dark .ad-status { background:var(--ptc-surface-2) !important; }
+        .ad-layout { display:grid; grid-template-columns:240px minmax(0,1fr); gap:20px; }
+        .ad-img { width:100%; aspect-ratio:4/3; object-fit:contain; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); border-radius:10px; }
+        .ad-thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .ad-thumbs img { width:44px; height:44px; object-fit:cover; border-radius:6px; border:2px solid var(--ptc-border); cursor:pointer; }
+        .ad-thumbs img.on { border-color:var(--ptc-primary); }
+        .ad-holder { margin-top:14px; padding:12px; border:1px solid var(--ptc-border); border-radius:10px; background:var(--ptc-surface-2); }
+        .ad-holder-row { display:flex; align-items:center; gap:10px; margin-top:6px; }
+        .ad-av { width:36px; height:36px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; background:var(--ptc-primary); color:#fff; font-size:12px; font-weight:700; }
+        .ad-av.dept { background:#7c3aed; }
+        .ad-holder-name { font-size:13px; font-weight:600; color:var(--ptc-text); }
+        .ad-label { font-size:11px; font-weight:600; color:var(--ptc-text-faint); margin-bottom:2px; }
+        .ad-muted { font-size:12px; color:var(--ptc-text-muted); }
+        .mono { font-family:ui-monospace,Consolas,monospace; }
+        .ad-sec { margin-bottom:16px; }
+        .ad-sec h5 { display:flex; align-items:center; gap:7px; margin:0 0 8px; font-size:12px; font-weight:700; color:var(--ptc-text-2); text-transform:none; }
+        .ad-sec h5 i { color:var(--ptc-text-faint); width:14px; text-align:center; }
+        .ad-count { font-size:10.5px; font-weight:600; padding:0 7px; border-radius:99px; background:var(--ptc-surface-3); color:var(--ptc-text-muted); }
+        .ad-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; padding:12px; border:1px solid var(--ptc-border); border-radius:10px; }
+        .ad-field.full { grid-column:1 / -1; }
+        .ad-value { font-size:13px; color:var(--ptc-text); word-break:break-word; display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+        .ad-copy { border:0; background:transparent; color:var(--ptc-text-faint); cursor:pointer; padding:0 2px; font-size:11px; }
+        .ad-copy:hover { color:var(--ptc-primary); }
+        .ad-chip { font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:99px; }
+        .ad-chip.ok { background:var(--ptc-success-bg); color:var(--ptc-success); }
+        .ad-chip.warn { background:var(--ptc-warning-bg); color:var(--ptc-warning); }
+        .ad-chip.danger { background:var(--ptc-danger-bg); color:var(--ptc-danger); }
+        .ad-bar { flex-basis:100%; height:5px; border-radius:99px; background:var(--ptc-surface-3); overflow:hidden; }
+        .ad-bar span { display:block; height:100%; background:var(--ptc-primary); border-radius:99px; }
+        .ad-children { display:flex; flex-direction:column; gap:6px; }
+        .ad-child { display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:1px solid var(--ptc-border); border-radius:8px; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:12.5px; cursor:pointer; text-align:left; }
+        .ad-child:hover { border-color:var(--ptc-primary); }
+        .ad-child .mono { color:var(--ptc-primary); font-weight:700; }
+        .ad-child .nm { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .ad-child .st { font-size:11px; color:var(--ptc-text-muted); }
+        .ad-tags { display:flex; flex-wrap:wrap; gap:6px; }
+        .ad-tags span { font-size:12px; padding:3px 10px; border-radius:99px; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); color:var(--ptc-text-2); }
+        .ad-hist { border:1px solid var(--ptc-border); border-radius:10px; margin-bottom:6px; overflow:hidden; }
+        .ad-hist summary { display:flex; align-items:center; gap:8px; padding:9px 12px; cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ptc-text-2); list-style:none; background:var(--ptc-surface-2); }
+        .ad-hist summary::-webkit-details-marker { display:none; }
+        .ad-hist summary::after { content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900; font-size:10px; margin-left:auto; color:var(--ptc-text-faint); transition:transform .2s; }
+        .ad-hist[open] summary::after { transform:rotate(180deg); }
+        .ad-hist summary i { color:var(--ptc-text-faint); width:14px; text-align:center; }
+        .ad-hist-body { display:flex; flex-direction:column; gap:8px; padding:10px 12px; max-height:220px; overflow-y:auto; }
+        .ad-tl { display:flex; gap:10px; font-size:12.5px; }
+        .ad-tl-ic { width:26px; height:26px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; font-size:11px; background:var(--ptc-surface-2); color:var(--ptc-text-muted); }
+        .ad-tl-t { font-weight:600; color:var(--ptc-text); }
+        .ad-tl-d { color:var(--ptc-text-2); margin-top:1px; word-break:break-word; }
+        .ad-tl-m { font-size:11px; color:var(--ptc-text-faint); margin-top:2px; }
+        .ad-hist-body:empty::before { content:'ยังไม่มีประวัติ'; font-size:12px; color:var(--ptc-text-faint); }
+        .ad-foot { justify-content:space-between; flex-wrap:wrap; gap:8px; }
+        .ad-foot-left, .ad-foot-right { display:flex; flex-wrap:wrap; gap:6px; }
+        .ad-btn { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:8px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
+        .ad-btn:hover { border-color:var(--ptc-border-strong); color:var(--ptc-text); background:var(--ptc-surface-2); }
+        .ad-btn i { color:var(--ptc-text-faint); }
+        .ad-btn.ghost { border-color:transparent; background:transparent; }
+        .ad-btn.primary { background:var(--ptc-primary); border-color:var(--ptc-primary); color:#fff; }
+        .ad-btn.primary i { color:#fff; }
+        .ad-btn.primary:hover { background:var(--ptc-primary-dark); }
+        @media (max-width:720px) { .ad-layout { grid-template-columns:1fr; } .ad-grid { grid-template-columns:1fr; } .ad-side { max-width:320px; } }
+        /* ── การ์ดสรุปหน้าพัสดุ (ak-*) ── */
+        .ak-bar { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+        @media (max-width:1100px) { .ak-bar { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+        @media (max-width:640px) { .ak-bar { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        .ak-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--ptc-border); border-radius:12px; background:var(--ptc-surface); cursor:pointer; text-align:left; font:inherit; transition:border-color .15s, box-shadow .15s; }
+        .ak-card:hover { border-color:var(--ak); }
+        .ak-card.on { border-color:var(--ak); box-shadow:0 0 0 3px color-mix(in srgb, var(--ak) 18%, transparent); }
+        .ak-ic { width:34px; height:34px; flex-shrink:0; border-radius:9px; display:grid; place-items:center; color:var(--ak); background:color-mix(in srgb, var(--ak) 12%, transparent); }
+        .ak-tx { display:flex; flex-direction:column; min-width:0; }
+        .ak-tx b { font-size:18px; line-height:1.1; color:var(--ptc-text); }
+        .ak-tx span { font-size:11.5px; color:var(--ptc-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .row-more button { font-size:13px !important; }
+        .wr-top { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+        .wr-range { display:inline-flex; border:1px solid var(--ptc-border); border-radius:8px; overflow:hidden; }
+        .wr-range button { border:0; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:12px; font-weight:600; padding:5px 12px; cursor:pointer; }
+        .wr-range button + button { border-left:1px solid var(--ptc-border); }
+        .wr-range button.on { background:var(--ptc-primary); color:#fff; }
+        .wr-table { width:100%; border-collapse:collapse; font-size:13px; }
+        .wr-table th { text-align:left; font-size:11px; font-weight:700; color:var(--ptc-text-faint); padding:6px 8px; border-bottom:1px solid var(--ptc-border); }
+        .wr-table td { padding:9px 8px; border-bottom:1px solid var(--ptc-border); vertical-align:middle; color:var(--ptc-text-2); }
+        .wr-row { cursor:pointer; } .wr-row:hover td { background:var(--ptc-surface-2); }
+        .wr-empty { display:flex; flex-direction:column; align-items:center; gap:8px; padding:36px 10px; color:var(--ptc-text-muted); font-size:13px; }
+        .wr-empty i { font-size:28px; color:var(--ptc-success); }
+        .af-steps { position:sticky; top:-1px; z-index:5; display:flex; gap:4px; flex-wrap:wrap; padding:6px; margin:0 0 12px; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); border-radius:10px; }
+        .af-steps button { display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; color:var(--ptc-text-muted); font:inherit; font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:7px; cursor:pointer; }
+        .af-steps button:hover, .af-steps button.on { background:var(--ptc-surface); color:var(--ptc-text); box-shadow:var(--ptc-shadow-xs); }
+        .af-steps .n { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:10.5px; background:var(--ptc-primary-light); color:var(--ptc-primary); }
+        .af-dup { margin-top:5px; font-size:12px; color:var(--ptc-danger); }
+        .af-dup:empty { display:none; }
+        .af-bad { border-color:var(--ptc-danger) !important; }
+        /* มือถือ: เรียงแถวเดียว (เดิม 2 คอลัมน์บีบจนตัวหนังสือขาด) */
+        @media (max-width:768px) {
+            .dash-two-col { grid-template-columns:1fr !important; }
+            .perm-panel-wrap { grid-template-columns:1fr; height:auto; }
+            .perm-panel-left { border-right:0; border-bottom:1px solid var(--ptc-border); max-height:45vh; }
+            .perm-panel-right .perm-empty { padding:24px 12px; }
+        }
+        .bulk-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:7px 10px; margin-bottom:8px; background:var(--ptc-primary-light); border:1px solid var(--ptc-border); border-radius:10px; font-size:13px; }
+        .bulk-count { font-weight:700; color:var(--ptc-primary); margin-right:4px; }
+        .bulk-bar .bulk-del { color:var(--ptc-danger); }
+        .ad-holder-act { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+        .ad-holder-act .ad-btn { height:30px; font-size:12px; }
+        .pp-retire { color:var(--ptc-text-muted); }
+        .pp-retire:hover { color:var(--ptc-danger); }
+        .pp-sum { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:8px; }
+        .pp-sum div { padding:7px 9px; border:1px solid var(--ptc-border); border-radius:8px; background:var(--ptc-surface-2); }
+        .pp-sum span { display:block; font-size:10.5px; color:var(--ptc-text-faint); }
+        .pp-sum b { font-size:13px; color:var(--ptc-text); }
+        .pp-filter { display:inline-flex; border:1px solid var(--ptc-border); border-radius:8px; overflow:hidden; margin-bottom:8px; }
+        .pp-filter button { border:0; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:12px; font-weight:600; padding:4px 11px; cursor:pointer; }
+        .pp-filter button + button { border-left:1px solid var(--ptc-border); }
+        .pp-filter button.on { background:var(--ptc-primary); color:#fff; }
+        .pp-tl { max-height:300px; overflow-y:auto; padding:2px 4px 2px 0; }
+        .pp-item { position:relative; display:flex; gap:10px; padding-bottom:12px; font-size:12.5px; }
+        .pp-item:not(:last-child)::before { content:''; position:absolute; left:12px; top:26px; bottom:0; width:1.5px; background:var(--ptc-border); }
+        .pp-dot { width:25px; height:25px; flex-shrink:0; border-radius:50%; border:1.5px solid; display:grid; place-items:center; font-size:10.5px; background:var(--ptc-surface); }
+        .pp-body { min-width:0; flex:1; padding-top:2px; }
+        .pp-t { font-weight:600; color:var(--ptc-text); }
+        .pp-n, .pp-st { font-size:10.5px; font-weight:700; padding:0 6px; border-radius:99px; background:var(--ptc-surface-2); color:var(--ptc-text-muted); border:1px solid var(--ptc-border); }
+        .pp-d { color:var(--ptc-text-2); margin-top:1px; word-break:break-word; }
+        .pp-m { font-size:11px; color:var(--ptc-text-faint); margin-top:2px; }
+        .pp-form { text-align:left; }
+        .pp-form .ptc-label { display:block; margin:10px 0 5px; }
+        .pp-asset { font-size:12.5px; color:var(--ptc-text-2); padding:7px 10px; border-radius:8px; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); }
+        .pp-radios { display:flex; flex-wrap:wrap; gap:6px; }
+        .pp-radios label { cursor:pointer; }
+        .pp-radios input { position:absolute; opacity:0; pointer-events:none; }
+        .pp-radios span { display:inline-block; padding:5px 11px; border:1px solid var(--ptc-border); border-radius:99px; font-size:12.5px; color:var(--ptc-text-2); background:var(--ptc-surface); }
+        .pp-radios input:checked + span { border-color:var(--ptc-primary); background:var(--ptc-primary-light); color:var(--ptc-primary); font-weight:700; }
+        .pp-radios input:focus-visible + span { outline:2px solid var(--ptc-primary); outline-offset:1px; }
+        .pp-req { font-size:10px; font-weight:700; color:var(--ptc-danger); border:1px solid currentColor; border-radius:4px; padding:0 4px; margin-left:4px; }
+        .pp-warn { margin-top:10px; font-size:12px; color:var(--ptc-text-muted); }
+        @media (max-width:640px) { .pp-sum { grid-template-columns:repeat(2,1fr); } }
+        .tb-more { position:relative; display:inline-block; }
+        .tb-more-menu { display:none; position:absolute; right:0; top:calc(100% + 4px); z-index:60; min-width:210px; padding:4px; background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; box-shadow:var(--ptc-shadow-lg); }
+        .tb-more.open .tb-more-menu { display:block; }
+        .tb-more-menu button { display:flex; align-items:center; gap:8px; width:100%; padding:8px 10px; border:0; border-radius:7px; background:transparent; color:var(--ptc-text-2); font:inherit; font-size:12.5px; text-align:left; cursor:pointer; }
+        .tb-more-menu button:hover { background:var(--ptc-surface-2); color:var(--ptc-text); }
+        .tb-more-menu i { width:16px; text-align:center; }
+        .perm-filter-row { display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px; }
+        .perm-filter-chip { display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:99px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-2);font:inherit;font-size:11px;font-weight:600;cursor:pointer; }
+        .perm-filter-chip .n { font-weight:500;color:var(--ptc-text-faint); }
+        .perm-filter-chip.on { background:var(--ptc-primary);border-color:var(--ptc-primary);color:#fff; }
+        .perm-filter-chip.on .n { color:rgba(255,255,255,.8); }
+        .perm-legend { font-size:10.5px;line-height:1.5;color:var(--ptc-text-faint);background:var(--ptc-surface-2);border-radius:6px;padding:6px 8px;margin-bottom:8px; }
+        .perm-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 20px;gap:6px; }
+        .perm-empty .ic { width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--ptc-primary-light);color:var(--ptc-primary);font-size:20px;margin-bottom:6px; }
+        .perm-empty .t { font-size:14px;font-weight:600;color:var(--ptc-text); }
+        .perm-empty .s { font-size:12.5px;color:var(--ptc-text-muted); }
+        .perm-empty a { color:var(--ptc-primary);font-weight:600; }
         .perm-panel-hd-label { font-size:11px;font-weight:700;color:var(--ptc-text-faint); }
         .perm-panel-right { padding:16px;overflow-y:auto; }
         .perm-user-item { display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--ptc-radius-sm);font-size:12px;cursor:pointer;border-left:3px solid transparent;color:var(--ptc-text-2);transition:background .1s; }
@@ -287,7 +449,9 @@
     <div class="nav-search-wrap nav-search-centered">
         <div class="nav-search">
             <i class="fa fa-search nav-search-icon"></i>
-            <input type="text" class="nav-search-input" id="search-input" placeholder="ค้นหา...">
+            <input type="text" class="nav-search-input" id="search-input" placeholder="ค้นหาในหน้านี้..." style="padding-right:62px">
+            <!-- รวมช่องค้นหาเป็นที่เดียว: พิมพ์ = กรองข้อมูลในหน้า · Ctrl K = เปิดเมนูลัดไปหน้าอื่น -->
+            <button type="button" onclick="ptcCmd.open()" title="เมนูลัด: ไปหน้าอื่น / สั่งงานด่วน (Ctrl+K)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:1px solid var(--ptc-border);background:var(--ptc-surface-2);border-radius:5px;padding:1px 6px;font-family:monospace;font-size:10px;color:var(--ptc-text-faint);cursor:pointer">Ctrl K</button>
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto">
@@ -295,10 +459,6 @@
         <button id="warranty-alert-btn" class="nav-back" style="position:relative;width:auto;padding:0 10px;gap:5px;font-size:12px;color:#dc2626;" title="Warranty Alerts">
             <i class="fa fa-shield-alt"></i> Warranty
             <span id="warranty-count-badge" style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;padding:1px 4px;border-radius:99px;display:none">0</span>
-        </button>
-        <button class="nav-back" onclick="ptcCmd.open()" title="Command Palette (Ctrl+K)" style="width:auto;gap:5px;padding:0 10px;font-size:11px;color:#64748b">
-            <i class="fa fa-search" style="font-size:11px"></i>
-            <kbd style="font-size:9px;background:var(--ptc-surface-2);border:1px solid var(--ptc-border);border-radius:3px;padding:1px 4px;font-family:monospace;color:#94a3b8">Ctrl K</kbd>
         </button>
         <div id="nav-user-area"></div>
     </div>
@@ -336,11 +496,15 @@
                     <select id="filter-status" class="filter-select">
                         <option value="">ทุกสถานะ</option>
                         <option value="ใช้งานปกติ">ใช้งานปกติ</option>
+                        <option value="ว่าง">ว่าง (พร้อมมอบ)</option>
                         <option value="ถูกยืม">ถูกยืม</option>
                         <option value="รออนุมัติ">รออนุมัติ</option>
                         <option value="ชำรุด">ชำรุด</option>
                         <option value="รอซ่อม">รอซ่อม</option>
+                        <option value="ส่งซ่อม">ส่งซ่อม</option>
+                        <option value="__repair">ซ่อม / ชำรุด (ทั้งหมด)</option>
                         <option value="เลิกใช้งาน">เลิกใช้งาน</option>
+                        <option value="ตัดจำหน่าย">ตัดจำหน่าย</option>
                     </select>
                     <select id="filter-setup-status" class="filter-select" title="กรองตามสถานะ Setup Checklist">
                         <option value="">Setup Checklist: ทั้งหมด</option>
@@ -349,10 +513,17 @@
                     </select>
                     <button id="btn-list-view" class="ptc-btn-ghost ptc-btn-sm" title="List View"><i class="fa fa-list"></i></button>
                     <button id="btn-tree-view" class="ptc-btn-ghost ptc-btn-sm" title="Tree View"><i class="fa fa-sitemap"></i></button>
-                    <button onclick="exportAssets()" class="ptc-btn-ghost ptc-btn-sm" title="Export Excel" style="color:#059669;border-color:#bbf7d0"><i class="fa fa-file-excel"></i> Export</button>
-                    <button onclick="openBatchStickerModal()" class="ptc-btn-ghost ptc-btn-sm" title="Batch Print"><i class="fa fa-print"></i> Batch</button>
                     <button onclick="openAuditRoundModal()" class="ptc-btn-ghost ptc-btn-sm" title="เริ่มรอบตรวจนับทรัพย์สิน" style="color:#7c3aed;border-color:#ddd6fe"><i class="fa fa-clipboard-check"></i> ตรวจนับ</button>
-                    <button onclick="openAuditDashboard()" class="ptc-btn-ghost ptc-btn-sm" title="ดูสถานะรอบตรวจนับ" style="color:#7c3aed;border-color:#ddd6fe"><i class="fa fa-chart-bar"></i> สถานะ</button>
+                    <!-- ปุ่มที่ใช้ไม่บ่อย เก็บไว้ในเมนู "เพิ่มเติม" ให้แถบเครื่องมือโล่งขึ้น -->
+                    <div class="tb-more">
+                        <button type="button" class="ptc-btn-ghost ptc-btn-sm" onclick="this.parentElement.classList.toggle('open');event.stopPropagation()" title="เพิ่มเติม"><i class="fa fa-ellipsis"></i> เพิ่มเติม</button>
+                        <div class="tb-more-menu" onclick="this.parentElement.classList.remove('open')">
+                            <button type="button" onclick="openAuditDashboard()"><i class="fa fa-chart-bar" style="color:#7c3aed"></i> สถานะรอบตรวจนับ</button>
+                            <button type="button" onclick="exportAssets()"><i class="fa fa-file-excel" style="color:#059669"></i> Export Excel</button>
+                            <button type="button" onclick="openAuditSheet()"><i class="fa fa-clipboard-list" style="color:#2563eb"></i> พิมพ์ใบตรวจนับ (แยกบริษัท)</button>
+                            <button type="button" onclick="openBatchStickerModal()"><i class="fa fa-tags"></i> พิมพ์สติกเกอร์ (ตามที่กรองอยู่)</button>
+                        </div>
+                    </div>
                 </div>
                 <!-- Employee filters -->
                 <div id="employee-filters" class="filter-bar" style="display:none">
@@ -378,6 +549,8 @@
 
         <!-- Charts (assets only) — collapsible -->
         <div id="chart-section" style="display:none;margin-bottom:12px">
+            <!-- การ์ดสรุปสถานะพัสดุ — กดแล้วกรองรายการ (renderAssetKpis) -->
+            <div id="asset-kpis" class="ak-bar"></div>
             <button id="chart-toggle-btn" onclick="toggleAssetCharts()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#64748b;background:none;border:none;cursor:pointer;padding:4px 0;margin-bottom:4px">
                 <i class="fa fa-chart-pie" style="color:#6366f1"></i>
                 <span id="chart-toggle-label">แสดงกราฟ</span>
@@ -419,7 +592,7 @@
         </div>
         <div class="ptc-modal-body custom-scrollbar" id="modal-body"></div>
         <div class="ptc-modal-footer">
-            <button class="ptc-btn-ghost" onclick="closeModal()">ยกเลิก</button>
+            <button class="ptc-btn-ghost" id="modal-cancel-btn" onclick="closeModal()">ยกเลิก</button>
             <button id="modal-save-btn" class="ptc-btn-primary" onclick="gid('dynamic-form').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))">
                 <i class="fa fa-save"></i> บันทึกข้อมูล
             </button>
@@ -430,22 +603,25 @@
 <!-- ===== ASSET DETAILS MODAL ===== -->
 <div id="asset-details-modal" class="ptc-modal" style="display:none">
     <div class="ptc-modal-overlay" onclick="closeDetailsModal()"></div>
-    <div class="ptc-modal-dialog" style="width:100%;max-width:860px">
+    <div class="ptc-modal-dialog ad-dialog" style="width:100%;max-width:920px">
         <div class="ptc-modal-header">
-            <div style="font-weight:600;font-size:15px" id="details-modal-title">Asset Details</div>
-            <button class="ptc-btn-ghost ptc-btn-sm" onclick="closeDetailsModal()"><i class="fa fa-times"></i></button>
+            <div style="font-weight:600;font-size:13px;color:var(--ptc-text-muted)" id="details-modal-title">รายละเอียดพัสดุ</div>
+            <button class="ptc-btn-ghost ptc-btn-sm" onclick="closeDetailsModal()" title="ปิด (Esc)"><i class="fa fa-times"></i></button>
         </div>
         <div class="ptc-modal-body custom-scrollbar" id="details-modal-body"></div>
-        <div class="ptc-modal-footer" style="justify-content:space-between">
-            <div style="display:flex;gap:8px">
-                <button id="transfer-btn" class="ptc-btn-ghost ptc-btn-sm" style="display:none;color:#b45309;border-color:#fde68a"><i class="fa fa-random"></i> โอนย้าย</button>
-                <button id="transfer-set-btn" class="ptc-btn-ghost ptc-btn-sm" style="display:none;color:#7c3aed;border-color:#ddd6fe"><i class="fa fa-layer-group"></i> โอนย้ายทั้งชุด</button>
-                <button id="repair-btn" class="ptc-btn-ghost ptc-btn-sm" style="display:none;color:#dc2626;border-color:#fecaca"><i class="fa fa-wrench"></i> แจ้งซ่อม</button>
-                <a id="setup-btn" class="ptc-btn-ghost ptc-btn-sm" style="display:none;color:#1d4ed8;border-color:#93c5fd;text-decoration:none" target="_blank" rel="noopener"><i class="fa fa-laptop-code"></i> เปิด Setup</a>
-                <span id="setup-checklist-badge" style="align-self:center"></span>
-                <button id="print-label-btn" class="ptc-btn-ghost ptc-btn-sm" style="display:none;color:#0369a1;border-color:#bae6fd"><i class="fa fa-qrcode"></i> พิมพ์ Label</button>
+        <!-- ปุ่มหลักปุ่มเดียว (แก้ไข) · ที่เหลือหน้าตาเดียวกันหมด (เดิม 5 ปุ่ม 5 สี) -->
+        <div class="ptc-modal-footer ad-foot">
+            <div class="ad-foot-left">
+                <button id="repair-btn" class="ad-btn" style="display:none"><i class="fa fa-screwdriver-wrench"></i> แจ้งซ่อม</button>
+                <button id="transfer-btn" class="ad-btn" style="display:none"><i class="fa fa-right-left"></i> โอนย้าย</button>
+                <button id="transfer-set-btn" class="ad-btn" style="display:none"><i class="fa fa-layer-group"></i> โอนย้ายทั้งชุด</button>
+                <button id="print-label-btn" class="ad-btn" style="display:none"><i class="fa fa-qrcode"></i> พิมพ์ Label</button>
+                <a id="setup-btn" class="ad-btn" style="display:none;text-decoration:none" target="_blank" rel="noopener"><i class="fa fa-laptop-code"></i> ใบติดตั้ง (Setup)</a>
             </div>
-            <button class="ptc-btn-ghost" onclick="closeDetailsModal()">ปิด</button>
+            <div class="ad-foot-right">
+                <button class="ad-btn ghost" onclick="closeDetailsModal()">ปิด</button>
+                <button id="detail-edit-btn" class="ad-btn primary"><i class="fa fa-pen"></i> แก้ไข</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1011,8 +1187,18 @@
         return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
-    const placeholderThumbUrl = getPlaceholderDataUrl(50, 50, 'No');
-    const placeholderMainUrl = getPlaceholderDataUrl(300, 200, 'No Image');
+    // ไม่มีรูป → ไอคอนจอคอมสีเทา (เดิมขึ้นคำว่า "No" ดูเหมือนบั๊ก)
+    function getDevicePlaceholderUrl(w, h, caption) {
+        const s = Math.min(w, h) * 0.5, x = (w - s) / 2, y = (h - s) / 2 - (caption ? h * 0.06 : 0);
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="100%" height="100%" fill="#f1f5f9"/>`
+            + `<g fill="none" stroke="#94a3b8" stroke-width="${Math.max(1.5, s / 14)}" stroke-linecap="round" stroke-linejoin="round">`
+            + `<rect x="${x}" y="${y}" width="${s}" height="${s * 0.68}" rx="${s * 0.08}"/><path d="M${x + s * 0.35} ${y + s * 0.9}h${s * 0.3}M${w / 2} ${y + s * 0.68}v${s * 0.22}"/></g>`
+            + (caption ? `<text x="50%" y="${y + s + h * 0.1}" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="${Math.max(11, h * 0.07)}">${caption}</text>` : '')
+            + `</svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+    const placeholderThumbUrl = getDevicePlaceholderUrl(50, 50, '');
+    const placeholderMainUrl = getDevicePlaceholderUrl(300, 200, 'No image');
 
     window.handleImgError = function(imgEl) {
         try { const fb = imgEl?.dataset?.fallback; imgEl.onerror = null; imgEl.src = fb || placeholderThumbUrl; } catch (_) {}
@@ -1158,7 +1344,7 @@
         const icon = document.getElementById('themeIcon');
         if (icon) icon.className = isDark ? 'fa fa-sun' : 'fa fa-moon';
 
-        const wb = gid('warranty-alert-btn'); if (wb) wb.addEventListener('click', openWarrantyModal);
+        const wb = gid('warranty-alert-btn'); if (wb) wb.addEventListener('click', () => openWarrantyModal());
         initServiceTableActionsOnce();
 
         // Dirty state tracking — detect unsaved changes in modal form
@@ -1263,6 +1449,15 @@
         }
 
         applyAdminEmployeeDeepLink();
+        // มาจากสแกน QR (asset_scan.html) → เปิด popup เครื่องนั้นเลย
+        const deepAsset = new URLSearchParams(location.search).get('asset');
+        if (deepAsset && activeTab === 'it_assets') {
+            let tries = 0;
+            const t = setInterval(() => {
+                if ((data.it_assets || []).some(a => String(a.db_id) === String(deepAsset))) { clearInterval(t); showAssetDetailsModal(deepAsset); }
+                else if (++tries > 40) clearInterval(t);
+            }, 250);
+        }
 
         // Register admin tab shortcuts in the command palette
         if (window.ptcCmd) {
@@ -1449,13 +1644,34 @@
     function dLeft(s){if(!s)return null;const d=new Date(s);if(isNaN(d))return null;const t=new Date();t.setHours(0,0,0,0);d.setHours(0,0,0,0);return Math.ceil((d-t)/86400000);}
     function warrantySoon(th){return (data.it_assets||[]).filter(i=>{const d=dLeft(i.warranty_expires_on||i['warranty_expires_on']);return typeof d==='number'&&d>=0&&d<=th;});}
     function updateWarrantyBadge(){const n=warrantySoon(30).length,b=gid('warranty-count-badge');if(b){if(n>0){b.textContent=n;b.style.display=''}else b.style.display='none';}}
-    function openWarrantyModal(){
-        const items=warrantySoon(30);
-        const rows=items.map(i=>{const d=dLeft(i.warranty_expires_on||i['warranty_expires_on']);const dt=i.warranty_expires_on?new Date(i.warranty_expires_on).toLocaleDateString('th-TH'):(i['warranty_expires_on']?new Date(i['warranty_expires_on']).toLocaleDateString('th-TH'):'-');return `<tr><td class="px-2 py-1 font-mono">${i['ID อุปกรณ์']||i.asset_id||'-'}</td><td class="px-2 py-1">${i['ชื่ออุปกรณ์']||'-'}</td><td class="px-2 py-1">${dt}</td><td class="px-2 py-1 text-red-600 font-bold">${d} วัน</td></tr>`}).join('');
-        gid('modal-title').textContent='Warranty Alerts';
-        gid('modal-body').innerHTML=`<div class="text-xs"><div class="mb-2">ภายใน 30 วัน: ${items.length} รายการ</div><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="px-2 py-1">ID</th><th class="px-2 py-1">ชื่ออุปกรณ์</th><th class="px-2 py-1">หมดประกัน</th><th class="px-2 py-1">เหลือ</th></tr></thead><tbody>${rows||'<tr><td colspan="4" class="px-2 py-4 text-center text-slate-400">ไม่มีรายการ</td></tr>'}</tbody></table></div></div>`;
+    // หน้าต่างแจ้งเตือนประกัน: ดูอย่างเดียว (เดิมใช้กล่องฟอร์มเลยมีปุ่ม "บันทึกข้อมูล" ที่กดแล้วไม่ได้ทำอะไร)
+    function openWarrantyModal(days){
+        days = days || window._warrantyDays || 30;
+        window._warrantyDays = days;
+        const list = (data.it_assets||[]).map(i => ({ i, d: dLeft(i.warranty_expires_on) }))
+            .filter(x => typeof x.d === 'number' && x.d <= days && x.d >= -90)   // รวมที่เพิ่งหมดไม่เกิน 90 วัน
+            .sort((a, b) => a.d - b.d);
+        const soon = list.filter(x => x.d >= 0).length, expired = list.length - soon;
+        const chip = d => d < 0 ? `<span class="ad-chip danger">หมดแล้ว ${-d} วัน</span>` : d <= 30 ? `<span class="ad-chip warn">เหลือ ${d} วัน</span>` : `<span class="ad-chip ok">เหลือ ${d} วัน</span>`;
+        const rows = list.map(({ i, d }) => `<tr class="wr-row" onclick="closeModal(true);showAssetDetailsModal('${escapeJsString(i.db_id)}')">
+            <td><span class="ad-code">${escapeHtml(i['ID อุปกรณ์']||'-')}</span></td>
+            <td><div style="font-weight:600;color:var(--ptc-text)">${escapeHtml(i['ชื่ออุปกรณ์']||'-')}</div><div class="ad-muted">${escapeHtml(i.borrower||i.location||'')}</div></td>
+            <td>${escapeHtml(new Date(i.warranty_expires_on).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}))}</td>
+            <td style="text-align:right">${chip(d)}</td></tr>`).join('');
+        gid('modal-title').innerHTML = '<i class="fa fa-shield-halved" style="color:#dc2626;margin-right:8px"></i>ประกันใกล้หมด';
+        gid('modal-body').innerHTML = `
+            <div class="wr-top">
+                <div class="ad-muted">ใกล้หมด <b style="color:var(--ptc-text)">${soon}</b> รายการ · หมดไปแล้ว (ไม่เกิน 90 วัน) <b style="color:var(--ptc-text)">${expired}</b> รายการ</div>
+                <div class="wr-range">${[30,60,90].map(n => `<button type="button" class="${n===days?'on':''}" onclick="openWarrantyModal(${n})">${n} วัน</button>`).join('')}</div>
+            </div>
+            ${rows ? `<table class="wr-table"><thead><tr><th>รหัส</th><th>อุปกรณ์ / ผู้ใช้</th><th>หมดประกัน</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+                   : `<div class="wr-empty"><i class="fa fa-shield-halved"></i><div>ไม่มีพัสดุที่ประกันจะหมดใน ${days} วัน</div></div>`}`;
+        const saveBtn = gid('modal-save-btn'), cancelBtn = gid('modal-cancel-btn');
+        if (saveBtn) saveBtn.style.display = 'none';
+        if (cancelBtn) cancelBtn.textContent = 'ปิด';
         gid('modal').style.display='flex';
     }
+    window.openWarrantyModal = openWarrantyModal;
 
     window.serviceHealthCache = {};
     function serviceHealthDomId(serviceId, rowIndex) {
@@ -1716,7 +1932,8 @@
         const addBtn = gid('add-btn');
         const addSystemUserBtn = gid('add-system-user-btn');
         if (addBtn) {
-            addBtn.style.display = (tab === 'dashboard' || tab === 'borrow_management') ? 'none' : '';
+            // หน้าสิทธิ์ผู้ใช้ไม่มีอะไรให้ "เพิ่ม" (เลือกคนจากรายชื่อแทน)
+            addBtn.style.display = (tab === 'dashboard' || tab === 'borrow_management' || tab === 'permissions') ? 'none' : '';
             if (tab === 'employees') {
                 addBtn.innerHTML = `<i class="fa fa-user-plus"></i> เพิ่มพนักงาน`;
                 addBtn.onclick = () => openModal(false, { __forceSystemUser: false });
@@ -1724,7 +1941,10 @@
                 addBtn.innerHTML = `<i class="fa fa-cog"></i> จัดการตำแหน่ง`;
                 addBtn.onclick = () => openJobPositionManager();
             } else {
-                addBtn.innerHTML = `<i class="fa fa-plus"></i> เพิ่มรายการ`;
+                // ชื่อปุ่มบอกว่าเพิ่มอะไร แทน "เพิ่มรายการ" เหมือนกันทุกหน้า
+                const ADD_LABELS = { it_assets:'เพิ่มพัสดุ', departments:'เพิ่มแผนก', locations:'เพิ่มสถานที่', asset_categories:'เพิ่มหมวดหมู่อุปกรณ์',
+                    kb_articles:'เพิ่มบทความ', kb_categories:'เพิ่มหมวดหมู่ KB', services:'เพิ่มลิงก์บริการ', server_check:'เพิ่มห้อง Server' };
+                addBtn.innerHTML = `<i class="fa fa-plus"></i> ${ADD_LABELS[tab] || 'เพิ่มรายการ'}`;
                 addBtn.onclick = () => openModal();
             }
         }
@@ -1821,6 +2041,38 @@
         Toast.fire({ icon: fail ? 'warning' : 'success', title: `ลบสำเร็จ ${ok} รายการ${fail ? `, ล้มเหลว ${fail}` : ''}` });
     }
 
+    // สถานะที่นับเป็น "ซ่อม / ชำรุด" (ใช้ทั้งการ์ดสรุปและตัวกรอง __repair)
+    const ASSET_REPAIR_STATUSES = ['ส่งซ่อม', 'รอซ่อม', 'ชำรุด'];
+
+    // การ์ดสรุปเหนือตารางพัสดุ — นับตามบริษัทที่เลือกอยู่ · กดการ์ด = กรองสถานะนั้น (กดซ้ำ = ยกเลิก)
+    window.renderAssetKpis = function() {
+        const box = gid('asset-kpis');
+        if (!box) return;
+        const co = gid('filter-company')?.value || '';
+        const all = (data.it_assets || []).filter(a => !co || a.company === co);
+        const now = Date.now();
+        const warnSoon = all.filter(a => { if (!a.warranty_expires_on) return false; const d = (new Date(a.warranty_expires_on) - now) / 86400000; return d >= 0 && d <= 30; }).length;
+        const cur = gid('filter-status')?.value || '';
+        const cards = [
+            { key: '', label: 'ทั้งหมด', n: all.length, icon: 'fa-laptop', color: '#2563eb' },
+            { key: 'ใช้งานปกติ', label: 'ใช้งานปกติ', n: all.filter(a => a['สถานะ'] === 'ใช้งานปกติ').length, icon: 'fa-circle-check', color: '#16a34a' },
+            { key: 'ว่าง', label: 'ว่าง พร้อมมอบ', n: all.filter(a => a['สถานะ'] === 'ว่าง').length, icon: 'fa-box-open', color: '#0891b2' },
+            { key: 'ถูกยืม', label: 'ถูกยืม', n: all.filter(a => a['สถานะ'] === 'ถูกยืม').length, icon: 'fa-hand-holding', color: '#0284c7' },
+            { key: '__repair', label: 'ซ่อม / ชำรุด', n: all.filter(a => ASSET_REPAIR_STATUSES.includes(a['สถานะ'])).length, icon: 'fa-screwdriver-wrench', color: '#d97706' },
+            { key: '__warranty', label: 'ประกันหมดใน 30 วัน', n: warnSoon, icon: 'fa-shield-halved', color: '#dc2626' },
+        ];
+        box.innerHTML = cards.map(c => `<button type="button" class="ak-card${(c.key === cur && c.key !== '__warranty') ? ' on' : ''}" data-ak="${c.key}" style="--ak:${c.color}">
+            <span class="ak-ic"><i class="fa ${c.icon}"></i></span><span class="ak-tx"><b>${c.n}</b><span>${c.label}</span></span></button>`).join('');
+        box.querySelectorAll('[data-ak]').forEach(b => b.onclick = () => {
+            const k = b.dataset.ak;
+            if (k === '__warranty') { gid('warranty-alert-btn')?.click(); return; }
+            const sel = gid('filter-status');
+            if (sel) sel.value = (sel.value === k ? '' : k);
+            setPager('it_assets', { page: 1 });
+            renderContent();
+        });
+    }
+
     window.toggleAssetMoreMenu = function(e, dbId, eqId, name) {
         e.stopPropagation();
         const existing = document.getElementById('asset-more-menu');
@@ -1828,15 +2080,22 @@
         const menu = document.createElement('div');
         menu.id = 'asset-more-menu';
         menu.dataset.forId = dbId;
-        menu.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;padding:4px 0;font-size:13px';
+        // เมนู ⋯ ของแถว: ใช้สีจาก theme (เดิม #fff ตายตัว โหมดมืดเป็นกล่องขาว) · ลบอยู่ล่างสุดแยกสีแดง
+        menu.className = 'tb-more-menu row-more';
+        menu.style.cssText = 'display:block;position:fixed;z-index:9999;min-width:200px';
+        const rowItem = data.it_assets.find(a => String(a.db_id) === String(dbId)) || {};
+        const close = "document.getElementById('asset-more-menu')?.remove()";
         menu.innerHTML = `
-            <button onclick="duplicateItem('${dbId}');document.getElementById('asset-more-menu')?.remove()" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 14px;background:none;border:none;cursor:pointer;color:#334155;text-align:left" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'"><i class="fa fa-copy" style="width:14px;color:#64748b"></i> Clone</button>
-            <button onclick="openQRModal('${eqId}','${name}','${dbId}');document.getElementById('asset-more-menu')?.remove()" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 14px;background:none;border:none;cursor:pointer;color:#334155;text-align:left" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'"><i class="fa fa-qrcode" style="width:14px;color:#64748b"></i> QR Code</button>
-            <button onclick="window.open('print_asset.php?id=${dbId}','_blank','width=880,height=900');document.getElementById('asset-more-menu')?.remove()" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 14px;background:none;border:none;cursor:pointer;color:#059669;text-align:left" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'"><i class="fa fa-file-alt" style="width:14px"></i> พิมพ์ใบมอบ</button>
-            <button onclick="openRepairModalById('${dbId}');document.getElementById('asset-more-menu')?.remove()" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 14px;background:none;border:none;cursor:pointer;color:#dc2626;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'"><i class="fa fa-wrench" style="width:14px"></i> แจ้งซ่อม</button>`;
+            <button onclick="showAssetDetailsModal('${dbId}');${close}"><i class="fa fa-circle-info"></i> ดูรายละเอียด</button>
+            <button onclick="openTransferModal('${dbId}','${escapeJsString(rowItem.company||'')}',false);${close}"><i class="fa fa-right-left"></i> โอนย้าย</button>
+            <button onclick="openQRModal('${eqId}','${name}','${dbId}');${close}"><i class="fa fa-qrcode"></i> พิมพ์ Label / QR</button>
+            <button onclick="window.open('print_asset.php?id=${dbId}','_blank','width=880,height=900');${close}"><i class="fa fa-print"></i> พิมพ์ใบทะเบียน</button>
+            <button onclick="duplicateItem('${dbId}');${close}"><i class="fa fa-clone"></i> ทำสำเนา</button>
+            <div style="height:1px;background:var(--ptc-border);margin:4px 6px"></div>
+            <button onclick="deleteItem('${dbId}');${close}" style="color:var(--ptc-danger)"><i class="fa fa-trash" style="color:var(--ptc-danger)"></i> ลบพัสดุ</button>`;
         document.body.appendChild(menu);
         const rect = e.currentTarget.getBoundingClientRect();
-        const mw = 160, mh = 160;
+        const mw = 200, mh = 250;
         let top = rect.bottom + 4, left = rect.right - mw;
         if (top + mh > window.innerHeight) top = rect.top - mh - 4;
         if (left < 4) left = 4;
@@ -1897,33 +2156,6 @@
         }
     }
 
-    async function loadRepairHistory(assetId, containerId) {
-        const container = gid(containerId);
-        if (!container) return;
-        container.innerHTML = '<div class="text-center text-slate-400 py-4"><i class="fas fa-spinner fa-spin"></i> Loading repair history...</div>';
-        try {
-            const res = await fetch(`${apiPath}?action=get_asset_repair_history&asset_id=${encodeURIComponent(assetId)}`);
-            const history = await res.json();
-            if (!Array.isArray(history) || history.length === 0) { const sec=gid('details-repair-section'); if(sec) sec.style.display='none'; container.innerHTML=''; return; }
-            const getStatusClass = s => { const map = {'Pending':'bg-blue-100 text-blue-600','In Progress':'bg-amber-100 text-amber-600','Waiting for Parts':'bg-red-100 text-red-600','Completed':'bg-emerald-100 text-emerald-600','Cancelled':'bg-slate-100 text-slate-500'}; return map[s]||'bg-slate-100 text-slate-500'; };
-            container.innerHTML = history.map(item => `<div class="p-3 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm text-sm"><div class="flex justify-between items-start mb-1"><span class="font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">${item.id}</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusClass(item.status)}">${item.status}</span></div><p class="text-slate-700 dark:text-slate-200 mb-1"><span class="font-semibold">อาการ:</span> ${item.problem}</p>${item.solution?`<p class="text-emerald-600 text-xs bg-emerald-50 p-2 rounded mt-1"><i class="fas fa-check-circle mr-1"></i>${item.solution}</p>`:''}<div class="text-[10px] text-slate-400 mt-2 flex justify-between"><span><i class="far fa-calendar mr-1"></i>${new Date(item.date).toLocaleDateString('th-TH')}</span><span><i class="fas fa-user-cog mr-1"></i>${item.servicedBy||'-'}</span></div></div>`).join('');
-        } catch (e) { console.error(e); container.innerHTML = `<div class="text-center text-red-500 py-4 text-xs">Error loading repair history</div>`; }
-    }
-
-    window.loadTransferHistory = async function(assetId, containerId) {
-        const container = gid(containerId);
-        if (!container) return;
-        container.innerHTML = '<div class="text-center text-slate-400 py-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-        try {
-            const res = await fetch(`${apiPath}?action=get_asset_history&id=${assetId}`);
-            const history = await res.json();
-            if (!Array.isArray(history)) return;
-            const transfers = history.filter(h => h.event_type === 'TRANSFER');
-            if (transfers.length === 0) { const sec=gid('details-transfer-section'); if(sec) sec.style.display='none'; container.innerHTML=''; return; }
-            container.innerHTML = transfers.map(h => `<div class="p-2 rounded-md bg-purple-50 border border-purple-100 mb-2"><div class="flex justify-between items-start"><span class="text-xs font-bold text-purple-700"><i class="fas fa-exchange-alt mr-1"></i> Transfer</span><span class="text-[10px] text-slate-500">${new Date(h.timestamp).toLocaleDateString('th-TH')}</span></div><p class="text-xs text-slate-600 mt-1">${h.details}</p><div class="text-[10px] text-slate-400 mt-1 text-right">By: ${h.user_name}</div></div>`).join('');
-        } catch (e) { console.error(e); container.innerHTML = ''; }
-    }
-
     async function loadAssetHistory(assetId, containerId = 'asset-history-container') {
         const container = gid(containerId);
         if (!container) return;
@@ -1933,19 +2165,42 @@
             const history = await res.json();
             if (history.status === 'error') throw new Error(history.message);
             if (!Array.isArray(history)) throw new Error('Invalid data format');
-            if (history.length === 0) { container.innerHTML = '<div class="text-center text-slate-400 py-4">No history found.</div>'; return; }
-            const iconMap = { CREATE:'fa-plus-circle text-green-500',UPDATE:'fa-pencil-alt text-blue-500',STATUS_CHANGE:'fa-random text-purple-500',LOAN:'fa-arrow-circle-up text-orange-500',LOAN_REQUEST:'fa-paper-plane text-orange-400',RETURN:'fa-arrow-circle-down text-teal-500',NOTE:'fa-comment-dots text-slate-500',SPEC_CHANGE:'fa-microchip text-indigo-500',TRANSFER:'fa-exchange-alt text-purple-500' };
-            container.innerHTML = history.map(h => {
+            if (history.length === 0) { container.innerHTML = '<div class="ad-muted" style="padding:6px 0">ยังไม่มีบันทึก</div>'; return; }
+            // แปลงรหัสเหตุการณ์เป็นภาษาคน (เดิมโชว์ SETUP_SYNC / serial_number ตรงๆ)
+            const EV = {
+                CREATE: ['fa-plus', 'เพิ่มเข้าระบบ', '#16a34a'], UPDATE: ['fa-pen', 'แก้ไขข้อมูล', '#2563eb'],
+                STATUS_CHANGE: ['fa-arrows-rotate', 'เปลี่ยนสถานะ', '#7c3aed'], SPEC_CHANGE: ['fa-microchip', 'เปลี่ยนสเปค', '#4f46e5'],
+                TRANSFER: ['fa-right-left', 'โอนย้าย', '#7c3aed'], NOTE: ['fa-comment', 'บันทึกโน้ต', '#64748b'],
+                SETUP_SYNC: ['fa-laptop-code', 'อัปเดตจากใบติดตั้ง', '#0891b2'], ACCESS: ['fa-eye', 'เปิดดู', '#94a3b8'], ISSUE: ['fa-triangle-exclamation', 'แจ้งปัญหา', '#dc2626'],
+                LOAN: ['fa-arrow-up-from-bracket', 'ยืมออก', '#ea580c'], LOAN_REQUEST: ['fa-paper-plane', 'ขอยืม', '#ea580c'], LOAN_APPROVED: ['fa-check', 'อนุมัติการยืม', '#16a34a'],
+                LOAN_DENIED: ['fa-xmark', 'ปฏิเสธการยืม', '#dc2626'], LOAN_CANCELLED: ['fa-ban', 'ยกเลิกการยืม', '#64748b'], LOAN_RETURNED: ['fa-arrow-rotate-left', 'คืนแล้ว', '#0d9488'], RETURN: ['fa-arrow-rotate-left', 'คืนแล้ว', '#0d9488'],
+                REPAIR_REQUEST: ['fa-screwdriver-wrench', 'แจ้งซ่อม', '#f59e0b'], REPAIR_CREATED: ['fa-screwdriver-wrench', 'เปิดงานซ่อม', '#f59e0b'], REPAIR_START: ['fa-gears', 'เริ่มซ่อม', '#f59e0b'],
+                REPAIR_COMPLETE: ['fa-circle-check', 'ซ่อมเสร็จ', '#16a34a'], REPAIR_CANCEL: ['fa-ban', 'ยกเลิกงานซ่อม', '#64748b'], REPAIR_DELETE: ['fa-trash', 'ลบงานซ่อม', '#64748b'], REPAIR_UNREPAIRABLE: ['fa-heart-crack', 'ซ่อมไม่ได้', '#dc2626'],
+            };
+            const FIELD_TH = { serial_number: 'S/N', hostname: 'ชื่อเครื่อง', ip_address: 'IP', mac_address: 'MAC', custodian: 'ผู้ถือครอง', company: 'บริษัท', status: 'สถานะ', location: 'สถานที่', department: 'แผนก', name: 'ชื่อ', brand: 'ยี่ห้อ', model: 'รุ่น' };
+            const humanize = txt => escapeHtml(String(txt || '').replace(/\\"/g, '"'))
+                .replace(/^Sync จาก Setup:\s*/i, 'อัปเดต: ')
+                .replace(/\b([a-z]+(?:_[a-z]+)+|hostname|company|status|location|custodian)\b/g, m => FIELD_TH[m] || m);
+            // ซ่อน "เปิดดู" (ACCESS) ไว้ท้าย ไม่ให้กลบเหตุการณ์สำคัญ
+            const ordered = history.filter(h => h.event_type !== 'ACCESS').concat(history.filter(h => h.event_type === 'ACCESS'));
+            container.innerHTML = ordered.map(h => {
+                const ev = EV[h.event_type] || ['fa-clock-rotate-left', h.event_type, '#64748b'];
                 const isNote = h.event_type === 'NOTE';
-                let noteText = '', noteImage = '', safeNoteForEdit = '', detailsHtml = '';
+                let detailsHtml = '', noteActions = '';
                 if (isNote) {
-                    try { const noteData = JSON.parse(h.details); noteText = noteData.text || ''; noteImage = noteData.image || ''; } catch (e) { noteText = h.details || ''; }
-                    detailsHtml = `<div class="text-slate-500 dark:text-slate-400">${noteText.replace(/\\"/g,'"')}</div>`;
-                    if (noteImage) detailsHtml += `<a href="${noteImage}" target="_blank" class="mt-2 inline-block"><img src="${noteImage}" class="max-w-[150px] max-h-24 rounded border"></a>`;
-                    safeNoteForEdit = encodeURIComponent(noteText);
-                } else { detailsHtml = `<div class="text-slate-500 dark:text-slate-400">${(h.details||'').replace(/\\"/g,'"')}</div>`; }
-                const noteActions = isNote ? `<div class="ml-auto flex gap-1 pl-2"><button type="button" onclick="editAssetNote(${h.history_id},'${safeNoteForEdit}')" class="text-xs text-blue-500 hover:underline">แก้ไข</button><button type="button" onclick="deleteAssetNote(${h.history_id})" class="text-xs text-red-500 hover:underline">ลบ</button></div>` : '';
-                return `<div class="flex gap-3 text-xs"><div class="w-6 text-center pt-0.5"><i class="fas ${iconMap[h.event_type]||'fa-history'}"></i></div><div class="flex-1 flex items-start"><div class="flex-1"><p class="font-bold text-slate-600 dark:text-slate-300">${h.event_type}</p>${detailsHtml}<p class="text-slate-400 text-[10px] mt-0.5">${new Date(h.timestamp).toLocaleString('th-TH')} by ${h.user_name}</p></div>${noteActions}</div></div>`;
+                    let noteText = '', noteImage = '';
+                    try { const nd = JSON.parse(h.details); noteText = nd.text || ''; noteImage = nd.image || ''; } catch (e) { noteText = h.details || ''; }
+                    detailsHtml = humanize(noteText);
+                    if (noteImage) detailsHtml += `<div><a href="${escapeHtml(noteImage)}" target="_blank" rel="noopener"><img src="${escapeHtml(noteImage)}" style="max-width:150px;max-height:96px;border-radius:6px;border:1px solid var(--ptc-border);margin-top:4px"></a></div>`;
+                    const safe = encodeURIComponent(noteText);
+                    noteActions = ` · <a href="#" onclick="event.preventDefault();editAssetNote(${parseInt(h.history_id,10)},'${safe}')">แก้ไข</a> · <a href="#" style="color:var(--ptc-danger)" onclick="event.preventDefault();deleteAssetNote(${parseInt(h.history_id,10)})">ลบ</a>`;
+                } else {
+                    detailsHtml = humanize(h.details);
+                }
+                const when = h.timestamp ? new Date(h.timestamp).toLocaleString('th-TH', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                return `<div class="ad-tl"><div class="ad-tl-ic" style="color:${ev[2]}"><i class="fa ${ev[0]}"></i></div>
+                    <div style="min-width:0;flex:1"><div class="ad-tl-t">${escapeHtml(ev[1])}</div>${detailsHtml ? `<div class="ad-tl-d">${detailsHtml}</div>` : ''}
+                    <div class="ad-tl-m">${escapeHtml(when)}${h.user_name ? ' · ' + escapeHtml(h.user_name) : ''}${noteActions}</div></div></div>`;
             }).join('');
         } catch (e) { console.error(e); container.innerHTML = `<div class="text-center text-red-500 py-4 text-xs">Failed to load history.<br>${e.message}</div>`; }
     }
@@ -2124,7 +2379,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">
                 ${Array(8).fill(0).map(() => `<div class="dash-stat-card"><div class="ptc-skel" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="ptc-skel" style="height:18px;width:48px;margin-bottom:6px"></div><div class="ptc-skel" style="height:11px;width:80px"></div></div></div>`).join('')}
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
                 ${Array(2).fill(0).map(() => `<div class="dash-card"><div class="dash-card-hd"><div class="ptc-skel" style="height:13px;width:130px"></div><div class="ptc-skel" style="height:20px;width:44px;border-radius:10px"></div></div><div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">${Array(3).fill(0).map(() => `<div class="ptc-skel" style="height:11px;width:100%"></div>`).join('')}</div></div>`).join('')}
             </div>
             <div class="dash-card"><div class="dash-card-hd"><div class="ptc-skel" style="height:13px;width:130px"></div><div class="ptc-skel" style="height:20px;width:44px;border-radius:10px"></div></div><div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">${Array(3).fill(0).map(() => `<div class="ptc-skel" style="height:11px;width:100%"></div>`).join('')}</div></div>
@@ -2162,11 +2417,8 @@
         const pendingBadge = (n) => n > 0 ? `<span style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">${n} รอ</span>` : `<span style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;font-size:11px">ไม่มี</span>`;
 
         const emptyState = (msg) => `<tr><td colspan="5">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px 16px">
-                <div style="width:36px;height:36px;border-radius:50%;background:#f0fdf4;border:2px solid #bbf7d0;display:flex;align-items:center;justify-content:center">
-                    <i class="fa fa-check" style="color:#16a34a;font-size:15px"></i>
-                </div>
-                <div style="font-size:12px;font-weight:600;color:#16a34a">${msg}</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 16px;color:var(--ptc-success,#16a34a);font-size:12.5px;font-weight:600">
+                <i class="fa fa-circle-check"></i>${msg}
             </div>
         </td></tr>`;
 
@@ -2211,19 +2463,20 @@
             ${allClearBanner}
 
             <!-- KPI Cards -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">
+            <!-- แถวบน = เรื่องที่ต้องลงมือ, แถวล่าง = ตัวเลขภาพรวม (4 ใบต่อแถว ไม่เหลือช่องว่าง) -->
+            <div class="dash-kpi-grid">
+                ${statCard('fa-wrench','#f59e0b','#fffbeb','งานซ่อม รอดำเนินการ', kpi.pending||0, 'log.html')}
+                ${statCard('fa-boxes','#8b5cf6','#f5f3ff','เบิกของ รออนุมัติ', kpi.stock_pending||0, 'stock_management.html')}
+                ${statCard('fa-rotate','#ec4899','#fdf2f8','ยืม-คืน รออนุมัติ', kpi.loan_pending||0, 'borrow_management.html')}
+                ${statCard('fa-server','#ef4444','#fef2f2', scLabel, scValue, 'server_check.html')}
+                ${statCard('fa-check-circle','#10b981','#f0fdf4','เสร็จวันนี้', kpi.completed_today||0, null)}
                 ${statCard('fa-users','#3b82f6','#eff6ff','พนักงานทั้งหมด', empCount, null, 'employees')}
                 ${statCard('fa-laptop','#0ea5e9','#f0f9ff','พัสดุ IT ทั้งหมด', assetCount, null, 'it_assets')}
-                ${statCard('fa-wrench','#f59e0b','#fffbeb','Ticket รอดำเนินการ', kpi.pending||0, 'log.html')}
-                ${statCard('fa-boxes','#8b5cf6','#f5f3ff','Stock รอ Approve', kpi.stock_pending||0, 'stock_management.html')}
-                ${statCard('fa-rotate','#ec4899','#fdf2f8','ยืม-คืน รอ Approve', kpi.loan_pending||0, 'borrow_management.html')}
-                ${statCard('fa-check-circle','#10b981','#f0fdf4','เสร็จวันนี้', kpi.completed_today||0, null)}
-                ${statCard('fa-server','#ef4444','#fef2f2', scLabel, scValue, 'server_check.html')}
                 ${statCard('fa-network-wired','#0891b2','#ecfeff','อุปกรณ์ IT Links', itLinksDevices, 'it_links.html')}
             </div>
 
             <!-- Pending sections -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
                 <div class="dash-card">
                     <div class="dash-card-hd">
                         <div class="dash-card-title"><i class="fa fa-wrench" style="color:#f59e0b"></i> IT Ticket รอดำเนินการ</div>
@@ -2286,7 +2539,8 @@
                 const txt = (String(i['ID อุปกรณ์']||'')+String(i['ชื่ออุปกรณ์']||'')+String(i['Serial Number']||'')+String(i.asset_id||'')+String(i.ip_address||'')+String(i.mac_address||'')+JSON.stringify(i.accessories||[])).toLowerCase();
                 const isSetupDone = setupStatusMap[i['ID อุปกรณ์']||i.equipment_id||''] === 'active';
                 const matchesSetup = !setupFilter || (setupFilter === 'done' ? isSetupDone : !isSetupDone);
-                return (!term||txt.includes(term))&&(!cat||i['หมวดหมู่']===cat)&&(!stat||i['สถานะ']===stat)&&(!co||i.company===co)&&matchesSetup;
+                const matchesStat = !stat || (stat === '__repair' ? ASSET_REPAIR_STATUSES.includes(i['สถานะ']) : i['สถานะ'] === stat);
+                return (!term||txt.includes(term))&&(!cat||i['หมวดหมู่']===cat)&&matchesStat&&(!co||i.company===co)&&matchesSetup;
             });
         } else if (activeTab === 'employees') {
             const co = gid('filter-emp-company').value; const techFilter = gid('filter-emp-tech')?.value||'';
@@ -2310,6 +2564,7 @@
             countBadge.style.display = '';
         }
 
+        if (activeTab === 'it_assets') renderAssetKpis();
         if (activeTab === 'it_assets' && currentView === 'tree') {
             renderTreeView(items, container);
         } else {
@@ -2354,10 +2609,12 @@
                 img = normalizeUploadUrl(img) || placeholderThumbUrl;
                 let sClass = 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1'; let sIcon = 'fa-circle';
                 if (i['สถานะ']==='ใช้งานปกติ') { sClass='background:#f0fdf4;color:#166534;border:1px solid #bbf7d0'; sIcon='fa-check-circle'; }
+                else if (i['สถานะ']==='ว่าง') { sClass='background:#f0f9ff;color:#0e7490;border:1px solid #a5f3fc'; sIcon='fa-box-open'; }
                 else if (i['สถานะ']==='ถูกยืม') { sClass='background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe'; sIcon='fa-hand-holding'; }
                 else if (i['สถานะ']==='รออนุมัติ') { sClass='background:#fff7ed;color:#c2410c;border:1px solid #fed7aa'; sIcon='fa-clock'; }
                 else if (i['สถานะ']==='ชำรุด') { sClass='background:#fef2f2;color:#991b1b;border:1px solid #fecaca'; sIcon='fa-exclamation-triangle'; }
-                else if (i['สถานะ']==='รอซ่อม') { sClass='background:#fffbeb;color:#92400e;border:1px solid #fde68a'; sIcon='fa-tools'; }
+                else if (i['สถานะ']==='รอซ่อม' || i['สถานะ']==='ส่งซ่อม') { sClass='background:#fffbeb;color:#92400e;border:1px solid #fde68a'; sIcon='fa-tools'; }
+                else if (i['สถานะ']==='ตัดจำหน่าย') { sClass='background:#fef2f2;color:#991b1b;border:1px solid #fecaca'; sIcon='fa-ban'; }
                 else if (i['สถานะ']==='เลิกใช้งาน') { sClass='background:#f8fafc;color:#64748b;border:1px solid #cbd5e1'; sIcon='fa-ban'; }
                 const borrowerHtml = i.borrower ? `<div style="font-size:11px;color:#2563eb;margin-top:4px"><i class="fa fa-user" style="width:12px;text-align:center"></i> ${escapeHtml(i.borrower)}</div>` : '';
                 const brandModel = escapeHtml([i.brand,i.model].filter(Boolean).join(' '));
@@ -2368,14 +2625,13 @@
                 return `<tr style="cursor:pointer" class="group asset-row" data-id="${dbId}" onclick="showAssetDetailsModal('${dbId}')">
                     <td class="ptc-table-td" style="width:32px;padding:6px 8px" onclick="event.stopPropagation()"><input type="checkbox" class="asset-chk" value="${dbId}" onchange="onAssetCheckChange()" style="cursor:pointer"></td>
                     <td class="ptc-table-td" style="position:relative;padding-left:20px">
-                        <div style="position:absolute;left:0;top:0;bottom:0;width:3px" class="${companyAccentBg}"></div>
                         <div style="display:flex;align-items:center;gap:10px">
                             <div class="asset-thumb-wrapper"><img src="${img}" loading="lazy" decoding="async" onerror="handleImgError(this)" data-fallback="${placeholderThumbUrl}" class="asset-thumb" style="border-radius:6px;border:1px solid #e2e8f0;background:#fff"></div>
                             <div><div style="font-weight:700;font-size:13px;color:#0f172a;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${name}">${name}</div><div style="font-size:11px;color:#64748b">${brandModel||'-'}</div>${parentInfo}</div>
                         </div>
                     </td>
                     <td class="ptc-table-td">
-                        <div style="font-family:monospace;font-size:11px;font-weight:700;color:#2563eb;background:#eff6ff;padding:2px 7px;border-radius:4px;border:1px solid #bfdbfe;display:inline-block">${eqId}</div>
+                        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#2563eb;background:#eff6ff;padding:2px 7px;border-radius:4px;border:1px solid #bfdbfe;display:inline-block">${eqId}</span>${i.company ? `<span class="ad-co ${escapeHtml(String(i.company).toUpperCase())}" style="font-size:10px;padding:1px 6px">${escapeHtml(i.company)}</span>` : ''}</div>
                         ${(assetId||serial)?`<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
                             ${assetId?`<span style="font-family:monospace;font-size:9.5px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:0 5px;border-radius:3px" title="Asset ID"><i class="fa fa-tag" style="font-size:8px;opacity:.6;margin-right:2px"></i>${assetId}</span>`:''}
                             ${serial?`<span style="font-family:monospace;font-size:9.5px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;padding:0 5px;border-radius:3px" title="Serial Number"><i class="fa fa-barcode" style="font-size:8px;opacity:.6;margin-right:2px"></i>${serial}</span>`:''}
@@ -2394,9 +2650,9 @@
                         ${warrantyBadge ? `<div style="margin-top:4px">${warrantyBadge}</div>` : ''}
                     </td>
                     <td class="ptc-table-td" style="text-align:right;white-space:nowrap" onclick="event.stopPropagation()">
-                        <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;opacity:0;transition:opacity .15s" class="group-hover-actions">
+                        <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px" class="group-hover-actions">
+                            <button onclick="openRepairModalById('${dbId}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#d97706" title="แจ้งซ่อม"><i class="fa fa-screwdriver-wrench"></i></button>
                             <button onclick="editItem('${dbId}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#2563eb" title="แก้ไข"><i class="fa fa-edit"></i></button>
-                            <button onclick="deleteItem('${dbId}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#ef4444" title="ลบ"><i class="fa fa-trash"></i></button>
                             <div style="position:relative;display:inline-block">
                                 <button onclick="toggleAssetMoreMenu(event,'${dbId}','${escapeJsString(i['ID อุปกรณ์'])}','${escapeJsString(i['ชื่ออุปกรณ์'])}')" class="ptc-btn-ghost ptc-btn-sm" title="เพิ่มเติม"><i class="fa fa-ellipsis-v"></i></button>
                             </div>
@@ -2655,8 +2911,8 @@
                     <td class="ptc-table-td">${phoneHtml}</td>
                     <td class="ptc-table-td"><div style="${statusStyle};font-size:11px;text-transform:uppercase">${escapeHtml(i.employment_status)}</div>${offboardBadge}</td>
                     <td class="ptc-table-td" style="text-align:right">
-                        <button onclick="editItem('${escapeJsString(i.id)}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#2563eb"><i class="fa fa-edit"></i></button>
-                        <button onclick="deleteItem('${escapeJsString(i.id)}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#ef4444"><i class="fa fa-trash"></i></button>
+                        <!-- ไม่มีปุ่มลบในแถว (กดพลาดง่าย + ลบแล้วประวัติหาย) — ลาออกให้เปลี่ยนสถานะ, ลบจริงได้ในฟอร์มแก้ไข -->
+                        <button onclick="editItem('${escapeJsString(i.id)}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#2563eb" title="แก้ไข / เปลี่ยนสถานะ"><i class="fa fa-edit"></i></button>
                     </td>
                 </tr>`;
             }).join('');
@@ -2687,10 +2943,14 @@
         ` : '';
 
         const isAssets = activeTab === 'it_assets';
-        const bulkBar = isAssets ? `<div id="bulk-action-bar" style="display:none;align-items:center;gap:10px;padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:8px;font-size:13px">
-            <span id="bulk-count" style="font-weight:600;color:#991b1b"></span>
-            <button onclick="bulkDeleteAssets()" style="display:flex;align-items:center;gap:6px;padding:5px 14px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600"><i class="fa fa-trash"></i> ลบที่เลือก</button>
-            <button onclick="clearAssetSelection()" style="padding:5px 12px;background:none;border:1px solid #fca5a5;color:#991b1b;border-radius:6px;cursor:pointer;font-size:12px">ยกเลิก</button>
+        const bulkBar = isAssets ? `<div id="bulk-action-bar" class="bulk-bar" style="display:none">
+            <span id="bulk-count" class="bulk-count"></span>
+            <button onclick="printSelectedAssets('labels')" class="ptc-btn-ghost ptc-btn-sm"><i class="fa fa-tags"></i> พิมพ์สติกเกอร์</button>
+            <button onclick="printSelectedAssets('audit')" class="ptc-btn-ghost ptc-btn-sm"><i class="fa fa-clipboard-list"></i> พิมพ์ใบตรวจนับ</button>
+            <button onclick="printSelectedAssets('handover')" class="ptc-btn-ghost ptc-btn-sm"><i class="fa fa-file-signature"></i> พิมพ์ใบมอบ/รับ</button>
+            <span style="flex:1"></span>
+            <button onclick="bulkDeleteAssets()" class="ptc-btn-ghost ptc-btn-sm bulk-del"><i class="fa fa-trash"></i> ลบที่เลือก</button>
+            <button onclick="clearAssetSelection()" class="ptc-btn-ghost ptc-btn-sm">ยกเลิก</button>
         </div>` : '';
         const chkTh = isAssets ? `<th style="width:32px;padding:6px 8px"><input type="checkbox" id="select-all-assets" onchange="toggleSelectAllAssets(this)" style="cursor:pointer"></th>` : '';
         const actionTh = `<th style="text-align:right">Action</th>`;
@@ -2700,8 +2960,10 @@
         container.querySelectorAll('.group-hover-actions').forEach(div => {
             const tr = div.closest('tr');
             if (!tr) return;
+            // แสดงตลอดแบบจาง (เดิมซ่อนจนชี้เมาส์ = บนจอสัมผัสไม่เห็นเลย) ชี้แล้วชัด
+            div.style.opacity = '.45'; div.style.transition = 'opacity .15s';
             tr.addEventListener('mouseenter', () => div.style.opacity = '1');
-            tr.addEventListener('mouseleave', () => div.style.opacity = '0');
+            tr.addEventListener('mouseleave', () => div.style.opacity = '.45');
         });
 
         // Keyboard navigation: ArrowDown/Up + Enter to open row
@@ -3187,7 +3449,13 @@
         if (!container) return;
         const employees = (data.employees||[]).filter(e=>(e.employment_status||'').toLowerCase()==='active');
         const searchVal = gid('search-input').value.toLowerCase();
-        const filtered = employees.filter(e => { const t=Object.values(e).join(' ').toLowerCase(); return !searchVal||t.includes(searchVal); });
+        const hasRoleOf = e => ['admin','staff'].includes((e.role||'').toLowerCase());
+        const searched = employees.filter(e => { const t=Object.values(e).join(' ').toLowerCase(); return !searchVal||t.includes(searchVal); });
+        // ตัวกรองสถานะสิทธิ์ (จำไว้ระหว่างกดเลือกคน)
+        const pf = window.permFilter || 'all';
+        const cntHas = searched.filter(hasRoleOf).length, cntNone = searched.length - cntHas;
+        const filtered = searched.filter(e => pf === 'all' || (pf === 'has' ? hasRoleOf(e) : !hasRoleOf(e)));
+        const pfChip = (key, label, n, dot) => `<button type="button" class="perm-filter-chip${pf===key?' on':''}" data-pf="${key}">${dot?`<span style="width:7px;height:7px;border-radius:50%;background:${dot}"></span>`:''}${label}<span class="n">${n}</span></button>`;
         const avatarColorsPerm = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
         const leftList = filtered.map(e => {
             const primaryAssign = (e.assignments&&e.assignments.find(a=>a.is_primary==1))||(e.assignments&&e.assignments[0]);
@@ -3202,7 +3470,8 @@
             const avatarBg = hasRole
                 ? (eRole === 'admin' ? '#854d0e' : '#1d4ed8')
                 : avatarColorsPerm[(e.id||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0)%avatarColorsPerm.length];
-            const initials2 = (e.name_th||e.name||'?').trim().slice(0,2);
+            // ใช้อักษรย่อจากชื่ออังกฤษ (เดิมตัด 2 ตัวแรกของชื่อไทย = "นา" จาก นาย/นาง ทุกคน)
+            const initials2 = escapeHtml((String(e.name||e.name_th||'?').replace(/^(mr|ms|mrs|miss)\.?\s*/i,'').replace(/^(นางสาว|นาย|นาง)\s*/,'').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2) || '?').toUpperCase());
             let roleBadge = '';
             if (eRole==='admin') roleBadge = `<span style="padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#fef9c3;color:#854d0e;border:1px solid #fde047;margin-left:3px">ADMIN</span>`;
             else if (eRole==='staff') roleBadge = `<span style="padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;margin-left:3px">STAFF</span>`;
@@ -3222,13 +3491,30 @@
                     <div class="perm-panel-hd-label">เลือกผู้ใช้</div>
                     <button type="button" id="permission-role-manager-btn" class="ptc-btn-ghost ptc-btn-sm" style="font-size:11px;white-space:nowrap">จัดการชุดสิทธิ์</button>
                 </div>
+                <div class="perm-filter-row">
+                    ${pfChip('all','ทั้งหมด',searched.length,'')}
+                    ${pfChip('has','มีสิทธิ์แล้ว',cntHas,'#2563eb')}
+                    ${pfChip('none','ยังไม่ได้ตั้ง',cntNone,'#ea580c')}
+                </div>
+                <div class="perm-legend"><i class="fa fa-exclamation-circle" style="color:#c2410c"></i> = ยังไม่ได้ตั้งสิทธิ์ เข้าหน้า admin ไม่ได้ · ADMIN = ทำได้ทุกอย่าง · STAFF = ตามชุดสิทธิ์ที่ตั้ง</div>
                 <div id="permission-user-list" style="display:flex;flex-direction:column;gap:2px">${leftList||'<div style="font-size:12px;color:var(--ptc-text-faint)">ไม่พบผู้ใช้</div>'}</div>
             </div>
             <div class="perm-panel-right">
-                <div id="permission-detail-container" style="font-size:12px;color:var(--ptc-text-faint)">เลือกผู้ใช้จากด้านซ้ายเพื่อจัดการสิทธิ์</div>
+                <div id="permission-detail-container" style="font-size:12px;color:var(--ptc-text-faint)">
+                    <div class="perm-empty">
+                        <div class="ic"><i class="fa fa-user-shield"></i></div>
+                        <div class="t">เลือกผู้ใช้จากด้านซ้ายเพื่อจัดการสิทธิ์</div>
+                        <div class="s">${cntNone ? `มี <b>${cntNone} คน</b> ที่ยังไม่ได้ตั้งสิทธิ์ — <a href="#" data-pf-jump="none">ดูรายชื่อ</a>` : 'ทุกคนตั้งสิทธิ์ครบแล้ว ✓'}</div>
+                    </div>
+                </div>
             </div>
         </div>`;
         container.innerHTML = html;
+        container.querySelectorAll('[data-pf],[data-pf-jump]').forEach(b => b.addEventListener('click', ev => {
+            ev.preventDefault();
+            window.permFilter = b.dataset.pf || b.dataset.pfJump;
+            renderPermissionsContent(container);
+        }));
         const roleMgrBtn = gid('permission-role-manager-btn');
         if (roleMgrBtn) {
             roleMgrBtn.addEventListener('click', async () => {
@@ -3608,6 +3894,7 @@
             let sClass = 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1';
             if (item['สถานะ']==='ใช้งานปกติ') sClass='background:#f0fdf4;color:#166534;border:1px solid #bbf7d0';
             else if (item['สถานะ']==='ถูกยืม') sClass='background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe';
+            else if (item['สถานะ']==='ว่าง') sClass='background:#f0f9ff;color:#0e7490;border:1px solid #a5f3fc';
             else if (item['สถานะ']==='ส่งซ่อม') sClass='background:#fffbeb;color:#92400e;border:1px solid #fde68a';
             else if (item['สถานะ']==='ตัดจำหน่าย') sClass='background:#fef2f2;color:#991b1b;border:1px solid #fecaca';
             const hasChildIssue = item.children&&item.children.some(c=>['ส่งซ่อม','ตัดจำหน่าย','เสีย','ชำรุด'].includes(c['สถานะ']));
@@ -3821,11 +4108,16 @@
             <input type="hidden" name="db_id" value="${item.db_id||''}">
             <input type="hidden" id="asset-has-children" value="${hasChildren?'1':'0'}">
             <div class="asset-form-shell custom-scrollbar">
-                ${item.db_id ? `<div class="ptc-alert ptc-alert-info" style="margin-bottom:12px"><i class="fas fa-barcode"></i> <strong>รหัสพัสดุ IT:</strong> <code class="ptc-code-input">${escapeHtml(assetCode)||'—'}</code>${assetName?`<span style="margin-left:8px;opacity:.85">${escapeHtml(assetName)}</span>`:''}</div>` : ''}
+                <nav class="af-steps" aria-label="ส่วนของฟอร์ม">
+                    <button type="button" data-af="af-main"><span class="n">1</span>ข้อมูลหลัก</button>
+                    <button type="button" data-af="af-machine"><span class="n">2</span>ข้อมูลเครื่อง</button>
+                    <button type="button" data-af="asset-section-procurement"><span class="n">3</span>จัดซื้อ & ประกัน</button>
+                    <button type="button" data-af="asset-section-extras"><span class="n">4</span>อื่นๆ & รูปภาพ</button>
+                </nav>
                 <p class="ptc-req-hint"><span class="ptc-req-mark">*</span> บังคับกรอก — S/N + Hostname สำหรับ NB/PC/SV, IP สำหรับ Network (NT)</p>
 
                 <div class="ptc-modal-section ptc-modal-section--stack">
-                    <div class="ptc-section-hd s-blue"><i class="fas fa-id-card"></i> ① ข้อมูลหลัก</div>
+                    <div class="ptc-section-hd s-blue" id="af-main"><i class="fas fa-id-card"></i> ① ข้อมูลหลัก</div>
                     <div class="ptc-alert ptc-alert-info" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;padding:12px 14px">
                         <div class="ptc-form-group" style="flex:1;margin:0"><label class="${lbl}">รหัสพัสดุ IT ${reqMark}</label><input type="text" name="equipment_id" id="form-equipment-id" value="${assetCode}" class="${inp} ptc-code-input" readonly placeholder="สร้างอัตโนมัติหลังเลือก บริษัท+แผนก+ประเภท"></div>
                         ${checkBtn}${genBtn}
@@ -3838,7 +4130,7 @@
                     <div class="ptc-form-grid-2">
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">ชื่ออุปกรณ์ ${reqMark}</label><input type="text" name="name" value="${assetName}" class="${inp}" required></div>
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">สถานที่ (Location) ${reqMark}</label><input type="text" name="location" id="form-location" value="${item.location||''}" class="${inp}" placeholder="ชั้น / ห้อง / โซน"></div>
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">สถานะ</label><select name="status" class="${inp}">${['ใช้งานปกติ','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน'].map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">สถานะ</label><select name="status" class="${inp}">${['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].concat(item.status && !['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].includes(item.status) ? [item.status] : []).map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
                     </div>
                     <div class="ptc-form-group" style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9">
                         <label class="${lbl}">การถือครอง</label>
@@ -3865,7 +4157,7 @@
                 </div>
 
                 <div class="ptc-modal-section ptc-modal-section--stack">
-                    <div class="ptc-section-hd s-violet"><i class="fas fa-microchip"></i> ② ข้อมูลเครื่อง / เครือข่าย</div>
+                    <div class="ptc-section-hd s-violet" id="af-machine"><i class="fas fa-microchip"></i> ② ข้อมูลเครื่อง / เครือข่าย</div>
                     <div class="ptc-form-grid-2">
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">ยี่ห้อ (Brand)</label><input type="text" name="brand" value="${item.brand||''}" class="${inp}"></div>
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">รุ่น (Model)</label><input type="text" name="model" value="${item.model||''}" class="${inp}"></div>
@@ -4142,7 +4434,10 @@
         }
     }
 
+    document.addEventListener('click', () => document.querySelectorAll('.tb-more.open').forEach(m => m.classList.remove('open')));
+
     window.openModal = function(isEdit=false, item={}) {
+        { const sb = gid('modal-save-btn'), cb = gid('modal-cancel-btn'); if (sb) sb.style.display = ''; if (cb) cb.textContent = 'ยกเลิก'; }
         // พนักงาน: ใช้ฟอร์มกลาง (js/employee-form.js) เหมือนหน้า Contact List · ?oldform=1 = ฟอร์มเดิมด้านล่าง
         if (activeTab === 'employees' && window.PTCEmployeeForm && !/[?&]oldform=1\b/.test(location.search)) {
             const sess = window.adminSession || {};
@@ -4417,6 +4712,7 @@
         window._modalDirty = false;
         const sb = gid('modal-save-btn');
         if (sb) { sb.disabled = false; sb.innerHTML = '<i class="fa fa-save"></i> บันทึกข้อมูล'; }
+        if (sb) sb.style.display = ''; { const cb = gid('modal-cancel-btn'); if (cb) cb.textContent = 'ยกเลิก'; } // คืนปุ่มหลังปิดหน้าต่างประกัน
         gid('modal').style.display = 'none';
         deactivateModalA11y();
     }
@@ -4460,8 +4756,6 @@
     }
 
     // Label print state
-    let _curLabelPrint = null;
-    let _selectedLabelSize = 'label-L';
 
     // Cache scan settings (shared across calls)
     let _scanSettingsCache = null;
@@ -4501,13 +4795,15 @@
     window.showAssetDetailsModal = function(db_id) {
         const item = data.it_assets.find(i=>i.db_id==db_id);
         if (!item) { Swal.fire('Error','Asset not found','error'); return; }
-        gid('details-modal-title').textContent = String(item['ชื่ออุปกรณ์']||'Asset Details');
+        gid('details-modal-title').textContent = 'รายละเอียดพัสดุ'; // ชื่อเครื่องอยู่ในหัวข้อใหญ่ของ body แล้ว
         const body = gid('details-modal-body');
         const transferBtn = gid('transfer-btn'); const transferSetBtn = gid('transfer-set-btn'); const repairBtn = gid('repair-btn'); const setupBtn = gid('setup-btn'); const printLabelBtn = gid('print-label-btn');
         const childAssets = data.it_assets.filter(a=>a.parent_id==item.db_id);
         transferBtn.style.display=''; transferBtn.onclick=()=>openTransferModal(item.db_id,item.company,false);
         if (childAssets.length>0) { transferSetBtn.style.display=''; transferSetBtn.onclick=()=>openTransferModal(item.db_id,item.company,true); } else transferSetBtn.style.display='none';
         if(repairBtn) { repairBtn.style.display=''; repairBtn.onclick=()=>{ closeDetailsModal(); openRepairModal(item); }; }
+        const editBtn = gid('detail-edit-btn');
+        if (editBtn) editBtn.onclick = () => { closeDetailsModal(); editItem(String(item.db_id)); };
         if(printLabelBtn) { printLabelBtn.style.display=''; printLabelBtn.onclick=()=>openQRModal(item['ID อุปกรณ์']||item.equipment_id||'', item['ชื่ออุปกรณ์']||item.name||'', item.db_id); }
         if (setupBtn) {
             const setupParams = new URLSearchParams();
@@ -4525,7 +4821,7 @@
             if (item.borrower && String(item.borrower).indexOf('แผนก ') !== 0) setupParams.set('user', item.borrower);
             setupBtn.href = `setup.html?${setupParams.toString()}`;
             setupBtn.style.display = eqId ? 'inline-flex' : 'none';
-            refreshSetupChecklistBadge(eqId, 'setup-checklist-badge');
+
         }
         let imgUrl = item['รูปภาพ (URL)']; if (!imgUrl&&Array.isArray(item.images)&&item.images.length>0) imgUrl=item.images[0];
         imgUrl = normalizeUploadUrl(imgUrl)||placeholderMainUrl;
@@ -4533,73 +4829,121 @@
         try { if (Array.isArray(item.images)) galleryImages=item.images; else if(typeof item.images==='string'&&item.images) galleryImages=JSON.parse(item.images); } catch(e) { galleryImages=[]; }
         galleryImages = galleryImages.map(normalizeUploadUrl).filter(Boolean);
         if (!galleryImages.length && imgUrl !== placeholderMainUrl) galleryImages = [imgUrl];
-        let childrenHtml = '';
-        if (childAssets.length > 0) {
-            childrenHtml = `<div style="margin-top:12px;padding:12px;background:#faf5ff;border-radius:10px;border:1px solid #e9d5ff"><h5 style="font-weight:700;color:#7c3aed;font-size:13px;margin:0 0 8px"><i class="fas fa-layer-group" style="margin-right:6px"></i>อุปกรณ์ในชุด (Components)</h5><ul style="display:flex;flex-direction:column;gap:6px;list-style:none;margin:0;padding:0">${childAssets.map(c=>{let sColor='color:#475569;background:#f1f5f9;border:1px solid #cbd5e1';if(c['สถานะ']==='ส่งซ่อม')sColor='color:#92400e;background:#fffbeb;border:1px solid #fde68a';else if(c['สถานะ']==='ตัดจำหน่าย')sColor='color:#991b1b;background:#fef2f2;border:1px solid #fecaca';else if(c['สถานะ']==='ใช้งานปกติ')sColor='color:#166534;background:#f0fdf4;border:1px solid #bbf7d0';return `<li style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#fff;border-radius:6px;border:1px solid #e9d5ff;cursor:pointer;font-size:13px" onclick="showAssetDetailsModal('${c.db_id}')"><div style="display:flex;align-items:center;gap:8px"><i class="fas fa-level-up-alt fa-rotate-90" style="color:#e9d5ff"></i><span style="font-family:monospace;font-weight:700;color:#7c3aed">${c['ID อุปกรณ์']}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">${c['ชื่ออุปกรณ์']}</span></div><span style="${sColor};padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700">${c['สถานะ']}</span></li>`;}).join('')}</ul></div>`;
-        }
-        const details = [
-            {label:'รหัสพัสดุ',value:item['ID อุปกรณ์']||'-'},
-            ...((item.asset_id||'').trim() && (item.asset_id||'').trim() !== (item['ID อุปกรณ์']||'').trim() ? [{label:'Asset ID (บัญชี)',value:item.asset_id}] : []),
-            {label:'Serial Number',value:item['Serial Number']||'-'},
-            {label:'บริษัท',value:item.company||'-'},{label:'แผนก',value:item.owning_department_name||item.owning_department||'-'},{label:'หมวดหมู่',value:item['หมวดหมู่']||'-'},
-            {label:'สถานที่',value:item.location||'-'},{label:'Brand',value:item.brand||'-'},{label:'Model',value:item.model||'-'},
-            {label:'PC Name / Hostname',value:item.hostname||'-'},{label:'IP Address',value:item.ip_address||'-'},{label:'MAC Address',value:item.mac_address||'-'},
-            ...(function(){
-                const isDept = item.custodian_type === 'department' || String(item.borrower||'').indexOf('แผนก ') === 0;
-                const deptName = item.department || (isDept ? String(item.borrower||'').replace(/^แผนก\s+/,'').replace(/\s*\(ใช้ร่วมกัน\)$/,'') : '');
-                if (isDept) return [
-                    {label:'การถือครอง',value:'แผนก (ใช้ร่วมกัน)'},
-                    {label:'แผนกผู้ถือครอง',value:deptName||item.borrower||'-'}
-                ];
-                return [
-                    {label:'การถือครอง',value:'บุคคล'},
-                    {label:'ผู้ถือครอง',value:item.borrower||'-'},
-                    {label:'รหัสพนักงาน',value:item.custodian_employee_id||item.borrower_id||'-'}
-                ];
-            })(),
-            {label:'วันที่ซื้อ',value:item['วันที่ซื้อ']?new Date(item['วันที่ซื้อ']).toLocaleDateString('th-TH'):'-'},
-            {label:'หมดประกัน',value:item.warranty_expires_on?new Date(item.warranty_expires_on).toLocaleDateString('th-TH'):'-'},
-            {label:'ราคา',value:item.purchase_price&&parseFloat(item.purchase_price)>0?parseFloat(item.purchase_price).toLocaleString('th-TH',{minimumFractionDigits:2})+' ฿':'-'},
-            {label:'มูลค่าคงเหลือ',value:(()=>{ const price=parseFloat(item.purchase_price||0); const buyDate=item['วันที่ซื้อ']; const cat=data.asset_categories?.find(c=>c.cat_id==item.asset_category); const life=parseInt(item.useful_life_override||cat?.default_useful_life||0); if(!price||!buyDate||!life) return '-'; const years=(Date.now()-new Date(buyDate))/(365.25*86400000); const remaining=Math.max(0,price-(price/life)*years); const pct=Math.round((remaining/price)*100); return `${remaining.toLocaleString('th-TH',{maximumFractionDigits:0})} ฿ (${pct}%) — อายุ ${life} ปี`; })()},
-            {label:'ผู้จำหน่าย',value:item.supplier||'-'},{label:'PO Number',value:item.po_number||'-'},{label:'Invoice Number',value:item.invoice_number||'-'},
-            {label:'รายละเอียดสเปค',value:item.spec_details||'-'},
-        ];
         // Status badge
-        const stMap = {'ใช้งานปกติ':{bg:'#f0fdf4',color:'#166534',border:'#bbf7d0',icon:'fa-check-circle'},'ถูกยืม':{bg:'#eff6ff',color:'#1e40af',border:'#bfdbfe',icon:'fa-hand-holding'},'รออนุมัติ':{bg:'#f0f9ff',color:'#0369a1',border:'#bae6fd',icon:'fa-clock'},'ชำรุด':{bg:'#fef2f2',color:'#991b1b',border:'#fecaca',icon:'fa-exclamation-triangle'},'รอซ่อม':{bg:'#fffbeb',color:'#92400e',border:'#fde68a',icon:'fa-tools'},'เลิกใช้งาน':{bg:'#f8fafc',color:'#64748b',border:'#cbd5e1',icon:'fa-ban'}};
+        const stMap = {'ใช้งานปกติ':{bg:'#f0fdf4',color:'#166534',border:'#bbf7d0',icon:'fa-check-circle'},'ว่าง':{bg:'#f0f9ff',color:'#0e7490',border:'#a5f3fc',icon:'fa-box-open'},'ตัดจำหน่าย':{bg:'#fef2f2',color:'#991b1b',border:'#fecaca',icon:'fa-ban'},'ส่งซ่อม':{bg:'#fffbeb',color:'#92400e',border:'#fde68a',icon:'fa-tools'},'ถูกยืม':{bg:'#eff6ff',color:'#1e40af',border:'#bfdbfe',icon:'fa-hand-holding'},'รออนุมัติ':{bg:'#f0f9ff',color:'#0369a1',border:'#bae6fd',icon:'fa-clock'},'ชำรุด':{bg:'#fef2f2',color:'#991b1b',border:'#fecaca',icon:'fa-exclamation-triangle'},'รอซ่อม':{bg:'#fffbeb',color:'#92400e',border:'#fde68a',icon:'fa-tools'},'เลิกใช้งาน':{bg:'#f8fafc',color:'#64748b',border:'#cbd5e1',icon:'fa-ban'}};
         const st = stMap[item['สถานะ']] || {bg:'#f1f5f9',color:'#475569',border:'#cbd5e1',icon:'fa-circle'};
         const statusBadge = `<span style="display:inline-flex;align-items:center;gap:5px;background:${st.bg};color:${st.color};border:1px solid ${st.border};padding:3px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-top:6px"><i class="fa ${st.icon}"></i> ${escapeHtml(item['สถานะ']||'-')}</span>`;
-        const companyAccentBg = getCompanyAccentBgClass(item.company);
-        // Filter out blank fields (value = '-')
-        const filledDetails = details.filter(d => String(d.value??'').trim() !== '-' && String(d.value??'').trim() !== '');
-        body.innerHTML = `<div style="height:4px;border-radius:2px;margin-bottom:14px" class="${companyAccentBg}"></div>
-            <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px">
-                <div>
-                    <img id="asset-detail-main-img" src="${imgUrl}" loading="lazy" decoding="async" onerror="handleImgError(this)" data-fallback="${placeholderMainUrl}" class="asset-main-image" style="border:1px solid #e2e8f0">
-                    ${galleryImages.length > 1 ? `<div id="asset-detail-thumbs" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${galleryImages.map((g,idx)=>`<img src="${g}" loading="lazy" decoding="async" onerror="handleImgError(this)" data-fallback="${placeholderMainUrl}" onclick="document.getElementById('asset-detail-main-img').src=this.src;document.querySelectorAll('#asset-detail-thumbs img').forEach(t=>t.style.borderColor='#e2e8f0');this.style.borderColor='#3b82f6'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid ${idx===0?'#3b82f6':'#e2e8f0'};cursor:pointer;flex-shrink:0">`).join('')}</div>` : ''}
+        // ── popup รายละเอียดพัสดุ (ออกแบบใหม่ 2026-10-21 · เดิมสำรองที่ admin_BK.html) ──
+        // หัว: ชื่อ + รหัส + บริษัท + สถานะ · ซ้าย: รูป + ผู้ถือครอง · ขวา: 3 กลุ่มข้อมูล + ประวัติ (พับได้)
+        const esc = escapeHtml;
+        const fmtDate = v => v ? new Date(v).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        const isDept = item.custodian_type === 'department' || String(item.borrower||'').indexOf('แผนก ') === 0;
+        const deptHolder = item.department || (isDept ? String(item.borrower||'').replace(/^แผนก\s+/,'').replace(/\s*\(ใช้ร่วมกัน\)$/,'') : '');
+        const holderName = isDept ? (deptHolder || item.borrower || '') : (item.borrower || '');
+        const holderId = isDept ? '' : (item.custodian_employee_id || item.borrower_id || '');
+        const isRetired = ['ตัดจำหน่าย','เลิกใช้งาน'].includes(item['สถานะ']);
+        const holderIni = (String(holderName).replace(/^(mr|ms|mrs|miss)\.?\s*/i,'').replace(/^แผนก\s+/,'').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2) || '?').toUpperCase();
+
+        // ประกัน: นับวันที่เหลือ
+        const wExp = item.warranty_expires_on;
+        const wDays = wExp ? Math.ceil((new Date(wExp) - new Date()) / 86400000) : null;
+        const wChip = wDays === null ? '' : wDays < 0
+            ? `<span class="ad-chip danger">หมดประกันแล้ว</span>`
+            : wDays <= 30 ? `<span class="ad-chip warn">เหลือ ${wDays} วัน</span>` : `<span class="ad-chip ok">เหลือ ${Math.round(wDays/30)} เดือน</span>`;
+
+        // มูลค่าคงเหลือ (ค่าเสื่อมเส้นตรงตามอายุใช้งานของหมวด)
+        const price = parseFloat(item.purchase_price || 0);
+        const cat = data.asset_categories?.find(c => c.cat_id == item.asset_category);
+        const life = parseInt(item.useful_life_override || cat?.default_useful_life || 0);
+        let valueHtml = '';
+        if (price > 0 && item['วันที่ซื้อ'] && life) {
+            const years = (Date.now() - new Date(item['วันที่ซื้อ'])) / (365.25 * 86400000);
+            const remaining = Math.max(0, price - (price / life) * years);
+            const pct = Math.round((remaining / price) * 100);
+            valueHtml = `${remaining.toLocaleString('th-TH',{maximumFractionDigits:0})} ฿ <span class="ad-muted">(${pct}% · อายุ ${life} ปี)</span><div class="ad-bar"><span style="width:${pct}%"></span></div>`;
+        }
+
+        const field = (label, value, opts = {}) => {
+            const v = String(value ?? '').trim();
+            if (!v || v === '-') return '';
+            const copy = opts.copy ? `<button type="button" class="ad-copy" data-copy="${encodeURIComponent(v)}" title="คัดลอก"><i class="fa-regular fa-copy"></i></button>` : '';
+            return `<div class="ad-field${opts.full ? ' full' : ''}"><div class="ad-label">${label}</div><div class="ad-value${opts.mono ? ' mono' : ''}">${opts.html ? value : esc(v)}${copy}</div></div>`;
+        };
+        const section = (icon, title, inner) => inner.trim() ? `<section class="ad-sec"><h5><i class="fa ${icon}"></i>${title}</h5><div class="ad-grid">${inner}</div></section>` : '';
+
+        const machine = [
+            field('รหัสพัสดุ', item['ID อุปกรณ์'], { mono: true, copy: true }),
+            ((item.asset_id||'').trim() && (item.asset_id||'').trim() !== (item['ID อุปกรณ์']||'').trim()) ? field('รหัสบัญชี (Asset ID)', item.asset_id, { mono: true, copy: true }) : '',
+            field('หมายเลขเครื่อง (S/N)', item['Serial Number'], { mono: true, copy: true }),
+            field('หมวดหมู่', item['หมวดหมู่']),
+            field('ยี่ห้อ / รุ่น', [item.brand, item.model].filter(Boolean).join(' · ')),
+            field('ชื่อเครื่อง (Hostname)', item.hostname, { mono: true }),
+            field('IP Address', item.ip_address, { mono: true, copy: true }),
+            field('MAC Address', item.mac_address, { mono: true }),
+            field('สเปค', item.spec_details, { full: true }),
+        ].join('');
+        const place = [
+            field('บริษัท', item.company),
+            field('แผนกเจ้าของ', item.owning_department_name || item.owning_department),
+            field('สถานที่', item.location),
+            field('การถือครอง', isDept ? 'แผนก (ใช้ร่วมกัน)' : (holderName ? 'บุคคล' : '')),
+        ].join('');
+        const money = [
+            field('วันที่ซื้อ', fmtDate(item['วันที่ซื้อ'])),
+            field('หมดประกัน', wExp ? `${esc(fmtDate(wExp))} ${wChip}` : '', { html: true }),
+            field('ราคาซื้อ', price > 0 ? price.toLocaleString('th-TH',{minimumFractionDigits:2}) + ' ฿' : ''),
+            field('มูลค่าคงเหลือ', valueHtml, { html: true }),
+            field('ผู้จำหน่าย', item.supplier),
+            field('เลขที่ PO', item.po_number, { mono: true }),
+            field('เลขที่ใบแจ้งหนี้', item.invoice_number, { mono: true }),
+        ].join('');
+
+        const statusChip = `<span class="ad-status" style="background:${st.bg};color:${st.color};border-color:${st.border}"><i class="fa ${st.icon}"></i> ${esc(item['สถานะ']||'-')}</span>`;
+        const coChip = item.company ? `<span class="ad-co ${esc(String(item.company).toUpperCase())}">${esc(item.company)}</span>` : '';
+
+        const childrenBlock = childAssets.length ? `<section class="ad-sec"><h5><i class="fa fa-layer-group"></i>อุปกรณ์ในชุด <span class="ad-count">${childAssets.length}</span></h5>
+            <div class="ad-children">${childAssets.map(c => `<button type="button" class="ad-child" onclick="showAssetDetailsModal('${escapeJsString(c.db_id)}')">
+                <span class="mono">${esc(c['ID อุปกรณ์'])}</span><span class="nm">${esc(c['ชื่ออุปกรณ์'])}</span><span class="st">${esc(c['สถานะ'])}</span><i class="fa fa-chevron-right"></i></button>`).join('')}</div></section>` : '';
+        const accBlock = (item.accessories && item.accessories.length) ? `<section class="ad-sec"><h5><i class="fa fa-box-open"></i>อุปกรณ์เสริม</h5>
+            <div class="ad-tags">${item.accessories.map(a => `<span>${esc(a)}</span>`).join('')}</div></section>` : '';
+
+        body.innerHTML = `
+            <div class="ad-head">
+                <div class="ad-head-main">
+                    <div class="ad-title">${esc(item['ชื่ออุปกรณ์']||'')}</div>
+                    <div class="ad-sub">${[item.brand, item.model].filter(Boolean).map(esc).join(' · ') || esc(item['รายละเอียด']||'')}</div>
+                    <div class="ad-chips"><span class="ad-code">${esc(item['ID อุปกรณ์']||'-')}</span>${coChip}${statusChip}<span id="setup-checklist-badge"></span></div>
                 </div>
-                <div>
-                    <div style="margin-bottom:12px">
-                        <h4 style="font-size:16px;font-weight:700;color:#0f172a;margin:0 0 2px">${escapeHtml(item['ชื่ออุปกรณ์']||'')}</h4>
-                        <p style="font-size:13px;color:#94a3b8;margin:0">${escapeHtml(item['รายละเอียด']||'')}</p>
-                        ${statusBadge}
+            </div>
+            <div class="ad-layout">
+                <aside class="ad-side">
+                    <img id="asset-detail-main-img" src="${imgUrl}" loading="lazy" decoding="async" onerror="handleImgError(this)" data-fallback="${placeholderMainUrl}" class="ad-img">
+                    ${galleryImages.length > 1 ? `<div id="asset-detail-thumbs" class="ad-thumbs">${galleryImages.map((g,idx)=>`<img src="${g}" loading="lazy" onerror="handleImgError(this)" data-fallback="${placeholderMainUrl}" class="${idx===0?'on':''}" onclick="document.getElementById('asset-detail-main-img').src=this.src;document.querySelectorAll('#asset-detail-thumbs img').forEach(t=>t.classList.remove('on'));this.classList.add('on')">`).join('')}</div>` : ''}
+                    <div class="ad-holder">
+                        <div class="ad-label">${isDept ? 'แผนกที่ใช้' : 'ผู้ถือครอง'}</div>
+                        ${holderName ? `<div class="ad-holder-row"><span class="ad-av${isDept ? ' dept' : ''}">${isDept ? '<i class="fa fa-users"></i>' : esc(holderIni)}</span>
+                            <div><div class="ad-holder-name">${esc(holderName)}</div>${holderId ? `<div class="ad-muted mono">${esc(holderId)}</div>` : ''}</div></div>`
+                          : '<div class="ad-muted">ยังไม่มีผู้ถือครอง (ว่าง / ในคลัง)</div>'}
+                        <div class="ad-holder-act">${isRetired ? '<span class="ad-muted"><i class="fa fa-ban"></i> ตัดจำหน่ายแล้ว</span>'
+                            : holderName ? `<button type="button" class="ad-btn" onclick="assetReturn('${escapeJsString(item.db_id)}')"><i class="fa fa-arrow-rotate-left"></i>คืนเครื่อง</button>`
+                            : `<button type="button" class="ad-btn primary" onclick="assetAssign('${escapeJsString(item.db_id)}')"><i class="fa fa-user-plus"></i>มอบเครื่อง</button>
+                               <button type="button" class="ad-btn ghost pp-retire" onclick="assetRetire('${escapeJsString(item.db_id)}')">ตัดจำหน่าย</button>`}</div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid #f1f5f9;padding-top:12px">
-                        ${filledDetails.map(d=>{const raw=String(d.value??'-');const safeValue=escapeHtml(raw);const canCopy=['รหัสพัสดุ','Asset ID (บัญชี)','Serial Number'].includes(String(d.label||''))&&raw&&raw!=='-';const copyBtn=canCopy?`<button type="button" style="margin-left:6px;color:#94a3b8;border:none;background:none;cursor:pointer" data-copy="${encodeURIComponent(raw)}" title="คัดลอก"><i class="fas fa-copy"></i></button>`:'';return `<div><p style="font-size:11px;font-weight:600;color:#94a3b8;margin:0 0 2px">${escapeHtml(d.label)}</p><p style="font-size:13px;color:#334155;margin:0;word-break:break-all;display:flex;align-items:center">${safeValue}${copyBtn}</p></div>`;}).join('')}
-                    </div>
-                    ${childrenHtml}
-                    ${item.accessories&&item.accessories.length>0?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px"><h4 style="font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:6px"><i class="fas fa-box-open" style="color:#0ea5e9"></i>อุปกรณ์เสริม</h4><div style="display:flex;flex-wrap:wrap;gap:6px">${item.accessories.map(acc=>`<span style="background:#f1f5f9;color:#475569;font-size:12px;font-weight:500;padding:3px 10px;border-radius:99px">${acc}</span>`).join('')}</div></div>`:''}
-                    <div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px">
-                        <div id="details-transfer-section">
-                            <h4 style="font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:6px"><i class="fas fa-exchange-alt" style="color:#7c3aed"></i>ประวัติการโอนย้าย</h4>
-                            <div id="details-transfer-history-container" class="custom-scrollbar" style="display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto;margin-bottom:14px"></div>
+                </aside>
+                <div class="ad-main">
+                    ${section('fa-microchip', 'ข้อมูลเครื่อง', machine)}
+                    ${section('fa-location-dot', 'สังกัด & ที่ตั้ง', place)}
+                    ${section('fa-shield-halved', 'ประกัน & มูลค่า', money)}
+                    ${childrenBlock}
+                    ${accBlock}
+                    <section class="ad-sec">
+                        <h5><i class="fa fa-passport"></i>ประวัติเครื่อง</h5>
+                        <div id="pp-summary" class="pp-sum"></div>
+                        <div class="pp-filter" id="pp-filter">
+                            <button type="button" data-f="all" class="on">ทั้งหมด</button><button type="button" data-f="holder">ผู้ถือครอง</button><button type="button" data-f="repair">ซ่อม</button><button type="button" data-f="data">แก้ไขข้อมูล</button>
                         </div>
-                        <div id="details-repair-section">
-                            <h4 style="font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:6px"><i class="fas fa-tools" style="color:#f59e0b"></i>ประวัติการซ่อม</h4>
-                            <div id="details-repair-history-container" class="custom-scrollbar" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;margin-bottom:14px"></div>
-                        </div>
-                        <h4 style="font-size:13px;font-weight:700;color:#0f172a;margin:0 0 8px;display:flex;align-items:center;gap:6px"><i class="fas fa-history" style="color:#94a3b8"></i>System Log</h4>
-                        <div id="details-history-container" class="custom-scrollbar" style="display:flex;flex-direction:column;gap:8px;max-height:160px;overflow-y:auto"><div style="text-align:center;color:#94a3b8;padding:16px"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
-                    </div>
+                        <div id="pp-timeline" class="custom-scrollbar pp-tl"><div class="ad-muted" style="padding:10px">กำลังโหลด…</div></div>
+                    </section>
                 </div>
             </div>`;
         gid('asset-details-modal').style.display = 'flex';
@@ -4607,10 +4951,168 @@
         body.querySelectorAll('[data-copy]').forEach(btn => {
             btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const v=decodeURIComponent(String(btn.dataset.copy||'')); window.copyToClipboard(v); });
         });
-        loadAssetHistory(item.db_id, 'details-history-container');
-        loadRepairHistory(item['ID อุปกรณ์'], 'details-repair-history-container');
-        loadTransferHistory(item.db_id, 'details-transfer-history-container');
+        refreshSetupChecklistBadge(item['ID อุปกรณ์'] || item.equipment_id || '', 'setup-checklist-badge');
+        loadAssetPassport(item.db_id);
     }
+
+    // ── พาสปอร์ตเครื่อง: รวม ทะเบียน + งานซ่อม + ยืมคืน + ใบติดตั้ง/คนออก เป็นเส้นเวลาเดียว ──
+    const PP_EV = {
+        CREATE: ['fa-plus', 'รับเข้าทะเบียน', '#16a34a', 'data'], UPDATE: ['fa-pen', 'แก้ไขข้อมูล', '#2563eb', 'data'],
+        SETUP_SYNC: ['fa-laptop-code', 'อัปเดตจากใบติดตั้ง', '#0891b2', 'data'], NOTE: ['fa-comment', 'บันทึกโน้ต', '#64748b', 'data'],
+        TRANSFER: ['fa-right-left', 'โอนย้ายบริษัท', '#7c3aed', 'holder'], ASSIGN: ['fa-user-plus', 'มอบเครื่อง', '#16a34a', 'holder'],
+        RETURN: ['fa-arrow-rotate-left', 'รับคืนเครื่อง', '#0d9488', 'holder'], RETIRE: ['fa-ban', 'ตัดจำหน่าย', '#dc2626', 'holder'],
+        SETUP: ['fa-screwdriver', 'ติดตั้งเครื่อง', '#0891b2', 'holder'], OFFBOARD: ['fa-user-minus', 'พนักงานออก', '#b45309', 'holder'],
+        LOAN_OUT: ['fa-arrow-up-from-bracket', 'ยืมออก', '#ea580c', 'holder'], LOAN_BACK: ['fa-arrow-rotate-left', 'คืนจากการยืม', '#0d9488', 'holder'],
+        LOAN_REQUEST: ['fa-paper-plane', 'ขอยืม', '#ea580c', 'holder'], LOAN_APPROVED: ['fa-check', 'อนุมัติการยืม', '#16a34a', 'holder'],
+        LOAN_DENIED: ['fa-xmark', 'ปฏิเสธการยืม', '#64748b', 'holder'], LOAN_RETURNED: ['fa-arrow-rotate-left', 'คืนจากการยืม', '#0d9488', 'holder'],
+        REPAIR: ['fa-screwdriver-wrench', 'งานซ่อม', '#f59e0b', 'repair'], ISSUE: ['fa-triangle-exclamation', 'แจ้งปัญหา', '#dc2626', 'repair'],
+        REPAIR_REQUEST: ['fa-screwdriver-wrench', 'แจ้งซ่อม', '#f59e0b', 'repair'], REPAIR_CREATED: ['fa-screwdriver-wrench', 'เปิดงานซ่อม', '#f59e0b', 'repair'],
+        REPAIR_START: ['fa-gears', 'เริ่มซ่อม', '#f59e0b', 'repair'], REPAIR_COMPLETE: ['fa-circle-check', 'ซ่อมเสร็จ', '#16a34a', 'repair'],
+        REPAIR_CANCEL: ['fa-ban', 'ยกเลิกงานซ่อม', '#64748b', 'repair'], REPAIR_DELETE: ['fa-trash', 'ลบงานซ่อม', '#64748b', 'repair'],
+        REPAIR_UNREPAIRABLE: ['fa-heart-crack', 'ซ่อมไม่ได้', '#dc2626', 'repair'],
+    };
+    let _ppEvents = [];
+    window.loadAssetPassport = async function(dbId) {
+        const tl = gid('pp-timeline'), sum = gid('pp-summary');
+        if (!tl) return;
+        try {
+            const res = await fetch(`${apiPath}?action=asset_lifecycle&id=${encodeURIComponent(dbId)}`);
+            const j = await res.json();
+            if (j.status !== 'success') throw new Error(j.message || 'โหลดไม่สำเร็จ');
+            const sm = j.summary || {};
+            const age = sm.since ? (Date.now() - new Date(String(sm.since).replace(' ', 'T'))) / (365.25 * 86400000) : null;
+            const ageTxt = age === null ? '-' : age < 1 ? `${Math.max(1, Math.round(age * 12))} เดือน` : `${age.toFixed(1)} ปี`;
+            const sinceTxt = sm.holder_since ? new Date(String(sm.holder_since).replace(' ', 'T')).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '-';
+            if (sum) sum.innerHTML = [['อายุเครื่อง', ageTxt], ['ผ่านมือ', `${sm.holders || 0} คน`], ['ซ่อม', `${sm.repairs || 0} ครั้ง`], ['ถือครองปัจจุบันตั้งแต่', sinceTxt]]
+                .map(([l, v]) => `<div><span>${l}</span><b>${escapeHtml(v)}</b></div>`).join('');
+            // รวมเหตุการณ์ซ้ำติดกัน (เช่น อัปเดตจากใบติดตั้ง 5 ครั้งในวันเดียว) ให้อ่านง่าย
+            _ppEvents = [];
+            (j.events || []).forEach(e => {
+                const last = _ppEvents[_ppEvents.length - 1];
+                if (last && last.type === e.type && last.detail === e.detail && String(last.at).slice(0, 10) === String(e.at).slice(0, 10)) last.n = (last.n || 1) + 1;
+                else _ppEvents.push({ ...e });
+            });
+            renderAssetPassport('all');
+        } catch (e) {
+            tl.innerHTML = `<div class="ad-muted" style="padding:10px;color:var(--ptc-danger)">${escapeHtml(e.message)}</div>`;
+        }
+    };
+    function renderAssetPassport(filter) {
+        const tl = gid('pp-timeline');
+        if (!tl) return;
+        document.querySelectorAll('#pp-filter [data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === filter));
+        const FIELD_TH = { serial_number: 'S/N', hostname: 'ชื่อเครื่อง', ip_address: 'IP', mac_address: 'MAC', custodian: 'ผู้ถือครอง', company: 'บริษัท', status: 'สถานะ', location: 'สถานที่' };
+        const rows = _ppEvents.filter(e => filter === 'all' || (PP_EV[e.type] || [, , , 'data'])[3] === filter);
+        if (!rows.length) { tl.innerHTML = '<div class="ad-muted" style="padding:10px">ไม่มีรายการ</div>'; return; }
+        tl.innerHTML = rows.map(e => {
+            const ev = PP_EV[e.type] || ['fa-clock-rotate-left', e.type, '#64748b'];
+            let d = String(e.detail || '');
+            if (e.type === 'NOTE') { try { d = JSON.parse(d).text || ''; } catch (_) {} }
+            d = escapeHtml(d.replace(/^Sync จาก Setup:\s*/i, '')).replace(/\b([a-z]+(?:_[a-z]+)+|hostname|company|status|location|custodian)\b/g, m => FIELD_TH[m] || m);
+            const when = e.at ? new Date(String(e.at).replace(' ', 'T')).toLocaleString('th-TH', String(e.at).length > 10 ? { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' } : { day: 'numeric', month: 'short', year: '2-digit' }) : '';
+            const title = e.title || ev[1];
+            return `<div class="pp-item"><div class="pp-dot" style="color:${ev[2]};border-color:${ev[2]}"><i class="fa ${ev[0]}"></i></div>
+                <div class="pp-body"><div class="pp-t">${escapeHtml(title)}${e.n > 1 ? ` <span class="pp-n">×${e.n}</span>` : ''}${e.status ? ` <span class="pp-st">${escapeHtml(e.status)}</span>` : ''}</div>
+                ${d ? `<div class="pp-d">${d}</div>` : ''}<div class="pp-m">${escapeHtml(when)}${e.by ? ' · ' + escapeHtml(e.by) : ''}</div></div></div>`;
+        }).join('');
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('#pp-filter [data-f]'); if (b) renderAssetPassport(b.dataset.f); });
+
+    async function postLifecycle(op, dbId, fields) {
+        const fd = new FormData();
+        fd.append('op', op); fd.append('id', dbId);
+        Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+        const res = await fetch(`${apiPath}?action=asset_lifecycle`, { method: 'POST', body: fd });
+        const j = await res.json();
+        if (j.status !== 'success') throw new Error(j.message || 'บันทึกไม่สำเร็จ');
+        return j;
+    }
+    const ppRadios = (name, opts) => `<div class="pp-radios">${opts.map(([v, t]) => `<label><input type="radio" name="${name}" value="${v}"><span>${t}</span></label>`).join('')}</div>`;
+    const ppPick = name => document.querySelector(`.swal2-popup input[name="${name}"]:checked`)?.value || '';
+
+    window.assetAssign = async function(dbId) {
+        const item = (data.it_assets || []).find(i => String(i.db_id) === String(dbId));
+        const emps = (data.employees || []).filter(e => (e.employment_status || 'active') === 'active');
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'มอบเครื่อง',
+            html: `<div class="pp-form"><div class="pp-asset">${escapeHtml(item?.['ID อุปกรณ์'] || '')} · ${escapeHtml(item?.['ชื่ออุปกรณ์'] || '')}</div>
+                <label class="ptc-label">ผู้รับเครื่อง</label>
+                <input id="pp-emp" class="ptc-input" list="pp-emp-list" placeholder="พิมพ์ชื่อหรือรหัสพนักงาน" autocomplete="off">
+                <datalist id="pp-emp-list">${emps.map(e => `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name || '')}${e.name_th ? ' · ' + escapeHtml(e.name_th) : ''}</option>`).join('')}</datalist>
+                <label class="ptc-label" style="margin-top:10px">หมายเหตุ (ถ้ามี)</label>
+                <input id="pp-note" class="ptc-input" maxlength="300" placeholder="เช่น เครื่องทดแทนเครื่องเก่า"></div>`,
+            showCancelButton: true, confirmButtonText: 'มอบเครื่อง', cancelButtonText: 'ยกเลิก', focusConfirm: false,
+            didOpen: () => gid('pp-emp')?.focus(),
+            preConfirm: () => {
+                const v = gid('pp-emp').value.trim();
+                const emp = emps.find(e => String(e.id) === v) || emps.find(e => (e.name || '').toLowerCase() === v.toLowerCase());
+                if (!emp) { Swal.showValidationMessage('เลือกพนักงานจากรายชื่อ'); return false; }
+                return { emp, note: gid('pp-note').value.trim() };
+            }
+        });
+        if (!isConfirmed) return;
+        try {
+            await postLifecycle('assign', dbId, { employee_id: value.emp.id, note: value.note });
+            await loadAllData();
+            showAssetDetailsModal(dbId);
+            // มอบเสร็จ → ชวนทำใบติดตั้งต่อ (ข้อมูลกรอกให้แล้ว)
+            const r = await Swal.fire({ icon: 'success', title: 'มอบเครื่องแล้ว', text: `ทำใบติดตั้ง (Setup) ให้ ${value.emp.name} ต่อเลยไหม?`, showCancelButton: true, confirmButtonText: 'เปิดใบติดตั้ง', cancelButtonText: 'ไว้ทีหลัง' });
+            if (r.isConfirmed) gid('setup-btn')?.click();
+        } catch (e) { Swal.fire('ทำรายการไม่สำเร็จ', e.message, 'error'); }
+    };
+
+    window.assetReturn = async function(dbId) {
+        const item = (data.it_assets || []).find(i => String(i.db_id) === String(dbId));
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'รับคืนเครื่อง',
+            width: 520,
+            html: `<div class="pp-form"><div class="pp-asset">${escapeHtml(item?.['ID อุปกรณ์'] || '')} · คืนจาก <b>${escapeHtml(item?.borrower || '-')}</b></div>
+                <label class="ptc-label">เหตุผล</label>${ppRadios('pp-reason', [['resign', 'ลาออก'], ['replace', 'เปลี่ยนเครื่องใหม่'], ['move', 'ย้ายแผนก/บริษัท'], ['repair', 'ส่งซ่อม'], ['other', 'อื่นๆ']])}
+                <label class="ptc-label">สภาพเครื่อง</label>${ppRadios('pp-cond', [['good', 'สภาพดี'], ['fair', 'ใช้ได้ มีรอย'], ['broken', 'ชำรุด']])}
+                <label class="ptc-label">ข้อมูลในเครื่อง <span class="pp-req">TISAX</span></label>${ppRadios('pp-wipe', [['yes', 'ล้างข้อมูลแล้ว'], ['no', 'ยังไม่ได้ล้าง'], ['na', 'ไม่มีข้อมูล']])}
+                <label class="ptc-label">หมายเหตุ</label><input id="pp-note" class="ptc-input" maxlength="300" placeholder="เช่น อุปกรณ์ที่คืนมาด้วย: สายชาร์จ, กระเป๋า"></div>`,
+            showCancelButton: true, confirmButtonText: 'บันทึกรับคืน', cancelButtonText: 'ยกเลิก', focusConfirm: false,
+            preConfirm: () => {
+                const v = { reason: ppPick('pp-reason'), condition: ppPick('pp-cond'), wiped: ppPick('pp-wipe'), note: gid('pp-note').value.trim() };
+                if (!v.reason || !v.condition || !v.wiped) { Swal.showValidationMessage('เลือกให้ครบ: เหตุผล · สภาพ · ข้อมูลในเครื่อง'); return false; }
+                return v;
+            }
+        });
+        if (!isConfirmed) return;
+        try {
+            const j = await postLifecycle('return', dbId, value);
+            await loadAllData();
+            showAssetDetailsModal(dbId);
+            Toast.fire({ icon: 'success', title: j.message });
+        } catch (e) { Swal.fire('ทำรายการไม่สำเร็จ', e.message, 'error'); }
+    };
+
+    window.assetRetire = async function(dbId) {
+        const item = (data.it_assets || []).find(i => String(i.db_id) === String(dbId));
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'ตัดจำหน่ายเครื่อง',
+            width: 520,
+            html: `<div class="pp-form"><div class="pp-asset">${escapeHtml(item?.['ID อุปกรณ์'] || '')} · ${escapeHtml(item?.['ชื่ออุปกรณ์'] || '')}</div>
+                <label class="ptc-label">วิธีการ</label>${ppRadios('pp-method', [['sell', 'ขาย'], ['destroy', 'ทำลาย'], ['donate', 'บริจาค'], ['vendor', 'คืนผู้ขาย/ผู้ให้เช่า'], ['lost', 'สูญหาย']])}
+                <label class="ptc-label">ข้อมูลในเครื่อง <span class="pp-req">TISAX</span></label>${ppRadios('pp-wipe', [['yes', 'ล้างข้อมูล/ทำลายดิสก์แล้ว'], ['no', 'ยังไม่ได้ล้าง'], ['na', 'ไม่มีหน่วยความจำ']])}
+                <label class="ptc-label">หมายเหตุ / เลขที่เอกสารอนุมัติ</label><input id="pp-note" class="ptc-input" maxlength="300">
+                <div class="pp-warn"><i class="fa fa-circle-info"></i> ประวัติเครื่องยังเก็บไว้ครบ ไม่ถูกลบ</div></div>`,
+            showCancelButton: true, confirmButtonText: 'ยืนยันตัดจำหน่าย', confirmButtonColor: '#dc2626', cancelButtonText: 'ยกเลิก', focusConfirm: false,
+            preConfirm: () => {
+                const v = { method: ppPick('pp-method'), wiped: ppPick('pp-wipe'), note: gid('pp-note').value.trim() };
+                if (!v.method || !v.wiped) { Swal.showValidationMessage('เลือกวิธีการและสถานะข้อมูลในเครื่อง'); return false; }
+                if (v.wiped === 'no' && v.method !== 'lost') { Swal.showValidationMessage('ต้องล้างข้อมูลก่อนนำเครื่องออกจากบริษัท'); return false; }
+                return v;
+            }
+        });
+        if (!isConfirmed) return;
+        try {
+            const j = await postLifecycle('retire', dbId, value);
+            await loadAllData();
+            showAssetDetailsModal(dbId);
+            Toast.fire({ icon: 'success', title: j.message });
+        } catch (e) { Swal.fire('ทำรายการไม่สำเร็จ', e.message, 'error'); }
+    };
 
     window.closeDetailsModal = function() { gid('asset-details-modal').style.display = 'none'; deactivateModalA11y(); currentDetailsAssetCode = ''; }
 
@@ -5018,214 +5520,40 @@
         Swal.fire({ title:'กำลังสำรองข้อมูล...', text:'กรุณารอสักครู่', allowOutsideClick:false, didOpen:()=>{ Swal.showLoading(); const iframe=document.createElement('iframe'); iframe.style.display='none'; iframe.src='backup.php'; document.body.appendChild(iframe); setTimeout(()=>Swal.close(),5000); } });
     }
 
-    // --- QR Code ---
-    window.openQRModal = async function(assetId, assetName, dbId) {
-        if(!assetId) return Swal.fire('Error','ไม่พบรหัสทรัพย์สิน','error');
-        const item = dbId ? (data.it_assets||[]).find(i=>String(i.db_id)==String(dbId)) : null;
-        const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-        const targetUrl = `${baseUrl}/asset_scan.html?id=${encodeURIComponent(dbId)}`;
-        const scanCfg = await _getScanSettings();
-
-        const company = item?.company || '';
-        const coMap = {
-            PTA: { color:'#059669', light:'#ecfdf5', label:'PowerTech Assembly' },
-            PT4: { color:'#dc2626', light:'#fef2f2', label:'PowerTech 2004' },
-            PTE: { color:'#2563eb', light:'#eff6ff', label:'PowerTech Energy' },
-        };
-        const co = coMap[company] || { color:'#334155', light:'#f8fafc', label:'Powertech Center' };
-        const lineId = scanCfg['line_id_' + company.toLowerCase()] || '';
-        const dept    = escapeHtml(item?.owning_department_name || item?.owning_department || '');
-        const rawLoc  = (item?.location || '').trim();
-        const loc     = escapeHtml(/^(PTA|PT4|PTE)$/i.test(rawLoc) ? '' : rawLoc);
-        const serial  = escapeHtml((item?.serial_number || '').slice(0, 20));
-        const safeId  = escapeHtml(assetId);
-        const safeName = escapeHtml(assetName || '');
-
-        _curLabelPrint = { safeId, safeName, dept, loc, serial, company, lineId, co, targetUrl };
-        _selectedLabelSize = 'label-L';
-
-        // Adaptive ID font-size for modal preview (available info width ≈ 211px)
-        const _idPreviewPx = Math.max(11, Math.min(25, Math.floor(211 / Math.max(1, safeId.length * 0.68))));
-
-        // Size picker
-        const SIZES = [
-            { key:'label-L',  icon:'fa-tag',      lbl:'L · 100×50' },
-            { key:'label-M',  icon:'fa-tag',      lbl:'M · 89×36'  },
-            { key:'label-S',  icon:'fa-tag',      lbl:'S · 62×29'  },
-            { key:'label-XS', icon:'fa-tag',      lbl:'XS · 38×19' },
-            { key:'a4-2x5',  icon:'fa-th-large',  lbl:'A4 (2×5)'   },
-            { key:'a4-3x7',  icon:'fa-th',        lbl:'A4 (3×7)'   },
-        ];
-        const inactiveCSS = 'padding:4px 8px;border-radius:5px;font-size:10px;cursor:pointer;white-space:nowrap;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;';
-        const activeCSS   = 'padding:4px 8px;border-radius:5px;font-size:10px;cursor:pointer;white-space:nowrap;border:1px solid #111;background:#111;color:#fff;font-weight:700;';
-        const sizeBtn = ({key, icon, lbl}, i) => `<button data-size="${key}"
-            onclick="_selectedLabelSize='${key}';document.querySelectorAll('#size-picker button').forEach(b=>{b.style.cssText='${inactiveCSS}'});this.style.cssText='${activeCSS}'"
-            style="${i===0 ? activeCSS : inactiveCSS}">
-            <i class="fa ${icon}" style="margin-right:3px;font-size:9px"></i>${lbl}
-        </button>`;
-
-        // BW-1 preview — 290×145px (≈ 2:1)
-        const dialogHtml = `
-        <div id="size-picker" style="display:flex;gap:5px;justify-content:center;margin-bottom:12px;flex-wrap:wrap">
-            ${SIZES.map((s,i) => sizeBtn(s,i)).join('')}
-        </div>
-        <div id="print-area" style="width:360px;background:#fff;border:1.5px solid #111;overflow:hidden;
-            border-radius:10px;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;margin:0 auto;
-            box-shadow:0 2px 16px rgba(0,0,0,.24);display:flex;flex-direction:column;">
-            <div style="background:#111;height:32px;padding:0 14px;display:flex;align-items:center;
-                justify-content:space-between;flex-shrink:0;">
-                <div style="color:#fff;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:1;">${co.label}</div>
-                <div style="color:rgba(255,255,255,.32);font-size:7.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;">IT ASSET TAG</div>
-            </div>
-            <div style="display:flex;padding:13px 15px 11px;gap:14px;align-items:center;flex:1;min-height:0;">
-                <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
-                    <div style="font-size:7.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#c0c0c0;margin-bottom:4px;">Property of ${co.label}</div>
-                    <div style="font-family:'Consolas','Courier New',monospace;font-size:${_idPreviewPx}px;font-weight:900;color:#080808;letter-spacing:.05em;line-height:1;margin-bottom:5px;white-space:nowrap;overflow:hidden;">${safeId}</div>
-                    <div style="font-size:11px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em;">${safeName}</div>
-                    <div style="height:1px;background:#e0e0e0;margin:7px 0 5px;"></div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;">
-                        ${dept   ? `<div><div style="font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#bbb;font-weight:600;margin-bottom:1px;">Dept</div><div style="font-size:10.5px;color:#111;font-weight:700;">${dept}</div></div>` : '<div></div>'}
-                        ${serial ? `<div><div style="font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#bbb;font-weight:600;margin-bottom:1px;">S/N</div><div style="font-size:9px;color:#111;font-weight:700;font-family:'Consolas','Courier New',monospace;">${serial}</div></div>` : '<div></div>'}
-                        <div><div style="font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#bbb;font-weight:600;margin-bottom:1px;">Company</div><div style="font-size:10.5px;color:#111;font-weight:700;">${escapeHtml(company||'-')}</div></div>
-                        ${lineId ? `<div><div style="font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#bbb;font-weight:600;margin-bottom:1px;">LINE</div><div style="font-size:10px;color:#111;font-weight:700;">${escapeHtml(lineId)}</div></div>` : '<div></div>'}
-                    </div>
-                </div>
-                <div style="flex-shrink:0;background:#111;border-radius:8px;padding:9px 9px 7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
-                    <div style="width:87px;height:87px;display:flex;align-items:center;justify-content:center;line-height:0;filter:invert(1);">
-                        <div id="qrcode"></div>
-                    </div>
-                    <div style="font-size:7px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.42);">SCAN TO VIEW</div>
-                </div>
-            </div>
-            <div style="border-top:1px solid #e0e0e0;background:#f5f5f5;height:24px;padding:0 15px;
-                display:flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;">
-                <span style="font-size:8px;color:#aaa;letter-spacing:.03em;">If found, return to IT Dept</span>
-                <span style="font-size:8px;color:#d0d0d0;">·</span>
-                <span style="font-size:8px;color:#aaa;letter-spacing:.03em;">Scan QR for details</span>
-            </div>
-        </div>`;
-
-        Swal.fire({
-            title: `<span style="font-size:13px;font-weight:600;color:#64748b;">Asset Tag — ${safeId}</span>`,
-            html: dialogHtml,
-            showCloseButton: true, showCancelButton: true, focusConfirm: false,
-            confirmButtonText: '<i class="fas fa-print"></i> พิมพ์สติ๊กเกอร์',
-            cancelButtonText: 'ปิด',
-            width: 490,
-            didOpen: () => {
-                new QRCode(document.getElementById('qrcode'), { text: targetUrl, width: 85, height: 85, correctLevel: QRCode.CorrectLevel.M });
-            }
-        }).then(result => { if (result.isConfirmed) printSticker(); });
+    // --- พิมพ์สติกเกอร์ / ใบตรวจนับ: ทุกปุ่มไปที่ asset_print.php หน้าเดียว (ดูตัวอย่าง + เลือกขนาดในหน้านั้น) ---
+    function openAssetPrint(params) {
+        const w = window.open('asset_print.php?' + new URLSearchParams(params).toString(), '_blank', 'width=1180,height=900');
+        if (!w) Swal.fire({ icon:'info', title:'เบราว์เซอร์บล็อกหน้าต่างใหม่', text:'กรุณาอนุญาต pop-up ของเว็บนี้แล้วลองอีกครั้ง' });
     }
-
-    // Build mm-based label HTML for print (each size has its own proportions)
-    function buildLabelPrint(size, qrSrc, d) {
-        const { safeId, safeName, dept, serial, company, lineId, co } = d;
-        const qrImg = `<img src="${qrSrc}" style="width:100%;height:100%;display:block;">`;
-        const qrImgInv = `<img src="${qrSrc}" style="width:100%;height:100%;display:block;filter:invert(1);">`;
-        const coName = co.label;
-
-        // cfg: w/h in mm, hdrH/ftrH in mm, bodyPadV/H in mm, qrS in mm, fonts in pt
-        const cfgs = {
-            'label-L':  { w:100, h:50,  hdrH:8,   ftrH:7,   bodyPadV:'3mm',   bodyPadH:'4mm',   qrS:'26mm', idPt:13,  coPt:7,   tagPt:4,  propPt:3.5, namePt:5.5, glPt:3,   gvPt:4.5, ftrPt:3.5, scanPt:3,   full:true  },
-            'label-M':  { w:89,  h:36,  hdrH:5.5, ftrH:5,   bodyPadV:'2.5mm', bodyPadH:'3.5mm', qrS:'19mm', idPt:9.5, coPt:5,   tagPt:3,  propPt:2.5, namePt:4,   glPt:2.5, gvPt:3.5, ftrPt:2.5, scanPt:2.5, full:true  },
-            'label-S':  { w:62,  h:29,  hdrH:4.5, ftrH:4.5, bodyPadV:'2mm',   bodyPadH:'2.5mm', qrS:'15mm', idPt:7.5, coPt:4,   tagPt:2,  propPt:2,   namePt:3.5, glPt:2,   gvPt:3,   ftrPt:2,   scanPt:2,   full:false },
-            'label-XS': { w:38,  h:19,  hdrH:3,   ftrH:2.5, bodyPadV:'1.5mm', bodyPadH:'2mm',   qrS:'10mm', idPt:5.5, coPt:2.5, tagPt:1.5,propPt:0,   namePt:0,   glPt:0,   gvPt:2.5, ftrPt:0,   scanPt:0,   xs:true    },
-        };
-        const c = cfgs[size];
-        if (!c) return null;
-
-        // Adaptive ID font: shrink if ID is too long for available space
-        // Available info-column width per size (mm) = label_w - 2×padH - qrS - gap
-        const _idAvailMm = { 'label-L':63, 'label-M':60, 'label-S':40, 'label-XS':20 }[size] || 60;
-        // monospace char width ≈ pt × 0.353mm × 0.62
-        const _idPt = (function() {
-            const charMm = c.idPt * 0.353 * 0.62;
-            const needed = safeId.length * charMm;
-            if (needed <= _idAvailMm) return c.idPt;
-            return Math.max(c.idPt * 0.6, _idAvailMm / (safeId.length * 0.353 * 0.62));
-        })();
-
-        if (c.xs) {
-            // XS: header · body(ID + dept + QR) · mini footer
-            return `<div style="width:${c.w}mm;height:${c.h}mm;background:#fff;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;box-sizing:border-box;">
-    <div style="background:#111;height:${c.hdrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-        <div style="color:#fff;font-size:${c.coPt}pt;font-weight:800;letter-spacing:.05em;text-transform:uppercase;overflow:hidden;white-space:nowrap;">${coName}</div>
-        <div style="color:rgba(255,255,255,.35);font-size:${c.tagPt}pt;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;">IT Asset</div>
-    </div>
-    <div style="flex:1;display:flex;padding:${c.bodyPadV} ${c.bodyPadH};gap:1.5mm;align-items:center;min-height:0;">
-        <div style="flex:1;min-width:0;">
-            <div style="font-size:${_idPt}pt;font-family:'Consolas','Courier New',monospace;font-weight:900;color:#050505;letter-spacing:.05em;line-height:1.2;white-space:nowrap;overflow:hidden;">${safeId}</div>
-            ${dept ? `<div style="font-size:${c.gvPt}pt;color:#444;font-weight:600;margin-top:0.5mm;white-space:nowrap;overflow:hidden;">${dept}</div>` : ''}
-        </div>
-        <div style="flex-shrink:0;width:${c.qrS};height:${c.qrS};border:0.4pt solid #111;padding:0.5mm;line-height:0;">${qrImg}</div>
-    </div>
-    <div style="border-top:0.4pt solid #e0e0e0;background:#f6f6f6;height:${c.ftrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        ${lineId ? `<span style="font-size:2.5pt;color:#222;font-weight:700;">${escapeHtml(lineId)}</span>` : `<span style="font-size:2pt;color:#aaa;">IT Dept</span>`}
-    </div>
-</div>`;
-        }
-
-        if (!c.full) {
-            // S: compact — ID hero + name + 2 meta rows + QR
-            return `<div style="width:${c.w}mm;height:${c.h}mm;background:#fff;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;box-sizing:border-box;">
-    <div style="background:#111;height:${c.hdrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-        <div style="color:#fff;font-size:${c.coPt}pt;font-weight:800;letter-spacing:.05em;text-transform:uppercase;overflow:hidden;white-space:nowrap;">${coName}</div>
-        <div style="color:rgba(255,255,255,.35);font-size:${c.tagPt}pt;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;">IT Asset Tag</div>
-    </div>
-    <div style="flex:1;display:flex;padding:${c.bodyPadV} ${c.bodyPadH};gap:2mm;align-items:center;min-height:0;">
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
-            <div style="font-size:${c.propPt}pt;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#bbb;margin-bottom:0.5mm;">Property of ${coName}</div>
-            <div style="font-size:${_idPt}pt;font-family:'Consolas','Courier New',monospace;font-weight:900;color:#050505;letter-spacing:.05em;line-height:1;margin-bottom:1mm;white-space:nowrap;overflow:hidden;">${safeId}</div>
-            <div style="font-size:${c.namePt}pt;font-weight:600;color:#222;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.5mm;">${safeName}</div>
-            <div style="height:0.3mm;background:#e2e2e2;margin:1mm 0;"></div>
-            ${dept   ? `<div style="display:flex;gap:1mm;align-items:baseline;"><span style="font-size:${c.glPt}pt;letter-spacing:.06em;text-transform:uppercase;color:#bbb;font-weight:600;white-space:nowrap;">Dept</span><span style="font-size:${c.gvPt}pt;color:#111;font-weight:700;">${dept}</span></div>` : ''}
-            ${serial ? `<div style="display:flex;gap:1mm;align-items:baseline;margin-top:0.5mm;"><span style="font-size:${c.glPt}pt;letter-spacing:.06em;text-transform:uppercase;color:#bbb;font-weight:600;white-space:nowrap;">S/N</span><span style="font-size:${c.gvPt}pt;color:#111;font-weight:700;font-family:'Consolas','Courier New',monospace;">${serial}</span></div>` : ''}
-        </div>
-        <div style="flex-shrink:0;background:#111;border-radius:1mm;padding:1.5mm 1.5mm 1mm;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5mm;">
-            <div style="width:${c.qrS};height:${c.qrS};border:0.4pt solid rgba(255,255,255,.15);padding:0.5mm;line-height:0;">${qrImgInv}</div>
-            <div style="font-size:${c.scanPt}pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);">Scan</div>
-        </div>
-    </div>
-    <div style="border-top:0.4pt solid #e0e0e0;background:#f6f6f6;height:${c.ftrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:center;gap:1mm;flex-shrink:0;">
-        <span style="font-size:${c.ftrPt}pt;color:#aaa;">IT</span>
-        <span style="font-size:${c.ftrPt}pt;color:#ccc;">·</span>
-        <span style="font-size:${c.ftrPt}pt;color:#aaa;">Scan QR</span>
-    </div>
-</div>`;
-        }
-
-        // L / M: full 2-col grid layout — Hybrid C (dark QR panel, rounded corner)
-        return `<div style="width:${c.w}mm;height:${c.h}mm;background:#fff;overflow:hidden;border-radius:2mm;font-family:'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;box-sizing:border-box;">
-    <div style="background:#111;height:${c.hdrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-        <div style="color:#fff;font-size:${c.coPt}pt;font-weight:800;letter-spacing:.06em;text-transform:uppercase;">${coName}</div>
-        <div style="color:rgba(255,255,255,.35);font-size:${c.tagPt}pt;font-weight:600;letter-spacing:.15em;text-transform:uppercase;">IT Asset Tag</div>
-    </div>
-    <div style="flex:1;display:flex;padding:${c.bodyPadV} ${c.bodyPadH};gap:3mm;align-items:center;min-height:0;">
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
-            <div style="font-size:${c.propPt}pt;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#bbb;margin-bottom:1mm;">Property of ${coName}</div>
-            <div style="font-size:${_idPt}pt;font-family:'Consolas','Courier New',monospace;font-weight:900;color:#050505;letter-spacing:.05em;line-height:1;margin-bottom:1.2mm;white-space:nowrap;overflow:hidden;">${safeId}</div>
-            <div style="font-size:${c.namePt}pt;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${safeName}</div>
-            <div style="height:0.3mm;background:#e2e2e2;margin:1.5mm 0;"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1mm 3mm;">
-                ${dept   ? `<div><div style="font-size:${c.glPt}pt;letter-spacing:.08em;text-transform:uppercase;color:#bbb;font-weight:600;">Department</div><div style="font-size:${c.gvPt}pt;color:#111;font-weight:700;">${dept}</div></div>` : '<div></div>'}
-                ${serial ? `<div><div style="font-size:${c.glPt}pt;letter-spacing:.08em;text-transform:uppercase;color:#bbb;font-weight:600;">Serial No.</div><div style="font-size:${c.gvPt}pt;color:#111;font-weight:700;font-family:'Consolas','Courier New',monospace;">${serial}</div></div>` : '<div></div>'}
-                <div><div style="font-size:${c.glPt}pt;letter-spacing:.08em;text-transform:uppercase;color:#bbb;font-weight:600;">Company</div><div style="font-size:${c.gvPt}pt;color:#111;font-weight:700;">${escapeHtml(company||'-')}</div></div>
-                ${lineId ? `<div><div style="font-size:${c.glPt}pt;letter-spacing:.08em;text-transform:uppercase;color:#bbb;font-weight:600;">LINE</div><div style="font-size:${c.gvPt}pt;color:#111;font-weight:700;">${escapeHtml(lineId)}</div></div>` : '<div></div>'}
-            </div>
-        </div>
-        <div style="flex-shrink:0;background:#111;border-radius:1.5mm;padding:2mm 2mm 1.5mm;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1mm;">
-            <div style="width:${c.qrS};height:${c.qrS};border:0.4pt solid rgba(255,255,255,.15);padding:0.8mm;line-height:0;">${qrImgInv}</div>
-            <div style="font-size:${c.scanPt}pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);">Scan to view</div>
-        </div>
-    </div>
-    <div style="border-top:0.4pt solid #e0e0e0;background:#f6f6f6;height:${c.ftrH}mm;padding:0 ${c.bodyPadH};display:flex;align-items:center;justify-content:center;gap:1.5mm;flex-shrink:0;">
-        <span style="font-size:${c.ftrPt}pt;color:#aaa;">If found, return to IT Dept</span>
-        <span style="font-size:${c.ftrPt}pt;color:#ccc;">·</span>
-        <span style="font-size:${c.ftrPt}pt;color:#aaa;">Scan QR for details</span>
-    </div>
-</div>`;
-    }
+    window.openQRModal = function(assetId, assetName, dbId) {
+        if (!dbId) return Swal.fire('Error','ไม่พบรหัสทรัพย์สิน','error');
+        openAssetPrint({ mode:'labels', ids:String(dbId) });
+    };
+    window.openBatchStickerModal = function() {
+        const ids = filtAssets().map(i => i.db_id).filter(Boolean);
+        if (!ids.length) return Swal.fire({ icon:'info', title:'ไม่มีรายการให้พิมพ์', text:'ลองล้างตัวกรองก่อน' });
+        openAssetPrint({ mode:'labels', ids:ids.join(',') });
+    };
+    window.printSelectedAssets = function(kind) {
+        const ids = [...document.querySelectorAll('.asset-chk:checked')].map(c => c.value).filter(Boolean);
+        if (!ids.length) return;
+        if (kind === 'handover') { window.open('print_asset.php?ids=' + ids.join(','), '_blank', 'width=880,height=900'); return; }
+        openAssetPrint({ mode:kind, ids:ids.join(',') });
+    };
+    window.openAuditSheet = async function() {
+        const cur = gid('filter-company')?.value || '';
+        const opt = (v, t) => `<option value="${v}" ${cur===v?'selected':''}>${t}</option>`;
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'พิมพ์ใบตรวจนับทรัพย์สิน',
+            html: `<div class="ptc-form-group" style="text-align:left;margin:0 0 10px"><label class="ptc-label">บริษัท</label>
+                    <select id="aud-co" class="ptc-input">${opt('PTA','PTA — Powertech Engine Assembly')}${opt('PT4','PT4 — Powertech 2004')}${opt('PTE','PTE — Powertech Energy Solutions')}</select></div>
+                <div class="ptc-form-group" style="text-align:left;margin:0"><label class="ptc-label">จัดกลุ่มตาม</label>
+                    <select id="aud-grp" class="ptc-input"><option value="dept">แผนก (ให้หัวหน้าแผนกเซ็นรับรอง)</option><option value="location">ที่ตั้ง / ชั้น (เดินตรวจทีละจุด)</option></select></div>`,
+            showCancelButton: true, confirmButtonText: '<i class="fa fa-print"></i> เปิดใบตรวจนับ', cancelButtonText: 'ยกเลิก', focusConfirm: false,
+            preConfirm: () => ({ company: gid('aud-co').value, group: gid('aud-grp').value })
+        });
+        if (isConfirmed) openAssetPrint({ mode:'audit', company:value.company, group:value.group });
+    };
 
     function getAssetCategoryAbbr(catId) {
         const cat = (data.asset_categories || []).find(c => String(c.cat_id) === String(catId));
@@ -5290,6 +5618,30 @@
         syncCustodianDeptFromOwning();
         updateAssetRequiredMarkers();
     };
+    // ฟอร์มพัสดุ: แถบขั้นตอน (กระโดดไปส่วน, กางให้ถ้าพับอยู่)
+    document.addEventListener('click', (e) => {
+        const b = e.target.closest('.af-steps [data-af]');
+        if (!b) return;
+        const id = b.dataset.af, el = gid(id);
+        if (!el) return;
+        if (el.style.display === 'none') toggleAssetFormSection(id);
+        (gid(id + '-toggle') || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.af-steps [data-af]').forEach(x => x.classList.toggle('on', x === b));
+    });
+    // ฟอร์มพัสดุ: เตือนรหัสพัสดุ / S/N ซ้ำทันทีที่พิมพ์ (ไม่ต้องรอกดบันทึก)
+    document.addEventListener('input', (e) => {
+        const t = e.target;
+        if (!t || (t.id !== 'form-equipment-id' && t.id !== 'form-serial')) return;
+        const v = String(t.value || '').trim().toLowerCase();
+        const selfId = String(t.form?.querySelector('[name="db_id"]')?.value || '');
+        const key = t.id === 'form-serial' ? 'Serial Number' : 'ID อุปกรณ์';
+        const dup = v && v !== '-' && v.length > 2 ? (data.it_assets || []).find(a => String(a.db_id) !== selfId && String(a[key] || '').trim().toLowerCase() === v) : null;
+        let msg = t.parentElement.querySelector('.af-dup');
+        if (!msg) { msg = document.createElement('div'); msg.className = 'af-dup'; t.insertAdjacentElement('afterend', msg); }
+        msg.innerHTML = dup ? `<i class="fa fa-triangle-exclamation"></i> ${t.id === 'form-serial' ? 'S/N นี้' : 'รหัสนี้'}ซ้ำกับ <b>${escapeHtml(dup['ID อุปกรณ์'] || '')}</b> ${escapeHtml(dup['ชื่ออุปกรณ์'] || '')}` : '';
+        t.classList.toggle('af-bad', !!dup);
+    });
+
     window.toggleAssetFormSection = function(sectionId) {
         const el = gid(sectionId);
         const btn = gid(sectionId + '-toggle');
@@ -5406,58 +5758,6 @@
         }
     });
 
-    window.printSticker = function() {
-        if (!_curLabelPrint) return;
-        const size = _selectedLabelSize || 'label-L';
-
-        // Bake QR canvas → dataURL
-        const qrDiv = document.getElementById('qrcode');
-        let qrSrc = '';
-        if (qrDiv) {
-            const canvas = qrDiv.querySelector('canvas');
-            if (canvas) qrSrc = canvas.toDataURL();
-            else { const img = qrDiv.querySelector('img'); if (img) qrSrc = img.src; }
-        }
-
-        let pageW, pageH, bodyHtml, winW, winH;
-
-        if (size === 'a4-2x5') {
-            // A4 2×5 = 10 L-labels per page, no scaling (2×100mm = 200mm + 5mm margins each side = 210mm ✓)
-            const lbl = buildLabelPrint('label-L', qrSrc, _curLabelPrint);
-            const cells = Array(10).fill(`<div>${lbl}</div>`).join('');
-            pageW='210mm'; pageH='297mm'; winW=900; winH=1100;
-            bodyHtml = `<div style="display:grid;grid-template-columns:100mm 100mm;gap:0;padding:5mm;">${cells}</div>`;
-        } else if (size === 'a4-3x7') {
-            // A4 3×7 = 21 S-labels (62mm each), 3×62+2×6+2×6=210mm ✓
-            const lbl = buildLabelPrint('label-S', qrSrc, _curLabelPrint);
-            const cells = Array(21).fill(`<div>${lbl}</div>`).join('');
-            pageW='210mm'; pageH='297mm'; winW=900; winH=1100;
-            bodyHtml = `<div style="display:grid;grid-template-columns:62mm 62mm 62mm;gap:6mm;padding:6mm;">${cells}</div>`;
-        } else {
-            // Single label — mm-sized HTML, exact @page
-            const lbl = buildLabelPrint(size, qrSrc, _curLabelPrint);
-            if (!lbl) return;
-            const sm = {
-                'label-L':  { w:'100mm', h:'50mm',  winW:460, winH:255 },
-                'label-M':  { w:'89mm',  h:'36mm',  winW:420, winH:195 },
-                'label-S':  { w:'62mm',  h:'29mm',  winW:355, winH:165 },
-                'label-XS': { w:'38mm',  h:'19mm',  winW:280, winH:125 },
-            }[size] || { w:'100mm', h:'50mm', winW:460, winH:255 };
-            pageW=sm.w; pageH=sm.h; winW=sm.winW; winH=sm.winH;
-            bodyHtml = lbl;
-        }
-
-        const win = window.open('', '', `width=${winW},height=${winH}`);
-        win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Asset Tag</title>
-        <style>
-            *{box-sizing:border-box;margin:0;padding:0}
-            body{background:#fff;}
-            @media print{@page{size:${pageW} ${pageH};margin:0} body{margin:0;padding:0}}
-        </style></head><body>${bodyHtml}</body></html>`);
-        win.document.close();
-        setTimeout(() => { win.print(); }, 800);
-    }
-
     function filtAssets() {
         const term=(gid('search-input').value||'').toLowerCase(); const cat=gid('filter-category').value;
         const stat=gid('filter-status').value; const co=gid('filter-company').value;
@@ -5468,26 +5768,6 @@
             const matchesSetup = !setupFilter || (setupFilter === 'done' ? isSetupDone : !isSetupDone);
             return (!term||txt.includes(term))&&(!cat||i['หมวดหมู่']===cat)&&(!stat||i['สถานะ']===stat)&&(!co||i.company===co)&&matchesSetup;
         });
-    }
-
-    function openBatchStickerModal() {
-        const items=filtAssets();
-        Swal.fire({
-            title:'Batch Print Stickers',
-            html:`<div class="space-y-2 text-left"><div><label class="text-xs">ชนิด</label><select id="bp-type" class="swal2-input"><option value="IT">QR (IT)</option><option value="ACC">Barcode (ACC)</option><option value="BOTH">Both</option></select></div><div><label class="text-xs">เทมเพลต</label><select id="bp-tpl" class="swal2-input"><option value="A4_3x8">A4 3x8</option><option value="A4_4x10">A4 4x10</option><option value="DIECUT_62x100">Die-cut 62x100</option></select></div><div class="text-xs">จำนวน: ${items.length}</div></div>`,
-            showCancelButton:true, confirmButtonText:'พิมพ์',
-            preConfirm:()=>({type:document.getElementById('bp-type').value,tpl:document.getElementById('bp-tpl').value})
-        }).then(r=>{ if(r.isConfirmed)printBatchStickers(r.value.tpl,r.value.type,items); });
-    }
-
-    function printBatchStickers(tpl, type, items) {
-        const cfgMap={A4_3x8:{cols:3,rows:8,gapMm:4,pageMarginMm:8,labelWmm:63.5,labelHmm:33.9,qrMm:22,barcodeHmm:10,idPt:10,namePt:7.5},A4_4x10:{cols:4,rows:10,gapMm:2.5,pageMarginMm:6,labelWmm:48,labelHmm:25.4,qrMm:16,barcodeHmm:8,idPt:8.5,namePt:6.5},DIECUT_62x100:{cols:2,rows:5,gapMm:6,pageMarginMm:8,labelWmm:62,labelHmm:100,qrMm:32,barcodeHmm:14,idPt:12,namePt:9}};
-        const cfg=cfgMap[tpl]||cfgMap.A4_3x8; const perPage=cfg.cols*cfg.rows;
-        const baseUrl=window.location.href.substring(0,window.location.href.lastIndexOf('/'));
-        const printItems=(items||[]).map(i=>{const id=String(i['ID อุปกรณ์']||i.asset_id||'').trim();const name=String(i['ชื่ออุปกรณ์']||'').trim();const dbid=String(i.db_id||'').trim();return{id,name,dbid};}).filter(x=>x.id);
-        const win=window.open('','','width=980,height=720'); if(!win) return;
-        win.document.write(`<html><head><title>Stickers</title><meta charset="utf-8"/><style>:root{--cols:${cfg.cols};--rows:${cfg.rows};--gap:${cfg.gapMm}mm;--m:${cfg.pageMarginMm}mm;--w:${cfg.labelWmm}mm;--h:${cfg.labelHmm}mm;--qr:${cfg.qrMm}mm;--bh:${cfg.barcodeHmm}mm;--idpt:${cfg.idPt}pt;--namept:${cfg.namePt}pt;}@page{size:A4;margin:var(--m);}html,body{padding:0;margin:0;}body{font-family:Arial,sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.page{width:100%;}.sheet{display:grid;grid-template-columns:repeat(var(--cols),var(--w));grid-auto-rows:var(--h);gap:var(--gap);justify-content:center;align-content:start;}.sticker{width:var(--w);height:var(--h);box-sizing:border-box;border:0.35mm solid #111;border-radius:2mm;padding:2.5mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;}.row{display:flex;gap:2.5mm;align-items:center;min-height:0;}.code{width:var(--qr);height:var(--qr);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}.meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;}.label{font-size:7pt;font-weight:700;letter-spacing:.4pt;text-transform:uppercase;color:#111;}.id{font-family:ui-monospace,monospace;font-weight:800;font-size:var(--idpt);line-height:1.05;margin-top:0.5mm;}.name{font-size:var(--namept);color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:0.5mm;}.barcode{width:100%;height:var(--bh);display:flex;align-items:center;justify-content:center;margin-top:1.5mm;}.barcode svg,.barcode img{width:100%;height:100%;}.center{text-align:center;}.pb{page-break-after:always;}.sticker--acc{padding-top:3mm;}</style></head><body class="ptc-unified-v1"><div id="root"></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script><script>(function(){const pxPerMm=3.7795275591;const cfg=${JSON.stringify(cfg)};const type=${JSON.stringify(type)};const baseUrl=${JSON.stringify(baseUrl)};const items=${JSON.stringify(printItems)};const perPage=${perPage};const qrPx=Math.max(40,Math.round((cfg.qrMm||22)*pxPerMm));const barHPx=Math.max(24,Math.round((cfg.barcodeHmm||10)*pxPerMm));const esc=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');const root=document.getElementById('root');let html='';const pages=Math.ceil(items.length/perPage)||1;for(let p=0;p<pages;p++){html+='<div class="page"><div class="sheet">';const slice=items.slice(p*perPage,(p+1)*perPage);slice.forEach((it,idx)=>{const sid='st_'+p+'_'+idx;const labelText=type==='ACC'?'ASSET TAG':'SCAN FOR REPAIR';const stickerClass=type==='ACC'?'sticker sticker--acc':'sticker';html+='<div class="'+stickerClass+'" id="'+sid+'" data-id="'+esc(it.id)+'" data-dbid="'+esc(it.dbid)+'" data-name="'+esc(it.name)+'">';if(type==='ACC'){html+='<div class="label center">'+labelText+'</div>';html+='<div class="barcode" data-role="barcode"></div>';html+='<div class="id center">'+esc(it.id)+'</div>';html+='<div class="name center">'+esc(it.name)+'</div>';}else if(type==='BOTH'){html+='<div class="row"><div class="code" data-role="qr"></div><div class="meta"><div class="label">'+labelText+'</div><div class="id">'+esc(it.id)+'</div><div class="name">'+esc(it.name)+'</div></div></div>';html+='<div class="barcode" data-role="barcode"></div>';}else{html+='<div class="row"><div class="code" data-role="qr"></div><div class="meta"><div class="label">'+labelText+'</div><div class="id">'+esc(it.id)+'</div><div class="name">'+esc(it.name)+'</div></div></div>';html+='<div class="barcode" style="display:none"></div>';}html+='</div>';});html+='</div></div>';if(p<pages-1)html+='<div class="pb"></div>';}root.innerHTML=html;const stickers=Array.from(document.querySelectorAll('.sticker'));stickers.forEach(st=>{const id=st.getAttribute('data-id')||'';const dbid=st.getAttribute('data-dbid')||'';const qrUrl=baseUrl+'/asset_scan.html?id='+encodeURIComponent(dbid||id);const qrEl=st.querySelector('[data-role="qr"]');if(qrEl){new QRCode(qrEl,{text:qrUrl,width:qrPx,height:qrPx});}const barEl=st.querySelector('[data-role="barcode"]');if(barEl){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');barEl.appendChild(svg);JsBarcode(svg,id,{format:'CODE128',lineColor:'#111',width:1.6,height:barHPx,displayValue:false,margin:0});}});setTimeout(()=>window.print(),250);})();<\/script></body></html>`);
-        win.document.close();
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -5773,7 +6053,7 @@
 
 </script>
 <script src="js/employee-form.js?v=20261021b"></script>
-<script src="js/sidebar.js?v=20261021b"></script>
+<script src="js/sidebar.js?v=20261021d"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>

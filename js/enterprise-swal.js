@@ -77,6 +77,17 @@
             });
         }
 
+        // buttonsStyling:false ทำให้ confirmButtonColor หาย → ปุ่ม "ลบ" สีแดงกลายเป็นสีน้ำเงิน (อันตราย) — ทาสีให้เองตอนเปิด
+        if (opts.confirmButtonColor) {
+            const color = opts.confirmButtonColor;
+            const userDidOpen = opts.didOpen;
+            opts.didOpen = (el) => {
+                const b = Swal.getConfirmButton && Swal.getConfirmButton();
+                if (b) { b.style.setProperty('background', color, 'important'); b.style.setProperty('border-color', color, 'important'); b.style.setProperty('color', '#fff', 'important'); }
+                if (typeof userDidOpen === 'function') userDidOpen(el);
+            };
+        }
+
         return _fire({
             ...PTC_DEFAULTS,
             ...opts,
@@ -86,6 +97,15 @@
 
     // Replace Swal.fire with the enterprise version
     Swal.fire = ptcFire;
+
+    // Swal.mixin(...) สืบทอด Swal.fire ที่ถูกแทนแล้ว → ค่าของ mixin (toast:true ฯลฯ) หาย กลายเป็นกล่องกลางจอ
+    // ให้ .fire ของ mixin รวมค่า mixin เข้าไปก่อนส่งต่อ ptcFire
+    const _mixin = Swal.mixin.bind(Swal);
+    Swal.mixin = function (mixinParams) {
+        const M = _mixin(mixinParams);
+        M.fire = (a1, a2, a3) => ptcFire({ ...(mixinParams || {}), ...normalizeOpts(a1, a2, a3) });
+        return M;
+    };
 
     // Expose PtcSwal / PtcToast as thin wrappers that call ptcFire (no recursion)
     window.PtcSwal = {
