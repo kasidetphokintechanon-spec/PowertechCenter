@@ -278,3 +278,33 @@ body.dir-v3.dark .dir-topbar .search-input {
 }
 html.dark body.dir-v3 .view-toggle { background: var(--bg-primary); }
 html.dark body.dir-v3 .view-toggle .view-btn.active { background: var(--bg-card); color: var(--accent); }
+
+/* ── ผังองค์กรแบบตามระดับ (renderOrgChart → .org-v3) ── */
+body.dir-v3 .employee-list.org-v3 { padding: 16px 16px 40px; }
+body.dir-v3 .org3-exec { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+body.dir-v3 .org3-exec-lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+body.dir-v3 .org3-exec-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+body.dir-v3 .org3-exec-row .org3-p { width: 260px; max-width: 100%; border-top: 3px solid var(--lvc); border-left-width: 1px; padding: 10px 12px; }
+body.dir-v3 .org3-exec-row .org3-av { width: 40px; height: 40px; font-size: 13px; }
+body.dir-v3 .org3-exec-line { width: 1px; height: 18px; background: var(--border-strong); }
+
+body.dir-v3 .org3-depts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; align-items: start; }
+body.dir-v3 .org3-dept { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+html.dark body.dir-v3 .org3-dept { background: var(--bg-primary); }
+body.dir-v3 .org3-dept-h { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-secondary); border-top: 3px solid transparent; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 13.5px; color: var(--text-primary); }
+body.dir-v3 .org3-dept-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.dir-v3 .org3-dept-n { font-size: 12px; font-weight: 600; color: var(--text-tertiary); flex-shrink: 0; }
+body.dir-v3 .org3-lv { padding: 8px 10px 10px; }
+body.dir-v3 .org3-lv + .org3-lv { border-top: 1px dashed var(--border); }
+body.dir-v3 .org3-lv-lbl { display: flex; align-items: center; gap: 6px; margin: 0 0 6px 2px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--lvc); }
+body.dir-v3 .org3-lv-lbl::before { content: ''; width: 6px; height: 6px; border-radius: 2px; background: var(--lvc); }
+body.dir-v3 .org3-lv-people { display: grid; gap: 6px; }
+
+body.dir-v3 .org3-p { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 8px; background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--lvc); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); }
+body.dir-v3 .org3-p:hover { border-color: var(--border-strong); border-left-color: var(--lvc); box-shadow: var(--shadow-md); }
+body.dir-v3 .org3-av { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; object-fit: cover; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; }
+body.dir-v3 .org3-tx { flex: 1; min-width: 0; }
+body.dir-v3 .org3-nm { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.dir-v3 .org3-ps { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.dir-v3 .org3-p .company-badge { flex-shrink: 0; font-size: 9.5px; padding: 1px 5px; }
+@media (max-width: 640px) { body.dir-v3 .org3-exec-row .org3-p { width: 100%; } }

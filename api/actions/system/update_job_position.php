@@ -28,16 +28,31 @@ $sortOrder = intval($_POST['sort_order'] ?? 999);
 $isActive = intval($_POST['is_active'] ?? 1) ? 1 : 0;
 if ($sortOrder < 1) $sortOrder = 999;
 
-if ($name !== '') {
-    if (mb_strlen($name, 'UTF-8') > 255) throw new Exception('Position name is too long');
-    $stmt = $conn->prepare("UPDATE job_positions SET name = ?, sort_order = ?, is_active = ? WHERE id = ?");
-    if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-    $stmt->bind_param("siii", $name, $sortOrder, $isActive, $id);
-} else {
-    $stmt = $conn->prepare("UPDATE job_positions SET sort_order = ?, is_active = ? WHERE id = ?");
-    if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-    $stmt->bind_param("iii", $sortOrder, $isActive, $id);
+// เปลี่ยนแค่ระดับ (ไม่มี sort_order มาด้วย) = ห้ามแตะชื่อ/ลำดับ/สถานะ ไม่งั้นลำดับจะถูกรีเซ็ตเป็น 999
+$levelOnly = array_key_exists('org_level', $_POST) && !array_key_exists('sort_order', $_POST) && $name === '';
+if (!$levelOnly) {
+    if ($name !== '') {
+        if (mb_strlen($name, 'UTF-8') > 255) throw new Exception('Position name is too long');
+        $stmt = $conn->prepare("UPDATE job_positions SET name = ?, sort_order = ?, is_active = ? WHERE id = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
+        $stmt->bind_param("siii", $name, $sortOrder, $isActive, $id);
+    } else {
+        $stmt = $conn->prepare("UPDATE job_positions SET sort_order = ?, is_active = ? WHERE id = ?");
+        if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
+        $stmt->bind_param("iii", $sortOrder, $isActive, $id);
+    }
+    
+    if (!$stmt->execute()) throw new Exception('Update failed: ' . $stmt->error);
 }
 
-if (!$stmt->execute()) throw new Exception('Update failed: ' . $stmt->error);
+// ระดับในผังองค์กร — ส่งมาเฉพาะตอน HR เปลี่ยน dropdown (ว่าง = กลับไปใช้ค่าที่ระบบเดา)
+if (array_key_exists('org_level', $_POST)) {
+    require_once __DIR__ . '/../../../includes/job_position_levels.php';
+    ensureJobPositionLevelColumn($conn);
+    $lv = intval($_POST['org_level']);
+    $orgLevel = isset(ORG_LEVELS[$lv]) ? $lv : null;
+    $stmtLv = $conn->prepare("UPDATE job_positions SET org_level = ? WHERE id = ?");
+    $stmtLv->bind_param("ii", $orgLevel, $id);
+    if (!$stmtLv->execute()) throw new Exception('Update level failed: ' . $stmtLv->error);
+}
 echo json_encode(['status' => 'success']);

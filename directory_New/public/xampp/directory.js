@@ -303,6 +303,7 @@ const defaultPositionOptions = [
 ];
 let jobPositionOptions = [];
 let jobPositionSortMap = {};
+let jobPositionLevelMap = {}; // ชื่อตำแหน่ง (lowercase) → ระดับในผังองค์กร 1-5
 const positionRanks = {
     'Managing Director': 1,
     'Executive Director and General Manager For Administration Division': 2,
@@ -1018,10 +1019,11 @@ function renderCompanyNav() {
 }
 
 async function loadJobPositions() {
-    const cached = DIR_CACHE.get('job_pos');
+    const cached = DIR_CACHE.get('job_pos_v2');
     if (cached) {
         jobPositionOptions = cached.options;
         jobPositionSortMap = cached.sortMap;
+        jobPositionLevelMap = cached.levelMap || {};
         return;
     }
     try {
@@ -1036,7 +1038,12 @@ async function loadJobPositions() {
                 acc[key] = Number.isFinite(order) && order > 0 ? order : 999;
                 return acc;
             }, {});
-            DIR_CACHE.set('job_pos', { options: jobPositionOptions, sortMap: jobPositionSortMap });
+            jobPositionLevelMap = json.positions.reduce((acc, p) => {
+                const key = String(p.name || '').trim().toLowerCase();
+                if (key) acc[key] = parseInt(p.org_level, 10) || 5;
+                return acc;
+            }, {});
+            DIR_CACHE.set('job_pos_v2', { options: jobPositionOptions, sortMap: jobPositionSortMap, levelMap: jobPositionLevelMap });
             return;
         }
     } catch (_) {}
@@ -1468,116 +1475,81 @@ const DEPT_COLOR_MAP = {
 };
 
 // ── Org Chart ─────────────────────────────────────────────────────────────────
+// ระดับในผังองค์กร (HR ตั้งได้ที่ admin.html?tab=job_positions) — ต้องตรงกับ includes/job_position_levels.php
+const ORG_LEVELS = [
+    { k: 1, name: 'ผู้บริหาร',        color: '#d97706' },
+    { k: 2, name: 'ผู้จัดการ',         color: '#7c3aed' },
+    { k: 3, name: 'หัวหน้างาน',        color: '#2563eb' },
+    { k: 4, name: 'วิศวกร / ผู้ชำนาญ',  color: '#0891b2' },
+    { k: 5, name: 'พนักงาน',           color: '#64748b' },
+];
+function getOrgLevel(position) {
+    const lv = jobPositionLevelMap[String(position || '').trim().toLowerCase()];
+    return ORG_LEVELS.find(l => l.k === lv) || ORG_LEVELS[ORG_LEVELS.length - 1];
+}
+
+// ผังองค์กรแบบ "ตามระดับ": ผู้บริหารอยู่บนสุด / แต่ละแผนกแบ่งชั้น ผู้จัดการ → หัวหน้างาน → วิศวกร/ผู้ชำนาญ → พนักงาน
 function renderOrgChart(employees) {
     const el = elements.employeeList;
-    el.className = 'employee-list org-view';
+    el.className = 'employee-list org-view org-v3';
 
-    if (!employees || employees.length === 0) {
+    const active = (employees || []).filter(e => (e.employment_status || e.status || 'active') === 'active');
+    if (active.length === 0) {
         el.innerHTML = `<div class="empty-state"><p>ไม่พบข้อมูล</p></div>`;
         return;
     }
 
-    const active = employees.filter(e => (e.employment_status || e.status || 'active') === 'active');
+    const esc = escapeHtmlText;
+    const execs = active.filter(e => getOrgLevel(e.position).k === 1).sort(compareEmployeesByRankThenName);
+    const execIds = new Set(execs.map(e => String(e.id)));
 
-    // Only people with is_executive=1 AND no department go to top exec row
-    // People with a department always appear in their dept column
-    const executives = active.filter(e => (e.isExecutive || e.is_executive == 1) && !String(e.department || '').trim()).sort(compareEmployeesByRankThenName);
-    const execIds    = new Set(executives.map(e => String(e.id)));
-    const regular    = active.filter(e => !execIds.has(String(e.id)));
-
-    // Group regular by department
     const grouped = {};
-    regular.forEach(e => {
-        const dept = String(e.department || '').trim() || 'ไม่ระบุแผนก';
-        if (!grouped[dept]) grouped[dept] = [];
-        grouped[dept].push(e);
+    active.filter(e => !execIds.has(String(e.id))).forEach(e => {
+        const dept = String(getPreferredAssignmentForCurrentFilter(e)?.department || e.department || '').trim() || 'ไม่ระบุแผนก';
+        (grouped[dept] = grouped[dept] || []).push(e);
     });
     const orderMap = getDepartmentSortOrderMap();
-    const sortedDepts = Object.keys(grouped).sort((a, b) => compareDepartmentNames(a, b, orderMap));
-    sortedDepts.forEach(dept => grouped[dept].sort(compareDepartmentMembers));
+    const depts = Object.keys(grouped).sort((a, b) => compareDepartmentNames(a, b, orderMap));
 
-    const esc = escapeHtmlText;
-    const empDataAttr = (emp) => `data-org-tip="${String(emp.id).replace(/"/g,'&quot;')}"`;
-
-    const avatarHtml = (emp) => {
-        const initials = esc(getInitials(emp.name));
-        return emp.avatar
-            ? `<img src="${esc(emp.avatar)}" class="org-avatar" alt="${esc(emp.name)}" onerror="this.outerHTML='<span class=\\'org-avatar org-initials\\'>${initials.replace(/'/g,'&#39;')}</span>'">`
-            : `<span class="org-avatar org-initials">${initials}</span>`;
-    };
-
-    const execCardHtml = (emp) => {
-        const co = emp.company || '';
-        return `<div class="org-exec-card company-${co}" ${empDataAttr(emp)} onclick="selectEmployee('${String(emp.id).replace(/'/g,"\\'")}')">
-            ${avatarHtml(emp)}
-            <div class="org-exec-info">
-                <div class="org-exec-name">${esc(emp.name)}</div>
-                <div class="org-exec-pos">${esc(emp.position || '')}</div>
-                ${co ? `<span class="company-badge ${co}">${esc(co)}</span>` : ''}
-            </div>
+    const person = (emp) => {
+        const lv = getOrgLevel(emp.position);
+        const co = esc(getDisplayCompanyForEmployee(emp) || emp.company || '');
+        const initials = esc(getInitials(emp.name || ''));
+        const id = esc(JSON.stringify(String(emp.id)));
+        const av = emp.avatar
+            ? `<img src="${esc(emp.avatar)}" class="org3-av" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;org3-av&quot;>${initials}</span>'">`
+            : `<span class="org3-av">${initials}</span>`;
+        return `<div class="org3-p" style="--lvc:${lv.color}" data-org-tip="${esc(emp.id)}" onclick="selectEmployee(${id})">
+            ${av}
+            <div class="org3-tx"><div class="org3-nm">${esc(emp.name)}</div><div class="org3-ps">${esc(emp.position || '-')}</div></div>
+            ${co ? `<span class="company-badge ${co}">${co}</span>` : ''}
         </div>`;
     };
-
-    const memberHtml = (emp) => {
-        const rank = getPositionRank(emp.position);
-        const rankLevel = rank <= 11 ? 'rank-mgr' : rank <= 23 ? 'rank-sup' : rank <= 44 ? 'rank-off' : 'rank-staff';
-        const co = emp.company || '';
-        return `<div class="org-member ${rankLevel}" ${empDataAttr(emp)} onclick="selectEmployee('${String(emp.id).replace(/'/g,"\\'")}')">
-            ${avatarHtml(emp)}
-            <div class="org-member-info">
-                <div class="org-member-name">${esc(emp.name)}</div>
-                <div class="org-member-pos">${esc(emp.position || '')}</div>
-            </div>
-            ${co ? `<span class="company-badge ${co}" style="font-size:9px;padding:1px 5px;">${esc(co)}</span>` : ''}
-        </div>`;
-    };
-
-    const deptColorMap = DEPT_COLOR_MAP;
 
     let html = '';
-
-    // Executive row
-    if (executives.length > 0) {
-        html += `<div class="org-exec-section">
-            <div class="org-section-label"><span>👑 Management Level</span></div>
-            <div class="org-exec-row">${executives.map(execCardHtml).join('')}</div>
+    if (execs.length) {
+        html += `<div class="org3-exec">
+            <div class="org3-exec-lbl">ผู้บริหารสูงสุด</div>
+            <div class="org3-exec-row">${execs.map(person).join('')}</div>
+            <div class="org3-exec-line"></div>
         </div>`;
     }
-
-    // Connecting line visual
-    if (executives.length > 0 && sortedDepts.length > 0) {
-        html += `<div class="org-connector-row"><div class="org-connector-line"></div></div>`;
-    }
-
-    // Department columns
-    if (sortedDepts.length > 0) {
-        html += `<div class="org-dept-columns">`;
-        sortedDepts.forEach(dept => {
-            const members = grouped[dept];
-            if (!members || members.length === 0) return;
-            const color = deptColorMap[dept] || '#6366f1';
-            const head = members[0];
-            const rest = members.slice(1);
-            const headHtml = `<div class="org-dept-head" ${empDataAttr(head)} onclick="selectEmployee('${String(head.id).replace(/'/g,"\\'")}')">
-                ${avatarHtml(head)}
-                <div class="org-member-info">
-                    <div class="org-member-name">${esc(head.name)}</div>
-                    <div class="org-member-pos">${esc(head.position || '')}</div>
-                </div>
-                ${head.company ? `<span class="company-badge ${head.company}" style="font-size:9px;padding:1px 5px;">${esc(head.company)}</span>` : ''}
+    html += `<div class="org3-depts">` + depts.map(dept => {
+        const members = grouped[dept];
+        const color = DEPT_COLOR_MAP[dept] || '#6366f1';
+        const bands = ORG_LEVELS.filter(l => l.k !== 1).map(l => {
+            const ps = members.filter(e => getOrgLevel(e.position).k === l.k).sort(compareEmployeesByRankThenName);
+            if (!ps.length) return '';
+            return `<div class="org3-lv" style="--lvc:${l.color}">
+                <div class="org3-lv-lbl">${l.name} · ${ps.length}</div>
+                <div class="org3-lv-people">${ps.map(person).join('')}</div>
             </div>`;
-            html += `<div class="org-dept-column">
-                <div class="org-dept-header" style="border-top:3px solid ${color}">
-                    <span class="org-dept-dot" style="background:${color}"></span>
-                    <span class="org-dept-name">${dept}</span>
-                    <span class="org-dept-count">${members.length}</span>
-                </div>
-                ${headHtml}
-                ${rest.length > 0 ? `<div class="org-dept-members">${rest.map(memberHtml).join('')}</div>` : ''}
-            </div>`;
-        });
-        html += `</div>`;
-    }
+        }).join('');
+        return `<section class="org3-dept">
+            <div class="org3-dept-h" style="border-top-color:${color}"><span class="org-dept-dot" style="background:${color}"></span><span class="org3-dept-name">${esc(dept)}</span><span class="org3-dept-n">${members.length} คน</span></div>
+            ${bands}
+        </section>`;
+    }).join('') + `</div>`;
 
     el.innerHTML = html;
 }

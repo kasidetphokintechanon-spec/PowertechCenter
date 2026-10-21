@@ -3405,6 +3405,9 @@
     }
 
     async function renderJobPositionsContent(container) {
+    // ระดับในผังองค์กร — ต้องตรงกับ ORG_LEVELS ใน includes/job_position_levels.php
+    const JP_LEVEL_LABEL = { 1:'ผู้บริหาร', 2:'ผู้จัดการ', 3:'หัวหน้างาน', 4:'วิศวกร / ผู้ชำนาญ', 5:'พนักงาน' };
+    const JP_LEVEL_COLOR = { 1:'#d97706', 2:'#7c3aed', 3:'#2563eb', 4:'#0891b2', 5:'#64748b' };
         if (!container) return;
         container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#94a3b8"><i class="fa fa-circle-notch fa-spin" style="margin-right:6px"></i> Loading...</div>`;
         try {
@@ -3426,7 +3429,7 @@
                 <!-- header hint -->
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
                     <span style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:5px">
-                        <i class="fa fa-grip-vertical"></i>ลาก-วางเพื่อเรียงลำดับ
+                        <i class="fa fa-grip-vertical"></i>ลาก-วางเพื่อเรียงลำดับ · เลือก "ระดับ" เพื่อจัดชั้นในผังองค์กร
                     </span>
                     <button id="jp-save-order-btn" style="padding:5px 14px;border-radius:7px;background:#10b981;color:#fff;border:none;font-size:11px;font-weight:700;cursor:pointer;opacity:.35;pointer-events:none;transition:opacity .15s;display:flex;align-items:center;gap:5px">
                         <i class="fa fa-check"></i>บันทึกลำดับ
@@ -3443,6 +3446,10 @@
                             onfocus="this.style.borderColor='#2563eb';this.style.background='#f8fafc'"
                             onblur="this.style.borderColor='transparent';this.style.background='transparent'">
                         <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;padding:0 4px">
+                        <select data-jp-level="${r.id}" title="ระดับในผังองค์กร (Contact List) — เปลี่ยนแล้วบันทึกทันที"
+                            style="flex-shrink:0;width:160px;height:28px;padding:0 6px;border:1px solid var(--ptc-border,#e2e8f0);border-left:3px solid ${JP_LEVEL_COLOR[r.org_level]||'#94a3b8'};border-radius:6px;background:var(--ptc-surface,#fff);color:var(--ptc-text,#0f172a);font-size:12px;font-family:inherit;cursor:pointer">
+                            ${Object.entries(JP_LEVEL_LABEL).map(([k,v])=>`<option value="${k}" ${String(r.org_level)===k?'selected':''}>${v}${String(r.org_level)===k&&!Number(r.org_level_set)?' (อัตโนมัติ)':''}</option>`).join('')}
+                        </select>
                             <input data-jp-active="${r.id}" type="checkbox" ${parseInt(r.is_active||0)===1?'checked':''} style="accent-color:#2563eb;width:14px;height:14px;cursor:pointer">
                             <span style="font-size:11px;color:#94a3b8;white-space:nowrap">Active</span>
                         </label>
@@ -3489,6 +3496,21 @@
                 });
 
                 // save row
+                // ระดับในผังองค์กร — บันทึกทันทีที่เปลี่ยน (ส่งแค่ org_level ไม่แตะลำดับ/ชื่อ)
+                row.querySelector('[data-jp-level]')?.addEventListener('change', async (ev) => {
+                    const id = row.getAttribute('data-jp-id');
+                    const sel = ev.target;
+                    const fd=new FormData();
+                    fd.append('action','update_job_position'); fd.append('id',id); fd.append('org_level',sel.value);
+                    try {
+                        const rs=await fetch(apiPath,{method:'POST',body:fd}); const js=await rs.json();
+                        if(js.status!=='success') throw new Error(js.message||'Error');
+                        sel.style.borderLeftColor = JP_LEVEL_COLOR[sel.value]||'#94a3b8';
+                        [...sel.options].forEach(o=>{ o.textContent = JP_LEVEL_LABEL[o.value]; });
+                        Toast.fire({icon:'success',title:'ตั้งระดับแล้ว: '+JP_LEVEL_LABEL[sel.value]});
+                    } catch(e) { Toast.fire({icon:'error',title:e.message}); }
+                });
+
                 row.querySelector('[data-jp-save]')?.addEventListener('click', async () => {
                     const id = row.getAttribute('data-jp-id');
                     const name = String(row.querySelector(`[data-jp-name="${id}"]`)?.value||'').trim();
