@@ -6,6 +6,9 @@ if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['
 $id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
 if (!$id) { echo json_encode(['status'=>'error','message'=>'ไม่ระบุ ID']); exit; }
 
+require_once __DIR__ . '/../../../includes/setup_handover.php';
+ensureSetupHandoverColumns($conn);
+
 $stmt = $conn->prepare("SELECT * FROM setup_records WHERE id=? LIMIT 1");
 $stmt->bind_param("i", $id);
 $stmt->execute();

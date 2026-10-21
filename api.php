@@ -513,7 +513,7 @@ try {
         // ใบติดตั้งมี IP / ชื่อผู้ใช้ VPN / สิทธิ์ระบบ — เฉพาะ IT (เดิมพนักงานทั่วไปเปิดดู/ลบได้)
         'getSetupRecords' => ['it_log.access', 'asset.manage'], 'getSetupRecord' => ['it_log.access', 'asset.manage'],
         'saveSetupRecord' => ['it_log.access', 'asset.manage'], 'deleteSetupRecord' => ['it_log.access', 'asset.manage'],
-        'findSetupRecordByAsset' => ['it_log.access', 'asset.manage'], 'getSetupAssetCodes' => ['it_log.access', 'asset.manage'],
+        'findSetupRecordByAsset' => ['it_log.access', 'asset.manage'], 'setupHandover' => ['it_log.access', 'asset.manage'], 'getSetupAssetCodes' => ['it_log.access', 'asset.manage'],
         'clear_loan_history' => ['loan.manage'], 'denyRequest' => ['loan.manage'], 'update_loan_status' => ['loan.manage'],
     ];
     if (isset($ACTION_PERMS[$safeAction])) {

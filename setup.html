@@ -160,6 +160,23 @@
         .email-subject-bar .esb-label { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; padding:2px 7px; background:#e2e8f0; border-radius:4px; flex-shrink:0; }
         html.dark .email-subject-bar .esb-label { background:#334155; color:#64748b; }
 
+        .ho-step-hd { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; color:var(--ptc-text); margin-bottom:12px; flex-wrap:wrap; }
+        .ho-step-hd .n { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:11.5px; background:var(--ptc-primary-light); color:var(--ptc-primary); }
+        .ho-step-hd small { font-size:12px; font-weight:400; color:var(--ptc-text-faint); }
+        .ho-ready { display:flex; flex-wrap:wrap; gap:8px; }
+        .ho-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:99px; font-size:12.5px; font-weight:600; border:1px solid var(--ptc-border); }
+        .ho-chip.ok { background:var(--ptc-success-bg); color:var(--ptc-success); border-color:transparent; }
+        .ho-chip.todo { background:var(--ptc-warning-bg); color:var(--ptc-warning); border-color:transparent; cursor:pointer; }
+        .ho-pill { font-size:12px; font-weight:700; padding:3px 11px; border-radius:99px; }
+        .ho-pill.ok { background:var(--ptc-success-bg); color:var(--ptc-success); }
+        .ho-pill.wait { background:var(--ptc-warning-bg); color:var(--ptc-warning); }
+        .ho-pill.todo { background:var(--ptc-surface-2); color:var(--ptc-text-muted); border:1px solid var(--ptc-border); }
+        .ho-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+        .ho-alt { font-size:12px; color:var(--ptc-text-faint); display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; }
+        .ho-alt button { border:0; background:none; font:inherit; font-size:12px; color:var(--ptc-primary); cursor:pointer; padding:2px 4px; }
+        .ho-alt button:hover { text-decoration:underline; }
+        .ho-done { font-size:12.5px; font-weight:700; color:var(--ptc-success); }
+        .ho-undo { border:0; background:none; color:var(--ptc-text-faint); font:inherit; font-size:12px; text-decoration:underline; cursor:pointer; }
         .email-preview-box { border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; background:#fff; max-height:380px; overflow-y:auto; }
         html.dark .email-preview-box { background:#0f172a; border-color:#334155; }
         .email-copy-toast { display:none; background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:99px; align-items:center; gap:5px; }
@@ -192,6 +209,24 @@
         html.dark .tab-btn:hover { color:#e2e8f0; }
         .tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; }
         html.dark .tab-btn.active { color:#60a5fa; border-bottom-color:#60a5fa; }
+        .tab-btn .tn { width:19px; height:19px; border-radius:50%; display:inline-grid; place-items:center; font-size:10.5px; font-weight:700; background:#f1f5f9; color:#64748b; }
+        .tab-btn.active .tn { background:#2563eb; color:#fff; }
+        html.dark .tab-btn .tn { background:#334155; color:#cbd5e1; }
+        .chk-tools { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+        .ctl-gap { flex:1; }
+        .nav-off { color:#dc2626 !important; font-size:12.5px; }
+        @media (max-width:640px) {
+            .setup-tab-nav { padding:0 4px; }
+            .tab-btn { flex:1 0 auto; justify-content:center; padding:10px 6px; gap:4px; font-size:12px; }
+            .tab-btn .tab-pct { display:none !important; }
+            .iso-doc-badge, .ptc-nav-sub, .ctl-lbl { display:none !important; }
+            .setup-controls { flex-wrap:nowrap; justify-content:flex-end; }
+            /* ตารางสิทธิ์บริษัท: มือถือเรียงเป็น 2 แถว (ชื่อบริษัท + Internet/VPN / ช่อง Net User เต็มแถว) */
+            .co-access-hdr { display:none; }
+            .co-access-row { grid-template-columns:1fr auto auto; row-gap:6px; }
+            .co-access-row .co-input { grid-column:1 / -1; grid-row:2; }
+            .email-prog-grid { grid-template-columns:repeat(2,1fr) !important; }
+        }
         .tab-pct { font-size:10px; background:#f1f5f9; color:#64748b; padding:1px 7px; border-radius:99px; transition:background .2s,color .2s; }
         .tab-btn.active .tab-pct { background:#dbeafe; color:#2563eb; }
         .tab-panel { display:none; }
@@ -255,7 +290,7 @@
         .print-only { display:none; }
 
         /* ── Bottom action bar ── */
-        .setup-controls { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e8f0; padding:10px 16px; display:flex; justify-content:center; gap:8px; z-index:100; flex-wrap:wrap; }
+        .setup-controls { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e8f0; padding:10px max(16px, calc((100% - 900px) / 2)); display:flex; align-items:center; gap:8px; z-index:100; flex-wrap:wrap; }
         html.dark .setup-controls { background:#1e293b; border-color:#334155; }
         @media print { .setup-controls { display:none; } }
 
@@ -309,6 +344,7 @@
         </div>
     </div>
     <div style="flex:1"></div>
+    <a id="btn-offboard" href="#" class="ptc-ghost no-print nav-off" style="display:none" onclick="goOffboard(event)" title="พนักงานออก / คืนเครื่อง"><i class="fa fa-right-from-bracket"></i> <span class="ctl-lbl">พนักงานออก</span></a>
     <span class="iso-doc-badge no-print"><i class="fa fa-file-shield"></i> IT-FM-001 Rev.01</span>
     <button id="theme-toggle" class="ptc-ghost no-print" title="สลับธีม" style="font-size:15px;padding:6px 10px;"><i id="theme-icon" class="fa fa-sun"></i></button>
     <div id="nav-user-area"></div>
@@ -350,25 +386,23 @@
 <!-- Tab nav -->
 <div class="setup-tab-nav no-print" id="tab-nav">
     <button class="tab-btn active" data-tab="info" onclick="switchTab('info')">
-        <i class="fa fa-user" style="font-size:11px"></i> ① ข้อมูล
-        <span class="tab-pct" id="tab-info-pct" style="display:none"></span>
+        <span class="tn">1</span>ข้อมูล<span class="tab-pct" id="tab-info-pct" style="display:none"></span>
     </button>
     <button class="tab-btn" data-tab="access" onclick="switchTab('access')">
-        <i class="fa fa-shield-halved" style="font-size:11px"></i> ② สิทธิ์
+        <span class="tn">2</span>สิทธิ์<span class="tab-pct" id="tab-access-st" style="display:none"></span>
     </button>
     <button class="tab-btn" data-tab="checklist" onclick="switchTab('checklist')">
-        <i class="fa fa-list-check" style="font-size:11px"></i> ③ Checklist
-        <span class="tab-pct" id="tab-checklist-pct">0%</span>
+        <span class="tn">3</span>เช็กลิสต์<span class="tab-pct" id="tab-checklist-pct">0%</span>
     </button>
     <button class="tab-btn" data-tab="email" onclick="switchTab('email')">
-        <i class="fa fa-envelope" style="font-size:11px"></i> ④ ส่งมอบ
+        <span class="tn">4</span>ส่งมอบ<span class="tab-pct" id="tab-email-st" style="display:none"></span>
     </button>
 </div>
 
 <div class="setup-page">
 
     <!-- ① Progress card -->
-    <div class="s-card progress-card no-print">
+    <div class="s-card progress-card no-print" id="progress-card" style="display:none">
         <div class="progress-ring-wrap">
             <svg width="56" height="56" viewBox="0 0 56 56">
                 <circle class="progress-ring-bg" cx="28" cy="28" r="23" fill="none" stroke-width="5"/>
@@ -427,9 +461,9 @@
                 <label>บริษัทที่สังกัด</label>
                 <select id="f-company" class="s-input">
                     <option value="">-- เลือก --</option>
-                    <option value="PTA">PowerTech Assembly (PTA)</option>
-                    <option value="PT4">PowerTech 2004 (PT4)</option>
-                    <option value="PTE">PowerTech Energy (PTE)</option>
+                    <option value="PTA">Powertech Engine Assembly (PTA)</option>
+                    <option value="PT4">Powertech 2004 (PT4)</option>
+                    <option value="PTE">Powertech Energy Solutions (PTE)</option>
                 </select>
             </div>
             <div class="s-field">
@@ -514,7 +548,7 @@
                         <input type="checkbox" id="co-active-PTA" onchange="toggleCoRow('PTA')">
                         <span class="co-badge co-pta">🏢 PTA</span>
                     </label>
-                    <input type="text" id="co-netuser-PTA" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <input type="text" id="co-netuser-PTA" class="s-input co-input" placeholder="เช่น Kasidet.p" disabled>
                     <label class="co-chk-wrap" id="co-inet-wrap-PTA">
                         <input type="checkbox" id="co-inet-PTA" disabled>
                         <span>Internet</span>
@@ -530,7 +564,7 @@
                         <input type="checkbox" id="co-active-PT4" onchange="toggleCoRow('PT4')">
                         <span class="co-badge co-pt4">🏭 PT4</span>
                     </label>
-                    <input type="text" id="co-netuser-PT4" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <input type="text" id="co-netuser-PT4" class="s-input co-input" placeholder="เช่น Kasidet.p" disabled>
                     <label class="co-chk-wrap" id="co-inet-wrap-PT4">
                         <input type="checkbox" id="co-inet-PT4" disabled>
                         <span>Internet</span>
@@ -546,7 +580,7 @@
                         <input type="checkbox" id="co-active-PTE" onchange="toggleCoRow('PTE')">
                         <span class="co-badge co-pte">🌏 PTE</span>
                     </label>
-                    <input type="text" id="co-netuser-PTE" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <input type="text" id="co-netuser-PTE" class="s-input co-input" placeholder="เช่น Kasidet.p" disabled>
                     <label class="co-chk-wrap" id="co-inet-wrap-PTE">
                         <input type="checkbox" id="co-inet-PTE" disabled>
                         <span>Internet</span>
@@ -573,76 +607,12 @@
                 <span class="printer-bldg-chip" id="pb-PTE" onclick="togglePB('PTE')">PTE</span>
             </div>
         </div>
-    </div>
-
-    <!-- Offboard banner (shown when loaded from offboarded record) -->
-    <div id="offboard-banner" class="offboard-banner" style="display:none">
-        <i class="fa fa-triangle-exclamation"></i>
-        <span>เครื่องนี้ <strong>Offboard แล้ว</strong> — ดูเฉพาะข้อมูล &nbsp;|&nbsp; <a href="#" id="offboard-link">ดูใบ Offboarding →</a></span>
-    </div>
-    </div><!-- /tab-access -->
-
-    <!-- ④ Tab: Checklist -->
-    <div class="tab-panel" id="tab-checklist">
-    <div id="checklist-wrap"></div>
-
-    <!-- ⑤ Custom checklist items -->
-    <div class="s-card" id="custom-checklist-card">
-        <div class="s-card-title">
-            <div class="s-icon" style="background:#fef3c7;color:#b45309"><i class="fa fa-list-check"></i></div>
-            รายการเพิ่มเติม (Custom)
-            <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:4px">— เพิ่มโปรแกรมหรืองานพิเศษที่ไม่อยู่ใน checklist มาตรฐาน</span>
+        <!-- โปรแกรม/ระบบที่เปิดสิทธิ์ (เดิมอยู่ในแท็บเมล — ย้ายมาให้สิทธิ์อยู่ที่เดียว ใช้ทั้งเมล/ใบส่งมอบ/ตอนพนักงานออก) -->
+        <div style="border-top:1px solid #f1f5f9;margin:14px 0 12px;"></div>
+        <div class="s-field" style="margin-bottom:6px">
+            <label>โปรแกรม / ระบบที่เปิดสิทธิ์ <span style="color:#94a3b8;font-weight:400">— ใช้ในเมลแจ้งผู้ใช้ ใบส่งมอบ และตอนพนักงานออก (ต้องปิดให้ครบ)</span></label>
         </div>
-        <div id="custom-items-list"></div>
-        <div class="custom-add-row">
-            <select id="custom-cat" class="s-input">
-                <option value="แอปพลิเคชัน">📦 แอปพลิเคชัน</option>
-                <option value="ระบบพื้นฐาน">🪟 ระบบพื้นฐาน</option>
-                <option value="เครือข่าย">🌐 เครือข่าย</option>
-                <option value="ความปลอดภัย">🛡️ ความปลอดภัย</option>
-                <option value="องค์กรเฉพาะทาง">🏢 องค์กรเฉพาะทาง</option>
-                <option value="อื่นๆ">➕ อื่นๆ</option>
-            </select>
-            <input type="text" id="custom-title" class="s-input" placeholder="เช่น ติดตั้ง AutoCAD 2024, ลง VPN FortiClient..." style="flex:1">
-            <button type="button" class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="addCustomItem()">
-                <i class="fa fa-plus"></i> เพิ่ม
-            </button>
-        </div>
-    </div>
-    </div><!-- /tab-checklist -->
-
-    <!-- ⑥ Tab: ส่งมอบ -->
-    <div class="tab-panel" id="tab-email">
-
-    <!-- Onboarding Email Generator -->
-    <div class="s-card no-print" id="email-card">
-        <div class="s-card-title">
-            <div class="s-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fa fa-envelope"></i></div>
-            Onboarding Email
-            <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:2px">— เมลต้อนรับพนักงานใหม่</span>
-            <span id="email-toast" class="email-copy-toast" style="margin-left:auto"><i class="fa fa-check"></i> คัดลอกแล้ว!</span>
-        </div>
-
-        <!-- Override fields -->
-        <div class="email-section-hdr">ข้อมูลในเมล</div>
-        <div class="s-grid s-grid-3" style="margin-bottom:16px;">
-            <div class="s-field">
-                <label>ชื่อพนักงาน <span style="color:#94a3b8;font-weight:400">(ถ้าไม่กรอก ใช้ชื่อจากด้านบน)</span></label>
-                <input type="text" id="em-name" class="s-input" placeholder="เช่น คุณสมชาย" oninput="refreshEmail()">
-            </div>
-            <div class="s-field">
-                <label>Windows Password <span style="color:#94a3b8;font-weight:400">(แจ้งในเมล)</span></label>
-                <input type="text" id="em-winpass" class="s-input" placeholder="ค่าเริ่มต้น: aaAA1234" oninput="refreshEmail()">
-            </div>
-            <div class="s-field">
-                <label>ผู้ติดต่อ IT <span style="color:#94a3b8;font-weight:400">(บันทึกอัตโนมัติ)</span></label>
-                <input type="text" id="em-itcontact" class="s-input" placeholder="IT Support โทร. 123" oninput="refreshEmail()">
-            </div>
-        </div>
-
-        <!-- Program selection -->
-        <div class="email-section-hdr">โปรแกรมที่เปิดสิทธิ์</div>
-        <div class="email-prog-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="email-prog-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:0">
             <label class="email-prog-card ep-on" id="ep-ptc" onclick="toggleEP('ptc')">
                 <input type="checkbox" id="epchk-ptc" checked style="display:none">
                 <div class="ep-dot"></div>
@@ -693,6 +663,82 @@
             </label>
         </div>
 
+    </div>
+
+    <!-- Offboard banner (shown when loaded from offboarded record) -->
+    <div id="offboard-banner" class="offboard-banner" style="display:none">
+        <i class="fa fa-triangle-exclamation"></i>
+        <span>เครื่องนี้ <strong>Offboard แล้ว</strong> — ดูเฉพาะข้อมูล &nbsp;|&nbsp; <a href="#" id="offboard-link">ดูใบ Offboarding →</a></span>
+    </div>
+    </div><!-- /tab-access -->
+
+    <!-- ④ Tab: Checklist -->
+    <div class="tab-panel" id="tab-checklist">
+    <div class="chk-tools no-print">
+        <button class="ptc-ghost" onclick="filterPending()"><i class="fa fa-clock"></i> ดูเฉพาะที่ยังไม่เสร็จ</button>
+        <button class="ptc-ghost" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> ล้างเช็กลิสต์</button>
+    </div>
+    <div id="checklist-wrap"></div>
+
+    <!-- ⑤ Custom checklist items -->
+    <div class="s-card" id="custom-checklist-card">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#fef3c7;color:#b45309"><i class="fa fa-list-check"></i></div>
+            รายการเพิ่มเติม (Custom)
+            <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:4px">— เพิ่มโปรแกรมหรืองานพิเศษที่ไม่อยู่ใน checklist มาตรฐาน</span>
+        </div>
+        <div id="custom-items-list"></div>
+        <div class="custom-add-row">
+            <select id="custom-cat" class="s-input">
+                <option value="แอปพลิเคชัน">📦 แอปพลิเคชัน</option>
+                <option value="ระบบพื้นฐาน">🪟 ระบบพื้นฐาน</option>
+                <option value="เครือข่าย">🌐 เครือข่าย</option>
+                <option value="ความปลอดภัย">🛡️ ความปลอดภัย</option>
+                <option value="องค์กรเฉพาะทาง">🏢 องค์กรเฉพาะทาง</option>
+                <option value="อื่นๆ">➕ อื่นๆ</option>
+            </select>
+            <input type="text" id="custom-title" class="s-input" placeholder="เช่น ติดตั้ง AutoCAD 2024, ลง VPN FortiClient..." style="flex:1">
+            <button type="button" class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="addCustomItem()">
+                <i class="fa fa-plus"></i> เพิ่ม
+            </button>
+        </div>
+    </div>
+    </div><!-- /tab-checklist -->
+
+    <!-- ⑥ Tab: ส่งมอบ -->
+    <div class="tab-panel" id="tab-email">
+
+    <!-- ① ความพร้อม -->
+    <div class="s-card no-print">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#dcfce7;color:#16a34a"><i class="fa fa-clipboard-check"></i></div>
+            ส่งมอบเครื่อง
+            <span id="ho-status" class="ho-pill" style="margin-left:auto"></span>
+        </div>
+        <div class="ho-step-hd"><span class="n">1</span>ความพร้อม</div>
+        <div class="ho-ready" id="ho-ready"></div>
+    </div>
+
+    <!-- ② แจ้งผู้ใช้ทางเมล -->
+    <div class="s-card no-print" id="email-card">
+        <div class="ho-step-hd"><span class="n">2</span>แจ้งผู้ใช้ทางเมล <small>ชื่อผู้ใช้ของแต่ละระบบ — ไม่มีรหัสผ่านจริงในเมล</small>
+            <span id="email-toast" class="email-copy-toast" style="margin-left:auto"><i class="fa fa-check"></i> คัดลอกแล้ว!</span>
+        </div>
+        <div class="s-grid s-grid-3" style="margin-bottom:12px;">
+            <div class="s-field">
+                <label>ส่งถึง <span style="color:#94a3b8;font-weight:400">(ดึงจาก Contact List)</span></label>
+                <input type="email" id="em-to" class="s-input" placeholder="อีเมลพนักงาน" autocomplete="off">
+            </div>
+            <div class="s-field">
+                <label>ชื่อในเมล <span style="color:#94a3b8;font-weight:400">(เว้นว่าง = ชื่อจากแท็บข้อมูล)</span></label>
+                <input type="text" id="em-name" class="s-input" placeholder="เช่น คุณสมชาย" oninput="refreshEmail()">
+            </div>
+            <div class="s-field">
+                <label>ผู้ติดต่อ IT <span style="color:#94a3b8;font-weight:400">(จำไว้ให้)</span></label>
+                <input type="text" id="em-itcontact" class="s-input" placeholder="IT Support โทร. 123" oninput="refreshEmail()">
+            </div>
+        </div>
+
         <!-- Subject bar -->
         <div class="email-subject-bar">
             <span class="esb-label">Subject</span>
@@ -706,15 +752,36 @@
         <div class="email-section-hdr" style="margin-bottom:8px;">ตัวอย่างเมล</div>
         <div class="email-preview-box" id="em-preview"></div>
 
-        <!-- Buttons -->
-        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
-            <button class="ptc-btn ptc-btn-primary" onclick="copyEmailBody()">
-                <i class="fa fa-paper-plane"></i> คัดลอกเนื้อหา (พร้อมรูปแบบ)
-            </button>
-            <button class="ptc-btn ptc-btn-secondary" onclick="saveEmailImage()">
-                <i class="fa fa-image"></i> บันทึกเป็นภาพ
-            </button>
-            <span style="font-size:11px;color:#94a3b8">วางใน Gmail หรือ Outlook ได้เลย / หรือบันทึกเป็น PNG ส่งทาง LINE ก็ได้</span>
+        <!-- ทางหลัก: ไฟล์เมลร่าง (.eml) → Outlook เปิดหน้าเขียนเมลพร้อมผู้รับ/หัวเรื่อง/เนื้อหา → Send → กด "ส่งเมลแล้ว" -->
+        <div class="ho-actions">
+            <button class="ptc-btn" onclick="openInOutlook()"><i class="fa fa-envelope-open-text"></i> เปิดเมลใน Outlook</button>
+            <span id="ho-email-state"></span>
+            <span style="flex:1"></span>
+            <span class="ho-alt">ไม่ได้ใช้ Outlook:
+                <button type="button" onclick="copyEmailBody()"><i class="fa fa-copy"></i> คัดลอกไปวางเว็บเมล</button>
+                <button type="button" onclick="saveEmailImage()"><i class="fa fa-image"></i> บันทึกเป็นภาพ (LINE)</button>
+            </span>
+        </div>
+    </div>
+
+    <!-- ③ รหัส Windows + เซ็นรับ -->
+    <div class="s-card no-print">
+        <div class="ho-step-hd"><span class="n">3</span>รหัส Windows + เซ็นรับเครื่อง <small>รหัสเริ่มต้นให้เป็นกระดาษ ไม่ส่งทางเมล (TISAX)</small></div>
+        <div class="s-grid s-grid-3" style="margin-bottom:12px;">
+            <div class="s-field">
+                <label>รหัส Windows เริ่มต้น <span style="color:#94a3b8;font-weight:400">(ไม่บันทึกในระบบ)</span></label>
+                <input type="text" id="em-winpass" class="s-input" placeholder="ค่าเริ่มต้น: aaAA1234" autocomplete="off" data-lpignore="true">
+            </div>
+            <div class="s-field">
+                <label>วันที่ผู้ใช้เซ็นรับ</label>
+                <input type="date" id="ho-sign-date" class="s-input">
+            </div>
+        </div>
+        <div class="ho-actions">
+            <button class="ptc-ghost" onclick="printPasswordSlip()"><i class="fa fa-key"></i> พิมพ์ใบแจ้งรหัสผ่าน</button>
+            <button class="ptc-ghost" onclick="printSetup()"><i class="fa fa-print"></i> พิมพ์ใบส่งมอบให้เซ็น</button>
+            <span style="flex:1"></span>
+            <span id="ho-sign-state"></span>
         </div>
     </div>
 
@@ -771,12 +838,9 @@
 <!-- Bottom action bar -->
 <div class="setup-controls no-print">
     <span id="save-badge" class="save-badge unsaved" style="display:none"><i class="fa fa-circle-dot"></i> ยังไม่ได้บันทึก</span>
-    <!-- ปุ่มรองเป็นแบบโปร่ง ให้ "บันทึก" เด่นปุ่มเดียว (เดิมน้ำเงินเท่ากันหมด แยกไม่ออก) -->
-    <button class="ptc-ghost" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> รีเซ็ต</button>
-    <button class="ptc-ghost" onclick="switchTab('checklist');filterPending()"><i class="fa fa-clock"></i> ที่ยังไม่เสร็จ</button>
-    <a id="btn-offboard" href="#" class="ptc-ghost" style="display:none;color:#dc2626;border-color:#fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> พนักงานออก / คืนเครื่อง</a>
-    <button class="ptc-ghost" onclick="switchTab('email');refreshEmail()"><i class="fa fa-envelope"></i> Onboarding Mail</button>
-    <button class="ptc-ghost" onclick="printSetup()"><i class="fa fa-print"></i> ปริ้นใบส่งมอบ</button>
+    <span class="ctl-gap"></span>
+    <button class="ptc-ghost" id="step-prev" onclick="goStep(-1)"><i class="fa fa-arrow-left"></i> <span class="ctl-lbl">ย้อน</span></button>
+    <button class="ptc-ghost" id="step-next" onclick="goStep(1)"><span class="ctl-lbl" id="step-next-lbl">ถัดไป</span> <i class="fa fa-arrow-right"></i></button>
     <button class="ptc-btn" onclick="saveRecord()" id="btn-save-db"><i class="fa fa-floppy-disk"></i> บันทึก</button>
 </div>
 
@@ -1241,6 +1305,10 @@ async function loadRecord(id) {
         syncSigNames();
         markSaved();
         updateInfoBadge();
+        handover = { email_sent_at: r.email_sent_at, email_sent_to: r.email_sent_to, email_sent_by: r.email_sent_by, signed_at: r.signed_at, signed_by: r.signed_by };
+        if (r.email_sent_to) document.getElementById('em-to').value = r.email_sent_to;
+        lookupRecipient(false);
+        renderHandover();
 
         // Auto-print ถ้ามาจาก setup_list ด้วย ?autoprint=1 → ใช้ printSetup() (ใบส่งมอบ)
         if (new URLSearchParams(location.search).get('autoprint') === '1') {
@@ -1344,7 +1412,7 @@ function updateProgress() {
 
     const readinessEl = document.getElementById('readiness-label');
     if (readinessEl) {
-        const labels = [[0,'ยังไม่ได้เริ่ม','#94a3b8'],[25,'เริ่มต้นแล้ว','#f59e0b'],[50,'กำลังดำเนินการ','#f59e0b'],[75,'เกือบเสร็จแล้ว','#2563eb'],[95,'พร้อมส่งมอบ','#16a34a'],[100,'ส่งมอบได้เลย ✅','#16a34a']];
+        const labels = [[0,'ยังไม่ได้เริ่ม','#94a3b8'],[25,'เริ่มต้นแล้ว','#f59e0b'],[50,'กำลังดำเนินการ','#f59e0b'],[75,'เกือบเสร็จแล้ว','#2563eb'],[95,'เกือบครบ','#16a34a'],[100,'เช็กลิสต์ครบ ✅ ไปขั้นส่งมอบได้','#16a34a']];
         const match = [...labels].reverse().find(l => pct >= l[0]);
         readinessEl.textContent = match[1];
         readinessEl.style.color = match[2];
@@ -1413,7 +1481,7 @@ async function resetChecklist() {
 }
 
 // ── Company Access Table ───────────────────────────────────────
-function toggleCoRow(co) {
+function toggleCoRow(co, fromLoad) {
     const active = document.getElementById('co-active-' + co)?.checked;
     const row    = document.getElementById('co-row-' + co);
     const input  = document.getElementById('co-netuser-' + co);
@@ -1422,6 +1490,8 @@ function toggleCoRow(co) {
     if (!row) return;
     row.classList.toggle('co-active', active);
     input.disabled = !active;
+    // เติมชื่อตามรูปแบบเฉพาะตอนคนกดเปิดบริษัทเอง — ตอนโหลดใบเก่าต้องแสดงตามที่บันทึกไว้
+    if (active && !fromLoad && !input.value.trim()) input.value = suggestWinUser(document.getElementById('f-user')?.value);
     if (inet) inet.disabled = !active;
     vpn.disabled   = !active;
     if (!active) {
@@ -1430,6 +1500,14 @@ function toggleCoRow(co) {
         vpn.checked = false;
     }
     markDirty();
+}
+
+// รูปแบบชื่อผู้ใช้ Windows ของบริษัท: ชื่อ.ตัวแรกของนามสกุล (ตัวเล็ก) — "Mr.Kasidet Phokintechanon" → "Kasidet.p"
+function suggestWinUser(fullName) {
+    const stripped = String(fullName || '').replace(/^(Mr\.?|Mrs\.?|Ms\.?|Miss\.?|Dr\.?|นาย|นาง(?:สาว)?)\s*/i, '').trim();
+    const parts = stripped.split(/\s+/).filter(Boolean);
+    if (parts.length < 2 || !/^[a-z]/i.test(parts[0])) return '';
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase() + '.' + parts[parts.length - 1].charAt(0).toLowerCase();
 }
 
 function getCompanyAccess() {
@@ -1448,7 +1526,7 @@ function setCompanyAccess(data) {
         const chk = document.getElementById('co-active-' + item.co);
         if (!chk) return;
         chk.checked = !!item.active;
-        toggleCoRow(item.co);
+        toggleCoRow(item.co, true);
         if (item.netuser) document.getElementById('co-netuser-' + item.co).value = item.netuser;
         const inetEl = document.getElementById('co-inet-' + item.co);
         if (inetEl) inetEl.checked = !!item.inet;
@@ -1507,8 +1585,7 @@ function getEmailData() {
     const winPass   = getV('em-winpass') || 'aaAA1234';
     const itContact = getV('em-itcontact') || 'ฝ่าย IT Support';
 
-    const coLabel = { PTA:'PowerTech Assembly Co., Ltd.', PT4:'PowerTech 2004 Co., Ltd.', PTE:'PowerTech Energy Co., Ltd.' };
-    const companyFull = coLabel[company] || company;
+    const companyFull = CO_FULL[company] || company;
 
     // หา net user จาก company access ของบริษัทที่ตรงกับ f-company ก่อน fallback ไปอันอื่น
     let winUser = '';
@@ -1518,149 +1595,132 @@ function getEmailData() {
         // ดึงแค่ส่วน username (หลัง \ หรือ /)
         winUser = mainAccess.netuser.replace(/^.*[\\\/]/, '');
     }
-    // Auto-generate จากชื่อถ้า netuser ว่าง: "Mr.Anan Atthajak" → "Anan.Atthajak"
-    if (!winUser && empName && empName !== 'พนักงานใหม่') {
-        // ตัด prefix คำนำหน้า (Mr. Mrs. Ms. Miss นาย นาง นางสาว ฯลฯ)
-        const stripped = empName.replace(/^(Mr\.|Mrs\.|Ms\.|Miss\.?|Dr\.|นาย|นาง(?:สาว)?)\s*/i, '').trim();
-        const parts = stripped.split(/\s+/);
-        if (parts.length >= 2) {
-            const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-            winUser = capFirst(parts[0]) + '.' + parts[parts.length - 1].charAt(0).toUpperCase();
-        }
-    }
+    // netuser ว่าง → สร้างตามรูปแบบบริษัท
+    if (!winUser && empName && empName !== 'พนักงานใหม่') winUser = suggestWinUser(empName);
 
     const printerBuildings = getPrinterBuildings();
     return { empName, staffId, company, companyFull, winUser, winPass, itContact, access, printerBuildings };
 }
 
 function buildEmailHTML(d) {
-    const { empName, staffId, companyFull, winUser, winPass, itContact, access, printerBuildings } = d;
-    const ptc    = document.getElementById('epchk-ptc')?.checked;
-    const erpN   = document.getElementById('epchk-erpN')?.checked;
-    const erpO   = document.getElementById('epchk-erpO')?.checked;
-    const mrpN   = document.getElementById('epchk-mrpN')?.checked;
-    const mrpO   = document.getElementById('epchk-mrpO')?.checked;
-    const ictrl  = document.getElementById('epchk-ictrl')?.checked;
-    const carsys = document.getElementById('epchk-carsys')?.checked;
-    const roomsys= document.getElementById('epchk-roomsys')?.checked;
+    // ออกแบบให้ Outlook (Windows) แสดงผลถูก: จัดหน้าด้วยตาราง + style ในบรรทัด (Outlook ใช้ตัวแสดงผลของ Word ไม่รองรับ flex/border-radius)
+    const { empName, staffId, company, companyFull, winUser, itContact, access, printerBuildings } = d;
+    const on = k => !!document.getElementById('epchk-' + k)?.checked;
+    const val = id => document.getElementById(id)?.value || '';
+    const e = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    const accent = { PTA:'#059669', PT4:'#dc2626', PTE:'#2563eb' }[company] || '#1e3a5f';
+    const FONT = "font-family:'Segoe UI','Leelawadee UI',Tahoma,Arial,sans-serif;";
 
-    const cd = t => `<code style="font-family:'Consolas',monospace;font-size:12px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:4px;padding:3px 9px;color:#0F172A;display:inline-block">${t}</code>`;
-    const row = (label, sub, codes, last=false) => `
-        <tr>
-            <td style="padding:12px 18px;${last?'':'border-bottom:1px solid #EEF2F6;'}vertical-align:middle;background:#ffffff">
-                <span style="font-weight:600;font-size:13px;color:#0F172A">${label}</span>
-                ${sub ? `<br><span style="font-size:11px;color:#94A3B8">${sub}</span>` : ''}
-            </td>
-            <td style="padding:12px 18px;${last?'':'border-bottom:1px solid #EEF2F6;'}text-align:right;vertical-align:middle;background:#ffffff">${codes}</td>
-        </tr>`;
-
-    // ชื่อจริงเท่านั้น (ตัดนามสกุลออก) สำหรับ Internet/VPN
+    // Internet/VPN ใช้ชื่อจริงอย่างเดียว · ERP เก่า/Icontrol ใช้ชื่อผู้ใช้ Windows ตัวเล็ก
     const baseUser = winUser.split('.')[0] || (() => {
         const stripped = empName.replace(/^(Mr\.|Mrs\.|Ms\.|Miss\.?|Dr\.|นาย|นาง(?:สาว)?)\s*/i,'').trim();
         return stripped.split(/\s+/)[0] || staffId;
     })();
     const userLow = winUser.toLowerCase();
+    const EMP = 'รหัสพนักงาน';
+    // คำทักทาย: ตัดคำนำหน้าออก (คุณ Mr. Kasidet → คุณ Kasidet)
+    const greetName = empName.replace(/^(Mr\.?|Mrs\.?|Ms\.?|Miss\.?|Dr\.?|นาย|นาง(?:สาว)?|คุณ)\s*/i, '').trim() || empName;
 
-    // แถว Windows Login
-    let rows = row('Windows Login', '', cd('User: ' + (winUser||'—')) + ' &nbsp; ' + cd('Pass: ' + winPass));
-
-    // รวม Internet + VPN เป็นแถวเดียว (credential เดียวกัน)
-    const inetCos = access.filter(c => c.inet).map(c => c.co);
-    const vpnCos  = access.filter(c => c.vpn).map(c => c.co);
-    const mergedCos = [...new Set([...inetCos, ...vpnCos])];
-    if (mergedCos.length > 0) {
-        // สร้าง label จากระบบที่เปิดใช้
-        const systems = ['Internet / VPN'];
-        if (carsys)  systems.push('CARSYS');
-        if (roomsys) systems.push('ROOMSYS');
-        const label = systems.join(' / ');
-        // subtitle = บริษัท + แยก VPN-only ถ้าต่างกัน
-        const sub = mergedCos.join(' · ');
-        rows += row(label, sub, cd('User: ' + baseUser) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    // [ระบบ, คำอธิบาย, ชื่อผู้ใช้, รหัสผ่าน] — ชื่อผู้ใช้/รหัสที่เป็นค่าจริงแสดงแบบตัวพิมพ์ดีด ส่วน "รหัสพนักงาน" เป็นคำอธิบาย
+    const acc = [['Windows (เข้าเครื่อง)', 'เปลี่ยนรหัสทันทีที่เข้าครั้งแรก', winUser || '-', '§ตามใบแจ้งรหัสผ่านที่ได้รับ']];
+    const netCos = [...new Set(access.filter(c => c.inet || c.vpn).map(c => c.co))];
+    if (netCos.length) {
+        const sys = ['Internet / VPN'].concat(on('carsys') ? ['CARSYS'] : [], on('roomsys') ? ['ROOMSYS'] : []);
+        acc.push([sys.join(' / '), netCos.join(' · '), baseUser, '§' + EMP]);
     }
+    if (on('ptc')) acc.push(['PowertechCenter', 'ระบบภายใน · ขอซ่อม/เบิกของ/Contact List', '§' + EMP, '§' + EMP]);
+    const erpNew = [on('erpN') && 'ERP', on('mrpN') && 'MRP'].filter(Boolean);
+    if (erpNew.length) acc.push([erpNew.join(' / '), 'ตัวใหม่', '§' + EMP, 'Pte@' + '§' + EMP]);
+    const oldSys = [on('erpO') && 'ERP', on('ictrl') && 'Icontrol'].filter(Boolean);
+    if (oldSys.length) acc.push([oldSys.join(' / '), on('erpO') ? 'ตัวเก่า' : '', userLow, '§' + EMP]);
+    if (on('mrpO')) acc.push(['MRP', 'ตัวเก่า', baseUser.toLowerCase() + '.s', '§' + EMP]);
+    acc.push(['เครื่องพิมพ์', printerBuildings?.length ? 'ตึก ' + printerBuildings.join(' · ') : '', '-', '§' + EMP]);
 
-    // PowertechCenter (User = staffId, Pass = staffId → ทั้งคู่คือรหัสพนักงาน)
-    if (ptc) rows += row('PowertechCenter', 'ระบบภายในองค์กร — ID และ Password คือรหัสพนักงาน',
-        cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    // "§..." = คำอธิบาย (ไม่ใช่ค่าที่พิมพ์ตรงๆ) · "Pte@§รหัสพนักงาน" = ค่าจริงต่อด้วยคำอธิบาย
+    const cell = v => String(v).split('§').map((part, i) => i === 0
+        ? (part ? `<span style="font-family:Consolas,'Courier New',monospace;font-size:13px;font-weight:bold;color:#0F172A;">${e(part)}</span>` : '')
+        : `<span style="font-size:13px;color:#475569;${i && v.indexOf('§') > 0 ? 'padding-left:2px;' : ''}">${e(part)}</span>`).join('');
+    const accRows = acc.map(([sys, sub, user, pass], i) => `
+            <tr>
+                <td style="${FONT}padding:10px 14px;border-top:1px solid #E2E8F0;${i % 2 ? 'background:#FAFBFC;' : ''}">
+                    <span style="font-size:14px;font-weight:bold;color:#0F172A;">${e(sys)}</span>${sub ? `<br><span style="font-size:12px;color:#64748B;">${e(sub)}</span>` : ''}
+                </td>
+                <td style="${FONT}padding:10px 14px;border-top:1px solid #E2E8F0;${i % 2 ? 'background:#FAFBFC;' : ''}">${cell(user)}</td>
+                <td style="${FONT}padding:10px 14px;border-top:1px solid #E2E8F0;${i % 2 ? 'background:#FAFBFC;' : ''}">${cell(pass)}</td>
+            </tr>`).join('');
 
-    // ERP / MRP ตัวใหม่ ใช้ credential สูตรเดียวกัน (User: รหัสพนักงาน / Pass: Pte@รหัสพนักงาน) → ยุบรวมถ้าติ๊กทั้งคู่
-    if (erpN && mrpN) {
-        rows += row('ERP / MRP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
-    } else if (erpN) {
-        rows += row('ERP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
-    } else if (mrpN) {
-        rows += row('MRP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
-    }
+    const asset = val('f-asset'), pc = val('f-pcname'), setupDate = val('f-date');
+    const dateTh = setupDate ? new Date(setupDate + 'T00:00:00').toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' }) : '';
+    const machine = [['รหัสเครื่อง', asset], ['ชื่อเครื่อง', pc], ['วันที่ส่งมอบ', dateTh]].filter(([, v]) => v);
+    const machineRows = machine.map(([l, v]) => `<tr><td style="${FONT}font-size:13px;color:#64748B;padding:3px 16px 3px 0;white-space:nowrap;">${l}</td><td style="${FONT}font-size:13px;color:#0F172A;font-weight:bold;padding:3px 0;">${e(v)}</td></tr>`).join('');
 
-    // ERP ตัวเก่า / Icontrol ใช้ credential สูตรเดียวกัน (User: winUser ตัวพิมพ์เล็ก / Pass: รหัสพนักงาน) → ยุบรวมถ้าติ๊กทั้งคู่
-    if (erpO && ictrl) {
-        rows += row('ERP / Icontrol', 'ตัวเก่า', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
-    } else if (erpO) {
-        rows += row('ERP', 'ตัวเก่า', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
-    } else if (ictrl) {
-        rows += row('Icontrol', '', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
-    }
+    const list = items => items.map(t => `<tr><td style="${FONT}font-size:13px;color:#0F172A;padding:3px 8px 3px 0;vertical-align:top;">•</td><td style="${FONT}font-size:13px;color:#334155;padding:3px 0;line-height:1.55;">${t}</td></tr>`).join('');
+    const section = (title, inner) => `
+    <tr><td style="padding:20px 28px 0;">
+        <p style="${FONT}margin:0 0 8px;font-size:12px;font-weight:bold;letter-spacing:.5px;color:${accent};text-transform:uppercase;">${title}</p>
+        ${inner}
+    </td></tr>`;
 
-    // MRP ตัวเก่า แยกไว้เสมอ (username มี .s ต่อท้าย ไม่ตรงกับสูตรอื่น)
-    if (mrpO) rows += row('MRP', 'ตัวเก่า', cd('User: ' + (baseUser.toLowerCase()+'.s')) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1F5F9;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background:#FFFFFF;border:1px solid #E2E8F0;">
 
-    // รหัสเครื่องพิมพ์ (แถวสุดท้าย) — ค่าเดียวกับรหัสพนักงาน ไม่พิมพ์ตัวเลขซ้ำ
-    const bldgSub = printerBuildings?.length ? 'ตึก ' + printerBuildings.join(' · ') : '';
-    rows += row('รหัสเครื่องพิมพ์', bldgSub,
-        `<span style="font-family:monospace;font-size:13px;font-weight:700;background:#EBF4FF;border:1px solid #185FA5;border-radius:4px;padding:3px 12px;color:#185FA5">= รหัสพนักงานของคุณ</span>`,
-        true);
+    <tr><td style="background:${accent};height:6px;font-size:0;line-height:0;">&nbsp;</td></tr>
+    <tr><td style="padding:22px 28px 6px;">
+        <p style="${FONT}margin:0;font-size:12px;color:#64748B;">${e(companyFull)} · ฝ่าย IT</p>
+        <p style="${FONT}margin:4px 0 0;font-size:22px;font-weight:bold;color:#0F172A;">ยินดีต้อนรับ คุณ${/^[A-Za-z]/.test(greetName) ? ' ' : ''}${e(greetName)}</p>
+    </td></tr>
+    <tr><td style="padding:10px 28px 0;">
+        <p style="${FONT}margin:0;font-size:14px;line-height:1.7;color:#334155;">ฝ่าย IT เตรียมเครื่องและบัญชีผู้ใช้ให้เรียบร้อยแล้ว ด้านล่างคือชื่อผู้ใช้ของแต่ละระบบ เก็บอีเมลนี้ไว้ดูภายหลังได้</p>
+    </td></tr>
 
-    return `<div style="font-family:'Segoe UI',Tahoma,Geneva,sans-serif;color:#0F172A;max-width:640px;margin:0 auto;background:#F8FAFC;padding:28px 16px">
-<div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
+    ${machine.length ? section('เครื่องของคุณ', `<table role="presentation" cellpadding="0" cellspacing="0" border="0">${machineRows}</table>`) : ''}
 
-    <div style="background:#0F2A4A;padding:20px 28px">
-        <table role="presentation" style="border-collapse:collapse"><tr>
-            <td style="width:38px;height:38px;background:#ffffff;border-radius:8px;text-align:center;vertical-align:middle;font-weight:800;font-size:14px;color:#0F2A4A">IT</td>
-            <td style="padding-left:12px;vertical-align:middle">
-                <div style="color:#ffffff;font-size:15px;font-weight:700;letter-spacing:.01em">Powertech Group</div>
-                <div style="color:#93C5FD;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:1px">IT Onboarding Notice</div>
-            </td>
-        </tr></table>
-    </div>
+    ${section('บัญชีเข้าระบบ', `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E2E8F0;border-top:0;">
+            <tr>
+                <td style="${FONT}background:#F8FAFC;padding:8px 14px;font-size:12px;font-weight:bold;color:#475569;border-top:1px solid #E2E8F0;">ระบบ</td>
+                <td style="${FONT}background:#F8FAFC;padding:8px 14px;font-size:12px;font-weight:bold;color:#475569;border-top:1px solid #E2E8F0;">ชื่อผู้ใช้</td>
+                <td style="${FONT}background:#F8FAFC;padding:8px 14px;font-size:12px;font-weight:bold;color:#475569;border-top:1px solid #E2E8F0;">รหัสผ่าน</td>
+            </tr>${accRows}
+        </table>
+        <p style="${FONT}margin:8px 0 0;font-size:12px;color:#64748B;">"รหัสพนักงาน" คือเลขประจำตัวพนักงานของคุณ${staffId ? '' : ''}</p>`)}
 
-    <div style="padding:26px 28px 8px;line-height:1.7">
-        <p style="margin:0">เรียน <strong>${empName}</strong>,</p>
-        <p style="margin:12px 0 0">ในนามของฝ่ายไอที ยินดีต้อนรับคุณเข้าสู่ <strong>${companyFull}</strong> ครับ เพื่อให้การเริ่มงานวันแรกเป็นไปอย่างราบรื่น เราได้จัดเตรียมบัญชีผู้ใช้งานไว้ให้เรียบร้อยแล้ว ดังนี้:</p>
-    </div>
+    ${section('วันแรกที่ใช้งาน', `<table role="presentation" cellpadding="0" cellspacing="0" border="0">${list([
+        'เข้า Windows ด้วยรหัสในใบแจ้งรหัสผ่าน แล้ว<b>ตั้งรหัสใหม่ทันที</b> จากนั้นฉีกทำลายกระดาษนั้น',
+        'ลองเปิดอินเทอร์เน็ต อีเมล และสั่งพิมพ์ ถ้าใช้ไม่ได้แจ้ง IT ได้เลย',
+        'ไฟล์งานให้เก็บในไดรฟ์ของบริษัท ไม่เก็บในแฟลชไดรฟ์หรือคลาวด์ส่วนตัว',
+    ])}</table>`)}
 
-    <div style="margin:16px 28px 0;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden">
-        <div style="background:#F1F5F9;border-bottom:1px solid #E2E8F0;padding:11px 18px;font-weight:700;font-size:12px;color:#334155;letter-spacing:.02em">
-            🔒&nbsp; ข้อมูลการเข้าระบบ (Credentials)
-        </div>
-        <table style="width:100%;border-collapse:collapse">${rows}</table>
-    </div>
+    ${section('เรื่องความปลอดภัย', `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FEF2F2;border-left:3px solid #DC2626;"><tr><td style="padding:10px 14px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">${list([
+            'ห้ามบอกรหัสผ่านกับใคร — <b>ฝ่าย IT จะไม่ขอรหัสผ่านคุณทางโทรศัพท์หรืออีเมล</b>',
+            'เจออีเมลแปลก ขอให้กดลิงก์หรือโอนเงิน อย่ากด ให้ส่งต่อให้ IT ตรวจ',
+            'เครื่องหาย ถูกขโมย หรือสงสัยว่าข้อมูลรั่ว แจ้ง IT ทันที',
+            'ลุกจากโต๊ะให้ล็อกหน้าจอ (กด <b>Windows + L</b>)',
+        ])}</table></td></tr></table>`)}
 
-    <div style="padding:14px 28px 0">
-        <p style="font-size:12px;color:#94A3B8;margin:0;font-style:italic">* สำหรับ Windows โปรดเปลี่ยนรหัสผ่านใหม่ทันทีเมื่อเข้าสู่ระบบครั้งแรก</p>
-    </div>
+    <tr><td style="padding:20px 28px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F8FAFC;border:1px solid #E2E8F0;"><tr><td style="${FONT}padding:12px 14px;font-size:13px;color:#334155;">
+            <b style="color:#0F172A;">ติดต่อฝ่าย IT</b><br>${e(itContact)}
+        </td></tr></table>
+    </td></tr>
 
-    <div style="margin:18px 28px 0;padding:13px 16px;border-left:3px solid #D97706;background:#FFFBEB;border-radius:0 6px 6px 0">
-        <strong style="color:#92400E;font-size:13px">ต้องการความช่วยเหลือ?</strong><br>
-        <span style="font-size:13px;color:#92400E">หากพบปัญหาการใช้งาน ติดต่อได้ที่ ${itContact} ครับ</span>
-    </div>
-
-    <div style="padding:22px 28px 26px;line-height:1.7">
-        <p style="margin:0">ขอให้มีความสุขกับการทำงานครับ</p>
-    </div>
-
-    <div style="border-top:1px solid #E2E8F0;padding:14px 28px;background:#F8FAFC">
-        <p style="margin:0;font-size:11px;color:#94A3B8">อีเมลฉบับนี้สร้างโดยระบบอัตโนมัติจากฝ่ายเทคโนโลยีสารสนเทศ — โปรดเก็บข้อมูลนี้เป็นความลับ</p>
-    </div>
-
-</div>
-</div>`;
+    <tr><td style="padding:22px 28px 24px;">
+        <p style="${FONT}margin:0;font-size:14px;color:#334155;">ขอให้สนุกกับการทำงานครับ<br><b style="color:#0F172A;">ฝ่าย IT</b></p>
+    </td></tr>
+    <tr><td style="${FONT}padding:12px 28px;border-top:1px solid #E2E8F0;font-size:11px;color:#94A3B8;">อีเมลนี้มีข้อมูลบัญชีผู้ใช้ · ข้อมูลภายใน ห้ามส่งต่อ</td></tr>
+</table>
+</td></tr>
+</table>`;
 }
+
+const CO_FULL = { PTA:'Powertech Engine Assembly Co., Ltd.', PT4:'Powertech 2004 Co., Ltd.', PTE:'Powertech Energy Solutions Co., Ltd.' };
+const emailSubject = d => `ยินดีต้อนรับสู่ ${CO_FULL[d.company] || d.company} – ข้อมูลการเข้าระบบของ ${d.empName}`;
 
 function refreshEmail() {
     const d = getEmailData();
-    const coLabel = { PTA:'PowerTech Assembly', PT4:'PowerTech 2004', PTE:'PowerTech Energy' };
-    const coName = coLabel[d.company] || d.company;
-    const subject = `ยินดีต้อนรับสู่ ${coName}! – ข้อมูลการเข้าระบบสำหรับ ${d.empName}`;
+    const subject = emailSubject(d);
     const el = document.getElementById('em-subject-text');
     if (el) el.textContent = subject;
     const preview = document.getElementById('em-preview');
@@ -1672,9 +1732,7 @@ function refreshEmail() {
 
 function copyEmailSubject() {
     const d = getEmailData();
-    const coLabel = { PTA:'PowerTech Assembly', PT4:'PowerTech 2004', PTE:'PowerTech Energy' };
-    const subject = `ยินดีต้อนรับสู่ ${coLabel[d.company]||d.company}! – ข้อมูลการเข้าระบบสำหรับ ${d.empName}`;
-    navigator.clipboard.writeText(subject).then(() => showEmailToast());
+    navigator.clipboard.writeText(emailSubject(d)).then(() => showEmailToast());
 }
 
 async function copyEmailBody() {
@@ -1729,6 +1787,131 @@ async function saveEmailImage() {
     link.href = canvas.toDataURL('image/png');
     link.click();
     showEmailToast();
+}
+
+// ── ส่งมอบ: ความพร้อม / ผู้รับเมล / ยืนยันส่งเมล-เซ็นรับ / ใบแจ้งรหัสผ่าน ──
+let handover = {};
+const escHo = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const fmtThai = (v, time) => { if (!v) return ''; const t = new Date(String(v).replace(' ', 'T')); return isNaN(t) ? v : t.toLocaleString('th-TH', time ? { day:'numeric', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' } : { day:'numeric', month:'short', year:'2-digit' }); };
+
+function renderHandover() {
+    const handled = CHECKS.filter(c => ['done','skipped'].includes(states[c.id])).length;
+    const pct = Math.round(handled / CHECKS.length * 100);
+    const items = [
+        [pct >= 100, `เช็กลิสต์ ${pct}%`, 'checklist'],
+        [recordId > 0 && !isDirty, recordId > 0 ? (isDirty ? 'มีการแก้ไขยังไม่บันทึก' : 'บันทึกใบแล้ว') : 'ยังไม่บันทึกใบ', ''],
+        [linkedAssetId > 0, linkedAssetId > 0 ? 'ผูกทะเบียน ' + (document.getElementById('f-asset')?.value || '') : 'ยังไม่ผูกรหัสพัสดุ', 'info'],
+        [GRANTED_SYSTEM_KEYS.some(k => document.getElementById('epchk-' + k)?.checked), 'เลือกระบบที่เปิดสิทธิ์', 'access'],
+    ];
+    const box = document.getElementById('ho-ready');
+    if (box) box.innerHTML = items.map(([ok, txt, tab]) => `<span class="ho-chip ${ok ? 'ok' : 'todo'}"${!ok && tab ? ` onclick="switchTab('${tab}')" title="ไปแก้"` : ''}><i class="fa ${ok ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i>${escHo(txt)}</span>`).join('');
+
+    const es = document.getElementById('ho-email-state');
+    if (es) es.innerHTML = handover.email_sent_at
+        ? `<span class="ho-done"><i class="fa fa-check"></i> ส่งเมลแล้ว ${escHo(fmtThai(handover.email_sent_at, true))}${handover.email_sent_by ? ' · ' + escHo(handover.email_sent_by) : ''}</span> <button class="ho-undo" onclick="markHandover('undo_email')">ยกเลิก</button>`
+        : `<button class="ptc-ghost" onclick="markHandover('email')"><i class="fa fa-check"></i> ส่งแล้ว</button>`;
+    const ss = document.getElementById('ho-sign-state');
+    if (ss) ss.innerHTML = handover.signed_at
+        ? `<span class="ho-done"><i class="fa fa-check"></i> เซ็นรับแล้ว ${escHo(fmtThai(handover.signed_at))}${handover.signed_by ? ' · ' + escHo(handover.signed_by) : ''}</span> <button class="ho-undo" onclick="markHandover('undo_signed')">ยกเลิก</button>`
+        : `<button class="ptc-btn" onclick="markHandover('signed')"><i class="fa fa-signature"></i> ผู้ใช้เซ็นรับแล้ว</button>`;
+    updateTabStatus();
+    const pill = document.getElementById('ho-status');
+    if (pill) {
+        const st = handover.signed_at ? ['ok', 'ส่งมอบแล้ว'] : handover.email_sent_at ? ['wait', 'รอเซ็นรับ'] : ['todo', 'ยังไม่ส่งมอบ'];
+        pill.className = 'ho-pill ' + st[0]; pill.textContent = st[1];
+    }
+    const sd = document.getElementById('ho-sign-date');
+    if (sd && !sd.value) sd.value = handover.signed_at || new Date().toISOString().slice(0, 10);
+}
+
+async function lookupRecipient(force) {
+    const to = document.getElementById('em-to');
+    const empId = document.getElementById('f-empid')?.value.trim();
+    if (!to || !empId || (to.value && !force)) return;
+    try {
+        const j = await (await fetch(`${API_PATH}?action=setupHandover&op=contact&employee_id=${encodeURIComponent(empId)}&company=${encodeURIComponent(document.getElementById('f-company')?.value || '')}`)).json();
+        if (j.email && (!to.value || force)) to.value = j.email;
+    } catch (_) {}
+}
+
+// ไฟล์ .eml ที่มี "X-Unsent: 1" → Outlook (Windows) เปิดเป็นเมลร่างพร้อมส่ง ไม่ใช่เมลที่ได้รับ
+// เนื้อหามีรูปแบบครบ ไม่ต้องคัดลอก/วางเอง (mailto: ใส่ HTML ไม่ได้)
+async function openInOutlook() {
+    const d = getEmailData();
+    const to = document.getElementById('em-to')?.value.trim() || '';
+    const b64 = str => btoa(unescape(encodeURIComponent(str)));
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0">${buildEmailHTML(d)}</body></html>`;
+    const eml = [
+        `To: ${to.replace(/[\r\n]/g, '')}`,
+        `Subject: =?UTF-8?B?${b64(emailSubject(d))}?=`,
+        'X-Unsent: 1',
+        'MIME-Version: 1.0',
+        'Content-Type: text/html; charset="UTF-8"',
+        'Content-Transfer-Encoding: base64',
+        '',
+        b64(html).replace(/.{76}/g, '$&\r\n'),
+    ].join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([eml], { type: 'message/rfc822' }));
+    a.download = `แจ้งข้อมูลเข้าระบบ-${(d.empName || 'พนักงานใหม่').replace(/[\\/:*?"<>|]+/g, '').trim()}.eml`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    if (!to) Swal.fire({ icon:'info', title:'ยังไม่มีอีเมลผู้รับ', text:'ใส่ผู้รับเองในหน้าต่าง Outlook ก่อนกด Send' });
+    if (handover.email_sent_at) return;
+    const r = await Swal.fire({
+        icon: 'info', title: 'เปิดไฟล์ที่ดาวน์โหลด แล้วกด Send ใน Outlook',
+        html: 'ไฟล์ <b>.eml</b> อยู่ในแถบดาวน์โหลดของเบราว์เซอร์ — เปิดแล้ว Outlook จะขึ้นเมลพร้อมส่ง<br><span style="font-size:12px;color:var(--ptc-text-muted)">ส่งเสร็จแล้วกด "ส่งแล้ว" เพื่อเก็บหลักฐาน</span>',
+        showCancelButton: true, confirmButtonText: 'ส่งแล้ว', cancelButtonText: 'ยังไม่ส่ง'
+    });
+    if (r.isConfirmed) markHandover('email');
+}
+
+async function markHandover(op) {
+    if (!recordId) { Swal.fire({ icon:'info', title:'บันทึกใบติดตั้งก่อน', text:'กดปุ่ม "บันทึก" ด้านล่างก่อน แล้วค่อยยืนยันการส่งมอบ' }); return; }
+    if (op === 'email' && !document.getElementById('em-to')?.value.trim()) {
+        const r = await Swal.fire({ icon:'question', title:'ไม่ได้ใส่อีเมลผู้รับ', text:'ยืนยันว่าส่งเมลแล้ว (เช่น ส่งทาง LINE) ใช่ไหม?', showCancelButton:true, confirmButtonText:'ใช่ ส่งแล้ว', cancelButtonText:'ยกเลิก' });
+        if (!r.isConfirmed) return;
+    }
+    const fd = new FormData();
+    fd.append('op', op); fd.append('id', recordId);
+    fd.append('to', document.getElementById('em-to')?.value.trim() || '');
+    fd.append('date', document.getElementById('ho-sign-date')?.value || '');
+    try {
+        const j = await (await fetch(`${API_PATH}?action=setupHandover`, { method:'POST', body:fd })).json();
+        if (j.status !== 'success') throw new Error(j.message || 'บันทึกไม่สำเร็จ');
+        handover = j.handover || {};
+        // ข้อเช็กลิสต์ที่ตรงกัน: แจ้ง Account (23) / ผู้ใช้พร้อมรับ (24)
+        const map = { email: 23, signed: 24 };
+        if (map[op] && states[map[op]] !== 'done') { states[map[op]] = 'done'; saveStates(); renderChecklist(); updateProgress(); await saveRecord(); }
+        renderHandover();
+    } catch (e) { Swal.fire('บันทึกไม่สำเร็จ', e.message, 'error'); }
+}
+
+function printPasswordSlip() {
+    const d = getEmailData();
+    const pass = document.getElementById('em-winpass')?.value.trim() || 'aaAA1234';
+    const who = escHo(document.getElementById('f-user')?.value || d.empName);
+    const w = window.open('', '_blank', 'width=620,height=520');
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>ใบแจ้งรหัสผ่าน</title>
+        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>@page{size:A5 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Sarabun,Arial,sans-serif;margin:0;color:#0f172a}
+        .slip{border:1.5px dashed #64748b;border-radius:8px;padding:16px 20px;max-width:180mm;margin:10px auto}
+        h1{font-size:15pt;margin:0 0 2px}.sub{font-size:9pt;color:#475569;margin-bottom:12px}
+        table{width:100%;border-collapse:collapse;font-size:11pt}td{padding:6px 8px;border:1px solid #cbd5e1}td:first-child{width:38%;color:#475569}
+        .pw{font-family:Consolas,monospace;font-size:15pt;font-weight:700;letter-spacing:.06em}
+        .warn{margin-top:10px;font-size:9pt;line-height:1.55;border-left:3px solid #dc2626;padding:4px 10px;background:#fef2f2}
+        .tag{float:right;font-size:8pt;font-weight:700;color:#b91c1c;border:1px solid #b91c1c;border-radius:3px;padding:0 5px}</style></head><body>
+        <div class="slip"><span class="tag">ลับ · CONFIDENTIAL</span><h1>ใบแจ้งรหัสผ่านเข้าเครื่อง</h1>
+        <div class="sub">${escHo(CO_FULL[d.company] || d.company)} · ฝ่าย IT</div>
+        <table><tr><td>ผู้ใช้</td><td>${who}</td></tr>
+        <tr><td>เครื่อง</td><td>${escHo(document.getElementById('f-asset')?.value || '-')} ${escHo(document.getElementById('f-pcname')?.value || '')}</td></tr>
+        <tr><td>ชื่อผู้ใช้ Windows</td><td class="pw" style="font-size:12pt">${escHo(d.winUser || '-')}</td></tr>
+        <tr><td>รหัสผ่านเริ่มต้น</td><td class="pw">${escHo(pass)}</td></tr></table>
+        <div class="warn"><b>สำคัญ:</b> เปลี่ยนรหัสผ่านทันทีที่เข้าเครื่องครั้งแรก แล้ว<b>ฉีกทำลายกระดาษนี้</b> · ห้ามแปะไว้ที่เครื่องหรือบอกผู้อื่น</div></div>
+        </body></html>`);
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 500);
 }
 
 // ── Print ──────────────────────────────────────────────────────
@@ -1995,6 +2178,38 @@ function updateInfoBadge() {
 
 // ── Tab switching ──────────────────────────────────────────────
 let activeTab = 'info';
+const STEPS = [['info', 'ข้อมูล'], ['access', 'สิทธิ์'], ['checklist', 'เช็กลิสต์'], ['email', 'ส่งมอบ']];
+function goStep(delta) {
+    const i = STEPS.findIndex(([k]) => k === activeTab);
+    const next = STEPS[i + delta];
+    if (next) switchTab(next[0]);
+}
+function updateStepNav() {
+    const i = STEPS.findIndex(([k]) => k === activeTab);
+    const prev = document.getElementById('step-prev'), next = document.getElementById('step-next');
+    if (prev) prev.style.visibility = i > 0 ? 'visible' : 'hidden';
+    if (next) next.style.display = i < STEPS.length - 1 ? '' : 'none';
+    const lbl = document.getElementById('step-next-lbl');
+    if (lbl && STEPS[i + 1]) lbl.textContent = 'ถัดไป: ' + STEPS[i + 1][1];
+}
+// ป้ายสถานะบนแท็บ ② และ ④ (① กับ ③ มีของเดิมอยู่แล้ว)
+function updateTabStatus() {
+    const pill = (id, txt, ok) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = txt ? '' : 'none';
+        el.textContent = txt;
+        el.style.background = ok ? '#dcfce7' : '#fef3c7';
+        el.style.color = ok ? '#166534' : '#a16207';
+    };
+    const cos = getCompanyAccess().filter(c => c.active).length;
+    const progs = GRANTED_SYSTEM_KEYS.filter(k => document.getElementById('epchk-' + k)?.checked).length;
+    pill('tab-access-st', cos || progs ? `${cos} บ. · ${progs} ระบบ` : '', cos > 0 && progs > 0);
+    pill('tab-email-st', handover.signed_at ? 'ส่งมอบแล้ว' : handover.email_sent_at ? 'รอเซ็น' : '', !!handover.signed_at);
+}
+document.addEventListener('click', e => { if (e.target.closest('#tab-access')) setTimeout(updateTabStatus, 0); });
+document.addEventListener('change', e => { if (e.target.closest('#tab-access')) updateTabStatus(); });
+document.addEventListener('DOMContentLoaded', () => { updateStepNav(); setTimeout(updateTabStatus, 0); });
 function switchTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p => {
         p.classList.toggle('active', p.id === 'tab-' + name);
@@ -2004,6 +2219,11 @@ function switchTab(name) {
     });
     activeTab = name;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const pc = document.getElementById('progress-card');
+    if (pc) pc.style.display = name === 'checklist' ? '' : 'none';
+    if (name === 'email') { refreshEmail(); lookupRecipient(false); renderHandover(); }
+    updateStepNav();
+    updateTabStatus();
 }
 
 // ── Init ───────────────────────────────────────────────────────

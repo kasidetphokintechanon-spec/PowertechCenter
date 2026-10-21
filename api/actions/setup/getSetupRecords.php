@@ -34,6 +34,9 @@ $conn->query("CREATE TABLE IF NOT EXISTS setup_records (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )");
 
+require_once __DIR__ . '/../../../includes/setup_handover.php';
+ensureSetupHandoverColumns($conn);
+
 $status  = $_GET['status'] ?? '';   // 'active' | 'offboarded' | ''
 $company = $_GET['company'] ?? '';
 $search  = trim($_GET['search'] ?? '');
@@ -53,7 +56,7 @@ if ($search) {
 
 $sql = "SELECT id, employee_name, employee_id, department, company, asset_code, pc_name,
                tech_name, setup_date, status, offboard_date, offboard_notes, job_type, created_at,
-               it_asset_id, checklist_states, custom_items
+               it_asset_id, checklist_states, custom_items, email_sent_at, signed_at
         FROM setup_records WHERE ".implode(' AND ',$where)." ORDER BY created_at DESC LIMIT 200";
 
 $stmt = $conn->prepare($sql);

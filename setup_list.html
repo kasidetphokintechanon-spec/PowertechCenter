@@ -62,6 +62,7 @@
         .status-badge.active { background:var(--ptc-success-bg); color:var(--ptc-success); border-color:transparent; }
         .status-badge.old { background:var(--ptc-surface-2); color:var(--ptc-text-muted); border-color:var(--ptc-border); }
         .status-badge.closed { background:var(--ptc-surface-2); color:var(--ptc-text-2); border-color:var(--ptc-border); }
+        .ho { font-weight:600; } .ho.ok { color:var(--ptc-success); } .ho.wait { color:var(--ptc-warning); } .ho.todo { color:var(--ptc-text-faint); }
         .status-sub { font-size:11px; color:var(--ptc-text-faint); margin-top:3px; max-width:220px; }
 
         .prog { display:flex; align-items:center; gap:8px; min-width:120px; }
@@ -277,7 +278,13 @@ function progressCell(r) {
     return `<div class="prog" title="ติ๊กแล้ว ${done} จาก ${total} ข้อ"><div class="prog-track"><div class="prog-fill${pct >= 100 ? ' full' : ''}" style="width:${pct}%"></div></div><span class="prog-txt">${pct}%</span></div>`;
 }
 function statusCell(r) {
-    if (r._state === 'active') return `<span class="status-badge active"><i class="fa fa-circle" style="font-size:6px"></i> ใช้งานอยู่</span>`;
+    if (r._state === 'active') {
+        // ขั้นส่งมอบ: ส่งเมลแจ้งผู้ใช้ → ผู้ใช้เซ็นรับ
+        const ho = r.signed_at ? `<span class="ho ok"><i class="fa fa-signature"></i> ส่งมอบแล้ว ${fmtDate(r.signed_at)}</span>`
+            : r.email_sent_at ? `<span class="ho wait"><i class="fa fa-envelope-circle-check"></i> ส่งเมลแล้ว · รอเซ็นรับ</span>`
+            : `<span class="ho todo">ยังไม่ส่งมอบ</span>`;
+        return `<span class="status-badge active"><i class="fa fa-circle" style="font-size:6px"></i> ใช้งานอยู่</span><div class="status-sub">${ho}</div>`;
+    }
     if (r._state === 'old') return `<span class="status-badge old">ใบเก่า</span><div class="status-sub">มีใบใหม่กว่าของเครื่องนี้แล้ว</div>`;
     return `<span class="status-badge closed"><i class="fa fa-box-archive" style="font-size:10px"></i> ปิดใบแล้ว</span><div class="status-sub">${fmtDate(r.offboard_date)}${r.offboard_notes ? ' · ' + esc(String(r.offboard_notes).slice(0, 60)) : ''}</div>`;
 }
