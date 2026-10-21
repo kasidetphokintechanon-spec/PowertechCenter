@@ -46,21 +46,16 @@
         .kb-nav-title { font-size: 15px; font-weight: 700; color: #0f172a; flex: 1; text-align: center; }
 
         /* ── Hero ── */
+        /* hero แบบ enterprise: พื้นขาว เส้นขอบบาง สีน้ำเงินเป็นสีเน้น (เดิมไล่สีน้ำเงิน→ม่วง — สำรองไว้ที่ kb_BK.html) */
         .kb-hero {
             margin-top: 56px;
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 40%, #7c3aed 100%);
-            padding: 56px 20px 80px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 40px 20px 36px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
-        .kb-hero::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        .kb-hero h1 { font-size: clamp(22px, 4vw, 32px); font-weight: 700; color: #fff; margin-bottom: 8px; position: relative; }
-        .kb-hero p { color: rgba(255,255,255,.75); font-size: 15px; margin-bottom: 28px; position: relative; }
+        .kb-hero h1 { font-size: clamp(22px, 4vw, 28px); font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .kb-hero p { color: #64748b; font-size: 15px; margin-bottom: 22px; }
 
         .kb-search-wrap { max-width: 600px; margin: 0 auto; position: relative; }
         .kb-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; pointer-events: none; }
@@ -68,15 +63,15 @@
             width: 100%; height: 52px;
             padding: 0 18px 0 50px;
             border-radius: 99px;
-            border: none;
+            border: 1px solid #e2e8f0;
             font-size: 15px; font-family: 'Kanit', sans-serif;
-            background: #fff;
+            background: #f8fafc;
             color: #0f172a;
-            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            box-shadow: none;
             outline: none;
             transition: box-shadow .2s;
         }
-        .kb-search-input:focus { box-shadow: 0 8px 32px rgba(0,0,0,.28), 0 0 0 3px rgba(255,255,255,.3); }
+        .kb-search-input:focus { background: #fff; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
         .kb-search-clear {
             position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
             background: #e2e8f0; border: none; border-radius: 50%; width: 24px; height: 24px;
@@ -204,7 +199,7 @@
 
         @media (max-width: 600px) {
             .kb-article-header, .kb-article-body { padding: 20px 18px; }
-            .kb-hero { padding: 40px 16px 60px; }
+            .kb-hero { padding: 28px 16px 24px; }
         }
 
         /* ── Dark mode ── */
@@ -213,6 +208,10 @@
         html.dark .kb-nav a { color: #94a3b8; }
         html.dark .kb-nav a:hover { color: #60a5fa; }
         html.dark .kb-nav-title { color: #f1f5f9; }
+        html.dark .kb-hero { background: #0f172a; border-bottom-color: #1e293b; }
+        html.dark .kb-hero h1 { color: #f1f5f9; }
+        html.dark .kb-hero p { color: #94a3b8; }
+        html.dark .kb-search-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
         html.dark .kb-stats { background: #0f172a; border-bottom-color: #1e293b; }
         html.dark .kb-stat-lbl { color: #64748b; }
         html.dark .kb-section-title { color: #94a3b8; }

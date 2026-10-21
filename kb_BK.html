@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base — Powertech IT</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <script src="js/pwa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/enterprise-swal.js?v=20260528"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow-x: hidden; }
+        /* This page has no ptc-app-shell — restore body scroll (enterprise-theme.css locks it by default at desktop widths) */
+        @media(min-width:1024px){
+            html,body{overflow:auto!important;height:auto!important}
+        }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* ── Nav ── */
+        .kb-nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 56px;
+            background: rgba(255,255,255,.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; padding: 0 20px; gap: 16px;
+        }
+        .kb-nav a { color: #475569; text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .kb-nav a:hover { color: #2563eb; }
+        .kb-nav-title { font-size: 15px; font-weight: 700; color: #0f172a; flex: 1; text-align: center; }
+
+        /* ── Hero ── */
+        .kb-hero {
+            margin-top: 56px;
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 40%, #7c3aed 100%);
+            padding: 56px 20px 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .kb-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .kb-hero h1 { font-size: clamp(22px, 4vw, 32px); font-weight: 700; color: #fff; margin-bottom: 8px; position: relative; }
+        .kb-hero p { color: rgba(255,255,255,.75); font-size: 15px; margin-bottom: 28px; position: relative; }
+
+        .kb-search-wrap { max-width: 600px; margin: 0 auto; position: relative; }
+        .kb-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 16px; pointer-events: none; }
+        .kb-search-input {
+            width: 100%; height: 52px;
+            padding: 0 18px 0 50px;
+            border-radius: 99px;
+            border: none;
+            font-size: 15px; font-family: 'Kanit', sans-serif;
+            background: #fff;
+            color: #0f172a;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            outline: none;
+            transition: box-shadow .2s;
+        }
+        .kb-search-input:focus { box-shadow: 0 8px 32px rgba(0,0,0,.28), 0 0 0 3px rgba(255,255,255,.3); }
+        .kb-search-clear {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            background: #e2e8f0; border: none; border-radius: 50%; width: 24px; height: 24px;
+            color: #64748b; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 11px;
+        }
+        .kb-search-clear.show { display: flex; }
+
+        /* ── Stats bar ── */
+        .kb-stats {
+            display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+            padding: 20px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .kb-stat { text-align: center; }
+        .kb-stat-val { font-size: 22px; font-weight: 800; color: #2563eb; line-height: 1; }
+        .kb-stat-lbl { font-size: 11px; color: #94a3b8; margin-top: 2px; font-weight: 500; }
+
+        /* ── Main layout ── */
+        .kb-main { max-width: 1000px; margin: 0 auto; padding: 32px 16px 64px; }
+
+        /* ── Section title ── */
+        .kb-section-title {
+            font-size: 13px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .06em; color: #64748b;
+            margin-bottom: 14px; display: flex; align-items: center; gap-8px;
+        }
+        .kb-section-title span { flex: 1; }
+        .kb-section-title a { font-size: 12px; color: #2563eb; text-decoration: none; text-transform: none; letter-spacing: 0; font-weight: 600; }
+
+        /* ── Category cards ── */
+        .kb-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 36px; }
+        .kb-cat-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 16px 14px; cursor: pointer; text-decoration: none; color: inherit;
+            transition: all .18s; display: flex; flex-direction: column; gap: 10px;
+        }
+        .kb-cat-card:hover { border-color: var(--cat-color, #2563eb); box-shadow: 0 4px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
+        .kb-cat-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--cat-bg, #eff6ff);
+            color: var(--cat-color, #2563eb);
+            display: flex; align-items: center; justify-content: center; font-size: 17px;
+        }
+        .kb-cat-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+        .kb-cat-count { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+        /* ── Article list ── */
+        .kb-articles { display: flex; flex-direction: column; gap: 10px; }
+        .kb-art-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 16px 18px; cursor: pointer; text-decoration: none; color: inherit;
+            transition: all .15s; display: flex; align-items: center; gap: 14px;
+        }
+        .kb-art-card:hover { border-color: #93c5fd; box-shadow: 0 2px 12px rgba(37,99,235,.08); }
+        .kb-art-icon { width: 38px; height: 38px; border-radius: 9px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .kb-art-body { flex: 1; min-width: 0; }
+        .kb-art-title { font-size: 14px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kb-art-meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; flex-wrap: wrap; }
+        .kb-art-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: #eff6ff; color: #2563eb; }
+        .kb-art-info { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+        .kb-art-excerpt { font-size: 12px; color: #64748b; margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        .kb-art-arrow { color: #cbd5e1; font-size: 13px; flex-shrink: 0; }
+
+        /* ── Empty state ── */
+        .kb-empty { text-align: center; padding: 56px 20px; color: #94a3b8; }
+        .kb-empty i { font-size: 40px; margin-bottom: 12px; display: block; }
+        .kb-empty p { font-size: 14px; }
+
+        /* ── Search results banner ── */
+        .kb-search-banner {
+            background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+            padding: 10px 16px; margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .kb-search-banner span { font-size: 13px; color: #1e40af; font-weight: 600; }
+        .kb-search-banner button { font-size: 12px; color: #2563eb; background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+
+        /* ── Article view ── */
+        #article-view { display: none; }
+        .kb-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; margin-bottom: 20px; flex-wrap: wrap; }
+        .kb-breadcrumb a { color: #2563eb; text-decoration: none; font-weight: 600; }
+        .kb-breadcrumb a:hover { text-decoration: underline; }
+        .kb-breadcrumb i { font-size: 10px; color: #cbd5e1; }
+
+        .kb-article-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+        .kb-article-header { padding: 28px 32px 20px; border-bottom: 1px solid #f1f5f9; }
+        .kb-article-category { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #2563eb; background: #eff6ff; padding: 4px 10px; border-radius: 99px; margin-bottom: 12px; }
+        .kb-article-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; color: #0f172a; line-height: 1.3; margin-bottom: 12px; }
+        .kb-article-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #94a3b8; }
+        .kb-article-meta span { display: flex; align-items: center; gap: 5px; }
+        .kb-article-body { padding: 28px 32px 36px; }
+
+        /* ── Article content typography ── */
+        .kb-content { line-height: 1.8; font-size: 14px; color: #334155; }
+        .kb-content h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+        .kb-content h2 { font-size: 18px; font-weight: 700; color: #0f172a; margin: 24px 0 10px; }
+        .kb-content h3 { font-size: 15px; font-weight: 700; color: #334155; margin: 18px 0 8px; }
+        .kb-content p { margin-bottom: 14px; }
+        .kb-content ul { list-style: disc; padding-left: 24px; margin-bottom: 14px; }
+        .kb-content ol { list-style: decimal; padding-left: 24px; margin-bottom: 14px; }
+        .kb-content li { margin-bottom: 6px; }
+        .kb-content code { background: #f1f5f9; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-size: 12px; border: 1px solid #e2e8f0; }
+        .kb-content pre { background: #0f172a; color: #e2e8f0; padding: 16px 20px; border-radius: 10px; overflow-x: auto; margin-bottom: 16px; }
+        .kb-content pre code { background: none; border: none; color: inherit; font-size: 12px; padding: 0; }
+        .kb-content blockquote { border-left: 3px solid #2563eb; padding: 10px 16px; background: #eff6ff; border-radius: 0 8px 8px 0; margin-bottom: 14px; color: #1e40af; }
+        .kb-content img { max-width: 100%; border-radius: 10px; margin: 12px 0; border: 1px solid #e2e8f0; }
+        .kb-content a { color: #2563eb; }
+        .kb-content table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+        .kb-content th { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; font-weight: 700; color: #475569; }
+        .kb-content td { border: 1px solid #e2e8f0; padding: 8px 12px; }
+
+        /* ── highlight ── */
+        mark { background: #fef9c3; color: #713f12; border-radius: 3px; padding: 0 2px; }
+
+        /* ── Category palette ── */
+        .cat-blue   { --cat-color:#2563eb; --cat-bg:#eff6ff; }
+        .cat-green  { --cat-color:#059669; --cat-bg:#f0fdf4; }
+        .cat-orange { --cat-color:#d97706; --cat-bg:#fffbeb; }
+        .cat-red    { --cat-color:#dc2626; --cat-bg:#fef2f2; }
+        .cat-purple { --cat-color:#7c3aed; --cat-bg:#f5f3ff; }
+        .cat-pink   { --cat-color:#db2777; --cat-bg:#fdf2f8; }
+        .cat-teal   { --cat-color:#0d9488; --cat-bg:#f0fdfa; }
+        .cat-indigo { --cat-color:#4f46e5; --cat-bg:#eef2ff; }
+
+        @media (max-width: 600px) {
+            .kb-article-header, .kb-article-body { padding: 20px 18px; }
+            .kb-hero { padding: 40px 16px 60px; }
+        }
+
+        /* ── Dark mode ── */
+        html.dark body { background: #0a0f1e; color: #e2e8f0; }
+        html.dark .kb-nav { background: rgba(15,23,42,.92); border-bottom-color: #1e293b; }
+        html.dark .kb-nav a { color: #94a3b8; }
+        html.dark .kb-nav a:hover { color: #60a5fa; }
+        html.dark .kb-nav-title { color: #f1f5f9; }
+        html.dark .kb-stats { background: #0f172a; border-bottom-color: #1e293b; }
+        html.dark .kb-stat-lbl { color: #64748b; }
+        html.dark .kb-section-title { color: #94a3b8; }
+        html.dark .kb-cat-card, html.dark .kb-art-card, html.dark .kb-article-wrap { background: #1e293b; border-color: #334155; }
+        html.dark .kb-cat-name, html.dark .kb-art-title, html.dark .kb-article-title { color: #f1f5f9; }
+        html.dark .kb-cat-count, html.dark .kb-art-info, html.dark .kb-article-meta { color: #64748b; }
+        html.dark .kb-art-excerpt { color: #94a3b8; }
+        html.dark .kb-art-arrow { color: #475569; }
+        html.dark .kb-empty { color: #64748b; }
+        html.dark .kb-search-banner { background: #1e2f4d; border-color: #2c4a7c; }
+        html.dark .kb-search-banner span { color: #93c5fd; }
+        html.dark .kb-breadcrumb { color: #94a3b8; }
+        html.dark .kb-breadcrumb i { color: #475569; }
+        html.dark .kb-article-header { border-bottom-color: #334155; }
+        html.dark .kb-content { color: #cbd5e1; }
+        html.dark .kb-content h1, html.dark .kb-content h2 { color: #f1f5f9; border-bottom-color: #334155; }
+        html.dark .kb-content h3 { color: #e2e8f0; }
+        html.dark .kb-content code { background: #1e293b; border-color: #334155; color: #f87171; }
+        html.dark .kb-content th { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+        html.dark .kb-content td { border-color: #334155; }
+        html.dark .kb-content img { border-color: #334155; }
+        html.dark mark { background: #713f12; color: #fef9c3; }
+        html.dark #theme-toggle { border-color: #334155; color: #94a3b8; }
+        html.dark #theme-toggle:hover { background: #1e293b; }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="kb-nav">
+    <a href="index.html"><i class="fas fa-arrow-left"></i> กลับหน้าแรก</a>
+    <div class="kb-nav-title">คลังความรู้ IT</div>
+    <button type="button" id="theme-toggle" onclick="toggleKbTheme()" title="สลับธีม" style="width:32px;height:32px;border-radius:8px;border:1px solid #e2e8f0;background:none;color:#64748b;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+        <i id="theme-icon" class="fas fa-sun"></i>
+    </button>
+</nav>
+
+<!-- Hero -->
+<div class="kb-hero" id="hero-section">
+    <h1>เราช่วยอะไรคุณได้บ้าง? <i class="fas fa-lightbulb" style="opacity:.7;font-size:.8em"></i></h1>
+    <p>ค้นหาคำตอบและวิธีแก้ปัญหา IT ได้เลย</p>
+    <div class="kb-search-wrap">
+        <i class="fas fa-search kb-search-icon"></i>
+        <input type="text" id="search-input" class="kb-search-input" placeholder="ค้นหา เช่น ปริ้นเตอร์, wifi, ลืมรหัสผ่าน...">
+        <button class="kb-search-clear" id="search-clear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="kb-stats" id="stats-bar">
+    <div class="kb-stat"><div class="kb-stat-val" id="stat-articles">—</div><div class="kb-stat-lbl">บทความทั้งหมด</div></div>
+    <div class="kb-stat"><div class="kb-stat-val" id="stat-cats">—</div><div class="kb-stat-lbl">หมวดหมู่</div></div>
+    <div class="kb-stat"><div class="kb-stat-val" id="stat-views">—</div><div class="kb-stat-lbl">ยอดเข้าชมรวม</div></div>
+</div>
+
+<!-- Main view -->
+<div id="main-view">
+    <div class="kb-main">
+
+        <!-- Search result banner -->
+        <div class="kb-search-banner" id="search-banner" style="display:none">
+            <span id="search-banner-text"></span>
+            <button onclick="clearSearch()"><i class="fas fa-times"></i> ล้างการค้นหา</button>
+        </div>
+
+        <!-- Categories -->
+        <div id="cats-section">
+            <div class="kb-section-title"><span>หมวดหมู่</span></div>
+            <div class="kb-cats" id="categories-container"></div>
+        </div>
+
+        <!-- Articles -->
+        <div>
+            <div class="kb-section-title">
+                <span id="articles-section-title">บทความทั้งหมด</span>
+            </div>
+            <div class="kb-articles" id="articles-container"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Article view -->
+<div id="article-view">
+    <div class="kb-main">
+        <div class="kb-breadcrumb">
+            <a href="#" onclick="showMainView();return false;"><i class="fas fa-home"></i> คลังความรู้</a>
+            <i class="fas fa-chevron-right"></i>
+            <span id="art-breadcrumb-cat" style="color:#64748b"></span>
+            <i class="fas fa-chevron-right"></i>
+            <span id="art-breadcrumb-title" style="color:#0f172a;font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+        </div>
+        <div class="kb-article-wrap">
+            <div id="article-content"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_PATH = 'api.php';
+    let allArticles = [], allCategories = [];
+    // sanitize:true กัน HTML/script ดิบที่แฝงมาในเนื้อหา (เช่นจาก KB draft ที่สร้างอัตโนมัติจาก ticket) ไม่ให้รันได้
+    const converter = new showdown.Converter({ tables: true, tasklists: true, strikethrough: true, sanitize: true });
+
+    const catPalettes = ['cat-blue','cat-green','cat-orange','cat-purple','cat-teal','cat-pink','cat-red','cat-indigo'];
+
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function gid(id) { return document.getElementById(id); }
+
+    function updateKbThemeIcon() {
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.className = document.documentElement.classList.contains('dark') ? 'fas fa-moon' : 'fas fa-sun';
+    }
+    function toggleKbTheme() {
+        document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('dark-theme');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateKbThemeIcon();
+    }
+    updateKbThemeIcon();
+    function estimateReadTime(text) {
+        const words = (text||'').split(/\s+/).length;
+        const mins = Math.max(1, Math.round(words / 150));
+        return mins + ' นาที';
+    }
+    function stripMd(md) {
+        return (md||'').replace(/[#*`>\[\]_~]/g,'').replace(/\n+/g,' ').trim().slice(0,120);
+    }
+    function highlight(text, term) {
+        if (!term) return esc(text);
+        const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+        return esc(text).replace(re, '<mark>$1</mark>');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res = await fetch(`${API_PATH}?action=get_kb_data`);
+            const data = await res.json();
+            if (data.status === 'success') {
+                allArticles = data.articles || [];
+                allCategories = data.categories || [];
+                renderStats();
+                renderCategories();
+                renderArticles(allArticles, '');
+
+                const urlParams = new URLSearchParams(location.search);
+                const q = urlParams.get('search');
+                if (q) { gid('search-input').value = q; doSearch(q); }
+                const deepLinkId = urlParams.get('id');
+                if (deepLinkId) showArticle(deepLinkId);
+            }
+        } catch (e) {
+            gid('articles-container').innerHTML = `<div class="kb-empty"><i class="fas fa-exclamation-circle" style="color:#fca5a5"></i><p style="color:#ef4444">โหลดข้อมูลไม่สำเร็จ</p></div>`;
+        }
+
+        gid('search-input').addEventListener('input', e => {
+            const term = e.target.value.trim();
+            gid('search-clear').classList.toggle('show', term.length > 0);
+            doSearch(term);
+        });
+    });
+
+    function renderStats() {
+        const totalViews = allArticles.reduce((s, a) => s + (Number(a.view_count)||0), 0);
+        gid('stat-articles').textContent = allArticles.length;
+        gid('stat-cats').textContent = allCategories.length;
+        gid('stat-views').textContent = totalViews >= 1000 ? (totalViews/1000).toFixed(1)+'k' : totalViews;
+    }
+
+    function renderCategories() {
+        const counts = {};
+        allArticles.forEach(a => { counts[a.category_id] = (counts[a.category_id]||0) + 1; });
+        const container = gid('categories-container');
+        if (!allCategories.length) { container.style.display='none'; return; }
+        container.innerHTML = allCategories.map((cat, i) => `
+            <a class="kb-cat-card ${catPalettes[i % catPalettes.length]}" onclick="filterByCategory(${cat.id}, '${esc(cat.name)}');return false;" href="#">
+                <div class="kb-cat-icon"><i class="fas ${cat.icon || 'fa-folder'}"></i></div>
+                <div>
+                    <div class="kb-cat-name">${esc(cat.name)}</div>
+                    <div class="kb-cat-count">${counts[cat.id]||0} บทความ</div>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    function renderArticles(articles, term) {
+        const container = gid('articles-container');
+        if (!articles.length) {
+            container.innerHTML = `<div class="kb-empty"><i class="fas fa-search"></i><p>ไม่พบบทความ${term ? ` สำหรับ "${esc(term)}"` : ''}</p></div>`;
+            return;
+        }
+        container.innerHTML = articles.map(art => {
+            const catPal = catPalettes[(allCategories.findIndex(c=>c.id==art.category_id)) % catPalettes.length] || 'cat-blue';
+            const excerpt = stripMd(art.content || art.excerpt || '');
+            return `
+            <a class="kb-art-card" href="#" onclick="showArticle(${art.id});return false;">
+                <div class="kb-art-icon ${catPal}"><i class="fas ${art.icon || 'fa-file-alt'}"></i></div>
+                <div class="kb-art-body">
+                    <div class="kb-art-title">${highlight(art.title, term)}</div>
+                    <div class="kb-art-meta">
+                        ${art.category_name ? `<span class="kb-art-badge">${esc(art.category_name)}</span>` : ''}
+                        <span class="kb-art-info"><i class="fas fa-eye"></i> ${art.view_count||0}</span>
+                        <span class="kb-art-info"><i class="fas fa-clock"></i> ${estimateReadTime(art.content)}</span>
+                    </div>
+                    ${excerpt ? `<div class="kb-art-excerpt">${highlight(excerpt, term)}</div>` : ''}
+                </div>
+                <i class="fas fa-chevron-right kb-art-arrow"></i>
+            </a>`;
+        }).join('');
+    }
+
+    function doSearch(term) {
+        const banner = gid('search-banner');
+        const catsSection = gid('cats-section');
+        const secTitle = gid('articles-section-title');
+        if (!term) {
+            banner.style.display = 'none';
+            catsSection.style.display = '';
+            secTitle.textContent = 'บทความทั้งหมด';
+            renderArticles(allArticles, '');
+            return;
+        }
+        const filtered = allArticles.filter(a =>
+            a.title.toLowerCase().includes(term.toLowerCase()) ||
+            (a.content||'').toLowerCase().includes(term.toLowerCase())
+        );
+        catsSection.style.display = 'none';
+        secTitle.textContent = 'ผลการค้นหา';
+        gid('search-banner-text').innerHTML = `<i class="fas fa-search" style="margin-right:6px"></i>พบ <strong>${filtered.length}</strong> บทความสำหรับ "<strong>${esc(term)}</strong>"`;
+        banner.style.display = 'flex';
+        renderArticles(filtered, term);
+    }
+
+    function filterByCategory(catId, catName) {
+        gid('search-input').value = '';
+        gid('search-clear').classList.remove('show');
+        const filtered = allArticles.filter(a => a.category_id == catId);
+        const banner = gid('search-banner');
+        gid('cats-section').style.display = 'none';
+        gid('articles-section-title').textContent = catName;
+        gid('search-banner-text').innerHTML = `<i class="fas fa-folder" style="margin-right:6px"></i>หมวด: <strong>${esc(catName)}</strong> — ${filtered.length} บทความ`;
+        banner.style.display = 'flex';
+        renderArticles(filtered, '');
+        window.scrollTo({ top: gid('articles-container').offsetTop - 80, behavior: 'smooth' });
+    }
+
+    function clearSearch() {
+        gid('search-input').value = '';
+        gid('search-clear').classList.remove('show');
+        doSearch('');
+    }
+
+    function showMainView() {
+        gid('main-view').style.display = 'block';
+        gid('article-view').style.display = 'none';
+        window.scrollTo(0, 0);
+    }
+
+    async function showArticle(id) {
+        gid('main-view').style.display = 'none';
+        gid('article-view').style.display = 'block';
+        window.scrollTo(0, 0);
+
+        const content = gid('article-content');
+        content.innerHTML = `<div style="padding:60px;text-align:center;color:#94a3b8"><i class="fas fa-spinner fa-spin fa-2x"></i></div>`;
+
+        try {
+            const res = await fetch(`${API_PATH}?action=get_kb_article_by_id&id=${id}`);
+            const data = await res.json();
+            if (data.status !== 'success') throw new Error(data.message || 'ไม่พบบทความ');
+            const art = data.article;
+
+            const catIdx = allCategories.findIndex(c => c.id == art.category_id);
+            const catPal = catPalettes[Math.max(0, catIdx) % catPalettes.length] || 'cat-blue';
+            const htmlContent = converter.makeHtml(art.content || '');
+            const updatedAt = art.updated_at ? new Date(art.updated_at).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '';
+
+            gid('art-breadcrumb-cat').textContent = art.category_name || 'ทั่วไป';
+            gid('art-breadcrumb-title').textContent = art.title;
+
+            content.innerHTML = `
+                <div class="kb-article-header">
+                    <div class="kb-article-category ${catPal}">
+                        <i class="fas ${allCategories[catIdx]?.icon || 'fa-folder'}"></i>
+                        ${esc(art.category_name || 'ทั่วไป')}
+                    </div>
+                    <div class="kb-article-title">${esc(art.title)}</div>
+                    <div class="kb-article-meta">
+                        ${art.author_name ? `<span><i class="fas fa-user"></i> ${esc(art.author_name)}</span>` : ''}
+                        ${updatedAt ? `<span><i class="fas fa-calendar"></i> ${updatedAt}</span>` : ''}
+                        <span><i class="fas fa-eye"></i> ${art.view_count||0} ครั้ง</span>
+                        <span><i class="fas fa-clock"></i> ${estimateReadTime(art.content)}</span>
+                    </div>
+                </div>
+                <div class="kb-article-body">
+                    <div class="kb-content">${htmlContent}</div>
+                </div>`;
+        } catch (e) {
+            content.innerHTML = `<div style="padding:60px;text-align:center;color:#ef4444"><i class="fas fa-exclamation-circle fa-2x" style="margin-bottom:12px;display:block"></i><p>${esc(e.message)}</p></div>`;
+        }
+    }
+</script>
+</body>
+</html>

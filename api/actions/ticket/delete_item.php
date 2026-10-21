@@ -101,6 +101,13 @@ if (isset($tableMap[$key]) && ($id !== '' || $allowEmptyId)) {
             $attach_stmt->bind_param("s", $id);
             if (!$attach_stmt->execute()) throw new Exception("Execute failed (Delete Attachments): " . $attach_stmt->error);
         }
+        // ลบพนักงาน → ลบสังกัด (บริษัท/แผนก/อีเมล) ตามไปด้วย ไม่งั้นค้างเป็นแถวกำพร้า
+        if ($key === 'employees') {
+            $asg_stmt = $conn->prepare("DELETE FROM employee_assignments WHERE employee_id = ?");
+            if (!$asg_stmt) throw new Exception("Prepare failed (Delete Assignments): " . $conn->error);
+            $asg_stmt->bind_param("s", $id);
+            if (!$asg_stmt->execute()) throw new Exception("Execute failed (Delete Assignments): " . $asg_stmt->error);
+        }
 
         $table = $tableMap[$key]['table'];
         $col = $tableMap[$key]['pk'];
