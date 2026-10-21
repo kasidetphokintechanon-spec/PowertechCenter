@@ -164,6 +164,12 @@ body.dir-v3 .v3-contact {
     min-width: 0;
 }
 body.dir-v3 .v3-none { font-size: 12px; color: var(--text-tertiary); }
+/* เบอร์+อีเมลอยู่บรรทัดเดียว (อีเมลยาวตัด …) — การ์ดเตี้ยลง เห็นคนต่อจอมากขึ้น โดยเฉพาะมือถือ */
+body.dir-v3 .v3-contact { flex-wrap: nowrap; }
+body.dir-v3 .v3-contact > .v3-pill:first-child:not(:last-child) { flex-shrink: 0; }
+body.dir-v3 .v3-contact > .v3-pill:last-child { flex: 0 1 auto; }
+/* อีเมลยาวในรายละเอียด: ขึ้นบรรทัดที่ @ (มี <wbr>) แทนการตัดกลางคำ */
+body.dir-v3 .assignment-email { word-break: normal; overflow-wrap: anywhere; min-width: 0; }
 
 body.dir-v3 .v3-pill {
     display: inline-flex;
@@ -256,6 +262,8 @@ body.dir-v3.detail-open .detail-scrim { opacity: 1; pointer-events: auto; }
     body.dir-v3 .dir-topbar .search-shortcut { display: none; }
     body.dir-v3 .dir-topbar .search-input { padding-right: 12px; font-size: 16px; } /* 16px กัน iOS ซูมเข้าเอง */
     body.dir-v3 .employee-list.v3-grid { padding: 10px 12px 28px; grid-template-columns: minmax(0, 1fr); }
+    body.dir-v3 .employee-card.v3-card { padding: 8px 10px; gap: 10px; }
+    body.dir-v3 .employee-list.v3-grid { gap: 6px; }
     body.dir-v3 .employee-detail,
     body.dir-v3 .employee-detail.mobile-show { width: 100%; padding-top: 64px; }
 }

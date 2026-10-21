@@ -8,6 +8,9 @@ const DOC_FORM_KEYS = [
     'handover' => 'ใบมอบ / รับทรัพย์สิน',
     'audit'    => 'ใบตรวจนับทรัพย์สิน',
     'password' => 'ใบแจ้งรหัสผ่าน',
+    'server_check' => 'ใบตรวจห้อง Server ประจำเดือน',
+    'it_report' => 'รายงานผลการให้บริการ IT',
+    'directory' => 'สมุดรายชื่อพนักงาน',
 ];
 
 function getDocForms(mysqli $conn): array {

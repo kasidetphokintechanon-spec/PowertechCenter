@@ -182,6 +182,17 @@ function isCancelledManagementDepartmentName(value) {
     return name === 'management' || name === 'mangement' || name === 'managment';
 }
 
+// ชื่อในฐานข้อมูลพิมพ์ไม่เหมือนกัน (Mr.Anan / Ms. Ernie / Ms.Kanyanat.Patkulkan)
+// → จัดรูปแบบตอนแสดงผลเท่านั้น ข้อมูลจริงไม่เปลี่ยน (ฟอร์มแก้ไขดึงจาก API ใหม่)
+function tidyPersonName(name) {
+    let n = String(name || '').trim().replace(/\s+/g, ' ');
+    const m = n.match(/^(Mrs|Miss|Ms|Mr|Dr)\.?\s*(.*)$/i);
+    if (!m || !m[2]) return n;
+    let rest = m[2];
+    if (!rest.includes(' ') && rest.includes('.')) rest = rest.replace(/\./g, ' ');
+    return m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() + (/^miss$/i.test(m[1]) ? ' ' : '. ') + rest.trim();
+}
+
 function mapEmployeeFromApi(row) {
     const assignments = Array.isArray(row.assignments) ? row.assignments : [];
     const primary = assignments.find(a => a.is_primary == 1) || assignments[0] || {};
@@ -190,7 +201,7 @@ function mapEmployeeFromApi(row) {
     if (isCancelledManagementDepartmentName(department)) department = '';
     const email = primary.email || '';
     const nameTh = row.name_th || '';
-    const nameEn = row.name || '';
+    const nameEn = tidyPersonName(row.name || '');
     const fullName = nameEn || nameTh || '-';
     const position = row.position || '';
     const isExecutiveByFlag = String(row.is_executive ?? '0') === '1';
@@ -1255,9 +1266,9 @@ function renderDepartments() {
     if (!elements.departmentList) return;
     elements.departmentList.innerHTML = departments.map(dept => {
         const color = DEPT_COLOR_MAP[dept] || '#6366f1';
-        return `<button class="nav-item" data-filter="dept-${dept}">
+        return `<button class="nav-item" data-filter="dept-${escapeHtmlText(dept)}">
             <span class="dept-nav-dot" style="background:${color}"></span>
-            <span>${dept}</span>
+            <span>${escapeHtmlText(dept)}</span>
             <span class="nav-badge">${activeEmployees.filter(e => e.department === dept).length}</span>
         </button>`;
     }).join('');
@@ -1404,21 +1415,21 @@ function renderFilterPills() {
     if (state.searchQuery) {
         pills.push(`<span class="filter-pill">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            ค้นหา: <b>${state.searchQuery}</b>
+            ค้นหา: <b>${escapeHtmlText(state.searchQuery)}</b>
             <button onclick="window.dirClearSearch()" aria-label="ล้างการค้นหา">×</button>
         </span>`);
     }
 
     if (state.companyFilter) {
         pills.push(`<span class="filter-pill filter-pill-company">
-            🏢 ${state.companyFilter}
+            🏢 ${escapeHtmlText(state.companyFilter)}
             <button onclick="window.dirClearCompany()" aria-label="ล้าง company">×</button>
         </span>`);
     }
 
     if (state.deptFilter) {
         pills.push(`<span class="filter-pill filter-pill-dept">
-            📁 แผนก ${state.deptFilter}
+            📁 แผนก ${escapeHtmlText(state.deptFilter)}
             <button onclick="window.dirClearDept()" aria-label="ล้าง dept">×</button>
         </span>`);
     }
@@ -1427,7 +1438,7 @@ function renderFilterPills() {
         const catLabels = { favorites:'⭐ ปักหมุด', executives:'🏆 ผู้บริหาร', management:'👔 Management', inactive:'Inactive' };
         const label = catLabels[state.currentFilter] || state.currentFilter;
         pills.push(`<span class="filter-pill filter-pill-category">
-            ${label}
+            ${escapeHtmlText(label)}
             <button onclick="window.dirSetCategory('all')" aria-label="ล้าง category">×</button>
         </span>`);
     }
@@ -1596,7 +1607,7 @@ function renderEmployeeList() {
         }
         const grouped = groupByDepartment(theRest);
         for (const [dept, employees] of Object.entries(grouped)) {
-            html += `<div class="group-header">${dept}</div>`;
+            html += `<div class="group-header">${escapeHtmlText(dept)}</div>`;
             html += employees.map(e => renderEmployeeCard(e)).join('');
         }
     } else {
@@ -1748,7 +1759,13 @@ function renderEmployeeDetail(employee) {
     const displayCompany = (primaryAssign?.company || getDisplayCompanyForEmployee(employee) || employee.company || '').trim();
     const displayDepartment = (primaryAssign?.department || employee.department || '').trim();
     const nameEn = employee.nameEn || employee.name || employee.nameTh || employee.name_th || '-';
-    const statusText = employee.status || 'ทำงานอยู่';
+    const isActive = isEmployeeActive(employee);
+    const statusText = isActive ? 'ทำงานอยู่' : 'ลาออกแล้ว';
+    // ข้อมูลพนักงานทุกช่องต้อง escape — หน้านี้เปิดดูได้โดยไม่ล็อกอิน
+    const e = escapeHtmlText;
+    // อีเมลยาว: ให้ขึ้นบรรทัดใหม่ที่ @ ไม่ใช่กลางคำ
+    const emailHtml = v => e(v).replace('@', '<wbr>@');
+    const jsArg = v => e(JSON.stringify(String(v ?? '')));
 
     elements.employeeDetail.innerHTML = `
         <div class="detail-content">
@@ -1761,17 +1778,17 @@ function renderEmployeeDetail(employee) {
             
             <div class="detail-header">
                 <div class="detail-avatar">
-                    ${employee.avatar ? `<img src="${employee.avatar}" alt="${employee.name}" loading="lazy" onerror="this.outerHTML='${initials}'">` : initials}
+                    ${employee.avatar ? `<img src="${e(employee.avatar)}" alt="" loading="lazy" onerror="this.outerHTML='${e(initials)}'">` : e(initials)}
                 </div>
-                <h1 class="detail-name">${nameEn}</h1>
-                ${thaiName ? `<p class="detail-position">${thaiName}</p>` : ''}
+                <h1 class="detail-name">${e(nameEn)}</h1>
+                ${thaiName ? `<p class="detail-position">${e(thaiName)}</p>` : ''}
                 <div class="detail-meta-row">
-                    ${empId ? `<span class="detail-meta-pill">${empId}</span>` : ''}
-                    ${employee.position ? `<span class="detail-meta-pill meta-role">${employee.position}</span>` : ''}
+                    ${empId ? `<span class="detail-meta-pill">${e(empId)}</span>` : ''}
+                    ${employee.position ? `<span class="detail-meta-pill meta-role">${e(employee.position)}</span>` : ''}
                 </div>
                 <div class="detail-badges">
-                    <span class="detail-badge company ${displayCompany || employee.company}">${displayCompany || employee.company}</span>
-                    ${displayDepartment ? `<span class="detail-badge department">${displayDepartment}</span>` : ``}
+                    <span class="detail-badge company ${e(displayCompany || employee.company)}">${e(displayCompany || employee.company)}</span>
+                    ${displayDepartment ? `<span class="detail-badge department">${e(displayDepartment)}</span>` : ``}
                     ${employee.isExecutive ? '<span class="detail-badge department">ผู้บริหาร</span>' : ''}
                     ${!isEmployeeActive(employee) ? '<span class="detail-badge inactive-status">⊘ Inactive</span>' : (isRecentlyAdded(employee) ? '<span class="detail-badge new-user">พนักงานใหม่</span>' : '')}
                 </div>
@@ -1780,7 +1797,7 @@ function renderEmployeeDetail(employee) {
             <div class="detail-section">
                 <div class="detail-section-title">ข้อมูลติดต่อ</div>
                 <div class="contact-cards">
-                    <div class="contact-card" onclick='handlePhoneAction(${JSON.stringify(contactPhone)})'>
+                    <div class="contact-card" onclick="handlePhoneAction(${jsArg(contactPhone)})">
                         <div class="contact-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -1788,7 +1805,7 @@ function renderEmployeeDetail(employee) {
                         </div>
                         <div class="contact-info">
                             <div class="contact-label">โทรศัพท์</div>
-                            <div class="contact-value">${contactPhone || '-'}</div>
+                            <div class="contact-value">${e(contactPhone) || '-'}</div>
                         </div>
                         <button class="contact-action" title="โทรออกหรือคัดลอก">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1797,6 +1814,7 @@ function renderEmployeeDetail(employee) {
                             </svg>
                         </button>
                     </div>
+                </div>
             </div>
 
             <div class="detail-section">
@@ -1805,13 +1823,13 @@ function renderEmployeeDetail(employee) {
                     ${assignments.map(a => `
                         <div class="assignment-card ${a.is_primary == 1 ? 'primary' : ''}">
                             <div class="assignment-header">
-                                <span class="assignment-company">${a.company || '-'}</span>
+                                <span class="assignment-company">${e(a.company) || '-'}</span>
                                 ${a.is_primary == 1 ? '<span class="assignment-badge">หลัก</span>' : ''}
                             </div>
-                            <div class="assignment-dept">${a.department || '-'}</div>
+                            <div class="assignment-dept">${e(a.department) || '-'}</div>
                             <div class="assignment-email-row">
-                                <span class="assignment-email">${a.email || '-'}</span>
-                                ${a.email ? `<button class="assignment-copy" onclick="event.stopPropagation(); copyToClipboard('${a.email}','อีเมล')">
+                                <span class="assignment-email">${a.email ? emailHtml(a.email) : '-'}</span>
+                                ${a.email ? `<button class="assignment-copy" onclick="event.stopPropagation(); copyToClipboard(${jsArg(a.email)},'อีเมล')">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -1834,12 +1852,12 @@ function renderEmployeeDetail(employee) {
                 </div>
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="info-label">ชื่อภาษาอังกฤษ</span>
-                        <span class="info-value">${nameEn}</span>
+                        <span class="info-label">ตำแหน่ง</span>
+                        <span class="info-value">${e(employee.position) || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">รหัสพนักงาน</span>
-                        <span class="info-value">${empId || '-'}</span>
+                        <span class="info-value">${e(empId) || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">วันเริ่มงาน</span>
@@ -1847,7 +1865,7 @@ function renderEmployeeDetail(employee) {
                     </div>
                     <div class="info-item">
                         <span class="info-label">อายุงาน</span>
-                        <span class="info-value">${isAdminUser ? (yearsWorked + ' ปี') : '-'}</span>
+                        <span class="info-value">${isAdminUser && yearsWorked !== '-' ? (yearsWorked < 1 ? 'ไม่ถึง 1 ปี' : yearsWorked + ' ปี') : '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">วันเกิด</span>
@@ -1855,13 +1873,13 @@ function renderEmployeeDetail(employee) {
                     </div>
                     <div class="info-item">
                         <span class="info-label">สถานะ</span>
-                        <span class="info-value" style="color: var(--success);">${statusText}</span>
+                        <span class="info-value" style="color: ${isActive ? 'var(--success)' : 'var(--text-secondary)'};">${statusText}</span>
                     </div>
                 </div>
             </div>
 
             <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px;">
-                <button onclick="toggleFavorite('${employee.id}')" style="
+                <button onclick="toggleFavorite(${jsArg(employee.id)})" style="
                     display: flex; align-items: center; justify-content: center;
                     gap: 8px; padding: 10px 18px;
                     border: 1px solid var(--border);
@@ -1877,7 +1895,7 @@ function renderEmployeeDetail(employee) {
                     </svg>
                     ${isFavorite ? 'ยกเลิกปักหมุด' : 'ปักหมุด'}
                 </button>
-                <a href="mailto:${contactEmail}" style="
+                <a href="mailto:${e(contactEmail)}" style="
                     display: flex; align-items: center; justify-content: center;
                     gap: 8px; padding: 10px 18px;
                     border: none; background: var(--accent);
@@ -1909,7 +1927,7 @@ function renderEmployeeDetail(employee) {
                     </svg>
                     เพิ่มพนักงาน
                 </button>
-                <button onclick="openAdminEdit('${empId}')" style="
+                <button onclick="openAdminEdit(${jsArg(empId)})" style="
                     display: flex; align-items: center; justify-content: center;
                     gap: 8px; padding: 10px 18px;
                     border: 1px solid var(--border); background: var(--bg-secondary);
@@ -1924,7 +1942,7 @@ function renderEmployeeDetail(employee) {
                     </svg>
                     แก้ไขพนักงาน
                 </button>
-                <a href="setup.html?user=${encodeURIComponent(employee.name || '')}&dept=${encodeURIComponent(displayDepartment)}&company=${encodeURIComponent(displayCompany)}&empid=${encodeURIComponent(empId)}" style="
+                <a href="setup.html?user=${encodeURIComponent(employee.name || '')}&amp;dept=${encodeURIComponent(displayDepartment)}&amp;company=${encodeURIComponent(displayCompany)}&amp;empid=${encodeURIComponent(empId)}" style="
                     display: flex; align-items: center; justify-content: center;
                     gap: 8px; padding: 10px 18px;
                     border: 1px solid #2563eb; background: #eff6ff;
@@ -2706,7 +2724,7 @@ function exportDirectoryExcel() {
         return;
     }
 
-    // ให้คอลัมน์และฟิลด์ใกล้เคียงของเดิม (js/directory.js)
+    // ให้คอลัมน์และฟิลด์ใกล้เคียง Directory รุ่นเดิม
     const header = ['ID', 'Name (EN)', 'Name (TH)', 'Position', 'Company', 'Department', 'Email', 'Phone', 'Status'];
     const lines = [];
 
@@ -2758,187 +2776,42 @@ function exportDirectoryExcel() {
     showToast('Export Excel เสร็จแล้ว');
 }
 
-// Export filtered employees to PDF — enterprise print style
+// สมุดรายชื่อ (A4 แนวนอน หลายหน้า — แกนกลาง js/doc-print.js หน้าตาเดียวกับใบพิมพ์ทุกใบ)
+// พิมพ์ตามตัวกรองที่เลือกอยู่บนจอ · จัดกลุ่มตามแผนก
 function exportDirectoryPdf() {
     const rows = state.filteredEmployees.length ? state.filteredEmployees : state.employees;
     if (!rows.length) {
-        if (window.Swal) {
-            Swal.fire({ icon: 'info', title: 'ไม่พบข้อมูล', text: 'ไม่มีรายชื่อพนักงานที่ตรงกับเงื่อนไขปัจจุบัน' });
-        } else {
-            showToast('ไม่มีข้อมูลสำหรับ Export');
-        }
+        if (window.Swal) Swal.fire({ icon: 'info', title: 'ไม่พบข้อมูล', text: 'ไม่มีรายชื่อพนักงานที่ตรงกับเงื่อนไขปัจจุบัน' });
+        else showToast('ไม่มีข้อมูลสำหรับพิมพ์');
         return;
     }
-
-    if (window.Swal) {
-        Swal.fire({
-            title: 'กำลังสร้าง PDF...',
-            text: 'กรุณารอสักครู่',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-    }
-
-    const win = window.open('', '_blank');
-    if (!win) {
-        if (window.Swal) Swal.close();
-        showToast('ไม่สามารถเปิดหน้าต่างใหม่ได้ (อาจถูกบล็อก Popup)');
-        return;
-    }
-
-    // ── Labels & meta ────────────────────────────────
+    const { esc } = DocPrint;
     const companyCode = state.companyFilter || getCompanyFilterCodeFromCurrentFilter() || '';
-    const deptFilter  = state.deptFilter || (state.currentFilter.startsWith('dept-') ? state.currentFilter.replace('dept-', '') : '');
-    const catFilter   = (['executives','management','inactive','favorites'].includes(state.currentFilter)) ? state.currentFilter : '';
+    const deptFilter = state.deptFilter || (state.currentFilter.startsWith('dept-') ? state.currentFilter.replace('dept-', '') : '');
+    const catLabels = { executives: 'ผู้บริหาร', management: 'Management', inactive: 'พนักงาน Inactive', favorites: 'ปักหมุด' };
+    const scope = [companyCode, deptFilter, catLabels[state.currentFilter]].filter(Boolean).join(' · ') || 'พนักงานทั้งหมด';
 
-    const companyNames = { PTA: 'Powertech Asia', PT4: 'Powertech 4', PTE: 'Powertech Energy' };
-    const companyColors = { PTA: '#059669', PT4: '#dc2626', PTE: '#2563eb' };
-    const accentColor = companyColors[companyCode] || '#1d4ed8';
+    const groups = {};
+    rows.forEach(emp => { const d = getPreferredAssignmentForCurrentFilter(emp)?.department || emp.department || 'ไม่ระบุแผนก'; (groups[d] ||= []).push(emp); });
+    let n = 0;
+    const body = Object.keys(groups).sort((x, y) => compareDepartmentNames(x, y)).map(d => `<tr class="grp"><td colspan="7">${esc(d)} <span style="font-weight:400;color:#64748b">· ${groups[d].length} คน</span></td></tr>`
+        + groups[d].map(emp => {
+            const a = getPreferredAssignmentForCurrentFilter(emp) || {};
+            return `<tr><td style="text-align:center;color:#64748b">${++n}</td><td class="mono">${esc(emp.employeeId || emp.id || '')}</td>
+                <td><b>${esc(getPreferredDisplayName(emp))}</b>${emp.nameTh ? `<div style="font-size:7.6pt;color:#64748b">${esc(emp.nameTh)}</div>` : ''}</td>
+                <td>${esc(emp.position || '')}</td><td style="text-align:center">${esc(getDisplayCompanyForEmployee(emp) || emp.company || '')}</td>
+                <td class="mono" style="white-space:nowrap">${esc(normalizePhoneValue(emp.phone || ''))}</td><td style="font-size:8pt">${esc(a.email || emp.email || '')}</td></tr>`;
+        }).join('')).join('');
 
-    const base = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-    const logoMap = { PTA: base + '../../../uploads/logos/pta_logo.png', PT4: base + '../../../uploads/logos/pt4_logo.png', PTE: base + '../../../uploads/logos/pte_logo.png' };
-    const logoSrc = logoMap[companyCode] || '';
-
-    const companyLabel   = companyCode ? (companyNames[companyCode] || companyCode) : 'Powertech System Center';
-    const companySub     = companyCode ? companyCode : 'All Companies';
-    const scopeLabel     = [companyCode, deptFilter, catFilter].filter(Boolean).join(' · ') || 'พนักงานทั้งหมด';
-
-    const dateStr  = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-    const docNo    = `DIR-${companyCode || 'ALL'}-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${String(rows.length).padStart(3,'0')}`;
-
-    // ── Table rows ────────────────────────────────────
-    const esc = (v) => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const companyBadgeColor = (c) => ({ PTA:'#059669', PT4:'#dc2626', PTE:'#2563eb' }[String(c||'').toUpperCase()] || '#64748b');
-
-    const tableRows = rows.map((emp, i) => {
-        const nameEn    = esc(getPreferredDisplayName(emp));
-        const nameTh    = esc(emp.nameTh || emp.name_th || '');
-        const phone     = esc(normalizePhoneValue(emp.phone || emp.mobile || ''));
-        const empCode   = String(emp.company || '').toUpperCase();
-        const badgeClr  = companyBadgeColor(empCode);
-        const isActive  = (emp.employment_status || emp.status || 'active') === 'active';
-        const rowBg     = i % 2 === 0 ? '#fff' : '#f8fafc';
-        return `<tr style="background:${rowBg}">
-            <td style="color:#64748b;font-size:10px;">${esc(emp.employeeId || emp.id || '')}</td>
-            <td style="font-weight:600;">${nameEn}</td>
-            <td>${nameTh}</td>
-            <td>${esc(emp.position || '')}</td>
-            <td style="text-align:center;"><span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;background:${badgeClr}18;color:${badgeClr};border:1px solid ${badgeClr}30">${esc(emp.company||'')}</span></td>
-            <td>${esc(emp.department || '')}</td>
-            <td style="font-size:10px;color:#475569;">${esc(emp.email || '')}</td>
-            <td>${phone}</td>
-        </tr>`;
-    }).join('');
-
-    // ── HTML ──────────────────────────────────────────
-    win.document.write(`<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="utf-8">
-<title>สมุดรายชื่อพนักงาน — ${companyLabel}</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Sarabun',sans-serif;background:#e8ecf0;padding:20px 0;color:#1e293b;display:flex;flex-direction:column;align-items:center;}
-.toolbar{width:794px;margin-bottom:12px;display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e2e8f0;}
-.toolbar h1{font-size:.85rem;font-weight:700;color:#1e293b;flex:1;}
-.print-btn{padding:5px 14px;border-radius:6px;border:none;background:#0f172a;color:#fff;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;}
-.print-btn:hover{background:#1e293b;}
-.a4{width:794px;min-height:1123px;background:#fff;padding:28px 32px 32px;box-shadow:0 4px 32px rgba(0,0,0,.13);font-size:12px;line-height:1.5;color:#1e293b;display:flex;flex-direction:column;}
-.doc-header{display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${accentColor};padding-bottom:12px;margin-bottom:10px;}
-.company-info{display:flex;align-items:center;gap:10px;border-left:4px solid ${accentColor};padding-left:12px;}
-.company-logo{width:44px;height:44px;object-fit:contain;}
-.company-name{font-size:1rem;font-weight:800;color:#1e293b;}
-.company-sub{font-size:.7rem;color:#475569;margin-top:2px;font-weight:500;}
-.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
-.doc-no-label{font-size:.58rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;}
-.doc-no{font-size:.85rem;font-weight:700;color:${accentColor};}
-.doc-date{font-size:.65rem;color:#64748b;}
-.doc-title-bar{background:linear-gradient(135deg,${accentColor},${accentColor}dd);color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:10px;}
-.doc-title-bar h2{font-size:.9rem;font-weight:700;letter-spacing:.02em;}
-.doc-title-bar p{font-size:.65rem;opacity:.85;margin-top:1px;}
-.info-row{display:flex;gap:0;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:10px;}
-.info-cell{flex:1;padding:5px 10px;border-right:1px solid #e2e8f0;}
-.info-cell:last-child{border-right:none;}
-.info-cell .lbl{font-size:.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;}
-.info-cell .val{font-size:.75rem;color:#1e293b;font-weight:600;margin-top:1px;}
-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;}
-thead tr{background:${accentColor};color:#fff;}
-thead th{padding:6px 7px;text-align:left;font-weight:600;font-size:.62rem;letter-spacing:.03em;}
-thead th.center{text-align:center;}
-tbody tr{border-bottom:1px solid #f1f5f9;}
-tbody td{padding:5px 7px;color:#334155;vertical-align:middle;}
-.doc-footer{margin-top:auto;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;}
-.doc-footer span{font-size:.58rem;color:#94a3b8;}
-@page{size:A4 landscape;margin:12mm;}
-@media print{
-  body{background:none;padding:0;display:block;}
-  .toolbar{display:none!important;}
-  .a4{box-shadow:none;width:100%;margin:0;padding:0;min-height:auto;display:block;}
-  thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-}
-</style>
-</head>
-<body>
-<div class="toolbar">
-  <h1>สมุดรายชื่อพนักงาน — ${esc(companyLabel)}${deptFilter ? ' / '+esc(deptFilter) : ''}</h1>
-  <button class="print-btn" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
-</div>
-<div class="a4">
-  <div class="doc-header">
-    <div class="company-info">
-      ${logoSrc ? `<img class="company-logo" src="${logoSrc}" onerror="this.style.display='none'">` : ''}
-      <div>
-        <div class="company-name">${esc(companyLabel)}</div>
-        <div class="company-sub">Powertech System Center · ${esc(companySub)}</div>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="doc-no-label">Document No.</div>
-      <div class="doc-no">${esc(docNo)}</div>
-      <div class="doc-date">${dateStr}</div>
-    </div>
-  </div>
-
-  <div class="doc-title-bar">
-    <h2>สมุดรายชื่อพนักงาน / Employee Directory</h2>
-    <p>Powertech System Center · ข้อมูล ณ ${dateStr}</p>
-  </div>
-
-  <div class="info-row">
-    <div class="info-cell"><div class="lbl">ขอบเขต / Scope</div><div class="val">${esc(scopeLabel)}</div></div>
-    <div class="info-cell"><div class="lbl">จำนวนทั้งหมด</div><div class="val">${rows.length} คน</div></div>
-    <div class="info-cell"><div class="lbl">วันที่พิมพ์</div><div class="val">${dateStr}</div></div>
-    <div class="info-cell"><div class="lbl">สถานะ</div><div class="val">Active · Verified</div></div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th style="width:7%">รหัส</th>
-        <th style="width:20%">ชื่อ (EN)</th>
-        <th style="width:18%">ชื่อ (TH)</th>
-        <th style="width:20%">ตำแหน่ง</th>
-        <th class="center" style="width:7%">บริษัท</th>
-        <th style="width:13%">แผนก</th>
-        <th style="width:10%">อีเมล</th>
-        <th style="width:8%">โทรศัพท์</th>
-      </tr>
-    </thead>
-    <tbody>${tableRows}</tbody>
-  </table>
-
-  <div class="doc-footer">
-    <span>DIR-FM-001 · Powertech System Center · สมุดรายชื่อพนักงาน</span>
-    <span>${esc(scopeLabel)} · ${rows.length} รายการ · พิมพ์ ${dateStr}</span>
-  </div>
-</div>
-</body></html>`);
-
-    win.document.close();
-    if (window.Swal) Swal.close();
-    win.focus();
-    setTimeout(() => win.print(), 800);
+    DocPrint.preview({
+        company: companyCode, formKey: 'directory', classified: true, size: 'land', flow: true,
+        docNo: `DIR-${companyCode || 'ALL'}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
+        dateText: 'ข้อมูล ณ ' + DocPrint.thDate(new Date(), true),
+        title: { th: 'สมุดรายชื่อพนักงาน', en: `Employee Directory · ${rows.length} คน` },
+        info: [['ขอบเขต', scope], ['จำนวน', rows.length + ' คน']],
+        blocks: [`<div class="dp-sec" style="break-inside:auto"><table class="dp-tbl"><thead><tr><th style="width:26px">#</th><th style="width:22mm">รหัส</th><th>ชื่อ - นามสกุล</th>
+            <th style="width:44mm">ตำแหน่ง</th><th style="width:14mm">บริษัท</th><th style="width:28mm">โทรศัพท์</th><th style="width:72mm">อีเมล</th></tr></thead><tbody>${body}</tbody></table></div>`],
+    });
 }
 
 // Copy directory link for HR to share
