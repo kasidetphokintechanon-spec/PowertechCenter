@@ -123,6 +123,9 @@ body.dir-v3 .employee-card.v3-card {
     padding: 10px 12px;
     min-width: 0;
 }
+/* styles.css เดิมใส่ min-height:56px ให้การ์ดบนจอสัมผัส → แถว grid หดเหลือ 56px เนื้อหาล้นทับการ์ดถัดไป (เจอบนมือถือจริง) */
+body.dir-v3 .employee-card.v3-card { min-height: 0; }
+body.dir-v3 .employee-list.v3-grid { grid-auto-rows: max-content; }
 body.dir-v3 .v3-card .avatar { width: 40px; height: 40px; font-size: 14px; }
 body.dir-v3 .v3-body { min-width: 0; }
 body.dir-v3 .v3-top {
@@ -243,6 +246,11 @@ body.dir-v3 .employee-detail.mobile-show {
 }
 body.dir-v3 .employee-detail .detail-placeholder { display: none; }
 body.dir-v3 .employee-detail .detail-close { display: flex !important; align-items: center; justify-content: center; z-index: 2; }
+/* ปุ่มปิดค้างมุมขวาบนตอนเลื่อน — อ่านยาว ๆ แล้วยังปิดได้ทันที
+   (fixed ใช้ไม่ได้: แผงมี transform → fixed กลายเป็นเลื่อนตามแผง · ใช้ sticky + margin ติดลบ ไม่ดันเนื้อหาลง) */
+body.dir-v3 .employee-detail .detail-close { position: sticky !important; top: 12px !important; right: auto !important; margin: 0 0 -36px auto; box-shadow: 0 1px 3px rgba(15,23,42,.15); border: 1px solid var(--border) !important; background: var(--bg-card) !important; }
+/* กล่องข้อมูลติดต่อมีระยะล่างซ้ำกับ padding ของกล่อง → ช่องว่างใต้เบอร์ */
+body.dir-v3 .detail-section .contact-cards { margin-bottom: 0; }
 
 body.dir-v3 .detail-scrim {
     position: fixed;

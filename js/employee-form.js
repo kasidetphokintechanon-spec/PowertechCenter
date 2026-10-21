@@ -285,7 +285,7 @@
             const left = Object.values(v).filter(x => !x).length;
             q('[data-act="save"]').disabled = left > 0 || st.saving;
             const foot = q('[data-foot]');
-            if (!foot.classList.contains('err')) foot.textContent = left ? `เหลืออีก ${left} รายการ` : 'พร้อมบันทึก — กด Ctrl+Enter ได้';
+            if (!foot.classList.contains('err')) foot.textContent = left ? `เหลืออีก ${left} รายการ` : (matchMedia('(pointer: coarse)').matches ? 'พร้อมบันทึก' : 'พร้อมบันทึก — กด Ctrl+Enter ได้');
             q('[data-go="1"]').classList.toggle('ok', v.id && v.name && v.position);
             q('[data-go="2"]').classList.toggle('ok', v.asg && v.email && v.phone);
             return left === 0;

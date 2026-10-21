@@ -1859,18 +1859,18 @@ function renderEmployeeDetail(employee) {
                         <span class="info-label">รหัสพนักงาน</span>
                         <span class="info-value">${e(empId) || '-'}</span>
                     </div>
-                    <div class="info-item">
+                    ${isAdminUser ? `<div class="info-item">
                         <span class="info-label">วันเริ่มงาน</span>
-                        <span class="info-value">${isAdminUser ? formatDate(employee.startDate) : '-'}</span>
+                        <span class="info-value">${formatDate(employee.startDate)}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">อายุงาน</span>
-                        <span class="info-value">${isAdminUser && yearsWorked !== '-' ? (yearsWorked < 1 ? 'ไม่ถึง 1 ปี' : yearsWorked + ' ปี') : '-'}</span>
+                        <span class="info-value">${yearsWorked !== '-' ? (yearsWorked < 1 ? 'ไม่ถึง 1 ปี' : yearsWorked + ' ปี') : '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">วันเกิด</span>
-                        <span class="info-value">${isAdminUser ? formatDate(employee.birthday) : '-'}</span>
-                    </div>
+                        <span class="info-value">${formatDate(employee.birthday)}</span>
+                    </div>` : ''}
                     <div class="info-item">
                         <span class="info-label">สถานะ</span>
                         <span class="info-value" style="color: ${isActive ? 'var(--success)' : 'var(--text-secondary)'};">${statusText}</span>
