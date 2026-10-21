@@ -28,8 +28,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<link rel="stylesheet" href="css/directory-v3.css?v=20261021a">
 </head>
-<body  class="dir-page-root directory-unified-v1 ptc-unified-v1">
+<body  class="dir-page-root directory-unified-v1 ptc-unified-v1 dir-v3">
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -54,16 +55,6 @@
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-            </div>
-
-            <!-- Search -->
-            <div class="search-container">
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                </svg>
-                <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาพนักงาน...">
-                <kbd class="search-shortcut" id="searchShortcutKey">⌘K</kbd>
             </div>
 
             <!-- Stats -->
@@ -181,6 +172,18 @@
 
             <!-- Employee List -->
             <section class="employee-list-section">
+                <!-- ค้นหา + กรองบริษัท อยู่บนสุดเสมอ (ทั้งคอมและมือถือ) -->
+                <div class="dir-topbar">
+                    <div class="search-container">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="search" class="search-input" id="searchInput" placeholder="ค้นหาชื่อ เบอร์ อีเมล แผนก..." autocomplete="off">
+                        <kbd class="search-shortcut" id="searchShortcutKey">⌘K</kbd>
+                    </div>
+                    <div class="dir-chips" id="companyChips"></div>
+                </div>
                 <div class="list-header">
                     <div class="list-header-left">
                         <div class="list-title-row">
@@ -271,6 +274,8 @@
 
     <!-- Overlay for mobile sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- ฉากหลังตอนเปิดรายละเอียดพนักงาน (แผงเลื่อนออกจากขวา) -->
+    <div class="detail-scrim" id="detailScrim" onclick="closeDetail()"></div>
 
     <!-- Enterprise employee editor modal -->
     <div id="employee-editor-modal" class="ptc-modal" style="display:none;" aria-hidden="true" role="dialog" aria-labelledby="employee-editor-title">
@@ -314,6 +319,6 @@
             el.textContent = isApple ? '⌘K' : 'Ctrl K';
         })();
     </script>
-    <script src="directory_New/public/xampp/directory.js?v=20260704q"></script>
+    <script src="directory_New/public/xampp/directory.js?v=20261021a"></script>
 </body>
 </html>

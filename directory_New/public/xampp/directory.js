@@ -1004,6 +1004,17 @@ function renderCompanyNav() {
             <span class="nav-badge" data-company-badge="${code}">0</span>
         </button>
     `).join('');
+
+    // ปุ่มกรองบริษัทแถวบน (ใช้ filter ชุดเดียวกับเมนูซ้าย — "company-" ว่าง = ทุกบริษัท)
+    const chips = document.getElementById('companyChips');
+    if (chips) {
+        chips.innerHTML = `<button type="button" class="dir-chip ${!state.companyFilter ? 'active' : ''}" data-filter="company-">ทั้งหมด <span class="dir-chip-n" data-company-badge="__all">0</span></button>`
+            + companyCodes.map((code) => `
+            <button type="button" class="dir-chip ${state.companyFilter === code ? 'active' : ''}" data-filter="company-${code}">
+                <span class="company-dot ${getCompanyDotClass(code)}"></span>${code}
+                <span class="dir-chip-n" data-company-badge="${code}">0</span>
+            </button>`).join('');
+    }
 }
 
 async function loadJobPositions() {
@@ -1190,6 +1201,8 @@ async function loadDepartments() {
 // Theme
 function applyTheme() {
     document.body.classList.toggle('dark', state.isDarkMode);
+    // ธีมรวม (directory-unified-theme.css / design-system.css) ใช้ html.dark — ต้องสลับคู่กัน ไม่งั้นมืดแค่ครึ่งหน้า
+    document.documentElement.classList.toggle('dark', state.isDarkMode);
 }
 
 function toggleTheme() {
@@ -1218,9 +1231,10 @@ function updateStats() {
     elements.execBadge.textContent = execCount;
     updateManagementNavVisibility(false);
     companyCodes.forEach((code) => {
-        const badge = document.querySelector(`[data-company-badge="${code}"]`);
-        if (badge) badge.textContent = activeEmployees.filter(e => employeeHasCompanyAssignment(e, code)).length;
+        const n = activeEmployees.filter(e => employeeHasCompanyAssignment(e, code)).length;
+        document.querySelectorAll(`[data-company-badge="${code}"]`).forEach(badge => { badge.textContent = n; });
     });
+    document.querySelectorAll('[data-company-badge="__all"]').forEach(badge => { badge.textContent = total; });
 }
 
 // Departments
@@ -1360,7 +1374,7 @@ function filterEmployees() {
 }
 
 function updateNavActiveStates() {
-    document.querySelectorAll('.nav-item[data-filter]').forEach(item => {
+    document.querySelectorAll('.nav-item[data-filter], .dir-chip[data-filter]').forEach(item => {
         const f = item.dataset.filter || '';
         let isActive = false;
         if (f.startsWith('company-')) {
@@ -1576,7 +1590,8 @@ function renderEmployeeList() {
     }
     const el = elements.employeeList;
     const isGrid = state.viewMode === 'grid';
-    el.className = `employee-list ${isGrid ? 'grid-view' : ''}`;
+    // v3: การ์ดเรียงหลายคอลัมน์เต็มความกว้าง (CSS ใน css/directory-v3.css)
+    el.className = `employee-list v3-grid ${isGrid ? 'grid-view' : ''}`;
 
     const hasExisting = el.children.length > 0;
     if (hasExisting) {
@@ -1653,61 +1668,68 @@ function highlightText(text, query) {
 }
 
 function renderEmployeeCard(employee) {
+    // v3: การ์ดกระชับ — เห็นเบอร์/อีเมลทันทีพร้อมปุ่มโทร/คัดลอก ไม่ต้องเปิดรายละเอียด
     const isFavorite = state.favorites.includes(employee.id);
     const isSelected = state.selectedEmployee?.id === employee.id;
-    const initials = getInitials(employee.name);
-    const safeId = String(employee.id).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const initials = escapeHtmlText(getInitials(employee.name || ''));
+    const safeId = escapeHtmlText(employee.id);
     const isNewUser = isRecentlyAdded(employee);
     const preOnboard = isPreOnboard(employee);
     const daysLeft = preOnboard ? daysUntilStart(employee) : null;
-    const displayCompany = getDisplayCompanyForEmployee(employee);
+    const displayCompany = escapeHtmlText(getDisplayCompanyForEmployee(employee) || employee.company || '');
     const contextAssign = getPreferredAssignmentForCurrentFilter(employee);
     const displayDepartment = String(contextAssign?.department || employee.department || '').trim();
     const q = state.searchQuery;
-    const displayName     = highlightText(employee.name, q);
-    const displayPosition = highlightText(employee.position, q);
-    const displayPhone    = employee.phone || contextAssign?.phone || '';
-    const displayEmail    = contextAssign?.email || employee.email || '';
+    const displayPhone = normalizePhoneValue(employee.phone || contextAssign?.phone || '');
+    const displayEmail = String(contextAssign?.email || employee.email || '').trim();
     const isBDay = employee.birthday && (() => { const d = new Date(employee.birthday); const n = new Date(); return d.getDate() === n.getDate() && d.getMonth() === n.getMonth(); })();
-    const safePhone = displayPhone.replace(/"/g, '&quot;');
-    const safeEmail = displayEmail.replace(/"/g, '&quot;');
-
+    const jsPhone = escapeHtmlText(JSON.stringify(displayPhone)); // ใช้เป็นอาร์กิวเมนต์ JS ใน onclick ได้ปลอดภัย
+    const jsEmail = escapeHtmlText(JSON.stringify(displayEmail));
     const isInactive = !isEmployeeActive(employee);
+    const sub = [employee.position, displayDepartment].filter(Boolean).map(t => highlightText(escapeHtmlText(t), q)).join(' · ');
+
+    const status = isInactive
+        ? '<span class="inactive-badge">⊘ Inactive</span>'
+        : (preOnboard && daysLeft !== null ? `<span class="incoming-badge" title="เริ่มงานอีก ${daysLeft} วัน">🔔 ${daysLeft}วัน</span>` : (isNewUser ? '<span class="new-badge">NEW</span>' : ''));
+
+    const phonePill = displayPhone ? `
+        <span class="v3-pill">
+            <button type="button" class="v3-pill-main" onclick="event.stopPropagation(); handlePhoneAction(${jsPhone})" title="โทร / คัดลอกเบอร์">
+                <i class="fa fa-phone"></i><span class="v3-pill-text">${highlightText(escapeHtmlText(displayPhone), q)}</span>
+            </button>
+            <button type="button" class="v3-copy" onclick="event.stopPropagation(); copyToClipboard(${jsPhone}, 'เบอร์โทร')" title="คัดลอกเบอร์"><i class="fa-regular fa-copy"></i></button>
+        </span>` : '';
+    const emailPill = displayEmail ? `
+        <span class="v3-pill">
+            <a class="v3-pill-main" href="mailto:${escapeHtmlText(displayEmail)}" onclick="event.stopPropagation()" title="ส่งอีเมล">
+                <i class="fa fa-envelope"></i><span class="v3-pill-text">${highlightText(escapeHtmlText(displayEmail), q)}</span>
+            </a>
+            <button type="button" class="v3-copy" onclick="event.stopPropagation(); copyToClipboard(${jsEmail}, 'อีเมล')" title="คัดลอกอีเมล"><i class="fa-regular fa-copy"></i></button>
+        </span>` : '';
 
     return `
-        <div class="employee-card company-${displayCompany || employee.company} ${isSelected ? 'active' : ''} ${isInactive ? 'is-inactive' : ''}"
+        <div class="employee-card v3-card company-${displayCompany} ${isSelected ? 'active' : ''} ${isInactive ? 'is-inactive' : ''}"
              data-id="${safeId}"
              onclick="selectEmployee('${safeId}')">
             <div class="avatar ${isBDay ? 'birthday-avatar' : ''}">
-                ${employee.avatar ? `<img src="${employee.avatar}" alt="${employee.name}" loading="lazy" onerror="this.outerHTML='${initials}'">` : initials}
+                ${employee.avatar ? `<img src="${escapeHtmlText(employee.avatar)}" alt="" loading="lazy" onerror="this.outerHTML='${initials}'">` : initials}
                 ${isBDay ? '<span class="birthday-crown" title="Happy Birthday!">🎂</span>' : ''}
             </div>
-            <div class="card-info">
-                <div class="card-name">${displayName}</div>
-                <div class="card-position">${displayPosition}</div>
-                ${displayDepartment ? `<div class="card-department">${highlightText(displayDepartment, q)}</div>` : ''}
-                ${displayPhone ? `<div class="card-phone"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.19 16.92z"/></svg>${displayPhone}</div>` : ''}
-                ${(displayPhone || displayEmail) ? `<div class="card-quick-actions">
-                    ${displayPhone ? `<a href="tel:${safePhone}" class="card-quick-btn card-quick-call" onclick="event.stopPropagation()" title="โทร ${safePhone}">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.19 16.92z"/></svg>
-                        <span>โทร</span>
-                    </a>` : ''}
-                    ${displayEmail ? `<a href="mailto:${safeEmail}" class="card-quick-btn card-quick-mail" onclick="event.stopPropagation()" title="${safeEmail}">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                        <span>อีเมล</span>
-                    </a>` : ''}
-                </div>` : ''}
-            </div>
-            <div class="card-actions">
-                ${isInactive ? '<span class="inactive-badge">⊘ Inactive</span>' : (preOnboard && daysLeft !== null ? `<span class="incoming-badge" title="เริ่มงานอีก ${daysLeft} วัน">🔔 ${daysLeft}วัน</span>` : (isNewUser ? '<span class="new-badge">NEW</span>' : ''))}
-                <button class="favorite-btn ${isFavorite ? 'active' : ''}"
-                        onclick="event.stopPropagation(); toggleFavorite('${safeId}')"
-                        title="${isFavorite ? 'ยกเลิกปักหมุด' : 'ปักหมุด'}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                </button>
-                <span class="company-badge ${displayCompany || employee.company}">${displayCompany || employee.company}</span>
+            <div class="v3-body">
+                <div class="v3-top">
+                    <span class="card-name">${highlightText(escapeHtmlText(employee.name), q)}</span>
+                    ${displayCompany ? `<span class="company-badge ${displayCompany}">${displayCompany}</span>` : ''}
+                    ${status}
+                    <button class="favorite-btn ${isFavorite ? 'active' : ''}"
+                            onclick="event.stopPropagation(); toggleFavorite('${safeId}')"
+                            title="${isFavorite ? 'ยกเลิกปักหมุด' : 'ปักหมุด'}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                ${sub ? `<div class="v3-sub">${sub}</div>` : ''}
+                ${(phonePill || emailPill) ? `<div class="v3-contact">${phonePill}${emailPill}</div>` : '<div class="v3-contact v3-none">ไม่มีเบอร์/อีเมล</div>'}
             </div>
         </div>
     `;
@@ -1727,13 +1749,15 @@ function selectEmployee(id) {
     if (!employee) return;
 
     state.selectedEmployee = employee;
-    renderEmployeeList();
+    // v3: แค่สลับไฮไลต์การ์ด ไม่วาดรายการใหม่ทั้งหมด (เดิมกระพริบทุกครั้งที่กด)
+    elements.employeeList.querySelectorAll('.employee-card.active').forEach(c => c.classList.remove('active'));
+    elements.employeeList.querySelector(`.employee-card[data-id="${CSS.escape(String(employee.id))}"]`)?.classList.add('active');
     renderEmployeeDetail(employee);
 
-    // Mobile: show detail
-    if (window.innerWidth <= 1024) {
-        elements.employeeDetail.classList.add('mobile-show');
-    }
+    // v3: รายละเอียดเป็นแผงเลื่อนออกจากขวาทุกขนาดจอ
+    elements.employeeDetail.classList.add('mobile-show');
+    document.body.classList.add('detail-open');
+    elements.employeeDetail.scrollTop = 0;
 }
 
 // Render Employee Detail
@@ -1957,6 +1981,7 @@ function renderEmployeeDetail(employee) {
 
 function closeDetail() {
     elements.employeeDetail.classList.remove('mobile-show');
+    document.body.classList.remove('detail-open');
 }
 
 function closeEmployeeEditorModal() {
@@ -3128,6 +3153,18 @@ function setupEventListeners() {
     elements.companyList?.addEventListener('click', (e) => {
         const navItem = e.target.closest('.nav-item[data-filter]');
         if (navItem) handleNavClick(navItem.dataset.filter);
+    });
+
+    // ปุ่มกรองบริษัทแถวบน — "ทั้งหมด" ล้างตัวกรองบริษัท, ปุ่มอื่นทำงานเหมือนเมนูซ้าย
+    document.getElementById('companyChips')?.addEventListener('click', (e) => {
+        const chip = e.target.closest('.dir-chip[data-filter]');
+        if (!chip) return;
+        if (chip.dataset.filter === 'company-') {
+            state.companyFilter = '';
+            filterEmployees();
+        } else {
+            handleNavClick(chip.dataset.filter);
+        }
     });
 
     // Department items — dynamic, ใช้ delegation บน container
