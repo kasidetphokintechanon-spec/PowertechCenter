@@ -1278,8 +1278,8 @@
                 { label: 'แท็บ: บริการ IT',            icon: 'fa-th-large',    color: '#6366f1', action: () => switchTab('services') },
                 { label: 'แท็บ: หมวดหมู่ Assets',    icon: 'fa-tags',         color: '#64748b', action: () => switchTab('asset_categories') },
                 { label: 'แท็บ: Locations',             icon: 'fa-map-marker-alt', color: '#10b981', action: () => switchTab('locations') },
-                { label: 'แท็บ: ประกาศ',              icon: 'fa-bullhorn',     color: '#f59e0b', action: () => switchTab('announcements') },
-                { label: 'แท็บ: วันหยุด',             icon: 'fa-calendar-alt', color: '#ec4899', action: () => switchTab('holidays') },
+                // { label: 'แท็บ: ประกาศ',              icon: 'fa-bullhorn',     color: '#f59e0b', action: () => switchTab('announcements') },
+                // { label: 'แท็บ: วันหยุด',             icon: 'fa-calendar-alt', color: '#ec4899', action: () => switchTab('holidays') },
                 { label: 'แท็บ: Server Check',         icon: 'fa-server',       color: '#0f766e', action: () => switchTab('server_check') },
                 { label: 'เพิ่มรายการใหม่',           icon: 'fa-plus',         color: '#16a34a', action: () => openModal() },
                 { label: 'โหลดข้อมูลใหม่',            icon: 'fa-sync',         color: '#2563eb', action: () => loadAllData(true).then(() => renderContent()) },
@@ -3405,10 +3405,10 @@
         }
     }
 
-    async function renderJobPositionsContent(container) {
     // ระดับในผังองค์กร — ต้องตรงกับ ORG_LEVELS ใน includes/job_position_levels.php
     const JP_LEVEL_LABEL = { 1:'ผู้บริหาร', 2:'ผู้จัดการ', 3:'หัวหน้างาน', 4:'วิศวกร / ผู้ชำนาญ', 5:'พนักงาน' };
     const JP_LEVEL_COLOR = { 1:'#d97706', 2:'#7c3aed', 3:'#2563eb', 4:'#0891b2', 5:'#64748b' };
+    async function renderJobPositionsContent(container) {
         if (!container) return;
         container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:#94a3b8"><i class="fa fa-circle-notch fa-spin" style="margin-right:6px"></i> Loading...</div>`;
         try {
@@ -3446,11 +3446,11 @@
                             style="flex:1;border:1px solid transparent;border-radius:6px;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ptc-text,#0f172a);min-width:0;padding:3px 6px;transition:border-color .12s"
                             onfocus="this.style.borderColor='#2563eb';this.style.background='#f8fafc'"
                             onblur="this.style.borderColor='transparent';this.style.background='transparent'">
-                        <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;padding:0 4px">
                         <select data-jp-level="${r.id}" title="ระดับในผังองค์กร (Contact List) — เปลี่ยนแล้วบันทึกทันที"
                             style="flex-shrink:0;width:160px;height:28px;padding:0 6px;border:1px solid var(--ptc-border,#e2e8f0);border-left:3px solid ${JP_LEVEL_COLOR[r.org_level]||'#94a3b8'};border-radius:6px;background:var(--ptc-surface,#fff);color:var(--ptc-text,#0f172a);font-size:12px;font-family:inherit;cursor:pointer">
                             ${Object.entries(JP_LEVEL_LABEL).map(([k,v])=>`<option value="${k}" ${String(r.org_level)===k?'selected':''}>${v}${String(r.org_level)===k&&!Number(r.org_level_set)?' (อัตโนมัติ)':''}</option>`).join('')}
                         </select>
+                        <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;padding:0 4px">
                             <input data-jp-active="${r.id}" type="checkbox" ${parseInt(r.is_active||0)===1?'checked':''} style="accent-color:#2563eb;width:14px;height:14px;cursor:pointer">
                             <span style="font-size:11px;color:#94a3b8;white-space:nowrap">Active</span>
                         </label>
@@ -3496,7 +3496,6 @@
                     setOrderDirty(true);
                 });
 
-                // save row
                 // ระดับในผังองค์กร — บันทึกทันทีที่เปลี่ยน (ส่งแค่ org_level ไม่แตะลำดับ/ชื่อ)
                 row.querySelector('[data-jp-level]')?.addEventListener('change', async (ev) => {
                     const id = row.getAttribute('data-jp-id');
@@ -3512,6 +3511,7 @@
                     } catch(e) { Toast.fire({icon:'error',title:e.message}); }
                 });
 
+                // save row
                 row.querySelector('[data-jp-save]')?.addEventListener('click', async () => {
                     const id = row.getAttribute('data-jp-id');
                     const name = String(row.querySelector(`[data-jp-name="${id}"]`)?.value||'').trim();

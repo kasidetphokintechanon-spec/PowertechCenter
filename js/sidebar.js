@@ -21,8 +21,9 @@
                 { id: 'employees',       icon: 'fa-users',              label: 'พนักงาน',            tab: 'employees',        page: 'admin',             perm: 'employee.manage' },
                 { id: 'job_positions',   icon: 'fa-briefcase',          label: 'ตำแหน่งงาน',         tab: 'job_positions',    page: 'admin',             perm: 'employee.manage' },
                 { id: 'departments',     icon: 'fa-building',           label: 'แผนก',               tab: 'departments',      page: 'admin',             perm: 'employee.manage' },
-                { id: 'announcements',   icon: 'fa-bullhorn',           label: 'ประกาศ',              tab: 'announcements',    page: 'admin',             perm: 'employee.manage' },
-                { id: 'holidays',        icon: 'fa-calendar-days',      label: 'วันหยุด',             tab: 'holidays',         page: 'admin',             perm: 'employee.manage' },
+                // ประกาศ / วันหยุด(admin) ซ่อนไว้ 2026-10-21 — ไม่มีหน้าไหนใช้ข้อมูล (วันหยุดตรวจห้อง Server อยู่ที่ holidays.html)
+                // { id: 'announcements',   icon: 'fa-bullhorn',           label: 'ประกาศ',              tab: 'announcements',    page: 'admin',             perm: 'employee.manage' },
+                // { id: 'holidays',        icon: 'fa-calendar-days',      label: 'วันหยุด',             tab: 'holidays',         page: 'admin',             perm: 'employee.manage' },
             ],
         },
         {
