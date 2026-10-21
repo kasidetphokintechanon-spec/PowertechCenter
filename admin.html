@@ -71,21 +71,21 @@
         /* Asset edit form */
         .ptc-modal-dialog--asset { max-width:780px !important; width:100%; }
         /* Audit dashboard */
-        .audit-round-hd{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:12px 16px;margin-bottom:12px}
-        .audit-round-title{font-size:14px;font-weight:800;color:#5b21b6;margin-bottom:2px}
-        .audit-round-meta{font-size:11.5px;color:#7c3aed}
-        .audit-prog{height:5px;background:#e9d5ff;border-radius:99px;margin:8px 0 4px;overflow:hidden}
-        .audit-prog-bar{height:100%;background:#7c3aed;border-radius:99px;transition:width .4s}
-        .audit-token-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:4px;background:#fafafa;border:1px solid #f1f5f9}
-        .audit-token-row:hover{background:#f5f3ff}
+        .audit-round-hd{background:var(--ptc-surface-2);border:1px solid var(--ptc-border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+        .audit-round-title{display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--ptc-text);margin-bottom:2px}
+        .audit-round-meta{font-size:12px;color:var(--ptc-text-muted)}
+        .audit-prog{height:5px;background:var(--ptc-border);border-radius:99px;margin:8px 0 2px;overflow:hidden}
+        .audit-prog-bar{height:100%;background:var(--ptc-primary);border-radius:99px;transition:width .4s}
+        .audit-token-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:4px;background:var(--ptc-surface);border:1px solid var(--ptc-border)}
+        .audit-token-row:hover{background:var(--ptc-surface-2)}
         .audit-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
         .audit-status-dot.pending{background:#f59e0b}
         .audit-status-dot.confirmed{background:#10b981}
         .audit-status-dot.partial{background:#3b82f6}
-        .audit-emp-name{flex:1;font-size:13px;font-weight:600;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .audit-status-txt{font-size:11px;color:#94a3b8;margin-right:4px;white-space:nowrap}
-        .audit-copy-btn{padding:4px 10px;font-size:11.5px;font-weight:600;border:1.5px solid #ddd6fe;background:#fff;color:#7c3aed;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s}
-        .audit-copy-btn:hover{background:#7c3aed;color:#fff;border-color:#7c3aed}
+        .audit-emp-name{flex:1;font-size:13px;font-weight:600;color:var(--ptc-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .audit-status-txt{font-size:11.5px;color:var(--ptc-text-muted);margin-right:4px;white-space:nowrap}
+        .audit-copy-btn{padding:4px 10px;font-size:11.5px;font-weight:600;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-primary);border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s}
+        .audit-copy-btn:hover{background:var(--ptc-primary);color:#fff;border-color:var(--ptc-primary)}
         .audit-copy-btn.copied{background:#10b981;color:#fff;border-color:#10b981}
         .asset-form-shell { max-height:65vh; overflow-y:auto; padding-right:4px; }
         .ptc-section-hd { font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; margin:0 0 14px; padding:7px 12px 7px 12px; border-radius:8px; border-left:3px solid; display:flex; align-items:center; gap:8px; }
@@ -391,6 +391,24 @@
         .pp-req { font-size:10px; font-weight:700; color:var(--ptc-danger); border:1px solid currentColor; border-radius:4px; padding:0 4px; margin-left:4px; }
         .pp-warn { margin-top:10px; font-size:12px; color:var(--ptc-text-muted); }
         @media (max-width:640px) { .pp-sum { grid-template-columns:repeat(2,1fr); } }
+        .asset-form-shell .ptc-label { text-transform:none; letter-spacing:0; font-size:12.5px; color:var(--ptc-text-2); }
+        .af-hd { display:flex; align-items:center; gap:8px; width:100%; margin:0 0 14px; padding:0 0 10px; border:0; border-bottom:1px solid var(--ptc-border); background:transparent; font:inherit; font-size:14px; font-weight:700; color:var(--ptc-text); text-align:left; }
+        .af-hd .n { width:22px; height:22px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; font-size:11.5px; background:var(--ptc-primary-light); color:var(--ptc-primary); }
+        .af-hd small { font-size:12px; font-weight:400; color:var(--ptc-text-faint); }
+        button.af-hd { cursor:pointer; }
+        .af-chev { margin-left:auto; font-size:11px; color:var(--ptc-text-faint); transition:transform .2s; }
+        .af-hd[aria-expanded="true"] .af-chev { transform:rotate(180deg); }
+        .af-fold { margin-top:10px; }
+        .af-fold .af-hd[aria-expanded="false"] { margin:0; padding:0; border-bottom:0; }
+        html.dark .asset-form-shell .ptc-alert-info { background:var(--ptc-surface-2); border-color:var(--ptc-border); color:var(--ptc-text-2); }
+        .af-drop { position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; padding:18px 12px; border:1.5px dashed var(--ptc-border-strong); border-radius:10px; background:var(--ptc-surface-2); color:var(--ptc-text-muted); font-size:12px; cursor:pointer; text-align:center; transition:border-color .15s, background .15s; }
+        .af-drop:hover, .af-drop.over { border-color:var(--ptc-primary); background:var(--ptc-primary-light); }
+        .af-drop i { font-size:22px; color:var(--ptc-primary); }
+        .af-drop b { font-size:13px; color:var(--ptc-text); }
+        .af-drop input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+        .af-new-imgs { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .af-new-imgs:empty { display:none; }
+        .af-new-imgs img { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--ptc-border); }
         .tb-more { position:relative; display:inline-block; }
         .tb-more-menu { display:none; position:absolute; right:0; top:calc(100% + 4px); z-index:60; min-width:210px; padding:4px; background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; box-shadow:var(--ptc-shadow-lg); }
         .tb-more.open .tb-more-menu { display:block; }
@@ -634,7 +652,7 @@
             <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#fef2f2;color:#dc2626;font-size:15px;flex-shrink:0"><i class="fa fa-wrench"></i></span>
                 <div style="min-width:0">
-                    <div style="font-weight:700;font-size:15px">แจ้งซ่อม / Repair Ticket</div>
+                    <div style="font-weight:700;font-size:15px">แจ้งซ่อม</div>
                     <div id="repair-modal-subtitle" style="font-size:12px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 </div>
             </div>
@@ -655,31 +673,30 @@
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">สถานะ</label>
                         <select id="repair-status" class="ptc-input" style="width:100%;box-sizing:border-box">
-                            <option value="Pending">Pending — รอดำเนินการ</option>
-                            <option value="In Progress">In Progress — กำลังซ่อม</option>
-                            <option value="Waiting for Parts">Waiting for Parts — รออะไหล่</option>
-                            <option value="Completed">Completed — เสร็จแล้ว</option>
-                            <option value="Cancelled">Cancelled — ยกเลิก</option>
+                            <option value="Pending">รอดำเนินการ</option>
+                            <option value="In Progress">กำลังซ่อม</option>
+                            <option value="Waiting for Parts">รออะไหล่</option>
+                            <option value="Completed">เสร็จแล้ว</option>
+                            <option value="Cancelled">ยกเลิก</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">ช่างผู้รับงาน <span style="color:var(--text-tertiary);font-weight:400">(Serviced By)</span></label>
+                    <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">ช่างผู้รับงาน</label>
                     <input type="text" id="repair-serviced-by" class="ptc-input" placeholder="ชื่อช่าง IT..." style="width:100%;box-sizing:border-box">
                 </div>
 
                 <div>
                     <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">
                         อาการเสีย / ปัญหา <span style="color:#dc2626">*</span>
-                        <span style="color:var(--text-tertiary);font-weight:400">(Problem)</span>
                     </label>
                     <textarea id="repair-problem" class="ptc-input" rows="3" placeholder="อธิบายอาการเสียหรือปัญหาที่พบ..." style="width:100%;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
                 </div>
 
                 <div>
                     <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">
-                        วิธีแก้ไข <span style="color:var(--text-tertiary);font-weight:400">(Solution — กรอกภายหลังได้)</span>
+                        วิธีแก้ไข <span style="color:var(--text-tertiary);font-weight:400">(กรอกภายหลังได้)</span>
                     </label>
                     <textarea id="repair-solution" class="ptc-input" rows="2" placeholder="วิธีแก้ไขที่ดำเนินการ..." style="width:100%;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
                 </div>
@@ -692,8 +709,8 @@
             </button>
             <div style="display:flex;gap:8px">
                 <button class="ptc-btn-ghost" onclick="closeRepairModal()">ยกเลิก</button>
-                <button id="repair-save-btn" class="ptc-btn ptc-btn-primary" onclick="saveRepairTicket()" style="background:#dc2626;border-color:#dc2626">
-                    <i class="fa fa-save" style="margin-right:5px"></i>บันทึก Ticket
+                <button id="repair-save-btn" class="ptc-btn ptc-btn-primary" onclick="saveRepairTicket()">
+                    <i class="fa fa-save" style="margin-right:5px"></i>บันทึกงานซ่อม
                 </button>
             </div>
         </div>
@@ -2264,23 +2281,18 @@
 
     window.openAuditRoundModal = async function() {
         const { value: formVal } = await Swal.fire({
-            title: '<span style="font-size:16px;font-weight:800"><i class="fas fa-clipboard-check" style="color:#7c3aed;margin-right:8px"></i>เริ่มรอบตรวจนับทรัพย์สิน</span>',
-            html: `
-                <div style="text-align:left">
-                    <div style="font-size:11.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">ชื่อรอบตรวจนับ <span style="color:#e11d48">*</span></div>
-                    <input id="swal-round-name" class="ptc-swal-input" placeholder="เช่น ตรวจนับประจำปี 2569" value="ตรวจนับทรัพย์สินประจำปี ${new Date().getFullYear()+543}">
-                    <div style="font-size:11.5px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 4px">กำหนดส่งภายในวันที่</div>
-                    <input id="swal-round-deadline" type="date" class="ptc-swal-input" value="${new Date(Date.now()+14*86400000).toISOString().slice(0,10)}">
-                    <div style="margin-top:14px;padding:10px 12px;background:#f5f3ff;border-radius:8px;border:1px solid #ddd6fe;font-size:12px;color:#6d28d9;line-height:1.7">
-                        <i class="fas fa-info-circle" style="margin-right:5px"></i>
-                        ระบบจะส่ง LINE ให้พนักงานทุกคนที่มีทรัพย์สินผูกอยู่<br>พร้อมลิงก์ยืนยันเฉพาะของแต่ละคน
-                    </div>
+            title: 'เริ่มรอบตรวจนับ (ออนไลน์)',
+            html: `<div class="pp-form">
+                    <div class="pp-asset"><i class="fas fa-circle-info"></i> ระบบจะส่ง LINE ให้พนักงานทุกคนที่ถือเครื่องอยู่ พร้อมลิงก์ให้กดยืนยันว่ายังมีเครื่องครบ</div>
+                    <label class="ptc-label">ชื่อรอบ <span class="pp-req">จำเป็น</span></label>
+                    <input id="swal-round-name" class="ptc-input" style="width:100%" placeholder="เช่น ตรวจนับประจำปี 2569" value="ตรวจนับทรัพย์สินประจำปี ${new Date().getFullYear()+543}">
+                    <label class="ptc-label">ต้องยืนยันภายในวันที่</label>
+                    <input id="swal-round-deadline" type="date" class="ptc-input" style="width:100%" value="${new Date(Date.now()+14*86400000).toISOString().slice(0,10)}">
                 </div>`,
             showCancelButton: true,
             confirmButtonText: '<i class="fas fa-paper-plane"></i> สร้างและส่ง LINE',
             cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#7c3aed',
-            width: 480,
+            width: 520,
             preConfirm: () => {
                 const name = document.getElementById('swal-round-name').value.trim();
                 const deadline = document.getElementById('swal-round-deadline').value;
@@ -2302,8 +2314,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'ส่งเรียบร้อยแล้ว',
-                html: `ส่ง LINE ให้พนักงาน <b>${json.sent_count}</b> คน<br><span style="font-size:12px;color:#64748b">${json.skipped_count > 0 ? `(ข้าม ${json.skipped_count} คนที่ไม่มี LINE)` : ''}</span>`,
-                confirmButtonColor: '#7c3aed'
+                html: `ส่ง LINE ให้พนักงาน <b>${json.sent_count}</b> คน<br><span style="font-size:12px;color:var(--ptc-text-muted)">${json.skipped_count > 0 ? `(ข้าม ${json.skipped_count} คนที่ไม่มี LINE)` : ''}</span>`
             });
         } catch(e) {
             Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: e.message });
@@ -2324,13 +2335,13 @@
                 const pct = r.total > 0 ? Math.round(r.confirmed / r.total * 100) : 0;
                 const deadlineStr = r.deadline ? new Date(r.deadline).toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}) : 'ไม่กำหนด';
                 const statusBadge = r.status === 'closed'
-                    ? '<span style="font-size:10px;background:#f1f5f9;color:#64748b;padding:2px 7px;border-radius:5px;margin-left:6px">ปิดแล้ว</span>'
-                    : '<span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:5px;margin-left:6px">Active</span>';
+                    ? '<span class="ad-chip" style="margin-left:6px;background:var(--ptc-surface-2);color:var(--ptc-text-muted)">ปิดแล้ว</span>'
+                    : '<span class="ad-chip ok" style="margin-left:6px">กำลังเปิด</span>';
                 const rows = r.tokens.map(t => {
                     const dotCls = t.status === 'confirmed' ? 'confirmed' : t.status === 'partial' ? 'partial' : 'pending';
-                    const statusTxt = t.status === 'confirmed' ? '✅ ยืนยันแล้ว' : t.status === 'partial' ? '⚠️ บางส่วน' : '⏳ รอยืนยัน';
+                    const statusTxt = t.status === 'confirmed' ? 'ยืนยันแล้ว' : t.status === 'partial' ? 'ยืนยันบางส่วน' : 'รอยืนยัน';
                     const copyBtn = t.status === 'pending'
-                        ? `<button class="audit-copy-btn" onclick="auditCopyLink(this,'${escapeHtml(t.link)}')"><i class="fas fa-copy" style="font-size:10px"></i> Copy Link</button>`
+                        ? `<button class="audit-copy-btn" onclick="auditCopyLink(this,'${escapeHtml(t.link)}')"><i class="fas fa-copy" style="font-size:10px"></i> คัดลอกลิงก์</button>`
                         : `<span style="font-size:11px;color:#94a3b8">${t.confirmed_at ? new Date(t.confirmed_at).toLocaleDateString('th-TH') : ''}</span>`;
                     return `<div class="audit-token-row">
                         <div class="audit-status-dot ${dotCls}"></div>
@@ -2340,28 +2351,27 @@
                     </div>`;
                 }).join('');
                 return `<div class="audit-round-hd">
-                    <div class="audit-round-title"><i class="fas fa-clipboard-check" style="margin-right:6px"></i>${escapeHtml(r.name)}${statusBadge}</div>
+                    <div class="audit-round-title">${escapeHtml(r.name)}${statusBadge}</div>
                     <div class="audit-round-meta">กำหนดส่ง: ${deadlineStr} · ยืนยันแล้ว ${r.confirmed}/${r.total} คน</div>
                     <div class="audit-prog"><div class="audit-prog-bar" style="width:${pct}%"></div></div>
                 </div>
                 <div style="margin-bottom:16px">${rows || '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:12px">ไม่มีพนักงานที่มีทรัพย์สินผูกไว้</div>'}</div>`;
             }).join('');
             Swal.fire({
-                title: '<span style="font-size:16px;font-weight:800"><i class="fas fa-clipboard-list" style="color:#7c3aed;margin-right:8px"></i>สถานะรอบตรวจนับ</span>',
-                html: `<div style="text-align:left;max-height:60vh;overflow-y:auto;padding-right:4px">${html}</div>`,
+                title: 'สถานะรอบตรวจนับ',
+                html: `<div class="custom-scrollbar" style="text-align:left;max-height:60vh;overflow-y:auto;padding-right:4px">${html}</div>`,
                 showCancelButton: false,
                 confirmButtonText: 'ปิด',
-                confirmButtonColor: '#7c3aed',
-                width: 560,
+                width: 600,
             });
         } catch(e) { Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: e.message }); }
     };
 
     window.auditCopyLink = function(btn, link) {
         navigator.clipboard.writeText(link).then(() => {
-            btn.textContent = '✓ Copied!';
+            btn.textContent = '✓ คัดลอกแล้ว';
             btn.classList.add('copied');
-            setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy" style="font-size:10px"></i> Copy Link'; btn.classList.remove('copied'); }, 2000);
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy" style="font-size:10px"></i> คัดลอกลิงก์'; btn.classList.remove('copied'); }, 2000);
         }).catch(() => { prompt('Copy ลิงก์นี้:', link); });
     };
 
@@ -4117,7 +4127,7 @@
                 <p class="ptc-req-hint"><span class="ptc-req-mark">*</span> บังคับกรอก — S/N + Hostname สำหรับ NB/PC/SV, IP สำหรับ Network (NT)</p>
 
                 <div class="ptc-modal-section ptc-modal-section--stack">
-                    <div class="ptc-section-hd s-blue" id="af-main"><i class="fas fa-id-card"></i> ① ข้อมูลหลัก</div>
+                    <div class="af-hd" id="af-main"><span class="n">1</span>ข้อมูลหลัก<small>รหัส บริษัท ที่ตั้ง ผู้ถือครอง</small></div>
                     <div class="ptc-alert ptc-alert-info" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;padding:12px 14px">
                         <div class="ptc-form-group" style="flex:1;margin:0"><label class="${lbl}">รหัสพัสดุ IT ${reqMark}</label><input type="text" name="equipment_id" id="form-equipment-id" value="${assetCode}" class="${inp} ptc-code-input" readonly placeholder="สร้างอัตโนมัติหลังเลือก บริษัท+แผนก+ประเภท"></div>
                         ${checkBtn}${genBtn}
@@ -4129,10 +4139,10 @@
                     </div>
                     <div class="ptc-form-grid-2">
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">ชื่ออุปกรณ์ ${reqMark}</label><input type="text" name="name" value="${assetName}" class="${inp}" required></div>
-                        <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">สถานที่ (Location) ${reqMark}</label><input type="text" name="location" id="form-location" value="${item.location||''}" class="${inp}" placeholder="ชั้น / ห้อง / โซน"></div>
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">สถานะ</label><select name="status" class="${inp}">${['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].concat(item.status && !['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].includes(item.status) ? [item.status] : []).map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">สถานที่ ${reqMark}</label><input type="text" name="location" id="form-location" value="${item.location||''}" class="${inp}" placeholder="ชั้น / ห้อง / โซน"></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">สถานะ</label><select name="status" id="form-status" class="${inp}">${['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].concat(item.status && !['ใช้งานปกติ','ว่าง','ถูกยืม','รออนุมัติ','ชำรุด','รอซ่อม','เลิกใช้งาน','ตัดจำหน่าย'].includes(item.status) ? [item.status] : []).map(s=>`<option value="${s}" ${(item.status || (item.db_id || item.borrower ? 'ใช้งานปกติ' : 'ว่าง'))===s?'selected':''}>${s}</option>`).join('')}</select></div>
                     </div>
-                    <div class="ptc-form-group" style="margin:12px 0 0;padding-top:12px;border-top:1px solid #f1f5f9">
+                    <div class="ptc-form-group" style="margin:12px 0 0;padding-top:12px;border-top:1px solid var(--ptc-border)">
                         <label class="${lbl}">การถือครอง</label>
                         <div style="display:flex;flex-wrap:wrap;gap:16px;margin:6px 0 10px">
                             <label class="ptc-custodian-opt"><input type="radio" name="custodian_type" value="person" ${custType==='person'?'checked':''} data-custodian-type="person"> บุคคล (พนักงาน)</label>
@@ -4157,24 +4167,25 @@
                 </div>
 
                 <div class="ptc-modal-section ptc-modal-section--stack">
-                    <div class="ptc-section-hd s-violet" id="af-machine"><i class="fas fa-microchip"></i> ② ข้อมูลเครื่อง / เครือข่าย</div>
+                    <div class="af-hd" id="af-machine"><span class="n">2</span>ข้อมูลเครื่อง<small>รุ่น S/N สเปค เครือข่าย</small></div>
                     <div class="ptc-form-grid-2">
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">ยี่ห้อ (Brand)</label><input type="text" name="brand" value="${item.brand||''}" class="${inp}"></div>
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">รุ่น (Model)</label><input type="text" name="model" value="${item.model||''}" class="${inp}"></div>
-                        <div id="asset-field-wrap-serial" class="ptc-form-group" style="margin:0"><label class="${lbl}">Serial Number <span id="req-mark-serial" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NB/PC/SV">*</span></label><input type="text" name="serial_number" id="form-serial" value="${item['Serial Number']||''}" class="${inp}"></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">ยี่ห้อ</label><input type="text" name="brand" value="${item.brand||''}" class="${inp}"></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">รุ่น</label><input type="text" name="model" value="${item.model||''}" class="${inp}"></div>
+                        <div id="asset-field-wrap-serial" class="ptc-form-group" style="margin:0"><label class="${lbl}">หมายเลขเครื่อง (S/N) <span id="req-mark-serial" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NB/PC/SV">*</span></label><input type="text" name="serial_number" id="form-serial" value="${item['Serial Number']||''}" class="${inp}"></div>
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">รายละเอียดสเปค</label><textarea name="spec_details" class="${inp}" rows="2" placeholder="CPU / RAM / SSD / OS">${item.spec_details||''}</textarea></div>
                         <div id="asset-field-wrap-hostname" class="ptc-form-span-all ptc-form-group" style="margin:0">
-                            <label class="${lbl}">ชื่อเครื่อง (Hostname) <span id="req-mark-hostname" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NB/PC/SV">*</span></label>
+                            <label class="${lbl}">ชื่อเครื่องในระบบ (Hostname) <span id="req-mark-hostname" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NB/PC/SV">*</span></label>
                             <input type="text" name="hostname" id="form-hostname" value="${item.hostname||''}" class="${inp}" placeholder="PTA-NB-001">
-                            <p class="svc-help">Windows: Settings → System → About → Device name</p>
+                            <p class="svc-help">ดูได้ที่ Windows: Settings → System → About → Device name</p>
                         </div>
-                        <div id="asset-field-wrap-ip" class="ptc-form-group" style="margin:0"><label class="${lbl}">IP Address <span id="req-mark-ip" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NT">*</span></label><input type="text" name="ip_address" id="form-ip" value="${item.ip_address||''}" class="${inp}" placeholder="192.168.x.x"></div>
-                        <div id="asset-field-wrap-mac" class="ptc-form-group" style="margin:0"><label class="${lbl}">MAC Address</label><input type="text" name="mac_address" value="${item.mac_address||''}" class="${inp}" placeholder="XX:XX:XX:XX:XX:XX"></div>
+                        <div id="asset-field-wrap-ip" class="ptc-form-group" style="margin:0"><label class="${lbl}">ไอพี (IP Address) <span id="req-mark-ip" class="ptc-req-mark asset-req-mark" style="display:none" title="บังคับสำหรับ NT">*</span></label><input type="text" name="ip_address" id="form-ip" value="${item.ip_address||''}" class="${inp}" placeholder="192.168.x.x"></div>
+                        <div id="asset-field-wrap-mac" class="ptc-form-group" style="margin:0"><label class="${lbl}">MAC Address (การ์ดแลน)</label><input type="text" name="mac_address" value="${item.mac_address||''}" class="${inp}" placeholder="XX:XX:XX:XX:XX:XX"></div>
                     </div>
                 </div>
 
-                <button type="button" class="ptc-collapse-btn s-green" id="asset-section-procurement-toggle" aria-expanded="${hasProcData?'true':'false'}" onclick="toggleAssetFormSection('asset-section-procurement')"><span><i class="fas fa-receipt" style="margin-right:6px;opacity:.8"></i>③ ข้อมูลจัดซื้อ / บัญชี</span><i class="fas fa-chevron-down ptc-collapse-chevron"></i></button>
-                <div id="asset-section-procurement" class="ptc-modal-section ptc-modal-section--stack" style="display:${procDisplay};margin-top:8px">
+                <div class="ptc-modal-section ptc-modal-section--stack af-fold">
+                <button type="button" class="af-hd" id="asset-section-procurement-toggle" aria-expanded="${hasProcData?'true':'false'}" onclick="toggleAssetFormSection('asset-section-procurement')"><span class="n">3</span>จัดซื้อ & ประกัน<small>ไม่บังคับ</small><i class="fas fa-chevron-down af-chev"></i></button>
+                <div id="asset-section-procurement" style="display:${procDisplay}">
                     <div class="ptc-form-grid-2">
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0"><label class="${lbl}">เลขทะเบียนบัญชี</label><input type="text" name="asset_id" value="${item.asset_id||''}" class="${inp}" placeholder="จากฝ่ายบัญชี/พัสดุ"></div>
                         <div class="ptc-form-span-all ptc-form-group" style="margin:0">
@@ -4185,34 +4196,38 @@
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">วันที่ซื้อ</label><input type="date" name="purchase_date" value="${item['วันที่ซื้อ']||''}" class="${inp}"></div>
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">หมดประกัน</label><input type="date" name="warranty_expires_on" value="${item.warranty_expires_on||''}" class="${inp}"></div>
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">ราคา (บาท)</label><input type="number" name="purchase_price" value="${item.purchase_price||''}" class="${inp}"></div>
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">อายุใช้งาน (ปี) <span style="font-weight:400;color:#94a3b8;font-size:11px">override</span></label><input type="number" name="useful_life_override" min="1" max="30" value="${item.useful_life_override||''}" placeholder="ว่าง = ค่า default category" class="${inp}"></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">อายุใช้งาน (ปี)</label><input type="number" name="useful_life_override" min="1" max="30" value="${item.useful_life_override||''}" placeholder="เว้นว่าง = ใช้ค่าตามประเภท" class="${inp}"></div>
                         <div class="ptc-form-group" style="margin:0"><label class="${lbl}">เลข PO</label><input type="text" name="po_number" value="${item.po_number||''}" class="${inp}"></div>
-                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">เลข Invoice</label><input type="text" name="invoice_number" value="${item.invoice_number||''}" class="${inp}"></div>
+                        <div class="ptc-form-group" style="margin:0"><label class="${lbl}">เลขใบแจ้งหนี้</label><input type="text" name="invoice_number" value="${item.invoice_number||''}" class="${inp}"></div>
                     </div>
                 </div>
+                </div>
 
-                <button type="button" class="ptc-collapse-btn s-amber" id="asset-section-extras-toggle" aria-expanded="${extrasDisplay===''?'true':'false'}" onclick="toggleAssetFormSection('asset-section-extras')"><span><i class="fas fa-puzzle-piece" style="margin-right:6px;opacity:.8"></i>④ อื่นๆ (อุปกรณ์เสริม, รูป, ชุดอุปกรณ์)</span><i class="fas fa-chevron-down ptc-collapse-chevron"></i></button>
-                <div id="asset-section-extras" class="ptc-modal-section ptc-modal-section--stack" style="display:${extrasDisplay};margin-top:8px">
+                <div class="ptc-modal-section ptc-modal-section--stack af-fold">
+                <button type="button" class="af-hd" id="asset-section-extras-toggle" aria-expanded="${extrasDisplay===''?'true':'false'}" onclick="toggleAssetFormSection('asset-section-extras')"><span class="n">4</span>อื่นๆ & รูปภาพ<small>อุปกรณ์เสริม รูป ชุดอุปกรณ์</small><i class="fas fa-chevron-down af-chev"></i></button>
+                <div id="asset-section-extras" style="display:${extrasDisplay}">
                     <div class="ptc-form-group"><label class="${lbl}">อุปกรณ์เสริม</label>
                         <div style="display:flex;gap:8px;margin-bottom:8px"><input type="text" id="accessory-input" class="${inp}" placeholder="เช่น Mouse, สายชาร์จ..."><button type="button" onclick="addAccessory()" class="ptc-btn-ghost ptc-btn-sm">เพิ่ม</button></div>
                         <div id="accessories-container" style="display:flex;flex-wrap:wrap;gap:6px"></div>
                         <input type="hidden" name="accessories" id="form-accessories-json">
                     </div>
-                    <div class="ptc-form-group"><label class="ptc-custodian-opt"><input type="checkbox" name="is_loanable" value="1" ${item.is_loanable==1?'checked':''}> อนุญาตให้ยืม (Loan pool)</label></div>
+                    <div class="ptc-form-group"><label class="ptc-custodian-opt"><input type="checkbox" name="is_loanable" value="1" ${item.is_loanable==1?'checked':''}> เปิดให้พนักงานยืมได้ (อยู่ในคลังยืม)</label></div>
                     <div class="ptc-form-group"><label class="${lbl}">รูปภาพ</label>
-                        <input type="file" name="imageFiles[]" multiple accept="image/*" class="ptc-file-input">
+                        <label class="af-drop"><input type="file" name="imageFiles[]" id="af-image-input" multiple accept="image/*">
+                            <i class="fa fa-cloud-arrow-up"></i><b>ลากรูปมาวางที่นี่</b><span>หรือกดเพื่อเลือกรูป (เลือกได้หลายรูป)</span></label>
+                        <div class="af-new-imgs" id="af-new-imgs"></div>
                         <input type="hidden" name="existing_images" id="existing-images-input" value='${JSON.stringify(images)}'>
                         ${imagePreviewHtml}
                     </div>
                     <div id="asset-section-bundle" class="ptc-form-group">
-                        <label class="${lbl}"><i class="fas fa-link" style="margin-right:4px;color:#2563eb"></i>ทรัพย์สินหลัก (ชุด PC Set)</label>
+                        <label class="${lbl}"><i class="fas fa-link" style="margin-right:4px;color:#2563eb"></i>เป็นส่วนหนึ่งของชุด (เช่น จอของชุด PC)</label>
                         <select name="parent_id" id="form-parent-id" class="${inp}"><option value="">— ไม่มี (เป็นทรัพย์สินหลัก) —</option>${parentOptions}</select>
                         <p class="svc-help">Monitor/UPS ในชุด PC — แสดงเมื่อประเภท PC หรือมีชุดอุปกรณ์</p>
                         ${childAssetsSection}
                     </div>
                 </div>
-                <p class="ptc-form-footnote"><i class="fas fa-history"></i> ประวัติการเปลี่ยนแปลง — กด &quot;ดูรายละเอียด&quot; จากตาราง
-                ${item.db_id && assetCode ? ` · <a href="setup.html?${setupLinkQs}" target="_blank" rel="noopener" style="color:#2563eb">เปิด Setup Checklist</a> <span id="setup-checklist-badge-edit"></span>` : ''}</p>
+                </div>
+                ${item.db_id && assetCode ? `<p class="ptc-form-footnote"><a href="setup.html?${setupLinkQs}" target="_blank" rel="noopener" style="color:var(--ptc-primary)"><i class="fas fa-laptop-code"></i> เปิดใบติดตั้ง (Setup Checklist)</a> <span id="setup-checklist-badge-edit"></span></p>` : ''}
             </div></form>`;
         }
         else if (activeTab === 'asset_categories') {
@@ -4777,18 +4792,31 @@
     };
 
     window.openTransferModal = async function(db_id, current_company, isSet=false) {
-        const title = isSet?'โอนย้ายทรัพย์สินทั้งชุด':'โอนย้ายทรัพย์สิน';
-        const text = isSet?'การกระทำนี้จะโอนย้ายทรัพย์สินหลักและอุปกรณ์ในชุดทั้งหมดไปยังบริษัทใหม่':'โอนย้ายทรัพย์สินนี้ไปยังบริษัทอื่น';
+        const item = (data.it_assets || []).find(i => String(i.db_id) === String(db_id));
+        const kids = isSet ? (data.it_assets || []).filter(a => String(a.parent_id) === String(db_id)) : [];
+        const CO = { PTA: 'Powertech Engine Assembly', PT4: 'Powertech 2004', PTE: 'Powertech Energy Solutions' };
+        const opts = Object.keys(CO).map(c => `<label><input type="radio" name="tr-co" value="${c}" ${c === current_company ? 'disabled' : ''}><span>${c}${c === current_company ? ' (ปัจจุบัน)' : ''}</span></label>`).join('');
         const { value: formValues } = await Swal.fire({
-            title, html: `<p class="text-sm text-slate-500 mb-4">${text}</p><select id="swal-company" class="swal2-input"><option value="PTA" ${current_company==='PTA'?'disabled':''}>PTA</option><option value="PT4" ${current_company==='PT4'?'disabled':''}>PT4</option><option value="PTE" ${current_company==='PTE'?'disabled':''}>PTE</option></select><textarea id="swal-reason" class="swal2-textarea" placeholder="เหตุผลในการโอนย้าย..."></textarea>`,
-            focusConfirm: false, showCancelButton: true, confirmButtonText: 'ยืนยันการโอนย้าย',
-            preConfirm: () => ({ company: document.getElementById('swal-company').value, reason: document.getElementById('swal-reason').value })
+            title: isSet ? 'โอนย้ายทั้งชุด' : 'โอนย้ายทรัพย์สิน',
+            width: 520,
+            html: `<div class="pp-form"><div class="pp-asset">${escapeHtml(item?.['ID อุปกรณ์'] || '')} · ${escapeHtml(item?.['ชื่ออุปกรณ์'] || '')} · อยู่บริษัท <b>${escapeHtml(current_company || '-')}</b></div>
+                ${isSet ? `<div class="pp-warn" style="margin-top:8px"><i class="fa fa-layer-group"></i> ย้ายพร้อมอุปกรณ์ในชุดอีก ${kids.length} ชิ้น${kids.length ? ': ' + kids.map(k => escapeHtml(k['ID อุปกรณ์'] || '')).join(', ') : ''}</div>` : ''}
+                <label class="ptc-label">ย้ายไปบริษัท</label><div class="pp-radios">${opts}</div>
+                <label class="ptc-label">เหตุผล <span class="pp-req">จำเป็น</span></label>
+                <textarea id="swal-reason" class="ptc-input" rows="3" maxlength="300" placeholder="เช่น พนักงานย้ายสังกัด, ยืมใช้ข้ามบริษัท" style="width:100%;resize:vertical"></textarea></div>`,
+            focusConfirm: false, showCancelButton: true, confirmButtonText: 'ยืนยันโอนย้าย', cancelButtonText: 'ยกเลิก',
+            preConfirm: () => {
+                const company = ppPick('tr-co'), reason = gid('swal-reason').value.trim();
+                // TISAX: การย้ายทรัพย์สินข้ามบริษัทต้องมีเหตุผลในประวัติ
+                if (!company || !reason) { Swal.showValidationMessage('เลือกบริษัทปลายทาง และใส่เหตุผล'); return false; }
+                return { company, reason };
+            }
         });
         if (formValues) {
             const fd=new FormData(); fd.append('action','transfer_asset'); fd.append('db_id',db_id); fd.append('new_company',formValues.company); fd.append('reason',formValues.reason);
             if (isSet) fd.append('transfer_set','1');
-            try { const res=await fetch(apiPath,{method:'POST',body:fd}); const json=await res.json(); if(json.status!=='success')throw new Error(json.message); Toast.fire({icon:'success',title:'โอนย้ายสำเร็จ!'}); closeDetailsModal(); await loadAllData(); }
-            catch(e){Swal.fire('Error',e.message,'error');}
+            try { const res=await fetch(apiPath,{method:'POST',body:fd}); const json=await res.json(); if(json.status!=='success')throw new Error(json.message); Toast.fire({icon:'success',title:'โอนย้ายสำเร็จ'}); closeDetailsModal(); await loadAllData(); }
+            catch(e){Swal.fire('โอนย้ายไม่สำเร็จ',e.message,'error');}
         }
     }
 
@@ -5123,6 +5151,7 @@
         if (activeTab === 'it_assets') {
             const assetErr = validateAssetRegistryForm(fd);
             if (assetErr) {
+                window._afShowErrors = true;
                 updateAssetRequiredMarkers();
                 Swal.fire('แจ้งเตือน', assetErr, 'warning');
                 return;
@@ -5287,7 +5316,9 @@
     window.deleteItem = async function(id) {
         const deleteText = activeTab === 'server_check'
             ? 'ห้องนี้จะถูกซ่อนจากหน้าเช็ครายวัน แต่ประวัติการเช็คเก่ายังเก็บไว้ครบ'
-            : 'รายการนี้จะถูกลบถาวร';
+            : activeTab === 'it_assets'
+                ? 'ลบแล้วประวัติเครื่องจะหายไปด้วย — ถ้าเครื่องแค่เลิกใช้ ให้ใช้ "ตัดจำหน่าย" ในหน้ารายละเอียดแทน (ประวัติยังอยู่ครบ)'
+                : 'รายการนี้จะถูกลบถาวร';
         const { isConfirmed } = await Swal.fire({ title:'ยืนยันการลบ?', text:deleteText, icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444', confirmButtonText:'ลบ', cancelButtonText:'ยกเลิก' });
         if (!isConfirmed) return;
 
@@ -5562,7 +5593,7 @@
     function setAssetReqInputHighlight(inputEl, required) {
         if (!inputEl) return;
         const empty = !String(inputEl.value || '').trim();
-        inputEl.classList.toggle('input-asset-req-empty', !!(required && empty));
+        inputEl.classList.toggle('input-asset-req-empty', !!(required && empty && window._afShowErrors));
     }
     const scheduleAssetMarkersUpdate = debounce(function() { updateAssetRequiredMarkers(); }, 80);
     let assetFormDelegatesBound = false;
@@ -5612,6 +5643,7 @@
         if (sync.checked && owning.value) custDept.value = owning.value;
     };
     window.initAssetFormUi = function() {
+        window._afShowErrors = false;
         bindAssetFormDelegatesOnce();
         const typeRadio = document.querySelector('#dynamic-form input[name="custodian_type"]:checked');
         setCustodianType(typeRadio?.value || 'person');
@@ -5641,6 +5673,16 @@
         msg.innerHTML = dup ? `<i class="fa fa-triangle-exclamation"></i> ${t.id === 'form-serial' ? 'S/N นี้' : 'รหัสนี้'}ซ้ำกับ <b>${escapeHtml(dup['ID อุปกรณ์'] || '')}</b> ${escapeHtml(dup['ชื่ออุปกรณ์'] || '')}` : '';
         t.classList.toggle('af-bad', !!dup);
     });
+
+    document.addEventListener('change', (e) => {
+        if (e.target.id !== 'af-image-input') return;
+        const box = gid('af-new-imgs');
+        if (!box) return;
+        box.querySelectorAll('img').forEach(i => URL.revokeObjectURL(i.src));
+        box.innerHTML = [...e.target.files].map(f => `<img src="${URL.createObjectURL(f)}" alt="" title="${escapeHtml(f.name)}">`).join('');
+    });
+    ['dragenter','dragover'].forEach(t => document.addEventListener(t, e => { const d = e.target.closest?.('.af-drop'); if (d) d.classList.add('over'); }));
+    ['dragleave','drop'].forEach(t => document.addEventListener(t, e => { const d = e.target.closest?.('.af-drop'); if (d) d.classList.remove('over'); }));
 
     window.toggleAssetFormSection = function(sectionId) {
         const el = gid(sectionId);
@@ -5751,6 +5793,8 @@
         const hidBorrowerId=gid('form-borrower-id'); if(hidBorrowerId)hidBorrowerId.value=empId||'';
         const hidDept=gid('form-custodian-department'); if(hidDept)hidDept.value=dept||'';
         const resDiv=gid('borrower-results'); if(resDiv)resDiv.style.display='none';
+        // เลือกผู้ถือแล้ว เครื่องไม่ "ว่าง" อีกต่อไป
+        const st=gid('form-status'); if(st && name && st.value==='ว่าง') st.value='ใช้งานปกติ';
     }
     document.addEventListener('click', (e) => {
         if (e.target.id!=='form-borrower'&&!e.target.closest('#borrower-results')) {
@@ -5798,13 +5842,13 @@
         const infoItems = [
             ['รหัสพัสดุ', assetId],
             ['ชื่ออุปกรณ์', assetName || '—'],
-            ['Serial Number', serial || '—'],
+            ['หมายเลขเครื่อง (S/N)', serial || '—'],
             ['หมวดหมู่', cat || '—'],
             ['แผนก', dept || '—'],
             ['บริษัท / สถานที่', (company ? company : '') + (loc && !/^(PTA|PT4|PTE)$/i.test(loc) ? (company ? ' · ' : '') + loc : '') || '—'],
         ];
         strip.innerHTML = infoItems.map(([l, v]) =>
-            `<div><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-tertiary)">${escapeHtml(l)}</span><div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:1px">${escapeHtml(v)}</div></div>`
+            `<div><span style="font-size:11px;font-weight:600;color:var(--text-tertiary)">${escapeHtml(l)}</span><div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:1px">${escapeHtml(v)}</div></div>`
         ).join('');
 
         // Defaults
@@ -5859,7 +5903,7 @@
             .then(r => r.json())
             .then(res => {
                 saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fa fa-save" style="margin-right:5px"></i>บันทึก Ticket';
+                saveBtn.innerHTML = '<i class="fa fa-save" style="margin-right:5px"></i>บันทึกงานซ่อม';
                 if (res.status === 'success') {
                     const jobNo = res.job_no || ('RPR-' + res.id);
                     Swal.fire({
@@ -5884,7 +5928,7 @@
             })
             .catch(err => {
                 saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fa fa-save" style="margin-right:5px"></i>บันทึก Ticket';
+                saveBtn.innerHTML = '<i class="fa fa-save" style="margin-right:5px"></i>บันทึกงานซ่อม';
                 Swal.fire({ icon:'error', title:'Network Error', text: String(err), confirmButtonColor:'#dc2626' });
             });
     };
