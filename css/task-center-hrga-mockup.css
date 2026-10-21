@@ -1,0 +1,664 @@
+/**
+ * HR&GA Task Center — visual match to task_center_hrga_mockup_v2.html
+ * Scoped under body.hrga-v2 (hides standard nav, fixed light shell).
+ */
+body.hrga-v2.ptc-normalize {
+    padding-top: 0 !important;
+    overflow: auto !important;
+    height: auto !important;
+    font-family: 'Inter', 'Kanit', sans-serif;
+    background: #0f172a;
+    color: #0f172a;
+}
+
+body.hrga-v2 .ptc-nav {
+    display: none !important;
+}
+
+body.hrga-v2 #hrgaModeBar.hrga-top {
+    display: block !important;
+}
+
+body.hrga-v2 #hrgaTaskCenter {
+    display: block !important;
+}
+
+/* —— Gradient header (mockup .top) —— */
+body.hrga-v2 .hrga-top {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    color: #fff;
+    padding: 12px 16px;
+}
+
+body.hrga-v2 .hrga-top .top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+body.hrga-v2 .hrga-top h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+body.hrga-v2 .hrga-top p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: .9;
+}
+
+body.hrga-v2 .hrga-back-link {
+    color: #fff;
+    opacity: .9;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, .25);
+    text-decoration: none;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+body.hrga-v2 .hrga-back-link:hover {
+    background: rgba(255, 255, 255, .12);
+}
+
+body.hrga-v2 .hrga-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+body.hrga-v2 .hrga-std-link {
+    border: 1px solid rgba(255, 255, 255, .35);
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+body.hrga-v2 .hrga-std-link:hover {
+    background: rgba(255, 255, 255, .2);
+}
+
+body.hrga-v2 .hrga-refresh {
+    border: 1px solid rgba(255, 255, 255, .35);
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+body.hrga-v2 .hrga-top .screen-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    max-width: 1180px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.hrga-v2 .hrga-top .sn {
+    border: 1px solid rgba(255, 255, 255, .3);
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+body.hrga-v2 .hrga-top .sn.active {
+    background: #fff;
+    color: #1d4ed8;
+    border-color: #fff;
+}
+
+/* —— Shell / screens —— */
+body.hrga-v2 #hrgaTaskCenter .shell,
+body.hrga-page-body #hrgaApp .shell {
+    background: #f1f5f9;
+    min-height: calc(100vh - 120px);
+    padding: 16px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .wrap,
+body.hrga-page-body #hrgaApp .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+body.hrga-v2 #hrgaTaskCenter .screen,
+body.hrga-page-body #hrgaApp .screen {
+    display: none;
+}
+
+body.hrga-v2 #hrgaTaskCenter .screen.active,
+body.hrga-page-body #hrgaApp .screen.active {
+    display: block;
+}
+
+body.hrga-v2 #hrgaTaskCenter .hrga-loading,
+body.hrga-page-body #hrgaApp .hrga-loading {
+    text-align: center;
+    padding: 48px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .meet-header,
+body.hrga-page-body #hrgaApp .meet-header {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+body.hrga-v2 #hrgaTaskCenter .meet-title,
+body.hrga-page-body #hrgaApp .meet-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .meet-meta,
+body.hrga-page-body #hrgaApp .meet-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .meet-badge,
+body.hrga-page-body #hrgaApp .meet-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef3c7;
+    color: #b45309;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+body.hrga-v2 #hrgaTaskCenter .kpi-meet,
+body.hrga-page-body #hrgaApp .kpi-meet {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+    body.hrga-v2 #hrgaTaskCenter .kpi-meet,
+body.hrga-page-body #hrgaApp .kpi-meet {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+body.hrga-v2 #hrgaTaskCenter .km,
+body.hrga-page-body #hrgaApp .km {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+body.hrga-v2 #hrgaTaskCenter .km,
+body.hrga-page-body #hrgaApp .km .v {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .km,
+body.hrga-page-body #hrgaApp .km .l {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+body.hrga-v2 #hrgaTaskCenter .km.danger,
+body.hrga-page-body #hrgaApp .km.danger {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+body.hrga-v2 #hrgaTaskCenter .km.danger,
+body.hrga-page-body #hrgaApp .km.danger .v {
+    color: #dc2626;
+}
+
+body.hrga-v2 #hrgaTaskCenter .layout-2,
+body.hrga-page-body #hrgaApp .layout-2 {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 14px;
+}
+
+@media (max-width: 960px) {
+    body.hrga-v2 #hrgaTaskCenter .layout-2,
+body.hrga-page-body #hrgaApp .layout-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+body.hrga-v2 #hrgaTaskCenter .panel,
+body.hrga-page-body #hrgaApp .panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+body.hrga-v2 #hrgaTaskCenter .ph,
+body.hrga-page-body #hrgaApp .ph {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .ph,
+body.hrga-page-body #hrgaApp .ph h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .tabs,
+body.hrga-page-body #hrgaApp .tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 0 0 12px;
+    margin-bottom: 14px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .tab,
+body.hrga-page-body #hrgaApp .tab {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #64748b;
+    font-family: inherit;
+}
+
+body.hrga-v2 #hrgaTaskCenter .tab.on,
+body.hrga-page-body #hrgaApp .tab.on {
+    background: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .person-block,
+body.hrga-page-body #hrgaApp .person-block {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+body.hrga-v2 #hrgaTaskCenter .person-block:last-child,
+body.hrga-page-body #hrgaApp .person-block:last-child {
+    border-bottom: none;
+}
+
+body.hrga-v2 #hrgaTaskCenter .person-head,
+body.hrga-page-body #hrgaApp .person-head {
+    padding: 10px 16px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .person-name,
+body.hrga-page-body #hrgaApp .person-name {
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-pill,
+body.hrga-page-body #hrgaApp .load-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-ok,
+body.hrga-page-body #hrgaApp .load-ok {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-warn,
+body.hrga-page-body #hrgaApp .load-warn {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-high,
+body.hrga-page-body #hrgaApp .load-high {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+body.hrga-v2 #hrgaTaskCenter .task-line,
+body.hrga-page-body #hrgaApp .task-line {
+    padding: 10px 16px 10px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    border-top: 1px solid #f8fafc;
+    cursor: pointer;
+}
+
+body.hrga-v2 #hrgaTaskCenter .task-line:hover,
+body.hrga-page-body #hrgaApp .task-line:hover {
+    background: #fafafa;
+}
+
+body.hrga-v2 #hrgaTaskCenter .badge,
+body.hrga-page-body #hrgaApp .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-pta,
+body.hrga-page-body #hrgaApp .b-pta {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-pt4,
+body.hrga-page-body #hrgaApp .b-pt4 {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-pte,
+body.hrga-page-body #hrgaApp .b-pte {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-routine,
+body.hrga-page-body #hrgaApp .b-routine {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-adhoc,
+body.hrga-page-body #hrgaApp .b-adhoc {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-doing,
+body.hrga-page-body #hrgaApp .b-doing {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-todo,
+body.hrga-page-body #hrgaApp .b-todo {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+body.hrga-v2 #hrgaTaskCenter .b-over,
+body.hrga-page-body #hrgaApp .b-over {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+body.hrga-v2 #hrgaTaskCenter .side-card,
+body.hrga-page-body #hrgaApp .side-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .side-card,
+body.hrga-page-body #hrgaApp .side-card h3 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .side-card.summary-boss,
+body.hrga-page-body #hrgaApp .side-card.summary-boss {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+body.hrga-v2 #hrgaTaskCenter .side-card.summary-boss,
+body.hrga-page-body #hrgaApp .side-card.summary-boss h3 {
+    color: #1d4ed8;
+}
+
+body.hrga-v2 #hrgaTaskCenter .side-card.summary-boss,
+body.hrga-page-body #hrgaApp .side-card.summary-boss p {
+    font-size: 12px;
+    color: #1e40af;
+    margin: 0;
+    line-height: 1.5;
+}
+
+body.hrga-v2 #hrgaTaskCenter .agenda,
+body.hrga-page-body #hrgaApp .agenda {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body.hrga-v2 #hrgaTaskCenter .agenda,
+body.hrga-page-body #hrgaApp .agenda li {
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 8px;
+    padding-left: 18px;
+    position: relative;
+}
+
+body.hrga-v2 #hrgaTaskCenter .agenda,
+body.hrga-page-body #hrgaApp .agenda li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2563eb;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-row,
+body.hrga-page-body #hrgaApp .load-row {
+    margin-bottom: 12px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-label,
+body.hrga-page-body #hrgaApp .load-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-bar,
+body.hrga-page-body #hrgaApp .load-bar {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-routine,
+body.hrga-page-body #hrgaApp .load-routine {
+    background: #a78bfa;
+}
+
+body.hrga-v2 #hrgaTaskCenter .load-adhoc,
+body.hrga-page-body #hrgaApp .load-adhoc {
+    background: #f59e0b;
+}
+
+body.hrga-v2 #hrgaTaskCenter .legend,
+body.hrga-page-body #hrgaApp .legend {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .legend,
+body.hrga-page-body #hrgaApp .legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .legend,
+body.hrga-page-body #hrgaApp .legend i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+body.hrga-v2 #hrgaTaskCenter table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+body.hrga-v2 #hrgaTaskCenter th,
+body.hrga-v2 #hrgaTaskCenter td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+}
+
+body.hrga-v2 #hrgaTaskCenter th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #94a3b8;
+    background: #f8fafc;
+}
+
+body.hrga-v2 #hrgaTaskCenter tr[data-task-id] {
+    cursor: pointer;
+}
+
+body.hrga-v2 #hrgaTaskCenter tr[data-task-id]:hover {
+    background: #f8fafc;
+}
+
+body.hrga-v2 #hrgaTaskCenter .routine-item,
+body.hrga-page-body #hrgaApp .routine-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+body.hrga-v2 #hrgaTaskCenter .routine-item:hover,
+body.hrga-page-body #hrgaApp .routine-item:hover {
+    background: #f8fafc;
+}
+
+body.hrga-v2 #hrgaTaskCenter .routine-item,
+body.hrga-page-body #hrgaApp .routine-item input {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+
+body.hrga-v2 #hrgaTaskCenter .btn-primary,
+body.hrga-page-body #hrgaApp .btn-primary {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+}
+
+body.hrga-v2 #hrgaTaskCenter .note,
+body.hrga-page-body #hrgaApp .note {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+body.hrga-v2 #hrgaTaskCenter .hrga-empty,
+body.hrga-page-body #hrgaApp .hrga-empty {
+    padding: 20px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+body.hrga-v2 #hrgaTaskCenter .table-scroll,
+body.hrga-page-body #hrgaApp .table-scroll {
+    overflow-x: auto;
+}

@@ -1,0 +1,63 @@
+/**
+ * Login — unified theme (aligned with log.html / IT Service Log)
+ * Load after login.html inline styles.
+ */
+body.login-unified-v1.ptc-body {
+    background-color: #f1f5f9 !important;
+    background-image: none !important;
+}
+html.dark body.login-unified-v1.ptc-body {
+    background-color: #0a0f1e !important;
+    background-image: none !important;
+}
+body.login-unified-v1.ptc-body::before,
+body.login-unified-v1.ptc-body::after {
+    display: none !important;
+    animation: none !important;
+}
+
+body.login-unified-v1 .login-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08) !important;
+    backdrop-filter: none !important;
+}
+html.dark body.login-unified-v1 .login-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Default sidebar: log blue (company themes PTA/PT4/PTE unchanged) */
+body.login-unified-v1 .login-sidebar:not(.theme-pta):not(.theme-pt4):not(.theme-pte) {
+    background: linear-gradient(150deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%) !important;
+}
+
+body.login-unified-v1 .migard-badge {
+    color: #1d4ed8 !important;
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+}
+html.dark body.login-unified-v1 .migard-badge {
+    color: #93c5fd !important;
+    background: rgba(30, 58, 138, 0.45) !important;
+    border-color: #334155 !important;
+}
+
+body.login-unified-v1 .login-welcome-title {
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+html.dark body.login-unified-v1 .login-welcome-title {
+    color: #f1f5f9;
+}
+
+body.login-unified-v1 .theme-toggle-btn {
+    border-color: #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+html.dark body.login-unified-v1 .theme-toggle-btn {
+    background: #1e293b;
+    border-color: #475569;
+}

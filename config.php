@@ -21,11 +21,22 @@ if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
     die('Access Denied');
 }
 
+// Root directory ของ project — ใช้กับ upload paths ทุกที่ (ป้องกัน CWD drift บน server)
+define('APP_ROOT', __DIR__);
+
 // กำหนดค่าคงที่สำหรับการเชื่อมต่อฐานข้อมูล
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'powertech_system');
+
+// ค่าลับประจำเครื่อง (เช่น AUTO_LOGIN_SECRET) อยู่ใน config.local.php — ไฟล์นั้นไม่เข้า git
+// ดูตัวอย่างที่ config.local.example.php
+if (file_exists(__DIR__ . '/config.local.php')) {
+    require_once __DIR__ . '/config.local.php';
+}
+// Secret key สำหรับ Windows App Auto-Login (ต้องตรงกับ C# ฝั่ง Windows) — ว่าง = ปิด auto-login
+if (!defined('AUTO_LOGIN_SECRET')) define('AUTO_LOGIN_SECRET', '');
 
 ini_set('default_socket_timeout', '3');
 

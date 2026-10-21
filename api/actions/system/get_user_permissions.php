@@ -12,9 +12,12 @@ if ($targetUser === '' || $targetUser === null) {
     $targetUser = $sessionUser;
 }
 
-if ($targetUser !== $sessionUser && (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin')) {
-    echo json_encode(['status' => 'error', 'message' => 'Access denied']);
-    exit;
+if ($targetUser !== $sessionUser) {
+    $role = $_SESSION['role'] ?? 'guest';
+    if ($role !== 'admin' && !hasPermission($conn, 'admin.manage_permissions') && !hasPermission($conn, 'employee.manage')) {
+        echo json_encode(['status' => 'error', 'message' => 'Access denied']);
+        exit;
+    }
 }
 
 $stmtEmp = $conn->prepare("SELECT id, role, name, name_th FROM employees WHERE id = ? LIMIT 1");

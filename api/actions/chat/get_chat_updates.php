@@ -41,8 +41,10 @@ $messages = $result->fetch_all(MYSQLI_ASSOC);
 if (!empty($messages)) {
     $msg_ids = array_map(function($m) { return intval($m['message_id']); }, $messages);
     if (!empty($msg_ids)) {
-        $ids_str = implode(',', $msg_ids);
-        $conn->query("UPDATE chat_messages SET is_read = 1 WHERE message_id IN ($ids_str)");
+        $placeholders = implode(',', array_fill(0, count($msg_ids), '?'));
+        $upd_stmt = $conn->prepare("UPDATE chat_messages SET is_read = 1 WHERE message_id IN ($placeholders)");
+        $upd_stmt->bind_param(str_repeat('i', count($msg_ids)), ...$msg_ids);
+        $upd_stmt->execute();
     }
 }
 

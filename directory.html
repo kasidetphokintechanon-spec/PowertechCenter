@@ -10,17 +10,26 @@
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="icon" href="pwa-icon.svg" type="image/svg+xml">
+    <link rel="icon" href="uploads/logos/directory_app_icon.png" type="image/png">
     <link rel="apple-touch-icon" href="uploads/logos/directory_app_icon.png">
-    <script src="js/pwa.js" defer></script>
+    <script src="js/favicon-version.js"></script>
+    <script src="js/pwa.js?v=20260526" defer></script>
 
-    <link rel="stylesheet" href="directory_New/public/xampp/styles.css?v=20260318-lastupdated">
+    <link rel="stylesheet" href="directory_New/public/xampp/styles.css?v=20260704k">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/directory-editor-theme.css?v=20260704a">
+    <link rel="stylesheet" href="css/directory-unified-theme.css?v=20260612">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/enterprise-swal.js?v=20260526"></script>
+    <script>(function(){const t=localStorage.getItem('theme')||localStorage.getItem('directory-theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');document.documentElement.classList.add('dir-page-root');})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 </head>
-<body>
+<body  class="dir-page-root directory-unified-v1 ptc-unified-v1">
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -78,7 +87,7 @@
                 <div class="nav-section" id="categorySection">
                     <div class="nav-section-title">หมวดหมู่</div>
                     <button class="nav-item" id="managementNavItem" data-category-key="management" data-filter="management" style="display:none;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#6366f1">
                             <rect x="3" y="7" width="18" height="14" rx="2"></rect>
                             <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
                             <path d="M3 13h18"></path>
@@ -87,7 +96,7 @@
                         <span class="nav-badge" id="managementBadge">0</span>
                     </button>
                     <button class="nav-item active" id="allNavItem" data-category-key="all" data-filter="all">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#2563eb">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
                             <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
@@ -96,7 +105,7 @@
                         <span class="nav-badge" id="allBadge">0</span>
                     </button>
                     <button class="nav-item" id="inactiveNavItem" data-category-key="inactive" data-filter="inactive">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#94a3b8">
                             <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                             <path d="M8 8h8M8 12h8M8 16h5"></path>
                         </svg>
@@ -104,19 +113,32 @@
                         <span class="nav-badge" id="inactiveBadge">0</span>
                     </button>
                     <button class="nav-item" id="favoritesNavItem" data-category-key="favorites" data-filter="favorites">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#f59e0b">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                         </svg>
                         <span data-category-label="favorites">ปักหมุด</span>
                         <span class="nav-badge" id="favBadge">0</span>
                     </button>
                     <button class="nav-item" id="executivesNavItem" data-category-key="executives" data-filter="executives">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#d97706">
                             <path d="m2 4 3 9h14l3-9-6 4-4-4-4 4-6-4"></path>
                             <path d="M5 13v7h14v-7"></path>
                         </svg>
                         <span data-category-label="executives">ผู้บริหาร</span>
                         <span class="nav-badge" id="execBadge">0</span>
+                    </button>
+                </div>
+
+                <!-- IT-only: incoming / pre-onboard employees — lives OUTSIDE categorySection so applyCategoryNavConfig() won't remove it -->
+                <div id="incomingSection" style="display:none;">
+                    <button class="nav-item" id="incomingNavItem" data-filter="incoming" style="width:100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#10b981">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M19 8v6M22 11l-3 3-3-3"></path>
+                        </svg>
+                        <span>กำลังจะมา</span>
+                        <span class="nav-badge" id="incomingBadge" style="background:#f59e0b;color:#fff;display:none;">0</span>
                     </button>
                 </div>
 
@@ -128,8 +150,9 @@
             </nav>
 
             <div class="sidebar-footer">
-                <p>Version 2.0</p>
-                <p>macOS Style UI</p>
+                <a href="index.html" class="dir-home-link dir-home-link--internal"><i class="fa fa-home" aria-hidden="true"></i> กลับหน้าแรก PowerCenter</a>
+                <p>Version 2.5</p>
+                <p>Powertech Directory</p>
             </div>
         </aside>
 
@@ -159,72 +182,72 @@
             <!-- Employee List -->
             <section class="employee-list-section">
                 <div class="list-header">
-                    <div class="list-header-meta">
-                        <h2 class="list-title" id="listTitle">พนักงานทั้งหมด</h2>
+                    <div class="list-header-left">
+                        <div class="list-title-row">
+                            <h2 class="list-title" id="listTitle">พนักงานทั้งหมด</h2>
+                            <span class="list-count-chip" id="listCountChip"></span>
+                        </div>
                         <div class="list-updated-at" id="lastUpdatedStamp">อัปเดตล่าสุด -</div>
                     </div>
-                    <div class="view-toggle">
-                        <button class="view-btn active" data-view="list" title="List view">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="8" y1="6" x2="21" y2="6"></line>
-                                <line x1="8" y1="12" x2="21" y2="12"></line>
-                                <line x1="8" y1="18" x2="21" y2="18"></line>
-                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    <div class="list-header-right">
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="list" title="List view">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                            </button>
+                            <button class="view-btn" data-view="org" title="Org Chart view">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="2" width="6" height="4" rx="1"></rect><rect x="2" y="18" width="5" height="4" rx="1"></rect>
+                                    <rect x="9.5" y="18" width="5" height="4" rx="1"></rect><rect x="17" y="18" width="5" height="4" rx="1"></rect>
+                                    <line x1="12" y1="6" x2="12" y2="13"></line><line x1="4.5" y1="13" x2="19.5" y2="13"></line>
+                                    <line x1="4.5" y1="13" x2="4.5" y2="18"></line><line x1="12" y1="13" x2="12" y2="18"></line><line x1="19.5" y1="13" x2="19.5" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="list-header-divider"></div>
+                        <button class="view-btn" type="button" onclick="forceRefreshDirectory()" title="รีโหลดข้อมูล">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
+                                <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
                             </svg>
                         </button>
-                        <button class="view-btn" data-view="grid" title="Grid view">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="14" width="7" height="7"></rect>
-                                <rect x="3" y="14" width="7" height="7"></rect>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" data-action="excel" onclick="exportDirectoryExcel()" title="Export to Excel">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16v16H4z"></path>
-                                <path d="m9 9 6 6m0-6-6 6"></path>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" data-action="pdf" onclick="exportDirectoryPdf()" title="Export to PDF">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 2h9l5 5v15H6z"></path>
-                                <path d="M14 2v6h6"></path>
-                                <path d="M9 17h6"></path>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" data-action="link" onclick="copyDirectoryLink()" title="คัดลอกลิงก์สำหรับ HR">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l1.83-1.83a4 4 0 0 0-5.66-5.66l-1.25 1.25"></path>
-                                <path d="M14 11a5 5 0 0 0-7.54-.54L4.63 12.29a4 4 0 0 0 5.66 5.66l1.25-1.25"></path>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" id="installAppBtn" title="ติดตั้งแอป Contact List" style="display:none;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="9" cy="8" r="3"></circle>
-                                <path d="M3 20v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1"></path>
-                                <path d="M19 8v6"></path>
-                                <path d="M22 11h-6"></path>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" data-action="refresh" onclick="forceRefreshDirectory()" title="รีโหลดเวอร์ชันล่าสุด">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M23 4v6h-6"></path>
-                                <path d="M1 20v-6h6"></path>
-                                <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
-                                <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
-                            </svg>
-                        </button>
-                        <button class="view-btn" type="button" id="categorySettingsBtn" title="ตั้งค่าหมวดหมู่" style="display:none;" onclick="openCategorySettings()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a7.97 7.97 0 0 0 .1-6l2-1-2-3-2.3 1a8 8 0 0 0-5.2-3L11 1H13l-1 2a8 8 0 0 0-5.2 3L4.5 5l-2 3 2 1a7.97 7.97 0 0 0 .1 6l-2 1 2 3 2.3-1a8 8 0 0 0 5.2 3l1 2h-2l1-2a8 8 0 0 0 5.2-3l2.3 1 2-3-2-1z"></path>
-                            </svg>
-                        </button>
+                        <div class="list-more-wrap">
+                            <button class="view-btn" id="listMoreBtn" title="เพิ่มเติม" onclick="toggleListMoreMenu(event)">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
+                                </svg>
+                            </button>
+                            <div class="list-more-menu" id="listMoreMenu">
+                                <button class="more-menu-item" onclick="exportDirectoryExcel(); closeListMoreMenu()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"></path><path d="m9 9 6 6m0-6-6 6"></path></svg>
+                                    Export Excel
+                                </button>
+                                <button class="more-menu-item" onclick="exportDirectoryPdf(); closeListMoreMenu()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"></path><path d="M14 2v6h6"></path><path d="M9 17h6"></path></svg>
+                                    Export PDF
+                                </button>
+                                <button class="more-menu-item" onclick="copyDirectoryLink(); closeListMoreMenu()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l1.83-1.83a4 4 0 0 0-5.66-5.66l-1.25 1.25"></path><path d="M14 11a5 5 0 0 0-7.54-.54L4.63 12.29a4 4 0 0 0 5.66 5.66l1.25-1.25"></path></svg>
+                                    คัดลอกลิงก์
+                                </button>
+                                <div class="more-menu-divider"></div>
+                                <button class="more-menu-item" id="installAppBtn" onclick="closeListMoreMenu()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"></circle><path d="M3 20v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1"></path><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+                                    ติดตั้งแอป
+                                </button>
+                                <button class="more-menu-item" id="categorySettingsBtn" style="display:none;" onclick="openCategorySettings(); closeListMoreMenu()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a7.97 7.97 0 0 0 .1-6l2-1-2-3-2.3 1a8 8 0 0 0-5.2-3L11 1H13l-1 2a8 8 0 0 0-5.2 3L4.5 5l-2 3 2 1a7.97 7.97 0 0 0 .1 6l-2 1 2 3 2.3-1a8 8 0 0 0 5.2 3l1 2h-2l1-2a8 8 0 0 0 5.2-3l2.3 1 2-3-2-1z"></path></svg>
+                                    ตั้งค่าหมวดหมู่
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <!-- Active filter pills -->
+                <div id="activeFilterPills" class="filter-pills-bar" style="display:none;"></div>
+
                 <div class="employee-list" id="employeeList"></div>
             </section>
 
@@ -249,6 +272,39 @@
     <!-- Overlay for mobile sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+    <!-- Enterprise employee editor modal -->
+    <div id="employee-editor-modal" class="ptc-modal" style="display:none;" aria-hidden="true" role="dialog" aria-labelledby="employee-editor-title">
+        <div class="ptc-modal-overlay" id="employee-editor-overlay"></div>
+        <div class="ptc-modal-dialog modal-lg dir-editor-dialog">
+            <div class="ptc-modal-header">
+                <div>
+                    <div class="ptc-modal-title" id="employee-editor-title">แก้ไขข้อมูลพนักงาน</div>
+                    <div class="dir-editor-sub" id="employee-editor-subtitle"></div>
+                </div>
+                <button type="button" class="ptc-modal-close" id="employee-editor-close" aria-label="ปิด">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="ptc-modal-body" id="employee-editor-body"></div>
+            <div class="ptc-modal-footer dir-editor-footer">
+                <div class="dir-editor-error" id="employee-editor-error" role="alert" hidden></div>
+                <div class="dir-editor-footer-actions">
+                    <div class="dir-editor-footer-left">
+                        <button type="button" class="ptc-btn ptc-btn-danger-outline" id="employee-editor-delete" style="display:none;">
+                            <i class="fa fa-trash"></i> ลบพนักงาน
+                        </button>
+                    </div>
+                    <div class="dir-editor-footer-right">
+                        <button type="button" class="ptc-btn ptc-btn-ghost" id="employee-editor-cancel">ยกเลิก</button>
+                        <button type="button" class="ptc-btn ptc-btn-primary" id="employee-editor-save">
+                            <i class="fa fa-check"></i> บันทึก
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function () {
             const el = document.getElementById('searchShortcutKey');
@@ -258,6 +314,6 @@
             el.textContent = isApple ? '⌘K' : 'Ctrl K';
         })();
     </script>
-    <script src="directory_New/public/xampp/directory.js?v=20260319-category-nav"></script>
+    <script src="directory_New/public/xampp/directory.js?v=20260704q"></script>
 </body>
 </html>

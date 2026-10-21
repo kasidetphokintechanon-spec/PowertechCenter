@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Center — HR and GA</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <script src="js/pwa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/task-center-theme.css?v=20260601hrga">
+    <link rel="stylesheet" href="css/task-center-hrga-page.css?v=20260601">
+    <link rel="stylesheet" href="css/task-center-hrga-mockup.css?v=20260602">
+    <script>
+        // This page's CSS (task-center-hrga-page.css / task-center-hrga-mockup.css) has no
+        // dark-mode rules yet, so it always displays light regardless of the user's saved
+        // theme. That's fine — but the old version of this script also *wrote*
+        // localStorage.setItem('theme','light') on every load, which overwrote the shared
+        // theme preference used by every other page in the app. Anyone who preferred dark
+        // mode would get silently flipped back to light everywhere after just visiting this
+        // page once. Only remove the `.dark` class locally — don't touch the saved setting.
+        document.documentElement.classList.remove('dark', 'dark-theme');
+    </script>
+    <style>
+        .detail-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; padding: 9px 11px; }
+        .detail-block .db-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin-bottom: 2px; font-weight: 600; }
+        .detail-block .db-value { font-size: 13.5px; font-weight: 500; color: #0f172a; }
+    </style>
+</head>
+<body class="hrga-page-body ptc-normalize">
+
+<header class="hrga-page-top">
+    <div class="hrga-page-top-row">
+        <a href="index.html" class="hrga-page-link" title="กลับหน้าหลัก"><i class="fa fa-chevron-left"></i></a>
+        <div>
+            <h1>Task Center — HR and GA</h1>
+            <p>ประชุมปรับงาน · ภาระงาน Load · Routine ลูกน้อง · ข้าม PTA · PT4 · PTE</p>
+        </div>
+        <div class="hrga-page-top-actions">
+            <a href="task_center.html?standard=1" class="hrga-page-link"><i class="fas fa-table-list"></i> ตารางมาตรฐาน</a>
+            <button type="button" class="hrga-page-link" id="hrgaRefreshBtn" title="รีเฟรช"><i class="fa fa-arrows-rotate"></i></button>
+            <a href="job_ticket.html?new=hrga" class="hrga-page-link"><i class="fas fa-plus"></i> งานใหม่</a>
+        </div>
+    </div>
+    <nav class="hrga-page-nav screen-nav" role="tablist" aria-label="โหมด HR and GA">
+        <button type="button" class="sn active" data-hrga-screen="meeting"><i class="fas fa-users"></i> โหมดประชุม</button>
+        <button type="button" class="sn" data-hrga-screen="load"><i class="fas fa-chart-bar"></i> ภาระงานทีม</button>
+        <button type="button" class="sn" data-hrga-screen="dash"><i class="fas fa-table"></i> ตารางภาพรวม</button>
+        <button type="button" class="sn" data-hrga-screen="routine"><i class="fas fa-rotate"></i> Routine ลูกน้อง</button>
+    </nav>
+</header>
+
+<main id="hrgaApp" class="hrga-shell" aria-live="polite">
+    <div class="hrga-loading"><div class="ptc-spinner"></div><div>กำลังโหลด…</div></div>
+</main>
+
+<div id="detailModal" class="ptc-modal" style="display:none">
+    <div class="ptc-modal-overlay" onclick="closeDetailModal()"></div>
+    <div class="ptc-modal-dialog" style="max-width:580px;">
+        <div class="ptc-modal-header">
+            <div style="font-weight:600;font-size:15px;">รายละเอียดงาน</div>
+            <button type="button" class="ptc-btn ptc-btn-ghost ptc-btn-sm" onclick="closeDetailModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="ptc-modal-body"><div id="detailPanel"></div></div>
+    </div>
+</div>
+
+<script src="js/task-center-hrga.js?v=20260604"></script>
+<script>
+(function () {
+    const session = { loaded: false };
+    const STATUS_LABELS = { todo:'ยังไม่เริ่ม', doing:'กำลังดำเนินการ', approve:'รออนุมัติ', done:'เสร็จแล้ว' };
+
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function formatDate(v) {
+        if (!v) return '-';
+        const d = new Date(v);
+        return isNaN(d) ? v : d.toLocaleDateString('th-TH');
+    }
+    function formatDateTime(v) {
+        if (!v) return '-';
+        const d = new Date(String(v).replace(' ', 'T'));
+        return isNaN(d) ? v : d.toLocaleString('th-TH');
+    }
+    function companyLabel(item) {
+        const raw = (item?.responsible_companies || item?.company) || '';
+        const p = String(raw).split(',').map(s => s.trim()).filter(Boolean);
+        return p.length ? p.join(', ') : (item?.company || '-');
+    }
+    function detailBlock(label, value) {
+        return `<div class="detail-block"><div class="db-label">${escapeHtml(label)}</div><div class="db-value">${escapeHtml(value)}</div></div>`;
+    }
+
+    async function apiFetch(url, options = {}) {
+        const res = await fetch(url, { credentials: 'same-origin', ...options });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status === 'error') throw new Error(data.message || `HTTP ${res.status}`);
+        return data;
+    }
+
+    async function loadSession() {
+        const pageQs = new URLSearchParams(window.location.search);
+        const apiQs = new URLSearchParams({ action: 'check_session' });
+        if (pageQs.get('hrga') === '1') apiQs.set('hrga', '1');
+        let p;
+        try {
+            p = await apiFetch('api.php?' + apiQs.toString());
+        } catch (e) {
+            console.error('check_session failed', e);
+            return false;
+        }
+        if (!p.loggedin) { window.location.href = 'login.html'; return false; }
+        Object.assign(session, p, { loaded: true });
+        const deptOk = window.TaskCenterHrga && TaskCenterHrga.isHrGaDept(p.primary_department);
+        const adminPreview = pageQs.get('hrga') === '1' && p.role === 'admin';
+        if (!p.hrga_mode && !deptOk && !adminPreview) {
+            window.location.replace('task_center.html?standard=1');
+            return false;
+        }
+        if (!p.hrga_mode) session.hrga_mode = true;
+        return true;
+    }
+
+    async function setDetailStatus(taskId, status) {
+        if (!window.TaskCenterHrga?.patchTaskStatus) return;
+        try {
+            await TaskCenterHrga.patchTaskStatus(taskId, status);
+            openDetailModal(taskId);
+        } catch (e) {
+            alert(e.message || 'บันทึกไม่สำเร็จ');
+        }
+    }
+    window.setDetailStatus = setDetailStatus;
+
+    function openDetailModal(id) {
+        const tasks = window.TaskCenterHrga ? TaskCenterHrga.getTasks() : [];
+        const item = tasks.find(t => String(t.id) === String(id));
+        const panel = document.getElementById('detailPanel');
+        if (!item) {
+            panel.innerHTML = '<p style="color:#64748b;font-size:13px;">ไม่พบข้อมูลงาน</p>';
+        } else {
+            const st = item.status || 'todo';
+            const statusBtns = st === 'done'
+                ? `<button type="button" class="hrga-page-link" onclick="setDetailStatus(${item.id},'todo')">เปิดใหม่</button>`
+                : `<button type="button" class="hrga-page-link" onclick="setDetailStatus(${item.id},'doing')">กำลังทำ</button>
+                   <button type="button" class="hrga-page-link" onclick="setDetailStatus(${item.id},'done')">เสร็จแล้ว</button>`;
+            panel.innerHTML = `
+                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">
+                    <span class="badge b-${st === 'done' ? 'todo' : st === 'doing' ? 'doing' : 'todo'}">${STATUS_LABELS[st] || st}</span>
+                    ${Number(item.is_recurring || 0) === 1 ? '<span class="badge b-routine">Routine</span>' : '<span class="badge b-adhoc">พิเศษ</span>'}
+                </div>
+                <h4 style="font-size:18px;font-weight:700;margin:0 0 8px;color:#0f172a;">${escapeHtml(item.title || '-')}</h4>
+                <p style="font-size:13px;color:#64748b;white-space:pre-wrap;margin:0 0 16px;">${escapeHtml(item.description || 'ไม่มีรายละเอียด')}</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+                    ${detailBlock('บริษัท', companyLabel(item))}
+                    ${detailBlock('แผนก', item.department || 'HR and GA')}
+                    ${detailBlock('ผู้รับผิดชอบ', item.owner_name || item.assignee_name || '-')}
+                    ${detailBlock('กำหนดส่ง', formatDate(item.due_date))}
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">${statusBtns}</div>
+                <div style="font-size:11.5px;color:#94a3b8;">อัปเดต ${escapeHtml(formatDateTime(item.updated_at))}</div>
+                <a href="job_ticket.html?task=${encodeURIComponent(item.id)}" class="btn-primary" style="display:inline-flex;justify-content:center;margin-top:14px;text-decoration:none;width:100%;box-sizing:border-box;">แก้ไขใน Job Ticket</a>`;
+        }
+        document.getElementById('detailModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    window.closeDetailModal = function () {
+        document.getElementById('detailModal').style.display = 'none';
+        document.body.style.overflow = '';
+    };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetailModal(); });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const ok = await loadSession();
+        if (!ok || !window.TaskCenterHrga) return;
+        TaskCenterHrga.init({
+            standalone: true,
+            session,
+            apiFetch,
+            escapeHtml,
+            formatDate,
+            openDetailModal,
+            onScreenChange: (scr) => {
+                document.querySelectorAll('[data-hrga-screen]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.hrgaScreen === scr);
+                });
+            }
+        });
+    });
+})();
+</script>
+</body>
+</html>

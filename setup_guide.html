@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือขั้นตอน IT Setup — IT-WI-001</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+    <style>
+        html, body { overflow:auto !important; height:auto !important; }
+        body { font-family:'Inter','Kanit',sans-serif; background:#f1f5f9; color:#334155; padding-bottom:80px; }
+        html.dark body { background:#0a0f1e; color:#e2e8f0; }
+
+        .guide-page { max-width:900px; margin:0 auto; padding:16px 16px 60px; display:flex; flex-direction:column; gap:16px; }
+
+        /* ── Cards ── */
+        .g-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:20px 24px; }
+        html.dark .g-card { background:#1e293b; border-color:#334155; }
+        .g-card-title { font-size:13px; font-weight:700; color:#0f172a; display:flex; align-items:center; gap:8px; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #f1f5f9; }
+        html.dark .g-card-title { color:#f1f5f9; border-color:#334155; }
+        .g-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+
+        /* ── Hero ── */
+        .hero-card { background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%); border:none; color:#fff; padding:28px 28px 24px; }
+        .hero-title { font-size:20px; font-weight:800; margin-bottom:4px; }
+        .hero-sub { font-size:13px; opacity:.8; margin-bottom:16px; }
+        .hero-meta { display:flex; gap:10px; flex-wrap:wrap; }
+        .hero-chip { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); border-radius:6px; padding:4px 12px; font-size:11px; font-weight:600; }
+
+        /* ── Info table ── */
+        .info-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+        .info-table tr { border-bottom:1px solid #f1f5f9; }
+        html.dark .info-table tr { border-color:#334155; }
+        .info-table tr:last-child { border-bottom:none; }
+        .info-table td:first-child { width:160px; font-weight:600; color:#64748b; padding:10px 0; vertical-align:top; }
+        .info-table td:last-child { padding:10px 0; color:#0f172a; }
+        html.dark .info-table td:last-child { color:#e2e8f0; }
+
+        /* ── Role badges ── */
+        .role-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+        .role-card { border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; display:flex; align-items:flex-start; gap:10px; }
+        html.dark .role-card { border-color:#334155; }
+        .role-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+        .role-name { font-size:13px; font-weight:700; color:#0f172a; }
+        html.dark .role-name { color:#f1f5f9; }
+        .role-desc { font-size:11px; color:#64748b; margin-top:2px; line-height:1.5; }
+
+        /* ── Flow diagram ── */
+        .flow-wrap { display:flex; flex-direction:column; gap:0; }
+        .flow-phase { display:flex; gap:0; align-items:stretch; }
+        .flow-phase-label { writing-mode:vertical-rl; transform:rotate(180deg); font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#94a3b8; padding:0 10px; display:flex; align-items:center; justify-content:center; min-width:32px; border-right:2px solid #f1f5f9; margin-right:16px; }
+        html.dark .flow-phase-label { border-color:#334155; }
+        .flow-steps { flex:1; display:flex; flex-wrap:wrap; gap:8px; padding:12px 0; align-items:center; }
+        .flow-step { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; }
+        .flow-box { border-radius:10px; padding:10px 14px; font-size:11px; font-weight:600; text-align:center; border:1.5px solid; display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; cursor:pointer; transition:all .15s; text-decoration:none; }
+        .flow-box i { font-size:16px; margin-bottom:2px; }
+        .flow-box.trigger  { background:#fefce8; border-color:#fde68a; color:#92400e; }
+        .flow-box.action   { background:#eff6ff; border-color:#bfdbfe; color:#1e40af; }
+        .flow-box.action:hover { background:#dbeafe; border-color:#93c5fd; }
+        .flow-box.doc      { background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+        .flow-box.doc:hover { background:#dcfce7; border-color:#86efac; }
+        .flow-box.warning  { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+        .flow-box.warning:hover { background:#fee2e2; border-color:#fca5a5; }
+        .flow-box.neutral  { background:#f8fafc; border-color:#e2e8f0; color:#475569; }
+        .flow-arrow { color:#cbd5e1; font-size:16px; display:flex; align-items:center; padding-top:4px; }
+        .flow-divider { border-top:1px dashed #e2e8f0; margin:4px 0 4px 48px; }
+        html.dark .flow-divider { border-color:#334155; }
+
+        /* ── Steps list ── */
+        .step-list { display:flex; flex-direction:column; gap:10px; }
+        .step-item { display:flex; gap:14px; align-items:flex-start; }
+        .step-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; }
+        .step-content { flex:1; padding-top:3px; }
+        .step-title { font-size:13px; font-weight:700; color:#0f172a; margin-bottom:3px; }
+        html.dark .step-title { color:#f1f5f9; }
+        .step-desc { font-size:12px; color:#64748b; line-height:1.6; }
+        .step-tag { display:inline-flex; align-items:center; gap:4px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:5px; padding:1px 8px; font-size:10px; font-weight:700; margin-left:6px; text-decoration:none; }
+        .step-tag.red { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
+        .step-tag.green { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
+
+        /* ── Checklist preview ── */
+        .chk-preview { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; }
+        html.dark .chk-preview { background:#0f172a; border-color:#334155; }
+        .chk-tag { background:#fff; border:1px solid #e2e8f0; border-radius:5px; padding:2px 10px; font-size:11px; color:#475569; font-weight:500; }
+        html.dark .chk-tag { background:#1e293b; border-color:#334155; color:#94a3b8; }
+
+        /* ── Doc links ── */
+        .doc-links { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+        .doc-link { display:flex; align-items:center; gap:12px; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; text-decoration:none; transition:all .15s; }
+        html.dark .doc-link { border-color:#334155; }
+        .doc-link:hover { border-color:#93c5fd; background:#eff6ff; }
+        .doc-link-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+        .doc-link-label { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; }
+        .doc-link-name { font-size:13px; font-weight:700; color:#0f172a; }
+        html.dark .doc-link-name { color:#f1f5f9; }
+        .doc-link-desc { font-size:11px; color:#64748b; margin-top:1px; }
+
+        /* ── Revision table ── */
+        .rev-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .rev-table th { background:#f8fafc; padding:8px 12px; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; text-align:left; border-bottom:1px solid #e2e8f0; }
+        html.dark .rev-table th { background:#0f172a; border-color:#334155; }
+        .rev-table td { padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#334155; }
+        html.dark .rev-table td { border-color:#334155; color:#e2e8f0; }
+        .rev-table tr:last-child td { border-bottom:none; }
+
+        /* ── ISO ── */
+        .iso-header { display:none; }
+        .iso-doc-badge { display:inline-flex; align-items:center; gap:6px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:3px 10px; font-size:10px; font-weight:700; color:#1d4ed8; }
+
+        /* ── Callout ── */
+        .callout { display:flex; gap:10px; align-items:flex-start; border-radius:8px; padding:12px 14px; font-size:12px; }
+        .callout.blue { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+        .callout.yellow { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+        .callout.green { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+        .callout i { margin-top:1px; flex-shrink:0; }
+
+        @media print {
+            body { background:#fff !important; font-size:10pt; }
+            .ptc-nav, .no-print { display:none !important; }
+            .guide-page { padding:0; max-width:100%; }
+            .g-card { border-radius:0; border:none; border-bottom:1px solid #ddd; padding:12px 16px; }
+            .hero-card { background:#1e3a5f !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .iso-header { display:block !important; border-bottom:2px solid #1a1a2e; margin-bottom:0; padding:8px 12px; }
+            .iso-doc-badge { display:none !important; }
+            .flow-box { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="ptc-nav">
+    <a href="setup_list.html" class="nav-back" title="กลับ"><i class="fa fa-arrow-left"></i></a>
+    <div class="ptc-nav-brand">
+        <div class="ptc-nav-icon" style="background:#1d4ed8"><i class="fa fa-book-open"></i></div>
+        <div>
+            <div class="ptc-nav-title">คู่มือขั้นตอน IT Setup</div>
+            <div class="ptc-nav-sub">Work Instruction — IT-WI-001</div>
+        </div>
+    </div>
+    <div style="flex:1"></div>
+    <span class="iso-doc-badge no-print"><i class="fa fa-file-shield"></i> IT-WI-001 Rev.01</span>
+    <button type="button" class="nav-back no-print" onclick="window.print()" title="พิมพ์คู่มือ"><i class="fa fa-print"></i></button>
+    <button id="theme-toggle" class="ptc-ghost no-print" title="สลับธีม" style="font-size:15px;padding:6px 10px;"><i id="theme-icon" class="fa fa-sun"></i></button>
+    <div id="nav-user-area"></div>
+</nav>
+
+<!-- ISO Print Header -->
+<div class="iso-header" style="display:none">
+    <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+        <tr>
+            <td rowspan="4" style="width:180px;border:1px solid #333;padding:8px 12px;text-align:center;vertical-align:middle;">
+                <div style="font-size:20px;font-weight:900;color:#1a1a2e;letter-spacing:-.5px">PowerTech</div>
+                <div style="font-size:9px;color:#555;margin-top:2px">Engine Assembly Co., Ltd.</div>
+            </td>
+            <td colspan="3" style="border:1px solid #333;padding:6px 12px;text-align:center;font-size:13pt;font-weight:700;">
+                คู่มือขั้นตอนการติดตั้งและถอนสิทธิ์คอมพิวเตอร์<br>
+                <span style="font-size:10pt;font-weight:400">IT Setup &amp; Offboarding Work Instruction</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>เลขที่เอกสาร</strong></td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;">IT-WI-001</td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>Rev:</strong> 01</td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>แผนก</strong></td>
+            <td colspan="2" style="border:1px solid #333;padding:4px 10px;font-size:9pt;">IT / Information Technology</td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>วันที่มีผลบังคับใช้</strong></td>
+            <td colspan="2" style="border:1px solid #333;padding:4px 10px;font-size:9pt;" id="iso-eff-date">—</td>
+        </tr>
+    </table>
+</div>
+
+<div class="guide-page">
+
+    <!-- Hero -->
+    <div class="g-card hero-card">
+        <div class="hero-title"><i class="fa fa-book-open" style="margin-right:8px"></i>คู่มือขั้นตอนการติดตั้งและถอนสิทธิ์คอมพิวเตอร์</div>
+        <div class="hero-sub">IT Setup &amp; Offboarding Work Instruction</div>
+        <div class="hero-meta">
+            <span class="hero-chip"><i class="fa fa-file-shield"></i> IT-WI-001 Rev.01</span>
+            <span class="hero-chip"><i class="fa fa-layer-group"></i> ISO Level 3 — Work Instruction</span>
+            <span class="hero-chip"><i class="fa fa-building"></i> IT / Information Technology</span>
+            <span class="hero-chip" id="hero-date"><i class="fa fa-calendar"></i> —</span>
+        </div>
+    </div>
+
+    <!-- 1. วัตถุประสงค์ -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fa fa-bullseye"></i></div>
+            1. วัตถุประสงค์ (Purpose)
+        </div>
+        <p style="font-size:13px;line-height:1.8;margin:0;color:#334155">
+            เอกสารนี้กำหนดขั้นตอนการปฏิบัติงานสำหรับฝ่าย IT ในการ <strong>ติดตั้งคอมพิวเตอร์และให้สิทธิ์การเข้าถึงระบบแก่พนักงานใหม่</strong> (Onboarding)
+            และ <strong>ถอนสิทธิ์และรับคืนอุปกรณ์เมื่อพนักงานสิ้นสุดการจ้างงาน</strong> (Offboarding) เพื่อให้มั่นใจว่า:
+        </p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+            <div class="callout blue"><i class="fa fa-shield-halved"></i><span>ข้อมูลและระบบของบริษัทได้รับการปกป้อง — สอดคล้อง <strong>TISAX</strong> (Information Security)</span></div>
+            <div class="callout blue"><i class="fa fa-certificate"></i><span>การจัดการสิทธิ์ผู้ใช้เป็นไปอย่างมีระบบ — สอดคล้อง <strong>IATF 16949</strong> (Document &amp; Record Control)</span></div>
+            <div class="callout green"><i class="fa fa-check-circle"></i><span>มีหลักฐานเป็นลายลักษณ์อักษรทุกขั้นตอน พร้อมให้ตรวจสอบโดย Auditor</span></div>
+        </div>
+    </div>
+
+    <!-- 2. ขอบเขต -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#f0fdf4;color:#16a34a"><i class="fa fa-sitemap"></i></div>
+            2. ขอบเขตการใช้งาน (Scope)
+        </div>
+        <table class="info-table">
+            <tr>
+                <td>ใช้กับ</td>
+                <td>พนักงานทุกคนของ <strong>PTA · PT4 · PTE</strong> ที่ได้รับหรือคืนอุปกรณ์คอมพิวเตอร์</td>
+            </tr>
+            <tr>
+                <td>ครอบคลุม</td>
+                <td>คอมพิวเตอร์ตั้งโต๊ะ, โน้ตบุ๊ก, และอุปกรณ์ IT ที่บริษัทจัดให้</td>
+            </tr>
+            <tr>
+                <td>ระบบที่เกี่ยวข้อง</td>
+                <td>Windows Login · Internet / Fortigate · VPN · ERP · MRP · เครื่องพิมพ์ · PowertechCenter</td>
+            </tr>
+            <tr>
+                <td>ผู้รับผิดชอบ</td>
+                <td>ฝ่าย IT — Information Technology</td>
+            </tr>
+            <tr>
+                <td>เอกสารอ้างอิง</td>
+                <td>IT-FM-001 (ใบส่งมอบฯ) · IT-FM-002 (ใบถอนสิทธิ์ฯ)</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. ผู้รับผิดชอบ -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#fef9c3;color:#92400e"><i class="fa fa-users"></i></div>
+            3. ผู้รับผิดชอบ (Responsibility)
+        </div>
+        <div class="role-grid">
+            <div class="role-card">
+                <div class="role-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fa fa-screwdriver-wrench"></i></div>
+                <div>
+                    <div class="role-name">ช่าง IT (IT Technician)</div>
+                    <div class="role-desc">ดำเนินการติดตั้ง กรอกข้อมูล ตรวจสอบ checklist และส่งมอบเครื่อง</div>
+                </div>
+            </div>
+            <div class="role-card">
+                <div class="role-icon" style="background:#f0fdf4;color:#16a34a"><i class="fa fa-user-tie"></i></div>
+                <div>
+                    <div class="role-name">หัวหน้า IT</div>
+                    <div class="role-desc">ตรวจสอบความครบถ้วน อนุมัติการเปิด/ปิดสิทธิ์ระบบสำคัญ</div>
+                </div>
+            </div>
+            <div class="role-card">
+                <div class="role-icon" style="background:#fef9c3;color:#92400e"><i class="fa fa-user"></i></div>
+                <div>
+                    <div class="role-name">พนักงาน (End User)</div>
+                    <div class="role-desc">รับมอบเครื่อง ลงนามยืนยัน และปฏิบัติตามนโยบาย IT ของบริษัท</div>
+                </div>
+            </div>
+            <div class="role-card">
+                <div class="role-icon" style="background:#fef2f2;color:#dc2626"><i class="fa fa-building-user"></i></div>
+                <div>
+                    <div class="role-name">HR / หัวหน้าแผนก</div>
+                    <div class="role-desc">แจ้ง IT เมื่อมีพนักงานเข้าใหม่หรือลาออก พร้อมระบุสิทธิ์ที่ต้องการ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Flow Overview -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#ede9fe;color:#6d28d9"><i class="fa fa-diagram-project"></i></div>
+            4. ภาพรวม Flow การทำงาน
+        </div>
+
+        <div class="flow-wrap">
+            <!-- Phase: Trigger -->
+            <div class="flow-phase">
+                <div class="flow-phase-label" style="color:#92400e;border-color:#fde68a">เริ่มต้น</div>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="flow-box trigger">
+                            <i class="fa fa-user-plus"></i>
+                            พนักงานเข้าใหม่<br><span style="font-size:9px;opacity:.7">HR แจ้ง IT</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box trigger">
+                            <i class="fa fa-arrow-right-arrow-left"></i>
+                            โอนย้ายแผนก<br><span style="font-size:9px;opacity:.7">ปรับสิทธิ์</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box warning">
+                            <i class="fa fa-user-minus"></i>
+                            พนักงานลาออก<br><span style="font-size:9px;opacity:.7">HR แจ้ง IT ทันที</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-divider"></div>
+
+            <!-- Phase: Onboarding -->
+            <div class="flow-phase">
+                <div class="flow-phase-label" style="color:#1d4ed8;border-color:#bfdbfe">Onboard</div>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="flow-box action" onclick="document.getElementById('sec-onboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-laptop"></i>
+                            เตรียมเครื่อง<br><span style="font-size:9px;opacity:.7">ติดตั้ง Windows</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box action" onclick="document.getElementById('sec-onboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-shield-halved"></i>
+                            สร้าง Account<br><span style="font-size:9px;opacity:.7">Domain / VPN / ERP</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box action" onclick="document.getElementById('sec-onboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-list-check"></i>
+                            Checklist<br><span style="font-size:9px;opacity:.7">ครบทุกข้อ</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <a href="setup.html" class="flow-box doc">
+                            <i class="fa fa-file-signature"></i>
+                            IT-FM-001<br><span style="font-size:9px;opacity:.7">ส่งมอบ + ลงนาม</span>
+                        </a>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box neutral">
+                            <i class="fa fa-envelope"></i>
+                            ส่งอีเมล<br><span style="font-size:9px;opacity:.7">Account ให้ผู้ใช้</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-divider"></div>
+
+            <!-- Phase: Active -->
+            <div class="flow-phase">
+                <div class="flow-phase-label" style="color:#16a34a;border-color:#bbf7d0">ใช้งาน</div>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="flow-box neutral">
+                            <i class="fa fa-circle-check" style="color:#16a34a"></i>
+                            Active<br><span style="font-size:9px;opacity:.7">พนักงานใช้งาน</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <a href="setup_list.html" class="flow-box doc">
+                            <i class="fa fa-magnifying-glass"></i>
+                            ค้นหาประวัติ<br><span style="font-size:9px;opacity:.7">Setup List</span>
+                        </a>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box neutral">
+                            <i class="fa fa-pen-to-square"></i>
+                            แก้ไข/อัปเดต<br><span style="font-size:9px;opacity:.7">ข้อมูลเครื่อง</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-divider"></div>
+
+            <!-- Phase: Offboarding -->
+            <div class="flow-phase">
+                <div class="flow-phase-label" style="color:#dc2626;border-color:#fecaca">Offboard</div>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="flow-box warning" onclick="document.getElementById('sec-offboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-triangle-exclamation"></i>
+                            รับแจ้งจาก HR<br><span style="font-size:9px;opacity:.7">วันสุดท้าย</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box warning" onclick="document.getElementById('sec-offboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-ban"></i>
+                            ถอนสิทธิ์<br><span style="font-size:9px;opacity:.7">ทุกระบบทันที</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-box warning" onclick="document.getElementById('sec-offboard').scrollIntoView({behavior:'smooth'})">
+                            <i class="fa fa-box-archive"></i>
+                            รับคืนเครื่อง<br><span style="font-size:9px;opacity:.7">ตรวจสภาพ</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <a href="setup_offboard.html" class="flow-box warning">
+                            <i class="fa fa-file-signature"></i>
+                            IT-FM-002<br><span style="font-size:9px;opacity:.7">ถอนสิทธิ์ + ลงนาม</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="callout yellow" style="margin-top:16px">
+            <i class="fa fa-lightbulb"></i>
+            <span>กล่องสีน้ำเงินกดได้ — จะข้ามไปยังขั้นตอนนั้นในหน้านี้ / กล่อง <strong>IT-FM-001/002</strong> กดแล้วเปิดฟอร์มได้เลย</span>
+        </div>
+    </div>
+
+    <!-- 5. ขั้นตอน Onboarding -->
+    <div class="g-card" id="sec-onboard">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fa fa-user-plus"></i></div>
+            5. ขั้นตอน Onboarding (การรับพนักงานใหม่)
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">1</div>
+                <div class="step-content">
+                    <div class="step-title">รับข้อมูลพนักงานจาก HR</div>
+                    <div class="step-desc">รับแจ้งชื่อ-สกุล, แผนก, บริษัท (PTA/PT4/PTE), วันเริ่มงาน<br>ตรวจสอบว่าต้องการสิทธิ์ระบบใดบ้าง (Internet, VPN, ERP, MRP)</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">2</div>
+                <div class="step-content">
+                    <div class="step-title">เตรียมเครื่องคอมพิวเตอร์</div>
+                    <div class="step-desc">ติดตั้ง Windows, Driver, Software ตามมาตรฐาน IT<br>บันทึก Asset Code, Serial Number, PC Name, IP Address</div>
+                    <div class="chk-preview">
+                        <span class="chk-tag">Windows 10/11</span>
+                        <span class="chk-tag">Driver ครบ</span>
+                        <span class="chk-tag">Antivirus</span>
+                        <span class="chk-tag">Office</span>
+                        <span class="chk-tag">Join Domain</span>
+                        <span class="chk-tag">Remote Desktop</span>
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">3</div>
+                <div class="step-content">
+                    <div class="step-title">สร้าง Account และให้สิทธิ์ระบบ</div>
+                    <div class="step-desc">
+                        สร้าง Windows Login รูปแบบ <strong>Firstname.L</strong> (เช่น Anan.A)<br>
+                        Password เริ่มต้น = <strong>รหัสพนักงาน</strong> (ใช้ร่วมกันทุกระบบ)
+                    </div>
+                    <div class="chk-preview">
+                        <span class="chk-tag">Internet / Fortigate</span>
+                        <span class="chk-tag">VPN (FortiClient)</span>
+                        <span class="chk-tag">ERP / MRP</span>
+                        <span class="chk-tag">เครื่องพิมพ์</span>
+                        <span class="chk-tag">PowertechCenter</span>
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">4</div>
+                <div class="step-content">
+                    <div class="step-title">กรอก Setup Checksheet
+                        <a href="setup.html" class="step-tag"><i class="fa fa-arrow-up-right-from-square"></i> setup.html</a>
+                    </div>
+                    <div class="step-desc">
+                        เปิด <strong>setup.html</strong> → กรอกข้อมูลพนักงาน, เครื่อง, สิทธิ์การเข้าถึง<br>
+                        ทำ Checklist ให้ครบทุกข้อ → กด <strong>บันทึก</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">5</div>
+                <div class="step-content">
+                    <div class="step-title">ส่งมอบเครื่องและรับลายเซ็น <span class="step-tag green"><i class="fa fa-file-signature"></i> IT-FM-001</span></div>
+                    <div class="step-desc">
+                        กด <strong>พิมพ์</strong> จาก setup.html → ได้เอกสาร <strong>IT-FM-001</strong><br>
+                        ให้พนักงานและช่าง IT ลงนาม → เก็บสำเนาไว้ 1 ชุด
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#dbeafe;color:#1d4ed8">6</div>
+                <div class="step-content">
+                    <div class="step-title">ส่ง Email แจ้ง Account</div>
+                    <div class="step-desc">
+                        กด <strong>สร้างอีเมล</strong> จาก setup.html → copy ข้อความ → ส่งหา Manager หรือ HR<br>
+                        อีเมลจะระบุ: Windows Login, Internet/VPN, ระบบที่ได้สิทธิ์, รหัสเครื่องพิมพ์
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. ขั้นตอน Offboarding -->
+    <div class="g-card" id="sec-offboard">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#fef2f2;color:#dc2626"><i class="fa fa-right-from-bracket"></i></div>
+            6. ขั้นตอน Offboarding (การถอนสิทธิ์และรับคืนเครื่อง)
+        </div>
+
+        <div class="callout yellow" style="margin-bottom:14px">
+            <i class="fa fa-triangle-exclamation"></i>
+            <span><strong>สำคัญ:</strong> ต้องดำเนินการถอนสิทธิ์ <strong>ภายในวันที่พนักงานสิ้นสุดการจ้างงาน</strong> เพื่อป้องกันการเข้าถึงระบบโดยไม่ได้รับอนุญาต</span>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <div class="step-num" style="background:#fee2e2;color:#dc2626">1</div>
+                <div class="step-content">
+                    <div class="step-title">รับแจ้งจาก HR / หัวหน้าแผนก</div>
+                    <div class="step-desc">ยืนยันวันสุดท้ายของการทำงาน, รายการเครื่องที่ต้องคืน</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#fee2e2;color:#dc2626">2</div>
+                <div class="step-content">
+                    <div class="step-title">ค้นหา Record ใน Setup List
+                        <a href="setup_list.html" class="step-tag red"><i class="fa fa-arrow-up-right-from-square"></i> setup_list.html</a>
+                    </div>
+                    <div class="step-desc">เปิด <strong>setup_list.html</strong> → ค้นชื่อพนักงาน → กดปุ่ม <strong>Offboard</strong></div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#fee2e2;color:#dc2626">3</div>
+                <div class="step-content">
+                    <div class="step-title">ถอนสิทธิ์ทุกระบบ</div>
+                    <div class="step-desc">
+                        ทำตาม Offboard Checklist — ถอนครบทุกบริษัทที่มีสิทธิ์<br>
+                        ตรวจสอบจากข้อมูล Internet/VPN ที่บันทึกไว้ตอน Onboard ว่ามี PTA/PT4/PTE ไหนบ้าง
+                    </div>
+                    <div class="chk-preview">
+                        <span class="chk-tag">Disable AD Account</span>
+                        <span class="chk-tag">ถอน Internet/Fortigate</span>
+                        <span class="chk-tag">ถอน VPN</span>
+                        <span class="chk-tag">ถอน ERP/MRP</span>
+                        <span class="chk-tag">ถอนสิทธิ์พิมพ์</span>
+                        <span class="chk-tag">คืน Email</span>
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#fee2e2;color:#dc2626">4</div>
+                <div class="step-content">
+                    <div class="step-title">รับคืนอุปกรณ์</div>
+                    <div class="step-desc">รับคืนเครื่อง, Charger, อุปกรณ์เสริม → ตรวจสอบสภาพ → บันทึกหมายเหตุ</div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-num" style="background:#fee2e2;color:#dc2626">5</div>
+                <div class="step-content">
+                    <div class="step-title">กรอก Offboard Checksheet และรับลายเซ็น <span class="step-tag red"><i class="fa fa-file-signature"></i> IT-FM-002</span></div>
+                    <div class="step-desc">
+                        กด <strong>พิมพ์</strong> จาก setup_offboard.html → ได้เอกสาร <strong>IT-FM-002</strong><br>
+                        ให้พนักงานและช่าง IT ลงนาม → เก็บสำเนาไว้ 1 ชุด
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Password Convention -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#fef9c3;color:#92400e"><i class="fa fa-key"></i></div>
+            7. มาตรฐาน Account และ Password
+        </div>
+        <table class="info-table">
+            <tr>
+                <td>Windows Login</td>
+                <td><strong>Firstname.L</strong> — ชื่อจริง + จุด + อักษรแรกของนามสกุล (ตัวใหญ่)<br>
+                    <span style="color:#64748b;font-size:11px">ตัวอย่าง: นายอนันต์ อาจหาญ → <code style="background:#f1f5f9;padding:1px 6px;border-radius:4px">Anan.A</code></span></td>
+            </tr>
+            <tr>
+                <td>Internet / VPN</td>
+                <td>Username = <strong>ชื่อจริงเท่านั้น</strong> (ไม่มี .นามสกุล)<br>
+                    <span style="color:#64748b;font-size:11px">ตัวอย่าง: <code style="background:#f1f5f9;padding:1px 6px;border-radius:4px">Anan</code></span></td>
+            </tr>
+            <tr>
+                <td>Password ทุกระบบ</td>
+                <td><strong>รหัสพนักงาน</strong> (ใช้ร่วมกัน: Internet · VPN · ERP · MRP · เครื่องพิมพ์)</td>
+            </tr>
+            <tr>
+                <td>PowertechCenter</td>
+                <td>Username = <strong>รหัสพนักงาน</strong> / Password = <strong>รหัสพนักงาน</strong></td>
+            </tr>
+        </table>
+        <div class="callout blue" style="margin-top:12px">
+            <i class="fa fa-circle-info"></i>
+            <span>แนะนำให้พนักงานเปลี่ยน Password หลังจากล็อกอินครั้งแรก โดยเฉพาะระบบ ERP และ VPN</span>
+        </div>
+    </div>
+
+    <!-- 8. เอกสารอ้างอิง -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#ede9fe;color:#6d28d9"><i class="fa fa-folder-open"></i></div>
+            8. เอกสารที่เกี่ยวข้อง (Related Documents)
+        </div>
+        <div class="doc-links">
+            <a href="setup_list.html" class="doc-link">
+                <div class="doc-link-icon" style="background:#eff6ff;color:#1d4ed8"><i class="fa fa-list-check"></i></div>
+                <div>
+                    <div class="doc-link-label">Hub หลัก</div>
+                    <div class="doc-link-name">Setup Records List</div>
+                    <div class="doc-link-desc">ค้นหาประวัติการติดตั้งทั้งหมด</div>
+                </div>
+            </a>
+            <a href="setup.html" class="doc-link">
+                <div class="doc-link-icon" style="background:#f0fdf4;color:#16a34a"><i class="fa fa-file-signature"></i></div>
+                <div>
+                    <div class="doc-link-label">IT-FM-001 Rev.01</div>
+                    <div class="doc-link-name">ใบส่งมอบและติดตั้งฯ</div>
+                    <div class="doc-link-desc">Onboarding Checksheet &amp; Delivery</div>
+                </div>
+            </a>
+            <a href="setup_offboard.html" class="doc-link">
+                <div class="doc-link-icon" style="background:#fef2f2;color:#dc2626"><i class="fa fa-right-from-bracket"></i></div>
+                <div>
+                    <div class="doc-link-label">IT-FM-002 Rev.01</div>
+                    <div class="doc-link-name">ใบถอนสิทธิ์และคืนอุปกรณ์ฯ</div>
+                    <div class="doc-link-desc">Offboarding Checklist &amp; Return</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 9. Revision History -->
+    <div class="g-card">
+        <div class="g-card-title">
+            <div class="g-icon" style="background:#f8fafc;color:#475569"><i class="fa fa-clock-rotate-left"></i></div>
+            9. ประวัติการแก้ไขเอกสาร (Revision History)
+        </div>
+        <table class="rev-table">
+            <thead>
+                <tr>
+                    <th>Rev</th>
+                    <th>วันที่</th>
+                    <th>รายละเอียดการแก้ไข</th>
+                    <th>ผู้แก้ไข</th>
+                    <th>ผู้อนุมัติ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>01</strong></td>
+                    <td id="rev-date-01">—</td>
+                    <td>จัดทำเอกสารครั้งแรก — กำหนด flow Onboarding/Offboarding และมาตรฐาน Account</td>
+                    <td>Kasidet P.</td>
+                    <td>—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Theme toggle
+    const updateIcon = () => {
+        document.getElementById('theme-icon').className =
+            document.documentElement.classList.contains('dark') ? 'fa fa-moon' : 'fa fa-sun';
+    };
+    updateIcon();
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('dark-theme');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+    });
+
+    // Dates
+    const today = new Date();
+    const thDate = today.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+    const thDateShort = today.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
+
+    const isoEl = document.getElementById('iso-eff-date');
+    if (isoEl) isoEl.textContent = thDate;
+
+    const heroEl = document.getElementById('hero-date');
+    if (heroEl) heroEl.innerHTML = `<i class="fa fa-calendar"></i> ${thDateShort}`;
+
+    const revEl = document.getElementById('rev-date-01');
+    if (revEl) revEl.textContent = thDateShort;
+
+    // Session check
+    fetch('api.php?action=check_session').then(r => r.json()).then(s => {
+        if (!s.loggedin) { window.location.href = 'login.html'; }
+    });
+});
+</script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

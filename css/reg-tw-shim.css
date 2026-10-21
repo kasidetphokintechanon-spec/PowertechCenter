@@ -1,0 +1,56 @@
+@import url('log-tw-shim.css');
+
+.min-h-screen { min-height: 100vh; }
+.transition-colors { transition-property: color, background-color, border-color; }
+.duration-300 { transition-duration: 300ms; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.max-w-5xl { max-width: 64rem; }
+.max-w-7xl { max-width: 80rem; }
+.pt-20 { padding-top: 5rem; }
+.pb-12 { padding-bottom: 3rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-8 { margin-bottom: 2rem; }
+.gap-8 { gap: 2rem; }
+.h-16 { height: 4rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.w-16 { width: 4rem; }
+.p-6 { padding: 1.5rem; }
+.p-1 { padding: 0.25rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.inline-flex { display: inline-flex; }
+.backdrop-blur-sm { backdrop-filter: blur(4px); }
+.bg-white\/90 { background-color: rgb(255 255 255 / 0.9); }
+.bg-blue-100 { background-color: #dbeafe; }
+.border-slate-300 { border-color: #cbd5e1; }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05); }
+.focus\:ring-2:focus { outline: 2px solid transparent; box-shadow: 0 0 0 2px #2563eb; }
+.focus\:ring-blue-500:focus { --tw-ring-color: #3b82f6; }
+.animate-fade-in { animation: regFadeIn 0.4s ease-out; }
+@keyframes regFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+html.dark .dark\:bg-slate-900 { background-color: #0f172a; }
+html.dark .dark\:text-slate-100 { color: #f1f5f9; }
+html.dark .dark\:text-white { color: #fff; }
+html.dark .dark\:text-blue-400 { color: #60a5fa; }
+html.dark .dark\:text-slate-300 { color: #cbd5e1; }
+html.dark .dark\:text-slate-400 { color: #94a3b8; }
+html.dark .dark\:border-slate-600 { border-color: #475569; }
+html.dark .dark\:bg-slate-600 { background-color: #475569; }
+html.dark .dark\:bg-slate-700 { background-color: #334155; }
+html.dark .dark\:bg-slate-800\/90 { background-color: rgb(30 41 59 / 0.9); }
+html.dark .dark\:bg-blue-900\/30 { background-color: rgb(30 58 138 / 0.3); }
+html.dark .dark\:hover\:text-slate-200:hover { color: #e2e8f0; }
+@media (min-width: 640px) {
+    .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+@media (min-width: 768px) {
+    .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .md\:p-8 { padding: 2rem; }
+}
+@media (min-width: 1024px) {
+    .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+}

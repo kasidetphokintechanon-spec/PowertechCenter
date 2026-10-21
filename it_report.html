@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Ticket Report</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="css/design-system.css">
+<link rel="stylesheet" href="css/enterprise-theme.css">
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:#f1f5f9;color:#1e293b;font-size:14px;min-height:100vh}
+
+/* ── Top bar ─────────────────────────────────────────────────────── */
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:17px;font-weight:700;color:#1e293b;white-space:nowrap}
+.topbar-title span{font-size:12px;font-weight:400;color:#64748b;margin-left:6px}
+.topbar-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.topbar select,.topbar button{height:34px;border-radius:6px;border:1px solid #e2e8f0;font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;padding:0 12px}
+.topbar select{background:#fff;color:#1e293b}
+.topbar select:focus{outline:none;border-color:#6366f1}
+.btn-load{background:#6366f1;color:#fff;border-color:#6366f1;font-weight:600;min-width:80px}
+.btn-load:hover{background:#4f46e5}
+.btn-print{background:#fff;color:#334155;gap:6px;display:flex;align-items:center}
+.btn-print:hover{background:#f8fafc}
+.topbar-right{margin-left:auto;display:flex;gap:8px}
+.company-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase}
+.tag-pta{background:#d1fae5;color:#059669}
+.tag-pt4{background:#fee2e2;color:#dc2626}
+.tag-pte{background:#dbeafe;color:#2563eb}
+
+/* ── Main content ─────────────────────────────────────────────────── */
+.content{padding:20px 24px;max-width:1440px;margin:0 auto}
+
+/* ── KPI row ─────────────────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.kpi-label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:28px;font-weight:700;color:#1e293b;line-height:1.1}
+.kpi-sub{font-size:12px;color:#64748b}
+.kpi-card.accent-green{border-left:3px solid #059669}
+.kpi-card.accent-blue{border-left:3px solid #2563eb}
+.kpi-card.accent-yellow{border-left:3px solid #d97706}
+.kpi-card.accent-purple{border-left:3px solid #7c3aed}
+.kpi-card.accent-red{border-left:3px solid #dc2626}
+.kpi-card.accent-sky{border-left:3px solid #0ea5e9}
+
+/* ── Chart grid ─────────────────────────────────────────────────── */
+.chart-grid{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-bottom:20px}
+.chart-grid-wide{display:grid;gap:12px;grid-template-columns:2fr 1fr;margin-bottom:20px}
+.chart-grid-3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:18px}
+.card-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9}
+.card-title small{font-size:11px;font-weight:400;color:#94a3b8;margin-left:4px}
+.chart-wrap{position:relative;height:240px}
+.chart-wrap.tall{height:300px}
+.chart-wrap.short{height:180px}
+
+/* ── Tables ─────────────────────────────────────────────────────── */
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.data-table th{background:#f8fafc;color:#64748b;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:7px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
+.data-table td{padding:7px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#f8fafc}
+.rank-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f1f5f9;font-size:10px;font-weight:700;color:#64748b}
+.rank-1{background:#fef3c7;color:#d97706}
+.rank-2{background:#e2e8f0;color:#475569}
+.rank-3{background:#fde8d0;color:#b45309}
+.bar-mini{height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden;margin-top:2px;min-width:60px}
+.bar-fill{height:100%;border-radius:3px;background:#6366f1;transition:width .3s}
+
+/* ── Aging ──────────────────────────────────────────────────────── */
+.aging-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.aging-cell{border-radius:8px;padding:12px 10px;text-align:center;background:#f1f5f9}
+.aging-cell .ag-num{font-size:22px;font-weight:700}
+.aging-cell .ag-lbl{font-size:11px;color:#64748b;margin-top:2px}
+.aging-cell.heat-0{background:#dcfce7;color:#15803d}
+.aging-cell.heat-1{background:#d1fae5;color:#059669}
+.aging-cell.heat-2{background:#fef9c3;color:#ca8a04}
+.aging-cell.heat-3{background:#fee2e2;color:#dc2626}
+.aging-cell.heat-4{background:#fecaca;color:#b91c1c}
+.aging-cell.heat-5{background:#f87171;color:#7f1d1d}
+
+/* ── Rating stars ────────────────────────────────────────────────── */
+.star-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.star-label{min-width:50px;font-size:12px;color:#64748b}
+.star-bar-wrap{flex:1;background:#f1f5f9;border-radius:4px;height:14px;overflow:hidden}
+.star-bar-fill{height:100%;border-radius:4px;background:#fbbf24}
+.star-count{min-width:28px;text-align:right;font-size:12px;font-weight:600;color:#334155}
+
+/* ── Loading / empty ─────────────────────────────────────────────── */
+.loading-overlay{position:fixed;inset:0;background:rgba(248,250,252,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-msg{text-align:center;padding:32px;color:#94a3b8;font-size:13px}
+
+/* ── Badge pills ─────────────────────────────────────────────────── */
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-yellow{background:#fef9c3;color:#ca8a04}
+.badge-red{background:#fee2e2;color:#dc2626}
+.badge-gray{background:#f1f5f9;color:#64748b}
+
+/* ── Print ───────────────────────────────────────────────────────── */
+@media print{
+  body{background:#fff}
+  .topbar,.btn-print,.btn-load,#theme-toggle{display:none!important}
+  .content{padding:8px 12px}
+  .kpi-card,.card{break-inside:avoid}
+  .chart-grid,.chart-grid-wide,.chart-grid-3{break-inside:avoid}
+}
+
+/* ── Dark mode ── */
+html.dark body{background:#0a0f1e;color:#e2e8f0}
+html.dark .topbar{background:#0f172a;border-bottom-color:#1e293b}
+html.dark .topbar-title{color:#f1f5f9}
+html.dark .topbar select,html.dark .topbar button{background:#1e293b;border-color:#334155;color:#e2e8f0}
+html.dark .btn-print{color:#cbd5e1}
+html.dark .btn-print:hover{background:#1e293b}
+html.dark .kpi-card,html.dark .card{background:#1e293b;border-color:#334155}
+html.dark .kpi-value{color:#f1f5f9}
+html.dark .kpi-label,html.dark .kpi-sub{color:#94a3b8}
+html.dark .card-title{color:#e2e8f0;border-bottom-color:#334155}
+html.dark .card-title small{color:#64748b}
+html.dark .data-table th{background:#0f172a;color:#94a3b8;border-bottom-color:#334155}
+html.dark .data-table td{color:#cbd5e1;border-bottom-color:#1e293b}
+html.dark .data-table tr:hover td{background:#0f172a}
+html.dark .rank-num{background:#334155;color:#94a3b8}
+html.dark .bar-mini{background:#334155}
+html.dark .aging-cell{background:#1e293b}
+html.dark .aging-cell .ag-lbl{color:#94a3b8}
+html.dark .star-label,html.dark .star-count{color:#94a3b8}
+html.dark .star-bar-wrap{background:#334155}
+html.dark .loading-overlay{background:rgba(10,15,30,.9)}
+html.dark .spinner{border-color:#334155;border-top-color:#6366f1}
+html.dark .empty-msg{color:#64748b}
+html.dark #theme-toggle{border-color:#334155;color:#94a3b8}
+html.dark #theme-toggle:hover{background:#1e293b}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:#64748b">กำลังโหลดข้อมูล…</div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-title">IT Ticket Report <span>ผลการให้บริการ</span></div>
+  <div class="topbar-filters">
+    <select id="selCompany">
+      <option value="all">ทุกบริษัท</option>
+      <option value="PTA">PTA</option>
+      <option value="PT4">PT4</option>
+      <option value="PTE">PTE</option>
+    </select>
+    <select id="selYear"></select>
+    <select id="selMonths">
+      <option value="12">12 เดือนล่าสุด (กราฟ)</option>
+      <option value="6">6 เดือนล่าสุด (กราฟ)</option>
+      <option value="24">24 เดือนล่าสุด (กราฟ)</option>
+    </select>
+    <button class="btn-load" onclick="loadReport()">โหลด</button>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-print" onclick="window.print()">&#128438; พิมพ์</button>
+    <button type="button" id="theme-toggle" title="สลับธีม" style="height:34px;width:34px;border-radius:6px;border:1px solid #e2e8f0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b">
+      <i id="theme-icon" class="fas fa-sun"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content">
+  <!-- KPI row -->
+  <div class="kpi-row" id="kpiRow">
+    <div class="kpi-card accent-blue">
+      <div class="kpi-label">Ticket ทั้งหมด</div>
+      <div class="kpi-value" id="kTotal">—</div>
+      <div class="kpi-sub" id="kTotalSub">ปีที่เลือก</div>
+    </div>
+    <div class="kpi-card accent-green">
+      <div class="kpi-label">อัตราเสร็จงาน</div>
+      <div class="kpi-value" id="kCompleteRate">—</div>
+      <div class="kpi-sub" id="kCompleteSub">Completed</div>
+    </div>
+    <div class="kpi-card accent-yellow">
+      <div class="kpi-label">SLA Compliance</div>
+      <div class="kpi-value" id="kSla">—</div>
+      <div class="kpi-sub" id="kSlaSub">จากงานที่เสร็จ</div>
+    </div>
+    <div class="kpi-card accent-purple">
+      <div class="kpi-label">MTTR เฉลี่ย</div>
+      <div class="kpi-value" id="kMttr">—</div>
+      <div class="kpi-sub">ชั่วโมง/ticket</div>
+    </div>
+    <div class="kpi-card accent-red">
+      <div class="kpi-label">Ticket ค้างอยู่</div>
+      <div class="kpi-value" id="kOpen">—</div>
+      <div class="kpi-sub">Open / In Progress</div>
+    </div>
+    <div class="kpi-card accent-sky">
+      <div class="kpi-label">คะแนนพึงพอใจ</div>
+      <div class="kpi-value" id="kRating">—</div>
+      <div class="kpi-sub">จากผู้ใช้งาน / 5</div>
+    </div>
+  </div>
+
+  <!-- Monthly trend + Status donut -->
+  <div class="chart-grid-wide">
+    <div class="card">
+      <div class="card-title">แนวโน้มรายเดือน <small>Total / Completed / Open</small></div>
+      <div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">สถานะ Ticket</div>
+      <div class="chart-wrap tall"><canvas id="chartStatus"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Type + Department table -->
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">ประเภทงาน <small>Top 12</small></div>
+      <div class="chart-wrap tall"><canvas id="chartType"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">แผนก / ฝ่าย <small>Top 12</small></div>
+      <div id="deptTableWrap"><div class="empty-msg">ไม่มีข้อมูล</div></div>
+    </div>
+  </div>
+
+  <!-- Technician + Urgency -->
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">Technician <small>Top 10 by volume</small></div>
+      <div class="chart-wrap tall"><canvas id="chartTech"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ความด่วน</div>
+      <div class="chart-wrap tall"><canvas id="chartUrgency"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Aging + Rating -->
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">อายุ Ticket ที่ค้างอยู่ <small>วันที่เปิด</small></div>
+      <div class="aging-grid" id="agingGrid">
+        <div class="empty-msg" style="grid-column:1/-1">ไม่มีข้อมูล</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">การให้คะแนนพึงพอใจ</div>
+      <div id="ratingBars"><div class="empty-msg">ไม่มีข้อมูล</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Theme toggle ─────────────────────────────────────────────────────────────
+(function initTheme() {
+    const updateIcon = () => {
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.className = document.documentElement.classList.contains('dark') ? 'fas fa-moon' : 'fas fa-sun';
+    };
+    updateIcon();
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('dark-theme');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+    });
+})();
+
+// ── Chart instances ──────────────────────────────────────────────────────────
+const charts = {};
+
+function destroyChart(id){
+  if(charts[id]){charts[id].destroy();delete charts[id];}
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const pct = (n,d) => d ? Math.round(n/d*100) : 0;
+const fmt = n => n == null ? '—' : Number(n).toLocaleString('th-TH');
+
+const STATUS_COLORS = {
+  'Completed':'#059669','Open':'#3b82f6','In Progress':'#f59e0b',
+  'Pending':'#a855f7','Cancelled':'#94a3b8','On Hold':'#e2e8f0'
+};
+const URG_COLORS = {
+  'ด่วนที่สุด':'#dc2626','Critical':'#dc2626',
+  'ด่วน':'#f59e0b','Urgent':'#f59e0b',
+  'ปกติ':'#22c55e','Normal':'#22c55e',null:'#94a3b8',''  :'#94a3b8'
+};
+const PALETTE = [
+  '#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6',
+  '#14b8a6','#f97316','#84cc16','#ec4899','#06b6d4','#a3e635'
+];
+
+// ── Load ─────────────────────────────────────────────────────────────────────
+function loadReport(){
+  const company = document.getElementById('selCompany').value;
+  const year    = document.getElementById('selYear').value;
+  const months  = document.getElementById('selMonths').value;
+
+  document.getElementById('loadingOverlay').style.display='flex';
+
+  fetch(`api.php?action=get_it_report_stats&company=${company}&year=${year}&months=${months}`)
+    .then(r=>r.json())
+    .then(res=>{
+      document.getElementById('loadingOverlay').style.display='none';
+      if(res.status!=='success'){alert('Error: '+(res.message||'ไม่สามารถโหลดข้อมูลได้'));return;}
+      renderReport(res.data, year);
+    })
+    .catch(err=>{
+      document.getElementById('loadingOverlay').style.display='none';
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+    });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderReport(d, year){
+  renderKPI(d.kpi, year);
+  renderMonthly(d.monthly);
+  renderStatus(d.by_status);
+  renderType(d.by_type);
+  renderDept(d.by_department);
+  renderTech(d.by_technician);
+  renderUrgency(d.by_urgency);
+  renderAging(d.aging);
+  renderRating(d.rating_dist);
+}
+
+function renderKPI(k, year){
+  document.getElementById('kTotal').textContent      = fmt(k.total);
+  document.getElementById('kTotalSub').textContent   = `ปี ${year}`;
+  const cr = pct(k.completed, k.total);
+  document.getElementById('kCompleteRate').textContent = cr+'%';
+  document.getElementById('kCompleteSub').textContent  = `${fmt(k.completed)} tickets`;
+  const sla = pct(k.sla_pass, k.sla_total);
+  document.getElementById('kSla').textContent     = k.sla_total ? sla+'%' : '—';
+  document.getElementById('kSlaSub').textContent  = k.sla_total ? `${k.sla_pass}/${k.sla_total}` : 'ไม่มีข้อมูล';
+  document.getElementById('kMttr').textContent    = k.mttr_hours != null ? k.mttr_hours : '—';
+  document.getElementById('kOpen').textContent    = fmt(k.open);
+  document.getElementById('kRating').textContent  = k.avg_rating != null ? k.avg_rating : '—';
+}
+
+function renderMonthly(rows){
+  destroyChart('chartMonthly');
+  const labels = rows.map(r=>{
+    const [y,m]=r.month.split('-');
+    return new Date(y,m-1).toLocaleDateString('th-TH',{month:'short',year:'2-digit'});
+  });
+  charts.chartMonthly = new Chart(document.getElementById('chartMonthly'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Total',data:rows.map(r=>+r.total),backgroundColor:'#c7d2fe',order:2},
+        {label:'Completed',data:rows.map(r=>+r.completed),backgroundColor:'#059669',order:2},
+        {label:'Open',data:rows.map(r=>+r.open),type:'line',
+         borderColor:'#f59e0b',backgroundColor:'transparent',
+         pointRadius:3,borderWidth:2,tension:.3,order:1}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}}
+  });
+}
+
+function renderStatus(rows){
+  destroyChart('chartStatus');
+  charts.chartStatus = new Chart(document.getElementById('chartStatus'),{
+    type:'doughnut',
+    data:{
+      labels:rows.map(r=>r.status||'ไม่ระบุ'),
+      datasets:[{data:rows.map(r=>+r.count),
+        backgroundColor:rows.map(r=>STATUS_COLORS[r.status]||'#94a3b8'),
+        borderWidth:1,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}
+  });
+}
+
+function renderType(rows){
+  destroyChart('chartType');
+  charts.chartType = new Chart(document.getElementById('chartType'),{
+    type:'bar',
+    data:{
+      labels:rows.map(r=>r.type||'ไม่ระบุ'),
+      datasets:[{label:'จำนวน',data:rows.map(r=>+r.count),
+        backgroundColor:PALETTE,borderRadius:4}]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{font:{size:11}}},y:{ticks:{font:{size:11}}}}}
+  });
+}
+
+function renderDept(rows){
+  const wrap = document.getElementById('deptTableWrap');
+  if(!rows||!rows.length){wrap.innerHTML='<div class="empty-msg">ไม่มีข้อมูล</div>';return;}
+  const max = Math.max(...rows.map(r=>+r.count));
+  wrap.innerHTML = `<table class="data-table">
+    <thead><tr><th>#</th><th>แผนก</th><th style="text-align:right">Ticket</th><th style="min-width:80px"></th></tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr>
+      <td><span class="rank-num ${i<3?'rank-'+(i+1):''}">${i+1}</span></td>
+      <td>${r.department||'ไม่ระบุ'}</td>
+      <td style="text-align:right;font-weight:600">${fmt(r.count)}</td>
+      <td><div class="bar-mini"><div class="bar-fill" style="width:${pct(r.count,max)}%"></div></div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderTech(rows){
+  destroyChart('chartTech');
+  charts.chartTech = new Chart(document.getElementById('chartTech'),{
+    type:'bar',
+    data:{
+      labels:rows.map(r=>r.servicedBy||'ไม่ระบุ'),
+      datasets:[
+        {label:'ทั้งหมด',data:rows.map(r=>+r.total),backgroundColor:'#c7d2fe',borderRadius:4},
+        {label:'เสร็จ',data:rows.map(r=>+r.completed),backgroundColor:'#059669',borderRadius:4}
+      ]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},
+      scales:{x:{beginAtZero:true,ticks:{font:{size:11}}},y:{ticks:{font:{size:11}}}}}
+  });
+}
+
+function renderUrgency(rows){
+  destroyChart('chartUrgency');
+  charts.chartUrgency = new Chart(document.getElementById('chartUrgency'),{
+    type:'doughnut',
+    data:{
+      labels:rows.map(r=>r.urgency||'ปกติ'),
+      datasets:[{data:rows.map(r=>+r.count),
+        backgroundColor:rows.map(r=>URG_COLORS[r.urgency]||'#94a3b8'),
+        borderWidth:1,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}
+  });
+}
+
+function renderAging(ag){
+  const grid = document.getElementById('agingGrid');
+  if(!ag||Object.keys(ag).length===0){
+    grid.innerHTML='<div class="empty-msg" style="grid-column:1/-1">ไม่มี Ticket ค้างอยู่</div>';return;
+  }
+  const buckets=[
+    {key:'d_0_1',  lbl:'≤ 1 วัน', heat:0},
+    {key:'d_2_3',  lbl:'2–3 วัน',  heat:1},
+    {key:'d_4_7',  lbl:'4–7 วัน',  heat:2},
+    {key:'d_8_14', lbl:'8–14 วัน', heat:3},
+    {key:'d_15_30',lbl:'15–30 วัน',heat:4},
+    {key:'d_30_plus',lbl:'> 30 วัน',heat:5}
+  ];
+  grid.innerHTML = buckets.map(b=>`
+    <div class="aging-cell heat-${b.heat}">
+      <div class="ag-num">${ag[b.key]||0}</div>
+      <div class="ag-lbl">${b.lbl}</div>
+    </div>`).join('');
+}
+
+function renderRating(rows){
+  const wrap = document.getElementById('ratingBars');
+  if(!rows||!rows.length){wrap.innerHTML='<div class="empty-msg">ไม่มีข้อมูล</div>';return;}
+  const total = rows.reduce((s,r)=>s+(+r.count),0);
+  const stars = [5,4,3,2,1];
+  const rMap = {};
+  rows.forEach(r=>rMap[r.rating]=+r.count);
+  wrap.innerHTML = stars.map(s=>{
+    const cnt = rMap[s]||0;
+    const w = total ? Math.round(cnt/total*100) : 0;
+    return `<div class="star-row">
+      <div class="star-label">★ ${s}</div>
+      <div class="star-bar-wrap"><div class="star-bar-fill" style="width:${w}%"></div></div>
+      <div class="star-count">${cnt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Init year selector ────────────────────────────────────────────────────────
+function initYears(years){
+  const sel = document.getElementById('selYear');
+  sel.innerHTML='';
+  (years||[new Date().getFullYear()]).forEach(y=>{
+    const opt=document.createElement('option');
+    opt.value=y;opt.textContent=y;sel.appendChild(opt);
+  });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+fetch('api.php?action=check_session', { credentials: 'same-origin' })
+  .then(r => r.json())
+  .then(sess => {
+    if (!sess.loggedin) { location.href = 'login.html'; return; }
+    const perms = sess.effective_permissions || [];
+    const canView = (sess.role === 'admin')
+        || String(sess.primary_department || '').toUpperCase() === 'IT'
+        || perms.includes('*')
+        || perms.includes('it_report.access');
+    if (!canView) {
+      alert('ไม่มีสิทธิ์เข้าถึง IT Report');
+      location.href = 'index.html';
+      return;
+    }
+    // First call: fetch year list then auto-load
+    fetch('api.php?action=get_it_report_stats&company=all&year='+new Date().getFullYear()+'&months=1')
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === 'success') initYears(res.data.years);
+        else initYears([new Date().getFullYear()]);
+        loadReport();
+      })
+      .catch(() => {
+        initYears([new Date().getFullYear()]);
+        loadReport();
+      });
+  })
+  .catch(() => { location.href = 'login.html'; });
+</script>
+</body>
+</html>

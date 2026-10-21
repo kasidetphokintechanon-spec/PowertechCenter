@@ -1,0 +1,15 @@
+/**
+ * log-v2 — unified with log.html canvas
+ */
+body.ptc-unified-v1.logv2-page {
+    background: #f1f5f9;
+}
+
+html.dark body.ptc-unified-v1.logv2-page {
+    background: #0a0f1e;
+}
+
+body.ptc-unified-v1 .logv2-card,
+body.ptc-unified-v1 .logv2-kpi-item {
+    border-radius: 14px;
+}

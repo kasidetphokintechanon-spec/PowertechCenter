@@ -1,15 +1,31 @@
 <?php
 // api/actions/getEquipmentData.php
 
+// Read-only on $_SESSION. admin.html fires this concurrently with several other
+// data-key fetches on every load — release the session lock immediately so those
+// requests run in parallel instead of queuing behind PHP's session lock.
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+
+// auto-migrate depreciation columns before querying them
+$_chk = $conn->query("SHOW COLUMNS FROM asset_categories LIKE 'default_useful_life'");
+if ($_chk && $_chk->num_rows === 0) {
+    $conn->query("ALTER TABLE asset_categories ADD COLUMN default_useful_life TINYINT UNSIGNED DEFAULT NULL");
+}
+$_chk2 = $conn->query("SHOW COLUMNS FROM it_assets LIKE 'useful_life_override'");
+if ($_chk2 && $_chk2->num_rows === 0) {
+    $conn->query("ALTER TABLE it_assets ADD COLUMN useful_life_override TINYINT UNSIGNED DEFAULT NULL");
+}
+
 // ดึงข้อมูลพัสดุ
-$sql = "SELECT 
-            a.*, 
-            a.id as db_id, 
-            a.purchase_date as 'วันที่ซื้อ', 
-            a.equipment_id as 'ID อุปกรณ์', 
-            a.name as 'ชื่ออุปกรณ์', 
-            a.serial_number as 'Serial Number', 
+$sql = "SELECT
+            a.*,
+            a.id as db_id,
+            a.purchase_date as 'วันที่ซื้อ',
+            a.equipment_id as 'ID อุปกรณ์',
+            a.name as 'ชื่ออุปกรณ์',
+            a.serial_number as 'Serial Number',
             c.cat_name as 'หมวดหมู่',
+            c.default_useful_life,
             d.dept_name as owning_department_name,
             a.status as 'สถานะ',
             a.image_url as 'รูปภาพ (URL)',

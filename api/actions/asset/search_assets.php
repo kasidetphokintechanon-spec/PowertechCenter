@@ -7,20 +7,23 @@ if (strlen($term) < 2) {
     exit;
 }
 
-$searchTerm = "%" . $conn->real_escape_string($term) . "%";
+$searchTerm = "%" . $term . "%";
 
-$sql = "SELECT equipment_id, asset_id, serial_number, name, borrower, borrower_id, image_url 
-        FROM it_assets 
-        WHERE equipment_id LIKE ? 
-           OR asset_id LIKE ? 
+$sql = "SELECT equipment_id, asset_id, serial_number, name, borrower, borrower_id, image_url
+        FROM it_assets
+        WHERE equipment_id LIKE ?
+           OR asset_id LIKE ?
            OR serial_number LIKE ?
            OR name LIKE ?
            OR borrower LIKE ?
+           OR borrower_id LIKE ?
+           OR hostname LIKE ?
+           OR ip_address LIKE ?
         LIMIT 10";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) throw new Exception("Prepare failed (Search Assets): " . $conn->error);
-$stmt->bind_param("ssssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+$stmt->bind_param("ssssssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
 $stmt->execute();
 $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 foreach ($data as &$row) {

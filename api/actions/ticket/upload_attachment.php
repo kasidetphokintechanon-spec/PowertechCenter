@@ -1,6 +1,11 @@
 <?php
 // api/actions/upload_attachment.php
 
+// Doesn't touch $_SESSION at all. request.html can upload several attachments
+// concurrently — release the session lock immediately so those requests (each doing
+// a file move + DB insert) actually run in parallel instead of queuing.
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+
 $log_id = $_POST['log_id'] ?? '';
 if (empty($log_id)) {
     throw new Exception("Log ID is required for attachment.");

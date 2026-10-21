@@ -1,2 +1,38 @@
 .env.local
 
+
+# Orchestration (local state)
+orchestration/last_session.md
+orchestration/.lock
+
+# Dependencies
+node_modules/
+
+# User uploads (ข้อมูลจริงของผู้ใช้ — ไม่เก็บใน git)
+uploads/
+
+# Backups / DB dumps / media (ใหญ่ หรือมีข้อมูลจริง+token)
+*.zip
+*.zip.*
+DB/*.sql
+!DB/schema_local.sql
+VDO/
+Stationery _Maid/
+ตัวอย่างพัฒนา/
+
+# Logs
+*_log.txt
+sync_*log.txt
+
+# Local-only / มี secret
+auto_login_test.php
+tmp_query.php
+*- Copy.html
+* - ตัว bk.html
+
+# Claude Code local
+.claude/settings.local.json
+.claude/worktrees/
+
+# ค่าลับประจำเครื่อง
+config.local.php

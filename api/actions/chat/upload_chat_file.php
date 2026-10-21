@@ -20,6 +20,25 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         throw new Exception("Invalid file type.");
     }
 
+    // ตรวจสอบ MIME type จากเนื้อหาไฟล์จริง (ป้องกันการปลอม extension)
+    $allowedMimes = [
+        'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
+        'gif' => 'image/gif', 'webp' => 'image/webp', 'pdf' => 'application/pdf',
+        'doc' => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'ppt' => 'application/vnd.ms-powerpoint',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'txt' => 'text/plain', 'zip' => 'application/zip',
+        'rar' => 'application/x-rar-compressed',
+    ];
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $detectedMime = $finfo->file($file['tmp_name']);
+    if (!in_array($detectedMime, $allowedMimes)) {
+        throw new Exception("Invalid file content type.");
+    }
+
     if ($file['size'] > 10 * 1024 * 1024) { // 10MB limit
         throw new Exception("File is too large. Maximum size is 10MB.");
     }

@@ -1,7 +1,9 @@
 <?php
 // api/actions/getLoanRequests.php
+$conn->query("ALTER TABLE it_assets ADD COLUMN IF NOT EXISTS checkout_time DATETIME NULL");
+
 $company_filter = $_GET['company'] ?? '';
-$sql = "SELECT 
+$base_sql = "SELECT
             a.id as loan_id,
             a.equipment_id,
             a.name as asset_name,
@@ -12,7 +14,8 @@ $sql = "SELECT
             a.department,
             a.purpose,
             a.return_date,
-            CASE 
+            a.checkout_time,
+            CASE
                 WHEN a.status = 'รออนุมัติ' THEN 'Pending'
                 WHEN a.status = 'ถูกยืม' THEN 'Active'
                 ELSE a.status
@@ -24,14 +27,15 @@ $sql = "SELECT
         WHERE a.status IN ('รออนุมัติ', 'ถูกยืม')";
 
 if (!empty($company_filter) && $company_filter !== 'All') {
-    $escaped_company = $conn->real_escape_string($company_filter);
-    $sql .= " AND a.company = '$escaped_company'";
+    $stmt = $conn->prepare($base_sql . " AND a.company = ? ORDER BY a.id DESC");
+    if (!$stmt) throw new Exception("Prepare failed in getLoanRequests: " . $conn->error);
+    $stmt->bind_param("s", $company_filter);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query($base_sql . " ORDER BY a.id DESC");
+    if (!$result) throw new Exception("SQL Error in getLoanRequests: " . $conn->error);
 }
-
-$sql .= " ORDER BY a.id DESC";
-
-$result = $conn->query($sql);
-if (!$result) throw new Exception("SQL Error in getLoanRequests: " . $conn->error);
 
 $data = [];
 while ($row = $result->fetch_assoc()) {

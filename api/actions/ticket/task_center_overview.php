@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/personal_tasks_schema.php';
+require_once __DIR__ . '/task_center_hrga_helper.php';
+ensurePersonalTasksSchema($conn);
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
@@ -17,25 +21,8 @@ $params = [];
 $types = '';
 
 if ($role !== 'admin') {
-    $visibilityParts = ["pt.user_id = ?"];
-    $params[] = $userId;
-    $types .= 's';
-
-    if ($sessionCompany !== '' && $sessionDept !== '') {
-        $visibilityParts[] = "(pt.share_scope = 'department' AND (pt.company = ? OR FIND_IN_SET(?, REPLACE(COALESCE(pt.responsible_companies,''), ' ', '')) > 0) AND pt.department = ?)";
-        $params[] = $sessionCompany;
-        $params[] = $sessionCompany;
-        $params[] = $sessionDept;
-        $types .= 'sss';
-    }
-
-    if ($sessionCompany !== '') {
-        $visibilityParts[] = "(pt.share_scope = 'company' AND (pt.company = ? OR FIND_IN_SET(?, REPLACE(COALESCE(pt.responsible_companies,''), ' ', '')) > 0))";
-        $params[] = $sessionCompany;
-        $params[] = $sessionCompany;
-        $types .= 'ss';
-    }
-
+    $visibilityParts = [];
+    taskCenterAppendVisibility($conn, $role, $userId, $sessionCompany, $sessionDept, $visibilityParts, $params, $types);
     $where[] = '(' . implode(' OR ', $visibilityParts) . ')';
 }
 

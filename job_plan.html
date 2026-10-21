@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Plan for IT/Maintenance</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                extend: { colors: { primary: '#2563eb' } }
+            }
+        };
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        @media print {
+            @page { size: A4 landscape; margin: 5mm; }
+            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background-color: white !important; font-family: sans-serif; font-size: 9px; }
+            .no-print { display: none !important; }
+            .table-container { overflow: visible !important; max-height: none !important; width: 100% !important; }
+            nav, .controls-card { display: none !important; }
+            .print-header { display: block !important; }
+            main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            
+            /* Excel-like Print Styling */
+            .gantt-table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; }
+            .gantt-table th, .gantt-table td { border: 1px solid #000 !important; padding: 2px; color: #000 !important; word-wrap: break-word; overflow-wrap: break-word; }
+            .gantt-table th { background-color: #f3f4f6 !important; font-weight: bold; text-align: center; }
+            
+            /* Remove sticky for print to avoid layout issues */
+            .sticky-col, .sticky-col-2 { position: static !important; background-color: transparent !important; border-right: 1px solid #000 !important; }
+            
+            /* Ensure red blocks print clearly */
+            .red-block { border: 1px solid #b91c1c; background-color: #ef4444 !important; }
+
+            /* Adjust column widths for print to fit A4 */
+            .day-col { min-width: 16px !important; width: 16px !important; padding: 0 !important; font-size: 8px; }
+            
+            /* Override Tailwind widths for print to save space */
+            th.w-10 { width: 25px !important; } /* No */
+            th.w-24 { width: 60px !important; } /* Date & Location */
+            th.w-28 { width: 70px !important; } /* Doc */
+            th.w-64 { width: 150px !important; } /* Desc */
+            th.w-32 { width: 80px !important; } /* Resp */
+            th.w-16 { width: 35px !important; } /* Type */
+        }
+        
+        .print-header { display: none; text-align: center; margin-bottom: 20px; }
+
+        /* Gantt Table Styles */
+        .gantt-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+        .gantt-table th, .gantt-table td { border: 1px solid #cbd5e1; padding: 4px; vertical-align: middle; }
+        .dark .gantt-table th, .dark .gantt-table td { border-color: #475569; }
+        
+        .gantt-table th { background-color: #f1f5f9; color: #334155; font-weight: 600; text-align: center; white-space: nowrap; }
+        .dark .gantt-table th { background-color: #1e293b; color: #e2e8f0; }
+        
+        .day-col { min-width: 24px; width: 24px; padding: 0 !important; text-align: center; }
+        .day-name { font-size: 10px; color: #64748b; }
+        .weekend { background-color: #f8fafc; }
+        .dark .weekend { background-color: #334155; }
+
+        /* Red Block for Timeline */
+        .gantt-cell { padding: 0 !important; height: 24px; position: relative; }
+        .red-block {
+            background-color: #ef4444; /* Tailwind red-500 */
+            color: transparent; /* ซ่อนตัวอักษรบนหน้าเว็บ แต่ Excel จะดึงไปแสดง */
+            height: 16px;
+            margin-top: 4px;
+            border-radius: 2px;
+            display: block;
+            width: 100%;
+        }
+        
+        /* Sticky Columns for horizontal scrolling */
+        .sticky-col { position: sticky; left: 0; z-index: 10; background-color: #fff; }
+        .dark .sticky-col { background-color: #0f172a; }
+        .sticky-col-2 { position: sticky; left: 40px; z-index: 10; background-color: #fff; }
+        .dark .sticky-col-2 { background-color: #0f172a; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700 no-print">
+        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Job Plan for IT/Maintenance</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="theme-toggle" class="w-10 h-10 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <i class="fas fa-sun block dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8 w-full max-w-[1920px] mx-auto">
+        
+        <!-- Print Header -->
+        <div class="print-header">
+            <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #334155;padding-bottom:8px;margin-bottom:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <img id="print-co-logo" src="" alt="" style="height:44px;width:auto;object-fit:contain;display:none;" onerror="this.style.display='none'">
+                    <div>
+                        <div id="print-co-name" style="font-size:1rem;font-weight:700;color:#1e293b;"></div>
+                        <div id="print-co-name-th" style="font-size:.75rem;color:#475569;"></div>
+                        <div id="print-co-addr" style="font-size:.65rem;color:#64748b;"></div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <h1 class="text-xl font-bold">Job Plan for IT/Maintenance</h1>
+                    <p id="print-period" class="text-sm text-gray-600"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-card bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6 no-print">
+            <form id="controlForm" class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">เดือน (Month)</label>
+                    <select id="selectMonth" class="w-40 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <!-- JS Populated -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ปี (Year)</label>
+                    <select id="selectYear" class="w-32 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <!-- JS Populated -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">บริษัท (Company)</label>
+                    <select id="selectCompany" class="w-32 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white">
+                        <option value="">ทั้งหมด</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="renderGantt()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md transition transform active:scale-95">
+                        <i class="fas fa-search mr-2"></i> Submit
+                    </button>
+                    <button type="button" onclick="window.print()" class="px-5 py-2.5 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-bold shadow-md transition transform active:scale-95">
+                        <i class="fas fa-print mr-2"></i> Print
+                    </button>
+                    <button type="button" onclick="exportReport()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow-md transition transform active:scale-95">
+                        <i class="fas fa-file-excel mr-2"></i> Export Report
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Structure -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto table-container custom-scrollbar">
+                <table id="jobTable" class="gantt-table">
+                    <thead>
+                        <tr id="headerRow1">
+                            <!-- Static Headers -->
+                            <th rowspan="2" class="w-10 sticky-col">No.</th>
+                            <th rowspan="2" class="w-24 sticky-col-2">Date Request</th>
+                            <th rowspan="2" class="w-28">Document No.</th>
+                            <th rowspan="2" class="w-64">Description</th>
+                            <th rowspan="2" class="w-32">Responsible</th>
+                            <th rowspan="2" class="w-24">Location</th>
+                            <th rowspan="2" class="w-16">Type</th>
+                            <!-- Dynamic Days 1-31 will be inserted here -->
+                        </tr>
+                        <tr id="headerRow2">
+                            <!-- Dynamic Day Names (Mon, Tue...) will be inserted here -->
+                        </tr>
+                    </thead>
+                    <tbody id="ganttBody" class="text-slate-700 dark:text-slate-300">
+                        <!-- Rows will be generated by JS -->
+                        <tr><td colspan="10" class="text-center py-8 text-slate-400">กรุณาเลือกเดือน/ปี และกด Submit</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initControls();
+            
+            // Theme Toggle Logic
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+
+            // Auto render current month
+            const today = new Date();
+            document.getElementById('selectMonth').value = today.getMonth() + 1;
+            document.getElementById('selectYear').value = today.getFullYear();
+            renderGantt();
+        });
+
+        function initControls() {
+            const monthSelect = document.getElementById('selectMonth');
+            const yearSelect = document.getElementById('selectYear');
+            
+            const months = [
+                "มกราคม (January)", "กุมภาพันธ์ (February)", "มีนาคม (March)", "เมษายน (April)", 
+                "พฤษภาคม (May)", "มิถุนายน (June)", "กรกฎาคม (July)", "สิงหาคม (August)", 
+                "กันยายน (September)", "ตุลาคม (October)", "พฤศจิกายน (November)", "ธันวาคม (December)"
+            ];
+
+            months.forEach((m, i) => {
+                const opt = document.createElement('option');
+                opt.value = i + 1;
+                opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            }
+        }
+
+        async function renderGantt() {
+            const month = parseInt(document.getElementById('selectMonth').value);
+            const year = parseInt(document.getElementById('selectYear').value);
+            const company = document.getElementById('selectCompany').value;
+            const daysInMonth = new Date(year, month, 0).getDate();
+            
+            // Update Print Header
+            const monthName = document.getElementById('selectMonth').options[document.getElementById('selectMonth').selectedIndex].text;
+            document.getElementById('print-period').textContent = `Period: ${monthName} ${year}`;
+
+            // Update company logo & info in print header
+            const _coLogos = {PTA:'uploads/logos/pta_logo.png',PT4:'uploads/logos/pt4_logo.png',PTE:'uploads/logos/pte_logo.png'};
+            const _coNamesEn = {PTA:'Powertech Engine Assembly Co., Ltd.',PT4:'Powertech 2004 Co., Ltd.',PTE:'Powertech Energy Solutions Co., Ltd.'};
+            const _coNamesTh = {PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด',PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด',PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด'};
+            const _coPrintLogo = document.getElementById('print-co-logo');
+            const _coPrintName = document.getElementById('print-co-name');
+            const _coPrintNameTh = document.getElementById('print-co-name-th');
+            const _coPrintAddr = document.getElementById('print-co-addr');
+            if (company && _coLogos[company]) {
+                _coPrintLogo.src = _coLogos[company]; _coPrintLogo.style.display = '';
+                _coPrintName.textContent = _coNamesEn[company] || company;
+                _coPrintNameTh.textContent = _coNamesTh[company] || '';
+                try {
+                    const _ci = await fetch('api.php?action=get_company_info').then(r=>r.json());
+                    if (_ci.status === 'success' && _ci.data[company]) {
+                        const _cd = _ci.data[company];
+                        if (_cd.name_en) _coPrintName.textContent = _cd.name_en;
+                        if (_cd.name_th) _coPrintNameTh.textContent = _cd.name_th;
+                        const _addr = (_cd.address_th || _cd.address_en || '');
+                        const _phone = (_cd.phone || '');
+                        _coPrintAddr.textContent = [_addr, _phone].filter(Boolean).join(' | ');
+                    }
+                } catch(e) {}
+            } else {
+                _coPrintLogo.style.display = 'none';
+                _coPrintName.textContent = 'Powertech Group';
+                _coPrintNameTh.textContent = 'กลุ่มบริษัท พาวเวอร์เทค';
+                _coPrintAddr.textContent = '';
+            }
+
+            // --- 1. Build Headers ---
+            const headerRow1 = document.getElementById('headerRow1');
+            const headerRow2 = document.getElementById('headerRow2');
+            
+            // Reset to static columns
+            // Static columns count = 7 (No, Date, Doc, Desc, Resp, Loc, Type)
+            // We need to keep the first 7 th elements and remove the rest
+            while (headerRow1.children.length > 7) headerRow1.removeChild(headerRow1.lastChild);
+            headerRow2.innerHTML = ''; // Clear row 2
+
+            for (let d = 1; d <= 31; d++) {
+                // Day Number (1-31)
+                const th1 = document.createElement('th');
+                th1.className = 'day-col';
+                
+                // Day Name (Mon, Tue...)
+                const th2 = document.createElement('th');
+                th2.className = 'day-col day-name';
+
+                if (d <= daysInMonth) {
+                    const dateObj = new Date(year, month - 1, d);
+                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                    const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+                    th1.textContent = d;
+                    th2.textContent = dayName;
+
+                    if (isWeekend) {
+                        th1.classList.add('weekend');
+                        th2.classList.add('weekend');
+                    }
+                } else {
+                    // Empty cells for days not in month (e.g. Feb 30)
+                    th1.textContent = '';
+                    th2.textContent = '';
+                    th1.style.backgroundColor = '#e2e8f0'; // Grey out
+                    th2.style.backgroundColor = '#e2e8f0';
+                }
+
+                headerRow1.appendChild(th1);
+                headerRow2.appendChild(th2);
+            }
+
+            // --- 2. Build Body ---
+            const tbody = document.getElementById('ganttBody');
+            tbody.innerHTML = '<tr><td colspan="38" class="text-center py-8 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...</td></tr>';
+
+            try {
+                const response = await fetch(`api.php?action=get_job_plans&month=${month}&year=${year}&company=${company}`);
+                const jobs = await response.json();
+
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(jobs) || jobs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="38" class="text-center py-8 text-slate-400">ไม่พบข้อมูลงานในเดือนนี้</td></tr>';
+                    return;
+                }
+
+                jobs.forEach((job, index) => {
+                    // Row 1: Plan
+                    const trPlan = document.createElement('tr');
+                    
+                    // Static Data (Merged for 2 rows)
+                    const staticCols = [
+                        { txt: job.no, cls: 'text-center sticky-col' },
+                        { txt: job.dateReq, cls: 'text-center sticky-col-2' },
+                        { txt: job.docNo, cls: 'text-center' },
+                        { txt: job.desc, cls: 'text-left' },
+                        { txt: job.resp, cls: 'text-left' },
+                        { txt: job.loc, cls: 'text-center' }
+                    ];
+
+                    staticCols.forEach(col => {
+                        const td = document.createElement('td');
+                            // td.rowSpan = 2; // ยกเลิกการรวมแถวตามที่ขอ
+                            td.className = `border-b ${col.cls} bg-white dark:bg-slate-800`; // Ensure background for sticky
+                        td.textContent = col.txt;
+                        trPlan.appendChild(td);
+                    });
+
+                        // 2. Type Column (Plan)
+                    const tdTypePlan = document.createElement('td');
+                    tdTypePlan.className = 'text-center font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20';
+                    tdTypePlan.textContent = 'Plan';
+                    trPlan.appendChild(tdTypePlan);
+
+                        // 3. Timeline Columns (Plan)
+                    for (let d = 1; d <= 31; d++) {
+                        const td = document.createElement('td');
+                        td.className = 'gantt-cell';
+                        if (d <= daysInMonth) {
+                            const dateObj = new Date(year, month - 1, d);
+                            if (dateObj.getDay() === 0 || dateObj.getDay() === 6) td.classList.add('weekend');
+                            
+                            // Draw Red Block
+                            if (job.plan && d >= job.plan.start && d <= job.plan.end) {
+                                const block = document.createElement('span');
+                                block.className = 'red-block opacity-70'; // Plan is slightly lighter
+                                    block.textContent = '█'; // ใส่ตัวอักษรเพื่อให้ Excel มองเห็นเป็นแท่งกราฟ
+                                block.title = `Plan: Day ${d}`;
+                                td.appendChild(block);
+                            }
+                        } else {
+                            td.style.backgroundColor = '#f1f5f9';
+                        }
+                        trPlan.appendChild(td);
+                    }
+                    tbody.appendChild(trPlan);
+
+                    // Row 2: Actual
+                    const trActual = document.createElement('tr');
+
+                    // Add empty cells for static columns to maintain table structure
+                    for (let i = 0; i < 6; i++) {
+                        const td = document.createElement('td');
+                        td.className = 'border-b bg-white dark:bg-slate-800';
+                        trActual.appendChild(td);
+                    }
+                    
+                    // Type: Actual
+                    const tdTypeActual = document.createElement('td');
+                    tdTypeActual.className = 'text-center font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20';
+                    tdTypeActual.textContent = 'Actual';
+                    trActual.appendChild(tdTypeActual);
+
+                    // Timeline: Actual
+                    for (let d = 1; d <= 31; d++) {
+                        const td = document.createElement('td');
+                        td.className = 'gantt-cell';
+                        if (d <= daysInMonth) {
+                            const dateObj = new Date(year, month - 1, d);
+                            if (dateObj.getDay() === 0 || dateObj.getDay() === 6) td.classList.add('weekend');
+
+                            // Draw Red Block (Solid)
+                            if (job.actual && d >= job.actual.start && d <= job.actual.end) {
+                                const block = document.createElement('span');
+                                block.className = 'red-block';
+                                    block.textContent = '█'; // ใส่ตัวอักษรเพื่อให้ Excel มองเห็นเป็นแท่งกราฟ
+                                block.title = `Actual: Day ${d}`;
+                                td.appendChild(block);
+                            }
+                        } else {
+                            td.style.backgroundColor = '#f1f5f9';
+                        }
+                        trActual.appendChild(td);
+                    }
+                    tbody.appendChild(trActual);
+                });
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+                tbody.innerHTML = '<tr><td colspan="38" class="text-center py-8 text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+            }
+        }
+
+        function exportReport() {
+            const table = document.getElementById('jobTable');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Job Plan" });
+            const monthName = document.getElementById('selectMonth').options[document.getElementById('selectMonth').selectedIndex].text;
+            const year = document.getElementById('selectYear').value;
+            XLSX.writeFile(wb, `Job_Plan_${monthName}_${year}.xlsx`);
+        }
+    </script>
+</body>
+</html>

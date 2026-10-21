@@ -5,7 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+if (($_SESSION['role'] ?? 'guest') !== 'admin' && !hasPermission($conn, 'admin.manage_permissions')) {
     echo json_encode(['status' => 'error', 'message' => 'Access denied']);
     exit;
 }

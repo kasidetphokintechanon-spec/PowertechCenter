@@ -1,25 +1,43 @@
 <?php
 // api/actions/generate_next_asset_id.php
 
-$company = $_REQUEST['company'] ?? 'PTA';
-$deptId = $_REQUEST['department_id'] ?? '';
-$catId = $_REQUEST['category_id'] ?? '';
+$company = trim($_REQUEST['company'] ?? 'PTA');
+$deptId = (int)($_REQUEST['department_id'] ?? 0);
+$catId = (int)($_REQUEST['category_id'] ?? 0);
 
-$deptRes = $conn->query("SELECT dept_abbr FROM departments WHERE dept_id = '$deptId'");
-$deptAbbr = ($deptRes && $row = $deptRes->fetch_assoc()) ? $row['dept_abbr'] : 'XX';
+$deptAbbr = 'XX';
+$catAbbr = 'XX';
 
-$catRes = $conn->query("SELECT cat_abbr FROM asset_categories WHERE cat_id = '$catId'");
-$catAbbr = ($catRes && $row = $catRes->fetch_assoc()) ? $row['cat_abbr'] : 'XX';
+if ($deptId > 0) {
+    $stmt = $conn->prepare('SELECT dept_abbr FROM departments WHERE dept_id = ? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('i', $deptId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row && !empty($row['dept_abbr'])) $deptAbbr = $row['dept_abbr'];
+    }
+}
+
+if ($catId > 0) {
+    $stmt = $conn->prepare('SELECT cat_abbr FROM asset_categories WHERE cat_id = ? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('i', $catId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row && !empty($row['cat_abbr'])) $catAbbr = $row['cat_abbr'];
+    }
+}
 
 $prefix = "$company-$deptAbbr-$catAbbr-";
-$res = $conn->query("SELECT equipment_id FROM it_assets WHERE equipment_id LIKE '$prefix%' ORDER BY id DESC LIMIT 1");
-$lastId = ($res && $row = $res->fetch_assoc()) ? $row['equipment_id'] : '';
-
-$nextNum = 1;
-if ($lastId) {
-    $parts = explode('-', $lastId);
-    $lastNum = end($parts);
-    if (is_numeric($lastNum)) $nextNum = intval($lastNum) + 1;
+$like = $prefix . '%';
+$stmt = $conn->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(equipment_id, '-', -1) AS UNSIGNED)) AS max_num FROM it_assets WHERE equipment_id LIKE ?");
+$maxNum = 0;
+if ($stmt) {
+    $stmt->bind_param('s', $like);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $maxNum = (int)($row['max_num'] ?? 0);
 }
-echo json_encode(['status' => 'success', 'new_id' => $prefix . str_pad($nextNum, 4, '0', STR_PAD_LEFT)]);
+
+echo json_encode(['status' => 'success', 'new_id' => $prefix . str_pad((string)($maxNum + 1), 4, '0', STR_PAD_LEFT)]);
 ?>

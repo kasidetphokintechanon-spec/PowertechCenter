@@ -23,15 +23,29 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
-// 3. ดึง Channel Access Token จาก DB
+// 3. ดึง Channel Access Token และ Channel Secret จาก DB
 $channelToken = '';
-$res = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'line_channel_token'");
-if ($row = $res->fetch_assoc()) {
-    $channelToken = $row['setting_value'];
+$channelSecret = '';
+$res = $conn->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('line_channel_token','line_channel_secret')");
+while ($row = $res->fetch_assoc()) {
+    if ($row['setting_key'] === 'line_channel_token') $channelToken = $row['setting_value'];
+    if ($row['setting_key'] === 'line_channel_secret') $channelSecret = $row['setting_value'];
 }
 
-// 4. รับข้อมูลและบันทึก Log (เพื่อเช็คว่า Fortigate ส่งมาถึงจริงไหม)
+// 4. รับข้อมูลและตรวจสอบ LINE Signature
 $content = file_get_contents('php://input');
+$clientIP = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+
+// ตรวจสอบ X-Line-Signature (ป้องกัน request ปลอม)
+if (!empty($channelSecret)) {
+    $lineSignature = $_SERVER['HTTP_X_LINE_SIGNATURE'] ?? '';
+    $expectedSig = base64_encode(hash_hmac('sha256', $content, $channelSecret, true));
+    if (!hash_equals($expectedSig, $lineSignature)) {
+        error_log("webhook.php: Invalid LINE signature from IP $clientIP");
+        exit;
+    }
+}
+
 $events = json_decode($content, true);
 $clientIP = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
 
@@ -73,18 +87,22 @@ if (!empty($events['events'])) {
             
             if (isset($data['action']) && isset($data['ref'])) {
                 $action = $data['action'];
-                $ref = $conn->real_escape_string($data['ref']);
                 $replyMsg = "";
 
                 // ตัวอย่าง Logic (ปรับชื่อตารางตามจริง เช่น bookings หรือ job_tickets)
+                $ref = $data['ref'];
                 if ($action === 'approve_booking') {
-                    $conn->query("UPDATE bookings SET status = 'Confirmed' WHERE booking_ref = '$ref' AND status = 'Pending'");
-                    if ($conn->affected_rows > 0) $replyMsg = "✅ อนุมัติการจอง $ref แล้ว";
+                    $stmt = $conn->prepare("UPDATE bookings SET status = 'Confirmed' WHERE booking_ref = ? AND status = 'Pending'");
+                    $stmt->bind_param("s", $ref);
+                    $stmt->execute();
+                    if ($stmt->affected_rows > 0) $replyMsg = "✅ อนุมัติการจอง $ref แล้ว";
                     else $replyMsg = "⚠️ ไม่สามารถอนุมัติได้ (สถานะอาจเปลี่ยนไปแล้ว)";
-                } 
+                }
                 elseif ($action === 'reject_booking') {
-                    $conn->query("UPDATE bookings SET status = 'Cancelled' WHERE booking_ref = '$ref' AND status = 'Pending'");
-                    if ($conn->affected_rows > 0) $replyMsg = "🚫 ปฏิเสธการจอง $ref แล้ว";
+                    $stmt = $conn->prepare("UPDATE bookings SET status = 'Cancelled' WHERE booking_ref = ? AND status = 'Pending'");
+                    $stmt->bind_param("s", $ref);
+                    $stmt->execute();
+                    if ($stmt->affected_rows > 0) $replyMsg = "🚫 ปฏิเสธการจอง $ref แล้ว";
                     else $replyMsg = "⚠️ ไม่สามารถปฏิเสธได้";
                 }
 

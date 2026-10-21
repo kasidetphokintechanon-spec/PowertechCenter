@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Log v2 — API diagnostic</title>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 16px; max-width: 720px; margin: 0 auto; }
+        pre { background: #f1f5f9; padding: 12px; border-radius: 8px; overflow: auto; font-size: 12px; }
+        button { margin: 6px 6px 6px 0; padding: 8px 14px; cursor: pointer; }
+        .ok { color: #059669; } .bad { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <h1>Log v2 — ตรวจขนาด API</h1>
+    <p>ใช้หน้านี้แยกจาก log-v2 ถ้ายัง Aw Snap ให้ดูว่า API ตัวไหนใหญ่ผิดปกติ</p>
+    <button type="button" id="btn-session">check_session</button>
+    <button type="button" id="btn-logs">it_logs (paginate 15)</button>
+    <button type="button" id="btn-tech">technicians</button>
+    <pre id="out">กดปุ่มเพื่อทดสอบ (ต้อง login ก่อน)</pre>
+    <p><a href="../log-v2.html">← กลับ log-v2</a></p>
+    <script>
+        const out = document.getElementById('out');
+        async function run(label, url, opts) {
+            const t0 = performance.now();
+            const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...opts });
+            const text = await res.text();
+            const ms = Math.round(performance.now() - t0);
+            const kb = (text.length / 1024).toFixed(1);
+            const cls = text.length > 1500000 ? 'bad' : 'ok';
+            let preview = text.slice(0, 200);
+            try {
+                const j = JSON.parse(text);
+                if (Array.isArray(j.data)) preview = `rows=${j.data.length}, total=${j.total}`;
+                else if (Array.isArray(j)) preview = `array length=${j.length}`;
+                else if (j.loggedin != null) preview = `loggedin=${j.loggedin}`;
+            } catch (_) {}
+            out.innerHTML = `<span class="${cls}">${label}</span>\nHTTP ${res.status} · ${kb} KB · ${ms} ms\n${preview}\n\n${text.length > 8000 ? text.slice(0, 8000) + '…' : text}`;
+        }
+        document.getElementById('btn-session').onclick = () => run('check_session', '../api.php?action=check_session');
+        document.getElementById('btn-logs').onclick = () => run('it_logs', '../api.php?action=get&file=it_logs&paginate=1&page=1&per_page=15&sort_field=date&sort_dir=desc');
+        document.getElementById('btn-tech').onclick = () => run('technicians', '../api.php?action=get&file=employees&scope=technicians');
+    </script>
+</body>
+</html>

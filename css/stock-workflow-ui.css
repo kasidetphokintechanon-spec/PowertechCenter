@@ -1,0 +1,388 @@
+/* PowertechCenter — shared stock module navigation + workflow chips */
+
+.stock-module-nav-host {
+    flex-shrink: 0;
+    background: var(--bg1, #fff);
+    border-bottom: 0.5px solid var(--border, #e2e8f0);
+    padding: 6px 12px;
+    overflow-x: auto;
+}
+
+.dark .stock-module-nav-host {
+    background: var(--bg1, #1e293b);
+    border-color: var(--border, #334155);
+}
+
+.stock-mod-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: min-content;
+}
+
+.stock-mod-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 0.5px solid var(--border, #e2e8f0);
+    background: var(--bg2, #f8fafc);
+    color: var(--text2, #64748b);
+    font-size: 11px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+    font-family: 'Kanit', sans-serif;
+}
+
+.stock-mod-link:hover {
+    border-color: var(--accent2, #2563eb);
+    color: var(--accent2, #2563eb);
+}
+
+.stock-mod-link.active {
+    background: var(--accent, #2563eb);
+    border-color: var(--accent, #2563eb);
+    color: #fff;
+    font-weight: 600;
+}
+
+.stock-mod-link i {
+    font-size: 10px;
+    opacity: 0.85;
+}
+
+/* Requester pages (stationery / maid) — workflow shell chips */
+.workflow-shell {
+    background: var(--bg1, #fff);
+    border-bottom: 0.5px solid var(--border, #e2e8f0);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.workflow-track {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.wf-chip {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 0.5px solid var(--border, #e2e8f0);
+    background: var(--bg2, #f8fafc);
+    color: var(--text2, #64748b);
+    white-space: nowrap;
+}
+
+.wf-chip.active {
+    border-color: var(--accent2, #2563eb);
+    background: #eff6ff;
+    color: var(--accent2, #2563eb);
+    font-weight: 600;
+}
+
+.wf-chip.done {
+    border-color: #86efac;
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 600;
+}
+
+.wf-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.wf-action-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 0.5px solid var(--border, #e2e8f0);
+    background: var(--bg2, #f8fafc);
+    color: var(--text2, #64748b);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    transition: all 0.15s;
+}
+
+.wf-action-btn:hover {
+    border-color: var(--accent2, #2563eb);
+    color: var(--accent2, #2563eb);
+}
+
+.wf-role-note {
+    width: 100%;
+    font-size: 10px;
+    color: var(--text3, #94a3b8);
+}
+
+@media (max-width: 900px) {
+    .workflow-shell {
+        align-items: flex-start;
+    }
+}
+
+/* ── Requester pages (stationery / maid) ── */
+.stock-request-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+@media (max-width: 1023px) {
+    .stock-request-page .item-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 639px) {
+    .stock-request-page {
+        height: auto;
+        min-height: 100dvh;
+        overflow: auto;
+    }
+
+    .stock-request-page .body-wrap {
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    .stock-request-page .left-col {
+        border-right: none;
+        border-bottom: 0.5px solid var(--border, #e2e8f0);
+        overflow: visible;
+        min-height: 0;
+    }
+
+    .stock-request-page .item-grid {
+        overflow-y: visible;
+        max-height: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 10px;
+    }
+
+    .stock-request-page .right-col {
+        width: 100%;
+        border-top: 0.5px solid var(--border, #e2e8f0);
+        overflow: visible;
+    }
+
+    .stock-request-page .cart-body {
+        max-height: min(42vh, 320px);
+    }
+
+    .stock-request-page .step-bar {
+        flex-wrap: wrap;
+        gap: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .stock-request-page .step-line {
+        display: none;
+    }
+
+    .stock-request-page .topbar-title span {
+        display: none;
+    }
+
+    .stock-request-page .topbar-sub {
+        display: none !important;
+    }
+
+    .stock-request-page .pending-banner {
+        flex-wrap: wrap;
+    }
+
+    .stock-request-page .wf-actions {
+        width: 100%;
+    }
+
+    .stock-request-page #flow-guide-modal > div {
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 380px) {
+    .stock-request-page .item-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── History page ── */
+.stock-history-page main {
+    padding-top: calc(5rem + env(safe-area-inset-top));
+}
+
+@media (max-width: 639px) {
+    .stock-history-page #stock-module-nav {
+        top: calc(64px + env(safe-area-inset-top));
+    }
+
+    .stock-history-page main {
+        padding-top: calc(7.5rem + env(safe-area-inset-top));
+    }
+
+    .stock-history-page .tab-btn {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+}
+
+/* ── Stock management (admin) ── */
+.stock-sb-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dark .stock-sb-toggle {
+    background: #1e293b;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+.stock-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 35;
+}
+
+.stock-mgmt-page.stock-sidebar-open .stock-sidebar-backdrop {
+    display: block;
+}
+
+@media (max-width: 1023px) {
+    .stock-mgmt-page #sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+    }
+
+    .stock-mgmt-page.stock-sidebar-open #sidebar {
+        transform: translateX(0);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .stock-mgmt-page #main-wrap {
+        margin-left: 0 !important;
+    }
+
+    .stock-center-v4 {
+        --sc-sidebar-w: min(280px, 88vw);
+    }
+
+    .stock-mgmt-page .stock-sb-toggle {
+        display: inline-flex;
+    }
+
+    .stock-mgmt-page .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .stock-mgmt-page #view-pending > div:first-of-type {
+        grid-template-columns: repeat(2, 1fr) !important;
+        padding: 12px 14px !important;
+    }
+
+    .stock-mgmt-page .ap-flow-shell {
+        margin: 0 12px 10px !important;
+    }
+
+    .stock-mgmt-page #view-pending.active > div:last-child {
+        flex-direction: column !important;
+    }
+
+    .stock-mgmt-page #view-pending.active > div:last-child > div:first-child {
+        width: 100% !important;
+        max-height: 38vh;
+        border-right: none !important;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stock-mgmt-page #side-panel {
+        width: min(100vw, 320px);
+    }
+
+    .stock-mgmt-page #content-area {
+        padding: 14px 12px !important;
+    }
+
+    .stock-mgmt-page #topbar {
+        padding: 0 12px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 52px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .stock-mgmt-page #topbar-title {
+        font-size: 14px !important;
+        flex: 1 1 100%;
+        order: 2;
+    }
+
+    .stock-mgmt-page #type-toggle-group {
+        order: 3;
+        flex: 1;
+    }
+}
+
+@media (max-width: 639px) {
+    .stock-mgmt-page .kpi-grid,
+    .stock-mgmt-page #view-pending > div:first-of-type {
+        grid-template-columns: 1fr !important;
+    }
+
+    .stock-mgmt-page #side-panel.open {
+        width: 100vw;
+    }
+
+    .stock-mgmt-page .stock-mod-link {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+
+    .stock-mgmt-page #type-toggle-group button {
+        flex: 1;
+        font-size: 11px !important;
+        padding: 8px 8px !important;
+    }
+}
+
+/* Tablet landscape (iPad) */
+@media (min-width: 640px) and (max-width: 1023px) {
+    .stock-request-page .right-col {
+        width: 280px;
+    }
+
+    .stock-request-page .body-wrap {
+        flex-direction: row;
+    }
+
+    .stock-request-page .left-col {
+        border-right: 0.5px solid var(--border, #e2e8f0);
+        border-bottom: none;
+    }
+}

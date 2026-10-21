@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dash-page">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Dashboard - IT Support Center</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="manifest" href="app-manifest.json">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/favicon-version.js"></script>
     <script src="js/pwa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/responsive-platform.css?v=20260526">
+    <link rel="stylesheet" href="css/dashboard-theme.css?v=20260530">
+    <link rel="stylesheet" href="css/dashboard-unified-theme.css?v=20260529">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -21,280 +28,136 @@
         })();
     </script>
     <style>
-        /* ── Page-specific layout ── */
-        body {
-            font-family: var(--ptc-font-th);
-            background-color: var(--ptc-bg);
-            color: var(--ptc-text);
-            min-height: 100vh;
-        }
-
-        /* Sticky top nav bar */
-        .dash-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: rgba(255,255,255,.9);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--ptc-border);
-            padding: .75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .dark .dash-nav,
-        html.dark .dash-nav { background: rgba(15,23,42,.9); }
-
-        .dash-nav__left  { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
-        .dash-nav__right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
-
-        /* Main content */
-        .dash-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        @media (max-width: 640px) { .dash-content { padding: 1rem; gap: 1rem; } }
-
-        /* Stat cards grid */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 1rem;
-        }
-        @media (max-width: 480px) { .stat-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; } }
-
-        /* Individual stat card */
-        .stat-card {
-            background: var(--ptc-surface);
-            border: 1px solid var(--ptc-border);
-            border-radius: var(--ptc-radius-lg);
-            padding: 1.125rem 1.25rem;
-            box-shadow: var(--ptc-shadow-sm);
-            transition: var(--ptc-transition);
-            cursor: pointer;
-            border-left-width: 4px;
-        }
-        .stat-card:hover { box-shadow: var(--ptc-shadow-md); transform: translateY(-2px); }
-        .stat-card.active { box-shadow: var(--ptc-shadow-md); ring: 2px solid var(--ptc-primary); }
-        .stat-card__val  { font-size: 2rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
-        .stat-card__lbl  { font-size: .75rem; font-weight: 600; color: var(--ptc-text-muted); margin-top: .375rem; }
-        .stat-card__icon { font-size: 1.5rem; opacity: .6; }
-
-        /* Chart grid */
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
-        @media (max-width: 900px)  { .chart-grid { grid-template-columns: 1fr; } }
-        @media (min-width: 901px) and (max-width: 1200px) { .chart-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        /* Chart card */
-        .chart-card {
-            background: var(--ptc-surface);
-            border: 1px solid var(--ptc-border);
-            border-radius: var(--ptc-radius-lg);
-            box-shadow: var(--ptc-shadow-sm);
-            overflow: hidden;
-        }
-        .chart-card__header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--ptc-border);
-        }
-        .chart-card__title {
-            font-size: .9375rem;
-            font-weight: 700;
-            color: var(--ptc-text);
-            display: flex; align-items: center; gap: .5rem;
-        }
-        .chart-card__title i { color: var(--ptc-text-faint); }
-        .chart-card__body { padding: 1.25rem; }
+        @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+        .chart-card__header { display: flex; align-items: center; justify-content: space-between; }
+        .chart-card__title { display: flex; align-items: center; }
         .chart-card canvas { max-height: 240px; width: 100% !important; }
         .chart-card--wide { grid-column: 1 / -1; }
-
-        /* Filter buttons */
         .filter-bar { display: flex; flex-wrap: wrap; gap: .5rem; }
-        .filter-btn {
-            display: inline-flex; align-items: center; gap: .375rem;
-            padding: .375rem .75rem; border-radius: 99px; font-size: .8125rem; font-weight: 500;
-            cursor: pointer; border: 1px solid var(--ptc-border);
-            background: var(--ptc-surface); color: var(--ptc-text-muted);
-            transition: var(--ptc-transition); white-space: nowrap;
-        }
-        .filter-btn:hover  { border-color: var(--ptc-primary); color: var(--ptc-primary); }
-        .filter-btn.active {
-            background: var(--ptc-primary-light); border-color: var(--ptc-primary);
-            color: var(--ptc-primary); font-weight: 600;
-        }
-
-        /* Table */
-        .data-table-wrap {
-            background: var(--ptc-surface);
-            border: 1px solid var(--ptc-border);
-            border-radius: var(--ptc-radius-lg);
-            box-shadow: var(--ptc-shadow-sm);
-            overflow: hidden;
-        }
-        .data-table-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1rem 1.25rem; border-bottom: 1px solid var(--ptc-border);
-            gap: .75rem; flex-wrap: wrap;
-        }
-        .data-table-header h2 { font-size: .9375rem; font-weight: 700; color: var(--ptc-text); margin: 0; display: flex; align-items: center; gap: .5rem; }
+        .filter-btn { display: inline-flex; align-items: center; gap: .375rem; cursor: pointer; white-space: nowrap; }
+        .data-table-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+        .data-table-header h2 { margin: 0; display: flex; align-items: center; gap: .5rem; }
         .data-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table.dtable { width: 100%; border-collapse: collapse; font-size: .875rem; }
-        table.dtable thead { background: var(--ptc-surface-2); }
         table.dtable thead th {
             padding: .625rem 1rem; text-align: left;
             font-size: .6875rem; font-weight: 700; letter-spacing: .06em;
-            text-transform: uppercase; color: var(--ptc-text-muted);
-            border-bottom: 1px solid var(--ptc-border); white-space: nowrap;
+            text-transform: uppercase; color: #64748b;
+            border-bottom: 1px solid #e2e8f0; white-space: nowrap;
         }
+        html.dark table.dtable thead th { border-bottom-color: #334155; color: #94a3b8; }
         table.dtable tbody td {
-            padding: .75rem 1rem; border-bottom: 1px solid var(--ptc-border);
-            color: var(--ptc-text-2); vertical-align: middle;
+            padding: .75rem 1rem; border-bottom: 1px solid #f1f5f9;
+            color: #475569; vertical-align: middle;
         }
+        html.dark table.dtable tbody td { border-bottom-color: #334155; color: #cbd5e1; }
         table.dtable tbody tr:last-child td { border-bottom: none; }
-        table.dtable tbody tr:hover { background: var(--ptc-surface-2); }
-
-        /* Status tags */
         .stag {
             display: inline-flex; align-items: center; gap: .3125rem;
             padding: .1875rem .625rem; border-radius: 99px;
             font-size: .75rem; font-weight: 600; white-space: nowrap;
         }
-        .stag-pending   { background: var(--ptc-primary-light);  color: var(--ptc-primary); }
-        .stag-progress  { background: var(--ptc-warning-bg);      color: var(--ptc-warning); }
-        .stag-parts     { background: var(--ptc-danger-bg);       color: var(--ptc-danger); }
-        .stag-done      { background: var(--ptc-success-bg);      color: var(--ptc-success); }
-        .stag-temp      { background: var(--ptc-info-bg);         color: var(--ptc-info); }
-        .stag-overdue   { background: var(--ptc-danger-bg); color: var(--ptc-danger); font-weight: 700; }
-
-        /* Alert bar */
+        .stag-pending   { background: #eff6ff; color: #2563eb; }
+        .stag-progress  { background: #fffbeb; color: #d97706; }
+        .stag-parts     { background: #fef2f2; color: #dc2626; }
+        .stag-done      { background: #f0fdf4; color: #16a34a; }
+        .stag-temp      { background: #eef2ff; color: #4f46e5; }
+        .stag-overdue   { background: #fef2f2; color: #dc2626; font-weight: 700; }
         .alert-pending {
-            background: var(--ptc-danger-bg);
-            border: 1px solid rgba(239,68,68,.25);
-            border-left: 4px solid var(--ptc-danger);
-            border-radius: var(--ptc-radius-lg);
             padding: 1rem 1.25rem;
             display: flex; align-items: center; justify-content: space-between;
             gap: 1rem; flex-wrap: wrap;
         }
-        .alert-pending__icon {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: var(--ptc-danger-bg); color: var(--ptc-danger);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.25rem; flex-shrink: 0;
-        }
-        .alert-pending__title { font-weight: 700; color: var(--ptc-danger); font-size: 1rem; }
-        .alert-pending__sub   { font-size: .875rem; color: var(--ptc-text-2); }
-
-        /* Rating display */
-        .rating-big { font-size: 3rem; font-weight: 800; color: var(--ptc-warning); line-height: 1; letter-spacing: -.04em; }
-
-        /* Warranty days-left colour */
-        .days-critical { color: var(--ptc-danger); font-weight: 700; }
-        .days-warn     { color: var(--ptc-warning); font-weight: 600; }
-
-        /* Company selector */
-        .company-select {
-            padding: .5rem .875rem; padding-right: 2.25rem;
-            border: 1px solid var(--ptc-border); border-radius: var(--ptc-radius-md);
-            background: var(--ptc-surface); color: var(--ptc-text);
-            font-size: .875rem; font-family: inherit; outline: none;
-            appearance: none; cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right .625rem center;
-            transition: var(--ptc-transition);
-        }
-        .company-select:focus { border-color: var(--ptc-primary); box-shadow: 0 0 0 3px var(--ptc-primary-ring); }
-
-        /* Empty states */
-        .empty-state {
-            text-align: center; padding: 2.5rem 1.5rem;
-            color: var(--ptc-text-muted); font-size: .875rem;
-        }
+        .alert-pending__title { font-weight: 700; color: #dc2626; font-size: 1rem; }
+        .alert-pending__sub { font-size: .875rem; color: #64748b; }
+        .days-critical { color: #dc2626; font-weight: 700; }
+        .days-warn { color: #d97706; font-weight: 600; }
+        .empty-state { text-align: center; padding: 2.5rem 1.5rem; color: #94a3b8; font-size: .875rem; }
         .empty-state i { font-size: 2rem; display: block; margin-bottom: .75rem; opacity: .4; }
-
-        /* Back link */
-        .back-link {
-            display: inline-flex; align-items: center; gap: .375rem;
-            font-size: .8125rem; color: var(--ptc-text-muted); text-decoration: none;
-            padding: .375rem .625rem; border-radius: var(--ptc-radius-sm);
-            transition: var(--ptc-transition);
+        .company-select {
+            appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right .625rem center;
         }
-        .back-link:hover { background: var(--ptc-surface-3); color: var(--ptc-text); }
-
-        /* Responsive table → card on mobile */
         @media (max-width: 600px) {
             table.dtable thead { display: none; }
             table.dtable, table.dtable tbody { display: block; }
             table.dtable tbody tr {
                 display: flex; flex-direction: column;
-                border: 1px solid var(--ptc-border);
-                border-radius: var(--ptc-radius-lg);
-                margin: .75rem 1rem;
-                overflow: hidden;
+                border: 1px solid #e2e8f0; border-radius: 12px;
+                margin: .75rem 1rem; overflow: hidden;
             }
+            html.dark table.dtable tbody tr { border-color: #334155; }
             table.dtable tbody tr:last-child { margin-bottom: 1rem; }
             table.dtable tbody td {
                 display: flex; align-items: flex-start; justify-content: space-between;
-                padding: .5rem .875rem; border-bottom: 1px solid var(--ptc-border);
+                padding: .5rem .875rem; border-bottom: 1px solid #f1f5f9;
             }
-            table.dtable tbody td:last-child { border-bottom: none; }
             table.dtable tbody td::before {
                 content: attr(data-label);
                 font-size: .6875rem; font-weight: 700;
                 letter-spacing: .05em; text-transform: uppercase;
-                color: var(--ptc-text-faint); flex-shrink: 0;
-                min-width: 80px; padding-right: .75rem; margin-top: 2px;
+                color: #94a3b8; flex-shrink: 0; min-width: 80px; padding-right: .75rem;
             }
         }
     </style>
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 </head>
-<body class="ptc-normalize">
+<body  class="ptc-normalize dash-center-pro dashboard-unified-v1 ptc-unified-v1">
 
-    <!-- ── Top Nav ── -->
-    <nav class="dash-nav">
-        <div class="dash-nav__left">
-            <a href="index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i>
-                <span>หน้าหลัก</span>
-            </a>
-            <div style="width:1px;height:20px;background:var(--ptc-border)"></div>
-            <div>
-                <div style="font-size:.9375rem;font-weight:700;color:var(--ptc-text)">IT Dashboard</div>
-                <div style="font-size:.75rem;color:var(--ptc-text-muted)">ภาพรวมและงานซ่อมที่ได้รับมอบหมาย</div>
+    <header class="dash-topbar">
+        <div class="dash-topbar__left">
+            <a href="index.html" class="dash-icon-btn" aria-label="กลับหน้าหลัก"><i class="fas fa-arrow-left"></i></a>
+            <div class="dash-topbar__brand">
+                <div class="dash-topbar__icon"><i class="fas fa-chart-line"></i></div>
+                <div>
+                    <div class="dash-topbar__title">IT Dashboard</div>
+                    <div class="dash-topbar__sub">Support Center · Analytics</div>
+                </div>
             </div>
         </div>
-        <div class="dash-nav__right">
-            <a href="job_plan.html" id="link-job-plan" class="back-link" style="display:none">
+        <div class="dash-topbar__right">
+            <a href="job_plan.html" id="link-job-plan" class="dash-link-btn" style="display:none">
                 <i class="fas fa-calendar-alt"></i> Job Plan
             </a>
-            <select id="dashboard-company-filter" class="company-select" onchange="filterDashboard()">
+            <select id="dashboard-company-filter" class="company-select" onchange="filterDashboard()" title="กรองตามบริษัท">
                 <option value="all">ทุกบริษัท</option>
                 <option value="PTA">PTA</option>
                 <option value="PT4">PT4</option>
                 <option value="PTE">PTE</option>
             </select>
+            <button type="button" class="dash-icon-btn" id="theme-toggle" aria-label="สลับธีม">
+                <i class="fas fa-sun" id="theme-icon-sun"></i>
+                <i class="fas fa-moon" id="theme-icon-moon" style="display:none"></i>
+            </button>
         </div>
-    </nav>
+    </header>
 
     <main class="dash-content">
+
+        <section class="dash-hero ptc-animate">
+            <div class="dash-hero__inner">
+                <h1 id="dash-hero-greeting">ภาพรวม IT Support</h1>
+                <p>เคสซ่อม · KPI · การยืม-คืน · ความพึงพอใจ</p>
+            </div>
+            <div class="dash-hero__chips">
+                <span class="dash-hero-chip"><i class="fas fa-briefcase"></i> <span id="dash-hero-jobs">—</span> งานของฉัน</span>
+                <span class="dash-hero-chip"><i class="fas fa-sync-alt"></i> <span id="dash-updated-at">กำลังโหลด…</span></span>
+            </div>
+        </section>
 
         <!-- Alert area -->
         <div id="dashboard-alert-area" style="display:none"></div>
 
-        <!-- Stat cards -->
+        <p class="dash-section-label">งานของฉัน — สรุปตามสถานะ</p>
         <div id="stat-cards-container" class="stat-grid ptc-animate"></div>
+
+        <p class="dash-section-label">วิเคราะห์และกราฟ</p>
 
         <!-- Chart grid -->
         <div class="chart-grid">
@@ -430,6 +293,46 @@
     let allLogs = [], currentUserId = null, myJobs = [], currentJobFilter = 'all';
     const gid = id => document.getElementById(id);
 
+    function applyDashTheme() {
+        const dark = localStorage.getItem('theme') === 'dark';
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.classList.toggle('dark-theme', dark);
+        const sun = gid('theme-icon-sun'), moon = gid('theme-icon-moon');
+        if (sun) sun.style.display = dark ? 'none' : '';
+        if (moon) moon.style.display = dark ? '' : 'none';
+    }
+    gid('theme-toggle')?.addEventListener('click', () => {
+        const dark = localStorage.getItem('theme') !== 'dark';
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        applyDashTheme();
+    });
+    applyDashTheme();
+
+    function setDashHeroMeta() {
+        const jobsEl = gid('dash-hero-jobs');
+        const updEl = gid('dash-updated-at');
+        const greetEl = gid('dash-hero-greeting');
+        if (jobsEl) jobsEl.textContent = String(myJobs.length);
+        if (updEl) {
+            const now = new Date();
+            updEl.textContent = 'อัปเดต ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        }
+        if (greetEl) {
+            const h = new Date().getHours();
+            const t = h < 12 ? 'สวัสดีตอนเช้า' : h < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+            greetEl.textContent = t + ' — ภาพรวม IT Support';
+        }
+    }
+
+    const statThemeMap = {
+        all: 'slate',
+        Pending: 'blue',
+        'In Progress': 'amber',
+        'Waiting for Parts': 'red',
+        'Temporary Fix': 'indigo',
+        Completed: 'green'
+    };
+
     function formatName(n) {
         if (!n) return 'N/A';
         n = n.replace(/^(Mr\.|Ms\.|Mrs\.|Miss|Dr\.|Khun)\s+/i, '');
@@ -500,28 +403,28 @@
         updateStatCards();
         renderFilterButtons();
         renderJobs();
+        setDashHeroMeta();
     }
 
     function filterByStatus(status) {
         currentJobFilter = status;
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === status));
+        document.querySelectorAll('.dash-stat-card').forEach(el => el.classList.toggle('active', el.dataset.filter === status));
         renderJobs();
         gid('jobs-table-body').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function updateStatCards() {
         const c = gid('stat-cards-container');
-        const colorMap = { all:'var(--ptc-primary)', Pending:'var(--ptc-primary)', 'In Progress':'var(--ptc-warning)', 'Waiting for Parts':'var(--ptc-danger)', 'Temporary Fix':'var(--ptc-info)', Completed:'var(--ptc-success)' };
         c.innerHTML = Object.entries(statusConfig).map(([k, v]) => {
             const n = k === 'all' ? myJobs.length : myJobs.filter(j => j.status === k).length;
-            const col = colorMap[k] || 'var(--ptc-primary)';
-            return `<div class="stat-card" style="border-left-color:${col}" onclick="filterByStatus('${k}')">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
-                <div>
-                  <div class="stat-card__val" style="color:${col}">${n}</div>
-                  <div class="stat-card__lbl">${v.text}</div>
-                </div>
-                <i class="fas ${v.icon} stat-card__icon" style="color:${col};margin-top:.25rem"></i>
+            const theme = statThemeMap[k] || 'blue';
+            const active = currentJobFilter === k ? ' active' : '';
+            return `<div class="dash-stat-card dash-stat--${theme}${active}" data-filter="${k}" onclick="filterByStatus('${k}')">
+              <div class="dash-stat-card__icon"><i class="fas ${v.icon}"></i></div>
+              <div>
+                <div class="dash-stat-card__val">${n}</div>
+                <div class="dash-stat-card__lbl">${v.text}</div>
               </div>
             </div>`;
         }).join('');
@@ -598,6 +501,11 @@
             renderLoanChart(data.loan_monthly);
             renderMttrChart(data.mttr_monthly, data.mttr_overall);
             renderAgingChart(data.aging_buckets);
+            const upd = gid('dash-updated-at');
+            if (upd) {
+                const now = new Date();
+                upd.textContent = 'กราฟ ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            }
         } catch (e) { console.error('Dashboard stats error:', e); }
     }
 

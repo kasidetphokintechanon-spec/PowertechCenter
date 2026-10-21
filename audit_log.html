@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Log - System Admin</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="manifest" href="app-manifest.json">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
+    <script src="js/favicon-version.js"></script>
     <script src="js/pwa.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,11 +24,14 @@
         };
         (function() {
             const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') document.documentElement.classList.add('dark');
+            if (theme === 'dark') document.documentElement.classList.add('dark', 'dark-theme');
         })();
     </script>
+<link rel="stylesheet" href="css/design-system.css">
+<link rel="stylesheet" href="css/enterprise-theme.css">
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300 ptc-unified-v1" data-page="audit_log">
 
     <nav class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm fixed w-full z-50 border-b border-slate-200 dark:border-slate-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,14 +40,22 @@
                     <i class="fas fa-arrow-left"></i> กลับหน้า Admin
                 </a>
                 <h1 class="text-lg font-bold">Audit Log</h1>
-                <a href="settings_line.html" class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 transition">
-                    <i class="fab fa-line text-lg"></i> <span class="hidden sm:inline">LINE Notify</span>
-                </a>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <a href="settings_line.html" class="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 transition">
+                        <i class="fab fa-line text-lg"></i> <span class="hidden sm:inline">LINE Notify</span>
+                    </a>
+                    <button type="button" id="theme-toggle" title="สลับธีม" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                        <i id="theme-icon" class="fas fa-sun"></i>
+                    </button>
+                    <div id="nav-user-area"></div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="flex-1 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div style="display:flex;margin-top:64px;height:calc(100vh - 64px);overflow:hidden;">
+    <aside id="ptc-sidebar" style="height:calc(100vh - 64px)"></aside>
+    <main class="flex-1 pb-12 px-4 sm:px-6 lg:px-8 w-full" style="overflow-y:auto;">
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
             <div class="relative flex-1 w-full">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -89,10 +102,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const sess = await (await fetch('api.php?action=check_session')).json();
-                if (!sess.loggedin || sess.role !== 'admin') { 
-                    window.location.href = 'login.html'; 
-                    return; 
-                }
+                const _p = sess.effective_permissions || [];
+                const _ok = sess.role === 'admin' || _p.includes('*') || _p.includes('audit.view');
+                if (!sess.loggedin || !_ok) { window.location.href = 'login.html'; return; }
 
                 const res = await fetch('api.php?action=get_audit_logs&v=' + Date.now());
                 allLogs = await res.json();
@@ -158,6 +170,25 @@
             
             window.location.href = url;
         }
+
+        // Theme was already read from localStorage on load (see boot script in <head>),
+        // but there was no button anywhere to actually switch it from this page.
+        (function initThemeToggle() {
+            const updateIcon = () => {
+                const icon = document.getElementById('theme-icon');
+                if (icon) icon.className = document.documentElement.classList.contains('dark') ? 'fas fa-moon' : 'fas fa-sun';
+            };
+            updateIcon();
+            document.getElementById('theme-toggle')?.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                document.documentElement.classList.toggle('dark-theme');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                updateIcon();
+            });
+        })();
     </script>
+</main></div>
+<script src="js/sidebar.js"></script>
+<script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>

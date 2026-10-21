@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Room Check</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="css/design-system.css">
+<link rel="stylesheet" href="css/enterprise-theme.css">
+<link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+<style>
+html,body{overflow:auto!important;height:auto!important;}
+body{font-family:'Inter','Kanit',sans-serif;background:#f1f5f9;color:#334155;padding-bottom:20px;}
+html.dark body{background:#0a0f1e;color:#e2e8f0;}
+
+/* ── top bar ── */
+.sc-topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:52px;z-index:40;}
+html.dark .sc-topbar{background:#1e293b;border-color:#334155;}
+.sc-month-nav{display:flex;align-items:center;gap:4px;}
+.sc-month-nav button{width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+html.dark .sc-month-nav button{background:#1e293b;border-color:#334155;color:#94a3b8;}
+.sc-month-nav button:hover{background:#f1f5f9;color:#2563eb;}
+.sc-month-label{font-size:14px;font-weight:800;color:#0f172a;min-width:130px;text-align:center;}
+html.dark .sc-month-label{color:#f1f5f9;}
+.sc-today-btn{height:30px;padding:0 12px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;font-family:inherit;}
+.sc-autosave-hint{margin-left:auto;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:5px;}
+html.dark .sc-autosave-hint{color:#475569;}
+html.dark .sc-today-btn{background:#1e293b;border-color:#334155;}
+.sc-today-btn:hover{background:#eff6ff;}
+.sc-badge{display:inline-flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:700;color:#64748b;}
+html.dark .sc-badge{background:#0f172a;border-color:#334155;}
+.sc-badge.done{background:#f0fdf4;border-color:#86efac;color:#16a34a;}
+
+/* ── company filter ── */
+.sc-co-filter{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.sc-co-btn{height:28px;padding:0 12px;border-radius:99px;border:1px solid #e2e8f0;background:#fff;font-size:11px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;}
+html.dark .sc-co-btn{background:#1e293b;border-color:#334155;color:#94a3b8;}
+.sc-co-btn:hover{background:#f1f5f9;}
+.sc-co-btn.active{background:#0f172a;border-color:#0f172a;color:#fff;}
+.sc-co-btn.active.co-PTA{background:#059669;border-color:#059669;}
+.sc-co-btn.active.co-PT4{background:#dc2626;border-color:#dc2626;}
+.sc-co-btn.active.co-PTE{background:#2563eb;border-color:#2563eb;}
+
+/* ── accordion ── */
+.sc-wrap{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.acc-room{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;}
+html.dark .acc-room{background:#1e293b;border-color:#334155;}
+.acc-room.has-issue{border-color:#fca5a5;}
+.acc-room.all-ok{border-color:#86efac;}
+.acc-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;}
+.acc-hd:hover{background:#f8fafc;}
+html.dark .acc-hd:hover{background:#0f172a;}
+.acc-code{font-size:14px;font-weight:800;color:#0f172a;min-width:44px;}
+html.dark .acc-code{color:#f1f5f9;}
+.acc-name{font-size:11px;color:#64748b;flex:1;}
+.acc-stat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+.acc-stat.ok{background:#dcfce7;color:#166534;}
+.acc-stat.issue{background:#fee2e2;color:#991b1b;}
+.acc-stat.partial{background:#fef9c3;color:#854d0e;}
+.acc-stat.empty{background:#f1f5f9;color:#94a3b8;}
+html.dark .acc-stat.empty{background:#334155;}
+.acc-actions{display:flex;gap:5px;flex-shrink:0;}
+.acc-chevron{font-size:11px;color:#94a3b8;transition:transform .2s;flex-shrink:0;}
+.acc-room.open .acc-chevron{transform:rotate(180deg);}
+.acc-body{display:none;border-top:1px solid #f1f5f9;}
+html.dark .acc-body{border-color:#334155;}
+.acc-room.open .acc-body{display:block;}
+
+/* ── month table ── */
+.mtbl-wrap{overflow-x:auto;padding:10px 12px 12px;}
+.mtbl{border-collapse:separate;border-spacing:2px;white-space:nowrap;font-size:9.5px;}
+.mtbl th.item-hd{text-align:left;font-size:9px;font-weight:700;color:#94a3b8;padding:2px 6px;width:150px;min-width:120px;position:sticky;left:0;background:#fff;z-index:2;}
+html.dark .mtbl th.item-hd{background:#1e293b;}
+.mtbl td.item-lbl{font-size:10px;font-weight:600;color:#334155;padding:3px 6px;position:sticky;left:0;background:#fff;z-index:2;border-right:1px solid #f1f5f9;}
+html.dark .mtbl td.item-lbl{color:#cbd5e1;background:#1e293b;border-color:#334155;}
+.mtbl th.day-hd{text-align:center;font-size:9px;font-weight:700;color:#64748b;width:28px;min-width:28px;padding:2px 0;}
+.mtbl th.day-hd.we{color:#cbd5e1;}
+html.dark .mtbl th.day-hd.we{color:#475569;}
+.mtbl th.day-hd.ph{color:#f97316;font-weight:800;}
+html.dark .mtbl th.day-hd.ph{color:#fb923c;}
+.mtbl th.day-hd.tod{color:#2563eb;}
+.dow{font-size:8px;font-weight:500;display:block;}
+
+/* ── value cells ── */
+.cv{width:28px;height:26px;text-align:center;vertical-align:middle;border-radius:5px;cursor:pointer;font-size:10px;font-weight:700;transition:transform .1s;}
+.cv:hover{transform:scale(1.2);z-index:5;position:relative;}
+.cv.we{background:transparent;cursor:default;color:#cbd5e1;}
+.cv.we:hover{transform:none;}
+.cv.ph{background:#fff7ed;cursor:default;color:#f97316;}
+.cv.ph:hover{transform:none;}
+.cv-chk.ph{cursor:default;background:#fff7ed;color:#f97316;}
+.cv.empty{background:#f1f5f9;}
+html.dark .cv.empty{background:#334155;}
+.cv.v-ok{background:#bbf7d0;color:#166534;}
+.cv.v-issue{background:#fecaca;color:#991b1b;}
+.cv.v-backup{background:#bfdbfe;color:#1d4ed8;}
+.cv.v-good{background:#bbf7d0;color:#166534;}
+.cv.v-bad{background:#fecaca;color:#991b1b;}
+.cv.v-med{background:#fef9c3;color:#854d0e;}
+.cv.tod{box-shadow:0 0 0 2px #2563eb;}
+.cv.tod:hover{box-shadow:0 0 0 2px #2563eb,0 2px 6px rgba(0,0,0,.15);}
+
+/* checker row */
+.cv-chk{width:28px;height:60px;text-align:center;vertical-align:middle;font-size:8px;font-weight:600;color:#94a3b8;cursor:pointer;border-radius:4px;overflow:hidden;writing-mode:vertical-rl;transform:rotate(180deg);padding:2px 0;}
+.cv-chk.filled{color:#2563eb;background:#eff6ff;}
+.cv-chk.we{cursor:default;}
+.cv-chk:not(.we):hover{background:#eff6ff;color:#2563eb;}
+td.item-lbl.chk-lbl{color:#94a3b8;font-size:9px;font-weight:600;}
+
+/* note row */
+.cv-note{width:28px;height:26px;text-align:center;vertical-align:middle;cursor:pointer;border-radius:5px;color:#cbd5e1;font-size:10px;}
+.cv-note:hover{background:#f1f5f9;}
+html.dark .cv-note:hover{background:#334155;}
+.cv-note.we{cursor:default;}
+.cv-note.ph{background:#fff7ed;cursor:default;}
+.cv-note.filled{color:#d97706;background:#fffbeb;}
+.cv-note.needs{color:#dc2626;background:#fef2f2;}
+td.item-lbl.note-lbl{color:#94a3b8;font-size:9px;font-weight:600;}
+
+/* inline input overlay */
+.cell-input-wrap{position:fixed;z-index:9999;background:#fff;border:1.5px solid #2563eb;border-radius:7px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:6px;}
+html.dark .cell-input-wrap{background:#1e293b;}
+.cell-input-wrap input{width:70px;height:30px;padding:0 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:13px;font-weight:700;text-align:center;font-family:inherit;background:#fff;color:#0f172a;outline:none;}
+html.dark .cell-input-wrap input{background:#0f172a;border-color:#334155;color:#e2e8f0;}
+.cell-input-wrap .ci-label{font-size:9px;color:#94a3b8;margin-bottom:4px;display:block;}
+.cell-input-wrap .ci-row{display:flex;align-items:center;gap:5px;}
+.cell-input-wrap .ci-clear{width:26px;height:30px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:5px;cursor:pointer;font-size:13px;flex-shrink:0;}
+.cell-input-wrap .ci-clear:hover{background:#fee2e2;}
+html.dark .cell-input-wrap .ci-clear{background:#3f1d1d;border-color:#7f1d1d;color:#fca5a5;}
+
+/* checker bar (per room) */
+.chk-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #f1f5f9;background:#f8fafc;}
+html.dark .chk-bar{background:#1e293b;border-color:#334155;}
+.chk-bar-input{flex:1;max-width:220px;height:28px;padding:0 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;font-family:inherit;background:#fff;color:#0f172a;outline:none;}
+.chk-bar-input:focus{border-color:#2563eb;}
+html.dark .chk-bar-input{background:#0f172a;border-color:#334155;color:#e2e8f0;}
+
+/* checker name popup */
+.chk-popup{position:fixed;z-index:9999;background:#fff;border:1.5px solid #2563eb;border-radius:7px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:6px;}
+html.dark .chk-popup{background:#1e293b;}
+.chk-popup input{width:120px;height:30px;padding:0 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;font-family:inherit;background:#fff;color:#0f172a;outline:none;}
+html.dark .chk-popup input{background:#0f172a;border-color:#334155;color:#e2e8f0;}
+.chk-popup textarea{width:210px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;font-family:inherit;background:#fff;color:#0f172a;outline:none;resize:vertical;}
+html.dark .chk-popup textarea{background:#0f172a;border-color:#334155;color:#e2e8f0;}
+.chk-popup .note-save-btn{margin-top:6px;width:100%;height:28px;border:none;border-radius:5px;background:#2563eb;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.chk-popup .note-save-btn:hover{background:#1d4ed8;}
+.chk-popup .ci-label{font-size:9px;color:#94a3b8;margin-bottom:4px;display:block;}
+
+/* misc */
+.sc-loading{text-align:center;padding:40px;color:#94a3b8;font-size:13px;}
+.legend{display:flex;gap:12px;padding:0 14px 12px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748b;}
+html.dark .leg-item{color:#94a3b8;}
+.leg-dot{width:12px;height:12px;border-radius:3px;}
+
+/* ══════════════════════════════════════════════════════════════
+   TV MODE — wall-monitor view (same control-room language as
+   it_links.html's TV Mode; deliberately its own dark theme since
+   this only ever runs on an office TV, never a normal browser tab)
+   ══════════════════════════════════════════════════════════════ */
+#tv-view {
+  --tv-bg:#0e1219; --tv-panel:#151b25; --tv-panel-2:#111621;
+  --tv-hair:#232c3d; --tv-accent:#d9954a;
+  --tv-ok:#34d399; --tv-ok-glow:rgba(52,211,153,.55);
+  --tv-warn:#fbbf24; --tv-warn-glow:rgba(251,191,36,.55);
+  --tv-crit:#f0475a; --tv-crit-glow:rgba(240,71,90,.6);
+  --tv-text:#eef1f6; --tv-text-dim:#8a93a6; --tv-text-faint:#4d5566;
+  --tv-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, 'Roboto Mono', monospace;
+  position: fixed; inset: 0; z-index: 1000; display: none;
+  background:
+    radial-gradient(ellipse 1400px 700px at 20% -10%, rgba(217,149,74,.05), transparent 60%),
+    radial-gradient(ellipse 1200px 800px at 100% 110%, rgba(52,211,153,.04), transparent 60%),
+    var(--tv-bg);
+  color: var(--tv-text); font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+#tv-view.active { display: block; }
+#tv-view .tv-grid-overlay {
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--tv-hair) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tv-hair) 1px, transparent 1px);
+  background-size:56px 56px; opacity:.28;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 20%, black 40%, transparent 95%);
+}
+#tv-view .tv-scanlines {
+  position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.10) 3px, rgba(0,0,0,0) 4px);
+  opacity:.35; mix-blend-mode:multiply;
+}
+.tv-wall { position:relative; z-index:2; max-width:1680px; margin:0 auto; height:100vh;
+  padding: clamp(16px,2.2vw,32px) clamp(16px,2.4vw,40px) clamp(16px,2.4vw,32px);
+  display:flex; flex-direction:column; gap:clamp(12px,1.6vw,20px); }
+
+.tv-exit { position:absolute; top:14px; right:14px; z-index:20;
+  background:var(--tv-panel); border:1px solid var(--tv-hair); color:var(--tv-text-dim);
+  width:32px; height:32px; border-radius:7px; cursor:pointer; font-size:14px;
+  display:flex; align-items:center; justify-content:center; opacity:.35; transition:opacity .15s; }
+.tv-exit:hover { opacity:1; color:var(--tv-text); }
+
+.tv-head { display:flex; align-items:center; gap:clamp(16px,2vw,28px);
+  padding-bottom:clamp(12px,1.6vw,18px); border-bottom:1px solid var(--tv-hair); flex-shrink:0; }
+.tv-brand { display:flex; align-items:center; gap:14px; flex-shrink:0; }
+.tv-brand-mark { width:40px; height:40px; border-radius:6px;
+  background:linear-gradient(155deg, var(--tv-accent), #8a5a26);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 6px 18px rgba(217,149,74,.25); flex-shrink:0; }
+.tv-brand-mark i { color:var(--tv-bg); font-size:17px; }
+.tv-brand-1 { font-family:var(--tv-mono); font-size:10.5px; font-weight:600; letter-spacing:.2em;
+  color:var(--tv-text-dim); text-transform:uppercase; }
+.tv-brand-2 { font-family:var(--tv-mono); font-size:clamp(15px,1.5vw,19px); font-weight:700;
+  letter-spacing:.04em; color:var(--tv-text); }
+
+.tv-banner { flex:1; min-width:0; display:flex; align-items:center; gap:16px;
+  padding:10px 20px; border-radius:8px; position:relative; border:1px solid var(--tv-hair); background:var(--tv-panel); }
+.tv-banner.ok { border-color:rgba(52,211,153,.35); color:var(--tv-ok); }
+.tv-banner.warn { border-color:rgba(251,191,36,.35); color:var(--tv-warn); }
+.tv-banner.neutral { color:var(--tv-text-dim); }
+.tv-banner.crit { border-color:rgba(240,71,90,.45); color:var(--tv-crit); animation:tvBannerPulse 2.6s ease-in-out infinite; }
+@keyframes tvBannerPulse {
+  0%,100%{ box-shadow:0 0 0 0 rgba(240,71,90,0), inset 0 0 24px rgba(240,71,90,.05); }
+  50%{ box-shadow:0 0 26px 1px var(--tv-crit-glow), inset 0 0 24px rgba(240,71,90,.12); }
+}
+.tv-banner-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; background:currentColor;
+  box-shadow:0 0 12px 2px currentColor; opacity:.9; }
+.tv-banner-text { font-family:var(--tv-mono); font-weight:700; letter-spacing:.06em;
+  font-size:clamp(13px,1.2vw,16px); text-transform:uppercase; }
+.tv-banner-sub { font-size:12px; color:var(--tv-text-dim); font-weight:500; margin-left:auto; white-space:nowrap; }
+
+.tv-clock-block { text-align:right; flex-shrink:0; }
+.tv-clock-time { font-family:var(--tv-mono); font-variant-numeric:tabular-nums;
+  font-size:clamp(22px,2.4vw,32px); font-weight:700; line-height:1; color:var(--tv-text); }
+.tv-clock-date { font-family:var(--tv-mono); font-size:11px; color:var(--tv-text-dim);
+  letter-spacing:.1em; margin-top:5px; text-transform:uppercase; }
+
+.tv-panels { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+  gap:clamp(12px,1.6vw,20px); flex:1; min-height:0; }
+.tv-panels.tv-single { grid-template-columns:1fr; max-width:900px; margin:0 auto; width:100%; }
+.tv-panels.tv-single .tv-panel-code { font-size:30px; }
+.tv-panels.tv-single .tv-panel-name { font-size:13px; }
+.tv-panels.tv-single .tv-room-name { font-size:15px; }
+.tv-panels.tv-single .tv-room { padding:13px 20px; }
+
+.tv-panel { background:linear-gradient(180deg, var(--tv-panel) 0%, var(--tv-panel-2) 100%);
+  border:1px solid var(--tv-hair); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+.tv-panel-head { display:flex; align-items:center; gap:10px; padding:14px 16px 12px;
+  border-bottom:1px solid var(--tv-hair); background:rgba(255,255,255,.014); flex-shrink:0; }
+.tv-panel-code { font-family:var(--tv-mono); font-weight:800; font-size:20px; color:var(--tv-accent); }
+.tv-panel-name { font-size:11px; color:var(--tv-text-dim); margin-top:2px; }
+.tv-panel-tally { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.tv-tchip { font-family:var(--tv-mono); font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:5px;
+  padding:3px 7px; border-radius:5px; background:var(--tv-panel-2); border:1px solid var(--tv-hair); font-variant-numeric:tabular-nums; }
+.tv-tchip .lamp { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.tv-tchip.c-ok { color:var(--tv-ok); } .tv-tchip.c-crit { color:var(--tv-crit); } .tv-tchip.c-warn { color:var(--tv-warn); }
+
+.tv-rooms { overflow:hidden; flex:1; min-height:0; }
+.tv-room { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--tv-hair); }
+.tv-room:last-child { border-bottom:none; }
+.tv-room-icon { width:28px; height:28px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background:var(--tv-panel-2); border:1px solid var(--tv-hair); color:var(--tv-text-dim); font-size:12.5px; }
+.tv-room-body { min-width:0; flex:1; }
+.tv-room-name { font-size:13px; font-weight:600; color:var(--tv-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tv-room-sub { font-family:var(--tv-mono); font-size:10.5px; color:var(--tv-text-faint); margin-top:1px; }
+.tv-room-status { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.tv-room-status-label { font-family:var(--tv-mono); font-size:9.5px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--tv-text-faint); width:70px; text-align:right; }
+.tv-lamp-big { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--tv-text-faint); }
+.tv-room.ok .tv-room-status-label { color:var(--tv-ok); }
+.tv-room.ok .tv-lamp-big { background:var(--tv-ok); box-shadow:0 0 9px 2px var(--tv-ok-glow); animation:tvBreathe 3.2s ease-in-out infinite; }
+.tv-room.issue { background:linear-gradient(90deg, rgba(240,71,90,.10), transparent 60%); }
+.tv-room.issue .tv-room-status-label { color:var(--tv-crit); }
+.tv-room.issue .tv-lamp-big { background:var(--tv-crit); box-shadow:0 0 10px 2px var(--tv-crit-glow); animation:tvBlink 1.1s steps(1) infinite; }
+.tv-room.pending .tv-room-status-label { color:var(--tv-warn); }
+.tv-room.pending .tv-lamp-big { background:var(--tv-warn); box-shadow:0 0 9px 2px var(--tv-warn-glow); animation:tvBreathe 1.4s ease-in-out infinite; }
+.tv-room.closed .tv-room-status-label { color:var(--tv-text-faint); }
+@keyframes tvBreathe { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+@keyframes tvBlink { 0%,49%{opacity:1;} 50%,100%{opacity:.25;} }
+
+.tv-foot { display:flex; align-items:center; gap:20px; padding-top:clamp(8px,1.2vw,14px);
+  border-top:1px solid var(--tv-hair); font-family:var(--tv-mono); font-size:10.5px; color:var(--tv-text-dim); letter-spacing:.04em; flex-shrink:0; }
+.tv-legend { display:flex; gap:16px; }
+.tv-legend-item { display:flex; align-items:center; gap:6px; }
+.tv-legend-dot { width:7px; height:7px; border-radius:50%; }
+.tv-foot-updated { margin-left:auto; color:var(--tv-text-faint); }
+.tv-foot-updated b { color:var(--tv-text-dim); font-weight:600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-banner.crit, .tv-room.ok .tv-lamp-big, .tv-room.issue .tv-lamp-big, .tv-room.pending .tv-lamp-big { animation:none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="ptc-nav">
+    <a href="dashboard.html" class="nav-back"><i class="fa fa-arrow-left"></i></a>
+    <div class="ptc-nav-brand">
+        <div class="ptc-nav-icon" style="background:#0f766e"><i class="fa fa-server"></i></div>
+        <div>
+            <div class="ptc-nav-title">Server Room Check</div>
+            <div class="ptc-nav-sub">Monthly Check Sheet</div>
+        </div>
+    </div>
+    <div style="flex:1"></div>
+    <button id="theme-toggle" class="ptc-ghost" title="สลับธีม" style="font-size:15px;padding:6px 10px;"><i id="theme-icon" class="fa fa-sun"></i></button>
+    <div id="nav-user-area"></div>
+</nav>
+
+<div class="sc-topbar">
+    <div class="sc-month-nav">
+        <button onclick="prevMonth()"><i class="fa fa-chevron-left"></i></button>
+        <span class="sc-month-label" id="month-label">...</span>
+        <button onclick="nextMonth()"><i class="fa fa-chevron-right"></i></button>
+    </div>
+    <button class="sc-today-btn" onclick="goThisMonth()">วันนี้</button>
+    <div class="sc-badge" id="overall-badge"><i class="fa fa-circle-half-stroke"></i><span id="overall-text">...</span></div>
+    <div class="sc-co-filter" id="sc-co-filter"></div>
+    <a href="holidays.html" class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;color:#ea580c;border-color:#fed7aa;">
+        <i class="fa fa-calendar-xmark"></i> วันหยุด
+    </a>
+    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;" onclick="enterTvMode()" title="โหมดจอมอนิเตอร์ (สำหรับขึ้นจอ TV)">
+        <i class="fa fa-tv"></i> TV Mode
+    </button>
+    <span class="sc-autosave-hint"><i class="fa fa-cloud-arrow-up"></i> บันทึกอัตโนมัติ</span>
+</div>
+
+<div id="sc-page"><div class="sc-loading"><i class="fa fa-spinner fa-spin" style="font-size:24px;color:#0f766e"></i><br>กำลังโหลด...</div></div>
+
+<!-- TV MODE (wall-monitor view) — built/refreshed by JS from the same rooms/vals/checkers data -->
+<div id="tv-view">
+  <div class="tv-grid-overlay"></div>
+  <div class="tv-scanlines"></div>
+  <button class="tv-exit" onclick="exitTvMode()" title="ออกจากโหมดจอมอนิเตอร์ (Esc)"><i class="fa fa-xmark"></i></button>
+  <div class="tv-wall">
+    <div class="tv-head">
+      <div class="tv-brand">
+        <div class="tv-brand-mark"><i class="fa fa-server"></i></div>
+        <div>
+          <div class="tv-brand-1">Powertech Group — Facilities</div>
+          <div class="tv-brand-2">SERVER ROOM MONITOR</div>
+        </div>
+      </div>
+      <div class="tv-banner" id="tv-banner">
+        <div class="tv-banner-dot"></div>
+        <div class="tv-banner-text" id="tv-banner-text">—</div>
+        <div class="tv-banner-sub" id="tv-banner-sub"></div>
+      </div>
+      <div class="tv-clock-block">
+        <div class="tv-clock-time" id="tv-clock">--:--:--</div>
+        <div class="tv-clock-date" id="tv-date"></div>
+      </div>
+    </div>
+
+    <div class="tv-panels" id="tv-panels"></div>
+
+    <div class="tv-foot">
+      <div class="tv-legend">
+        <div class="tv-legend-item"><span class="tv-legend-dot" style="background:var(--tv-ok);box-shadow:0 0 6px 1px var(--tv-ok-glow)"></span>เช็คครบ ไม่มีปัญหา</div>
+        <div class="tv-legend-item"><span class="tv-legend-dot" style="background:var(--tv-crit);box-shadow:0 0 6px 1px var(--tv-crit-glow)"></span>พบปัญหา</div>
+        <div class="tv-legend-item"><span class="tv-legend-dot" style="background:var(--tv-warn);box-shadow:0 0 6px 1px var(--tv-warn-glow)"></span>ยังเช็คไม่ครบ</div>
+      </div>
+      <div class="tv-foot-updated">AUTO-REFRESH <b>60s</b> &middot; LAST UPDATED <b id="tv-last-updated">—</b></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'api.php';
+const thMonths  = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const thMSh     = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDows    = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+let currentMonth = new Date().getMonth() + 1;
+let currentYear  = new Date().getFullYear();
+let monthDays    = 30;
+let holidayMap   = {}; // date string → holiday name
+
+// Data state (all mutable)
+let rooms = [], itemsByRoom = {}, vals = {}, checkers = {}, sugg = {};
+let dirty = {};       // `${rid}:${date}` → true
+let saveTimers = {};  // debounce per rid:date
+let openRooms  = new Set();
+let _loadAbort = null;
+let activeInput = null; // current floating input element
+let myName = '';      // ชื่อ login ของ user (ตัด Mr./Mrs. แล้ว)
+let companyFilter = localStorage.getItem('sc_company_filter') || ''; // '' = ทั้งหมด
+const COMPANY_LABELS = { '': 'ทั้งหมด', PTA: 'PTA', PT4: 'PT4', PTE: 'PTE' };
+
+function visibleRooms() {
+    return companyFilter ? rooms.filter(r => r.company === companyFilter) : rooms;
+}
+
+function renderCompanyFilter() {
+    const el = document.getElementById('sc-co-filter');
+    if (!el) return;
+    const present = new Set(rooms.map(r => r.company).filter(Boolean));
+    const cos = ['', ...['PTA','PT4','PTE'].filter(c => present.has(c))];
+    el.innerHTML = cos.map(c => `<button class="sc-co-btn${c===companyFilter?' active':''}${c?' co-'+c:''}" onclick="setCompanyFilter('${c}')">${COMPANY_LABELS[c]}</button>`).join('');
+}
+
+function setCompanyFilter(co) {
+    companyFilter = co;
+    localStorage.setItem('sc_company_filter', co);
+    renderCompanyFilter();
+    render();
+    updateBadge();
+}
+
+function stripTitle(n) {
+    return (n || '').replace(/^(Mr\.|Mrs\.|Miss|Ms\.|Dr\.|Prof\.|นาย|นาง|นางสาว)\s+/iu, '').trim();
+}
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+function ds(d)   { return `${currentYear}-${pad2(currentMonth)}-${pad2(d)}`; }
+function isWE(dateStr) { const dow=new Date(dateStr+'T00:00:00').getDay(); return dow===0||dow===6; }
+function isPH(dateStr) { return !!holidayMap[dateStr]; } // public/company holiday
+
+// ── Month nav ──────────────────────────────────────────────────
+function prevMonth(){ currentMonth--; if(currentMonth<1){currentMonth=12;currentYear--;} load(); }
+function nextMonth(){ currentMonth++; if(currentMonth>12){currentMonth=1;currentYear++;} load(); }
+function goThisMonth(){ const n=new Date(); currentMonth=n.getMonth()+1; currentYear=n.getFullYear(); load(); }
+function updateMonthLabel(){ document.getElementById('month-label').textContent=`${thMonths[currentMonth]} ${currentYear+543}`; }
+
+// ── Load ───────────────────────────────────────────────────────
+async function load() {
+    if (_loadAbort) _loadAbort.abort();
+    _loadAbort = new AbortController();
+    const sig = _loadAbort.signal;
+    updateMonthLabel();
+    document.getElementById('sc-page').innerHTML = '<div class="sc-loading"><i class="fa fa-spinner fa-spin" style="font-size:24px;color:#0f766e"></i><br>กำลังโหลด...</div>';
+    try {
+        const [res, hres] = await Promise.all([
+            fetch(`${API}?action=get_month_detail&month=${currentMonth}&year=${currentYear}`, { signal: sig }),
+            fetch(`${API}?action=get_holidays&month=${currentMonth}&year=${currentYear}`, { signal: sig }).catch(() => null)
+        ]);
+        const data = await res.json();
+        const hdata = hres && hres.ok ? await hres.json().catch(() => ({})) : {};
+        if (data.status !== 'success') return;
+        rooms       = data.rooms;
+        itemsByRoom = data.itemsByRoom;
+        vals        = data.vals     || {};
+        checkers    = data.checkers || {};
+        sugg        = data.sugg     || {};
+        monthDays   = data.days;
+        holidayMap  = hdata.map || {};
+        renderCompanyFilter();
+        render();
+        updateBadge();
+    } catch(e){ if (e?.name === 'AbortError') return; console.error(e); }
+}
+
+// ── Render accordion ───────────────────────────────────────────
+function render() {
+    const today = new Date().toISOString().slice(0,10);
+    let html = '<div class="sc-wrap">';
+    const roomsShown = visibleRooms();
+
+    if (!roomsShown.length) {
+        html += `<div class="sc-loading"><i class="fa fa-building-circle-xmark" style="font-size:22px;color:#cbd5e1"></i><br>ไม่มีห้องของบริษัทนี้</div>`;
+    }
+
+    roomsShown.forEach(room => {
+        const rid   = room.id;
+        const items = itemsByRoom[rid] || [];
+        const open  = openRooms.has(rid);
+        const stat  = roomStat(rid);
+        const statCls = stat.cls;
+        const statLbl = stat.lbl;
+        const roomCls = stat.cls === 'issue' ? 'has-issue' : stat.cls === 'ok' ? 'all-ok' : '';
+
+        html += `<div class="acc-room ${roomCls}${open?' open':''}" id="acc-${rid}">
+        <div class="acc-hd" onclick="toggleRoom(${rid})">
+            <span class="acc-code">${esc(room.code)}</span>
+            <span class="acc-name">${esc(room.name)}</span>
+            <span class="acc-stat ${statCls}">${statLbl}</span>
+            <div class="acc-actions" onclick="event.stopPropagation()">
+                <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:10px;height:26px;padding:0 8px;color:#7c3aed;border-color:#c4b5fd" onclick="bulkRoom(${rid})">
+                    <i class="fa fa-calendar-check"></i> All OK
+                </button>
+                <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:10px;height:26px;padding:0 8px;" onclick="printRoom(${rid})">
+                    <i class="fa fa-print"></i>
+                </button>
+            </div>
+            <i class="fa fa-chevron-down acc-chevron"></i>
+        </div>
+        <div class="acc-body">
+            <div class="chk-bar">
+                <i class="fa fa-user-check" style="color:#64748b"></i>
+                <span style="font-size:12px;color:#64748b;white-space:nowrap">ผู้ตรวจสอบ</span>
+                <input type="text" class="chk-bar-input" id="chk-bar-${rid}"
+                    value="${esc(Object.values(checkers[rid]||{})[0]||myName)}"
+                    placeholder="ชื่อผู้ตรวจสอบ"
+                    onkeydown="if(event.key==='Enter')applyCheckerAll(${rid})">
+                <button class="ptc-btn ptc-btn-primary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 12px;white-space:nowrap"
+                    onclick="applyCheckerAll(${rid})">
+                    <i class="fa fa-floppy-disk"></i> บันทึกทั้งเดือน
+                </button>
+            </div>
+            <div class="mtbl-wrap">${buildTable(rid, items, today)}</div>
+        </div>
+        </div>`;
+    });
+
+    html += `<div class="legend">
+        <span class="leg-item"><span class="leg-dot v-ok"></span>OK</span>
+        <span class="leg-item"><span class="leg-dot v-issue"></span>Issue</span>
+        <span class="leg-item"><span class="leg-dot v-backup"></span>Backup OK</span>
+        <span class="leg-item"><span class="leg-dot v-good"></span>ตัวเลขดี</span>
+        <span class="leg-item"><span class="leg-dot v-bad"></span>ตัวเลขต่ำ</span>
+        <span class="leg-item"><span class="leg-dot empty" style="border:1px solid #e2e8f0"></span>ยังไม่เช็ค</span>
+        <span class="leg-item"><i class="fa fa-note-sticky" style="color:#dc2626"></i>ต้องระบุหมายเหตุ (มี Issue แต่ยังไม่กรอก)</span>
+    </div></div>`;
+
+    document.getElementById('sc-page').innerHTML = html;
+}
+
+function buildTable(rid, items, today) {
+    // Precompute day metadata once — avoids new Date() × items × days
+    const dayInfo = [];
+    for (let d = 1; d <= monthDays; d++) {
+        const date = ds(d);
+        const dow  = new Date(date + 'T00:00:00').getDay();
+        dayInfo.push({ d, date, dow, we: dow===0||dow===6, ph: isPH(date), tod: date===today });
+    }
+
+    // Header
+    let thead = `<tr><th class="item-hd">รายการ</th>`;
+    for (const {d, date, dow, we, ph, tod} of dayInfo) {
+        const cls   = ph ? 'ph' : we ? 'we' : '';
+        const title = ph ? `title="${holidayMap[date]}"` : '';
+        thead += `<th class="day-hd${cls?' '+cls:''}${tod?' tod':''}" ${title}>${d}<span class="dow">${thDows[dow]}</span></th>`;
+    }
+    thead += `</tr>`;
+
+    // Item rows
+    let tbody = '';
+    items.forEach(item => {
+        const iid = item.id;
+        tbody += `<tr><td class="item-lbl">${esc(item.item_no)}. ${esc(item.label)}</td>`;
+        for (const {date, we, ph, tod} of dayInfo) {
+            const v = vals[rid]?.[date]?.[iid] ?? '';
+            if (we) {
+                tbody += `<td class="cv we${tod?' tod':''}">—</td>`;
+            } else if (ph) {
+                tbody += `<td class="cv ph${tod?' tod':''}" title="${esc(holidayMap[date])}">—</td>`;
+            } else {
+                const {cls, txt} = cellDisplay(v, item.input_type, item.threshold);
+                tbody += `<td class="cv ${cls}${tod?' tod':''}" id="cv-${rid}-${iid}-${date}"
+                    onclick="cellClick(${rid},${iid},'${date}','${esc(item.input_type)}',${item.threshold||0},this)"
+                    title="${item.label} — ${date}">${txt}</td>`;
+            }
+        }
+        tbody += `</tr>`;
+    });
+
+    // Checker row
+    tbody += `<tr><td class="item-lbl chk-lbl"><i class="fa fa-user" style="margin-right:3px"></i>ผู้ตรวจ</td>`;
+    for (const {date, we, ph, tod} of dayInfo) {
+        const name  = checkers[rid]?.[date] ?? '';
+        const short = shortName(name);
+        if (we) {
+            tbody += `<td class="cv-chk we"></td>`;
+        } else if (ph) {
+            tbody += `<td class="cv-chk ph" title="${esc(holidayMap[date])}"></td>`;
+        } else {
+            tbody += `<td class="cv-chk${short?' filled':''}" id="chk-${rid}-${date}"
+                onclick="checkerCellClick(${rid},'${date}',this)"
+                oncontextmenu="checkerCustomPopup(${rid},'${date}',this);return false;"
+                title="${name||'ยังไม่ระบุ'} (คลิกขวา = พิมพ์ชื่ออื่น)">${esc(short)}</td>`;
+        }
+    }
+    tbody += `</tr>`;
+
+    // Note row (หมายเหตุ / สาเหตุปัญหา)
+    tbody += `<tr><td class="item-lbl note-lbl"><i class="fa fa-note-sticky" style="margin-right:3px"></i>หมายเหตุ</td>`;
+    for (const {date, we, ph, tod} of dayInfo) {
+        if (we) {
+            tbody += `<td class="cv-note we"></td>`;
+        } else if (ph) {
+            tbody += `<td class="cv-note ph" title="${esc(holidayMap[date])}"></td>`;
+        } else {
+            const note = sugg[rid]?.[date] ?? '';
+            const dayVals = vals[rid]?.[date];
+            const hasIssue = dayVals ? Object.values(dayVals).includes('✖') : false;
+            const cls = note ? 'filled' : (hasIssue ? 'needs' : '');
+            tbody += `<td class="cv-note${cls?' '+cls:''}" id="note-${rid}-${date}"
+                onclick="noteClick(${rid},'${date}',this)"
+                title="${note?esc(note):'ไม่มีหมายเหตุ'}"><i class="fa fa-note-sticky"></i></td>`;
+        }
+    }
+    tbody += `</tr>`;
+
+    return `<table class="mtbl"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
+}
+
+function cellDisplay(v, type, threshold) {
+    if (v === '' || v === null || v === undefined) return { cls: 'empty', txt: '' };
+    if (type === 'status') {
+        if (v === '###') return { cls: 'v-ok',    txt: '✓' };
+        if (v === '✖')   return { cls: 'v-issue', txt: '✗' };
+        return { cls: 'empty', txt: '' };
+    }
+    if (type === 'backup') {
+        if (v === 'O')  return { cls: 'v-backup', txt: 'O' };
+        if (v === '✖')  return { cls: 'v-issue',  txt: '✗' };
+        return { cls: 'empty', txt: '' };
+    }
+    if (type === 'percent') {
+        const n = parseFloat(v);
+        if (isNaN(n)) return { cls: 'empty', txt: '' };
+        return { cls: n >= 90 ? 'v-good' : n >= 70 ? 'v-med' : 'v-bad', txt: n + '%' };
+    }
+    if (type === 'days') {
+        const n = parseFloat(v);
+        if (isNaN(n)) return { cls: 'empty', txt: '' };
+        const ok = threshold ? n >= threshold : n > 0;
+        return { cls: ok ? 'v-good' : 'v-bad', txt: String(n) };
+    }
+    return { cls: 'empty', txt: v };
+}
+
+// ── Toggle room accordion ──────────────────────────────────────
+function toggleRoom(rid) {
+    const el = document.getElementById('acc-' + rid);
+    if (!el) return;
+    if (openRooms.has(rid)) {
+        openRooms.delete(rid);
+        el.classList.remove('open');
+    } else {
+        openRooms.add(rid);
+        el.classList.add('open');
+    }
+}
+
+// ── Cell click ─────────────────────────────────────────────────
+function cellClick(rid, iid, date, type, threshold, el) {
+    closeActiveInput();
+    if (type === 'status' || type === 'backup') {
+        // Cycle: empty → ok → issue → empty
+        const cur = vals[rid]?.[date]?.[iid] ?? '';
+        let next;
+        if (type === 'status')  next = cur==='' ? '###' : cur==='###' ? '✖' : '';
+        if (type === 'backup')  next = cur==='' ? 'O'   : cur==='O'   ? '✖' : '';
+        setVal(rid, iid, date, next, el, type, threshold);
+    } else if (type === 'percent') {
+        // Cycle: empty → 100 → 50 → 0 → empty
+        const cur = vals[rid]?.[date]?.[iid] ?? '';
+        const next = cur === '' ? '100' : cur === '100' ? '50' : cur === '50' ? '0' : '';
+        setVal(rid, iid, date, next, el, type, threshold);
+    } else {
+        // days → floating input
+        showNumInput(rid, iid, date, type, threshold, el);
+    }
+}
+
+function setVal(rid, iid, date, val, el, type, threshold) {
+    if (!vals[rid])        vals[rid] = {};
+    if (!vals[rid][date])  vals[rid][date] = {};
+    vals[rid][date][iid] = val;
+
+    const {cls, txt} = cellDisplay(val, type, threshold);
+    el.className = `cv ${cls}${date === new Date().toISOString().slice(0,10) ? ' tod' : ''}`;
+    el.textContent = txt;
+
+    markDirty(rid, date);
+    updateRoomStat(rid);
+    updateBadge();
+    updateNoteCue(rid, date);
+}
+
+function updateNoteCue(rid, date) {
+    const noteEl = document.getElementById(`note-${rid}-${date}`);
+    if (!noteEl || noteEl.classList.contains('filled')) return; // already has a note, leave as-is
+    const dayVals  = vals[rid]?.[date];
+    const hasIssue = dayVals ? Object.values(dayVals).includes('✖') : false;
+    noteEl.classList.toggle('needs', hasIssue);
+}
+
+// ── Floating number input ──────────────────────────────────────
+function showNumInput(rid, iid, date, type, threshold, el) {
+    const cur = vals[rid]?.[date]?.[iid] ?? '';
+    const rect = el.getBoundingClientRect();
+    const suffix = type === 'percent' ? '%' : 'วัน';
+    const lbl    = type === 'percent' ? `% Online (≥90)` : `จำนวนวัน (≥${threshold||0})`;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'cell-input-wrap';
+    wrap.innerHTML = `<span class="ci-label">${lbl}</span>
+        <div class="ci-row">
+            <input type="number" min="0" ${type==='percent'?'max="100"':''} value="${esc(String(cur))}" placeholder="0">
+            <button type="button" class="ci-clear" title="ลบค่า">×</button>
+        </div>`;
+    wrap.style.cssText = `left:${Math.min(rect.left, window.innerWidth-160)}px;top:${rect.bottom+4}px;`;
+    document.body.appendChild(wrap);
+    activeInput = wrap;
+
+    const inp = wrap.querySelector('input');
+    const clearBtn = wrap.querySelector('.ci-clear');
+    inp.focus(); inp.select();
+
+    let cleared = false;
+    const commit = () => {
+        const v = cleared ? '' : inp.value.trim();
+        setVal(rid, iid, date, v, el, type, threshold);
+        closeActiveInput();
+    };
+    clearBtn.addEventListener('click', () => { cleared = true; commit(); });
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') commit(); if(e.key==='Escape') closeActiveInput(); });
+    setTimeout(() => document.addEventListener('click', function outsideClick(ev) {
+        if (!wrap.contains(ev.target)) { commit(); document.removeEventListener('click', outsideClick); }
+    }), 50);
+}
+
+function closeActiveInput() {
+    if (activeInput) { activeInput.remove(); activeInput = null; }
+}
+
+// ── Checker name ───────────────────────────────────────────────
+function shortName(name) {
+    const _p = name ? name.trim().split(/\s+/) : [];
+    return _p.length > 1 && _p[0].endsWith('.') ? _p[1] : (_p[0] || '');
+}
+
+// Click: toggle เป็นชื่อฉัน / ว่าง (แบบเดียวกับสถานะช่องอื่น)
+function checkerCellClick(rid, date, el) {
+    closeActiveInput();
+    const cur  = checkers[rid]?.[date] ?? '';
+    const next = cur === myName ? '' : myName;
+    if (!checkers[rid]) checkers[rid] = {};
+    checkers[rid][date] = next;
+    const short = shortName(next);
+    el.textContent = short;
+    el.className = `cv-chk${short?' filled':''}`;
+    el.title = (next || 'ยังไม่ระบุ') + ' (คลิกขวา = พิมพ์ชื่ออื่น)';
+    markDirty(rid, date);
+}
+
+// Right-click: เปิดช่องพิมพ์ชื่ออื่น (กรณีคนอื่นเป็นผู้ตรวจแทน)
+function checkerCustomPopup(rid, date, el) {
+    closeActiveInput();
+    const cur = checkers[rid]?.[date] ?? '';
+    const rect = el.getBoundingClientRect();
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chk-popup';
+    wrap.innerHTML = `<span class="ci-label"><i class="fa fa-user"></i> ผู้ตรวจสอบ</span>
+        <input type="text" value="${esc(cur || myName)}" placeholder="ชื่อผู้ตรวจ">`;
+    wrap.style.cssText = `left:${Math.min(rect.left, window.innerWidth-180)}px;top:${rect.bottom+4}px;`;
+    document.body.appendChild(wrap);
+    activeInput = wrap;
+
+    const inp = wrap.querySelector('input');
+    inp.focus(); inp.select();
+
+    const commit = () => {
+        const v = stripTitle(inp.value.trim());
+        if (!checkers[rid]) checkers[rid] = {};
+        checkers[rid][date] = v;
+        el.textContent = v;
+        el.className = `cv-chk${v?' filled':''}`;
+        el.title = v || 'ยังไม่ระบุ';
+        markDirty(rid, date);
+        closeActiveInput();
+    };
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') commit(); if(e.key==='Escape') closeActiveInput(); });
+    setTimeout(() => document.addEventListener('click', function outsideClick(ev) {
+        if (!wrap.contains(ev.target)) { commit(); document.removeEventListener('click', outsideClick); }
+    }), 50);
+}
+
+// ── Note / suggestions (หมายเหตุ, สาเหตุปัญหา) ──────────────────
+function noteClick(rid, date, el) {
+    closeActiveInput();
+    const cur = sugg[rid]?.[date] ?? '';
+    const rect = el.getBoundingClientRect();
+
+    const wrap = document.createElement('div');
+    wrap.className = 'chk-popup';
+    wrap.innerHTML = `<span class="ci-label"><i class="fa fa-note-sticky"></i> หมายเหตุ / สาเหตุปัญหา</span>
+        <textarea rows="3" placeholder="พิมพ์หมายเหตุ...">${esc(cur)}</textarea>
+        <button type="button" class="note-save-btn">บันทึก</button>`;
+    wrap.style.cssText = `left:${Math.min(rect.left, window.innerWidth-230)}px;top:${rect.bottom+4}px;`;
+    document.body.appendChild(wrap);
+    activeInput = wrap;
+
+    const ta = wrap.querySelector('textarea');
+    ta.focus();
+
+    const commit = () => {
+        const v = ta.value.trim();
+        if (!sugg[rid]) sugg[rid] = {};
+        sugg[rid][date] = v;
+        const dayVals  = vals[rid]?.[date];
+        const hasIssue = dayVals ? Object.values(dayVals).includes('✖') : false;
+        el.className = `cv-note${v ? ' filled' : (hasIssue ? ' needs' : '')}`;
+        el.title = v || 'ไม่มีหมายเหตุ';
+        markDirty(rid, date);
+        closeActiveInput();
+    };
+    wrap.querySelector('.note-save-btn').addEventListener('click', commit);
+    ta.addEventListener('keydown', e => { if(e.key==='Escape') closeActiveInput(); });
+    setTimeout(() => document.addEventListener('click', function outsideClick(ev) {
+        if (!wrap.contains(ev.target)) { commit(); document.removeEventListener('click', outsideClick); }
+    }), 50);
+}
+
+// ── Apply checker name to all weekdays in month ────────────────
+function applyCheckerAll(rid) {
+    const inp = document.getElementById(`chk-bar-${rid}`);
+    if (!inp) return;
+    const name = stripTitle(inp.value.trim());
+    if (!name) { inp.focus(); return; }
+
+    const from = new Date(currentYear, currentMonth - 1, 1);
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    if (!checkers[rid]) checkers[rid] = {};
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const date = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dow  = new Date(date + 'T00:00:00').getDay();
+        if (dow === 0 || dow === 6) continue; // skip weekends
+        if (isPH(date)) continue;             // skip holidays
+        checkers[rid][date] = name;
+
+        // update cell in DOM if rendered
+        const el = document.getElementById(`chk-${rid}-${date}`);
+        if (el) {
+            el.textContent = name;
+            el.className = 'cv-chk filled';
+            el.title = name;
+        }
+        markDirty(rid, date);
+    }
+    inp.value = name;
+}
+
+// ── Dirty / save ───────────────────────────────────────────────
+function markDirty(rid, date) {
+    const k = `${rid}:${date}`;
+    dirty[k] = true;
+    clearTimeout(saveTimers[k]);
+    saveTimers[k] = setTimeout(() => saveCell(rid, date), 1800);
+}
+
+async function saveCell(rid, date) {
+    const k = `${rid}:${date}`;
+    if (!dirty[k]) return;
+    dirty[k] = false;
+
+    const fd = new FormData();
+    fd.append('action',      'save_check');
+    fd.append('room_id',     rid);
+    fd.append('check_date',  date);
+    fd.append('checked_by',  checkers[rid]?.[date] ?? '');
+    fd.append('suggestions', sugg[rid]?.[date] ?? '');
+    fd.append('values',      JSON.stringify(vals[rid]?.[date] ?? {}));
+
+    try {
+        const res  = await fetch(API, { method:'POST', body:fd });
+        const data = await res.json();
+        if (data.status !== 'success') dirty[k] = true; // retry on next change
+    } catch(e) { dirty[k] = true; }
+}
+
+// ── Bulk fill room ─────────────────────────────────────────────
+async function bulkRoom(rid) {
+    const room = rooms.find(r => r.id == rid);
+    if (!confirm(`All OK ทั้งเดือน: ${room?.code} — ${thMSh[currentMonth]} ${currentYear+543}\n\nจะ mark ✓ ทุกรายการ ทุกวันจันทร์–ศุกร์\nลบข้อมูลวันเสาร์–อาทิตย์อัตโนมัติ\n\nยืนยัน?`)) return;
+
+    const fd = new FormData();
+    fd.append('action',  'bulk_fill');
+    fd.append('room_id', rid);
+    fd.append('month',   currentMonth);
+    fd.append('year',    currentYear);
+    fd.append('mode',    'all');
+
+    try {
+        const res  = await fetch(API, { method:'POST', body:fd });
+        const data = await res.json();
+        if (data.status === 'success') {
+            // Reload just this room's data
+            await reloadRoom(rid);
+        } else {
+            alert('เกิดข้อผิดพลาด: ' + (data.message || ''));
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function reloadRoom(rid) {
+    const res  = await fetch(`${API}?action=get_month_detail&month=${currentMonth}&year=${currentYear}`);
+    const data = await res.json();
+    if (data.status !== 'success') return;
+    // Merge updated data for this room
+    vals[rid]     = data.vals?.[rid]     || {};
+    checkers[rid] = data.checkers?.[rid] || {};
+    sugg[rid]     = data.sugg?.[rid]     || {};
+    // Re-render room body
+    const room  = rooms.find(r => r.id == rid);
+    const items = itemsByRoom[rid] || [];
+    const today = new Date().toISOString().slice(0,10);
+    const bodyEl = document.querySelector(`#acc-${rid} .mtbl-wrap`);
+    if (bodyEl) bodyEl.innerHTML = buildTable(rid, items, today);
+    updateRoomStat(rid);
+    updateBadge();
+}
+
+// ── Print ──────────────────────────────────────────────────────
+function printRoom(rid) {
+    window.open(`server_check_print.php?room_id=${rid}&month=${currentMonth}&year=${currentYear}`, '_blank');
+}
+
+// ── Stats ──────────────────────────────────────────────────────
+function roomStat(rid) {
+    const items = itemsByRoom[rid] || [];
+    const total = items.length;
+    if (total === 0) return { cls: 'empty', lbl: 'ไม่มีรายการ' };
+
+    let daysOk = 0, daysIssue = 0, daysTotal = 0;
+    for (let d = 1; d <= monthDays; d++) {
+        const date = ds(d);
+        if (isWE(date)) continue;
+        daysTotal++;
+        const dayVals = vals[rid]?.[date];
+        if (!dayVals) continue;
+        const vArr = Object.values(dayVals);
+        if (vArr.includes('✖')) daysIssue++;
+        else if (vArr.length >= total) daysOk++;
+    }
+    if (daysIssue > 0) return { cls: 'issue',   lbl: `${daysIssue} วัน ⚠` };
+    if (daysOk === daysTotal && daysTotal > 0) return { cls: 'ok',   lbl: `${daysOk}/${daysTotal} วัน ✓` };
+    if (daysOk > 0)          return { cls: 'partial', lbl: `${daysOk}/${daysTotal} วัน` };
+    return { cls: 'empty', lbl: 'ยังไม่เช็ค' };
+}
+
+function updateRoomStat(rid) {
+    const stat    = roomStat(rid);
+    const statEl  = document.querySelector(`#acc-${rid} .acc-stat`);
+    const roomEl  = document.getElementById('acc-' + rid);
+    if (statEl) { statEl.className = `acc-stat ${stat.cls}`; statEl.textContent = stat.lbl; }
+    if (roomEl) {
+        roomEl.classList.remove('has-issue','all-ok');
+        if (stat.cls === 'issue') roomEl.classList.add('has-issue');
+        if (stat.cls === 'ok')    roomEl.classList.add('all-ok');
+    }
+}
+
+function updateBadge() {
+    const today = new Date().toISOString().slice(0,10);
+    const el = document.getElementById('overall-badge');
+    const txt = document.getElementById('overall-text');
+    if (!el) return;
+
+    const now = new Date();
+    const roomsShown = visibleRooms();
+    if (currentMonth === now.getMonth()+1 && currentYear === now.getFullYear() && !isWE(today)) {
+        // Today: how many rooms done
+        let done = 0;
+        roomsShown.forEach(r => {
+            const items = itemsByRoom[r.id] || [];
+            const dayVals = vals[r.id]?.[today];
+            if (dayVals && Object.values(dayVals).filter(v=>v&&v!=='').length >= items.length) done++;
+        });
+        txt.textContent = `วันนี้ ${done}/${roomsShown.length} ห้อง`;
+        el.className = 'sc-badge' + (done === roomsShown.length && roomsShown.length > 0 ? ' done' : '');
+    } else {
+        // Month total
+        let total = 0, ok = 0;
+        roomsShown.forEach(r => {
+            const items = itemsByRoom[r.id] || [];
+            for (let d=1; d<=monthDays; d++) {
+                const date = ds(d);
+                if (isWE(date)) continue;
+                total++;
+                const dv = vals[r.id]?.[date];
+                if (dv && Object.values(dv).filter(v=>v&&v!=='').length >= items.length) ok++;
+            }
+        });
+        txt.textContent = `${ok}/${total} ช่อง`;
+        el.className = 'sc-badge' + (total > 0 && ok === total ? ' done' : '');
+    }
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── TV MODE (wall-monitor view) ─────────────────────────────────
+const TV_CYCLE_MS   = 4500;  // how long each page stays on screen (not used yet — rooms list here is small, kept for future growth)
+const TV_REFRESH_MS = 60000; // how often to re-pull today's check data while on the wall
+let tvActive = false;
+let tvClockInterval  = null;
+let tvRefreshInterval = null;
+let tvCompanyFilter  = null; // null = every company; 'PTA' etc = single-site screen
+
+function enterTvMode(companyCode) {
+    tvCompanyFilter = companyCode || null;
+    tvActive = true;
+    document.getElementById('tv-view').classList.add('active');
+    document.getElementById('tv-panels').classList.toggle('tv-single', !!tvCompanyFilter);
+    renderTvView();
+    tickTvClock();
+    tvClockInterval = setInterval(tickTvClock, 1000);
+    tvRefreshInterval = setInterval(async () => { await load(); renderTvView(); }, TV_REFRESH_MS);
+    document.addEventListener('keydown', tvKeyHandler);
+}
+
+function exitTvMode() {
+    tvActive = false;
+    document.getElementById('tv-view').classList.remove('active');
+    clearInterval(tvClockInterval);   tvClockInterval   = null;
+    clearInterval(tvRefreshInterval); tvRefreshInterval = null;
+    document.removeEventListener('keydown', tvKeyHandler);
+}
+
+function tvKeyHandler(e){ if (e.key === 'Escape') exitTvMode(); }
+
+function tickTvClock(){
+    const now = new Date();
+    const clockEl = document.getElementById('tv-clock');
+    const dateEl  = document.getElementById('tv-date');
+    if (clockEl) clockEl.textContent =
+        [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('th-TH', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+// Today's checklist completion for one room — not a live ping like IT Links,
+// this is "has today's manual inspection been done, and did it find anything wrong".
+function roomTodayStat(rid) {
+    const items = itemsByRoom[rid] || [];
+    const total = items.length;
+    const today = new Date().toISOString().slice(0,10);
+    const closed = isWE(today) || isPH(today);
+    const dayVals = vals[rid]?.[today] || {};
+    const filled = Object.values(dayVals).filter(v => v !== '' && v != null).length;
+    const hasIssue = Object.values(dayVals).includes('✖');
+    const checker = checkers[rid]?.[today] || '';
+    return { total, filled, hasIssue, closed, checker };
+}
+
+function renderTvView() {
+    const scopedRooms = tvCompanyFilter
+        ? rooms.filter(r => (r.company || '').toUpperCase() === tvCompanyFilter.toUpperCase())
+        : rooms;
+
+    // ── Overall status banner (reflects only what's on THIS screen) ──
+    const banner     = document.getElementById('tv-banner');
+    const bannerText = document.getElementById('tv-banner-text');
+    const bannerSub  = document.getElementById('tv-banner-sub');
+    banner.className = 'tv-banner';
+
+    const checkableRooms = scopedRooms.filter(r => !roomTodayStat(r.id).closed && (itemsByRoom[r.id]||[]).length);
+    const issueRooms   = checkableRooms.filter(r => roomTodayStat(r.id).hasIssue);
+    const pendingRooms = checkableRooms.filter(r => { const s = roomTodayStat(r.id); return !s.hasIssue && s.filled < s.total; });
+
+    if (issueRooms.length > 0) {
+        banner.classList.add('crit');
+        bannerText.textContent = issueRooms.length === 1 ? '1 ROOM WITH ISSUES' : `${issueRooms.length} ROOMS WITH ISSUES`;
+        const r0 = issueRooms[0];
+        bannerSub.textContent = tvCompanyFilter ? `${r0.code} — ${r0.name}` : `${r0.company} · ${r0.code} — ${r0.name}`;
+    } else if (!checkableRooms.length) {
+        banner.classList.add('neutral');
+        bannerText.textContent = 'ไม่มีรายการเช็ควันนี้';
+        bannerSub.textContent = 'วันหยุด / ไม่มีห้องที่ต้องเช็ค';
+    } else if (pendingRooms.length > 0) {
+        banner.classList.add('warn');
+        bannerText.textContent = 'CHECKING…';
+        bannerSub.textContent = `${checkableRooms.length - pendingRooms.length}/${checkableRooms.length} ROOMS`;
+    } else {
+        banner.classList.add('ok');
+        bannerText.textContent = 'ALL ROOMS CHECKED — NO ISSUES';
+        bannerSub.textContent = `${checkableRooms.length} rooms`;
+    }
+
+    // ── Company panels ──
+    const panelsEl = document.getElementById('tv-panels');
+    panelsEl.innerHTML = '';
+
+    const companyCodes = tvCompanyFilter
+        ? [...new Set(scopedRooms.map(r => r.company))]
+        : [...new Set(rooms.map(r => r.company))];
+
+    if (!companyCodes.length) {
+        panelsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--tv-text-faint);font-family:var(--tv-mono)">
+            ไม่พบบริษัทรหัส "${esc(tvCompanyFilter)}"</div>`;
+        document.getElementById('tv-last-updated').textContent = new Date().toLocaleTimeString('th-TH');
+        return;
+    }
+
+    companyCodes.forEach(code => {
+        const companyRooms = rooms.filter(r => r.company === code);
+        let okCount = 0, issueCount = 0, pendCount = 0;
+        companyRooms.forEach(r => {
+            const s = roomTodayStat(r.id);
+            if (s.closed || !(itemsByRoom[r.id]||[]).length) return;
+            if (s.hasIssue) issueCount++;
+            else if (s.filled >= s.total) okCount++;
+            else pendCount++;
+        });
+
+        const roomsHtml = companyRooms.map(r => {
+            const s = roomTodayStat(r.id);
+            let cls, label;
+            if (s.closed || !(itemsByRoom[r.id]||[]).length) { cls = 'closed'; label = 'ปิด'; }
+            else if (s.hasIssue) { cls = 'issue'; label = 'พบปัญหา'; }
+            else if (s.filled >= s.total) { cls = 'ok'; label = 'เช็คแล้ว'; }
+            else { cls = 'pending'; label = `${s.filled}/${s.total}`; }
+            return `<div class="tv-room ${cls}">
+                <div class="tv-room-icon"><i class="fa fa-server"></i></div>
+                <div class="tv-room-body"><div class="tv-room-name">${esc(r.code)} — ${esc(r.name)}</div><div class="tv-room-sub">${s.checker ? esc(s.checker) : (s.closed ? 'วันหยุด' : 'ยังไม่มีผู้ตรวจ')}</div></div>
+                <div class="tv-room-status"><span class="tv-room-status-label">${label}</span><span class="tv-lamp-big"></span></div>
+            </div>`;
+        }).join('');
+
+        const tallyHtml =
+            (okCount    ? `<div class="tv-tchip c-ok"><span class="lamp"></span>${okCount}</div>` : '') +
+            (issueCount ? `<div class="tv-tchip c-crit"><span class="lamp"></span>${issueCount}</div>` : '') +
+            (pendCount  ? `<div class="tv-tchip c-warn"><span class="lamp"></span>${pendCount}</div>` : '');
+
+        const companyName = COMPANY_LABELS[code] || code;
+        const panelEl = document.createElement('div');
+        panelEl.className = 'tv-panel';
+        panelEl.innerHTML = `
+            <div class="tv-panel-head">
+                <div>
+                    <div class="tv-panel-code">${esc(code)}</div>
+                    <div class="tv-panel-name">${esc(companyName)}</div>
+                </div>
+                <div class="tv-panel-tally">${tallyHtml}</div>
+            </div>
+            <div class="tv-rooms">${roomsHtml || '<div style="padding:24px;text-align:center;color:var(--tv-text-faint);font-size:12px">ไม่มีห้อง</div>'}</div>
+        `;
+        panelsEl.appendChild(panelEl);
+    });
+
+    document.getElementById('tv-last-updated').textContent = new Date().toLocaleTimeString('th-TH');
+}
+
+// ── Init ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    const updateIcon = () => {
+        document.getElementById('theme-icon').className =
+            document.documentElement.classList.contains('dark') ? 'fa fa-moon' : 'fa fa-sun';
+    };
+    updateIcon();
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('dark-theme');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+    });
+
+    fetch('api.php?action=check_session').then(r=>r.json()).then(s=>{
+        if (!s.loggedin) { window.location.href='login.html?returnUrl=server_check.html'; return; }
+        myName = stripTitle(s.display_name || s.username || '');
+    });
+
+    const p = new URLSearchParams(location.search);
+    if (p.get('month')) currentMonth = parseInt(p.get('month'));
+    if (p.get('year'))  currentYear  = parseInt(p.get('year'));
+    if (p.get('date')) {
+        const d = new Date(p.get('date')+'T00:00:00');
+        currentMonth = d.getMonth()+1; currentYear = d.getFullYear();
+    }
+
+    updateMonthLabel();
+    await load();
+
+    if (p.get('tv') === '1') enterTvMode(p.get('company'));
+});
+</script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่าระบบ IT Support - Powertech System</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="manifest" href="app-manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <script src="js/pwa.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .frm { width:100%; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s; }
+        .frm:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+        .lbl { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:5px; }
+        .section-title { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; padding:0 0 8px; border-bottom:1px solid #f1f5f9; margin-bottom:16px; }
+        /* ── Nav User Chip ── */
+        #nav-user-area{display:flex;align-items:center;flex-shrink:0;position:relative}
+        .nav-user-chip{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;position:relative;transition:background .15s,border-color .15s;user-select:none}
+        .nav-user-chip:hover{background:#f1f5f9;border-color:#cbd5e1}
+        html.dark .nav-user-chip{background:#1e293b;border-color:#334155}
+        html.dark .nav-user-chip:hover{background:#263348}
+        .nav-user-avatar{width:28px;height:28px;border-radius:50%;background:#2563eb;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.5px}
+        .nav-user-info{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+        .nav-user-name{font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+        html.dark .nav-user-name{color:#f1f5f9}
+        .nav-user-role{font-size:10px;color:#64748b;white-space:nowrap}
+        html.dark .nav-user-role{color:#94a3b8}
+        .nav-user-chevron{font-size:9px;color:#94a3b8;transition:transform .2s;flex-shrink:0}
+        .nav-user-chip.open .nav-user-chevron{transform:rotate(180deg)}
+        .nav-user-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:180px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.12);padding:6px;z-index:500;animation:navDropIn .15s ease}
+        .nav-user-dropdown.open{display:block}
+        html.dark .nav-user-dropdown{background:#1e293b;border-color:#334155;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+        @keyframes navDropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+        .nav-ud-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;border:none;background:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;font-family:inherit;transition:background .12s;text-align:left}
+        .nav-ud-item:hover{background:#f1f5f9}
+        html.dark .nav-ud-item{color:#cbd5e1}
+        html.dark .nav-ud-item:hover{background:#263348}
+        .nav-ud-logout{color:#dc2626!important;font-weight:600}
+        .nav-ud-logout:hover{background:#fef2f2!important}
+        html.dark .nav-ud-logout:hover{background:#450a0a!important}
+        .nav-ud-divider{height:1px;background:#f1f5f9;margin:4px 6px}
+        html.dark .nav-ud-divider{background:#334155}
+    </style>
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans ptc-unified-v1" data-page="settings_system">
+    <div class="flex h-screen">
+        <!-- Shared Sidebar -->
+        <aside id="ptc-sidebar"></aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 justify-between">
+                <h1 class="text-xl font-bold text-slate-700">ตั้งค่าระบบ IT Support</h1>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <a href="admin.html" class="text-slate-500 hover:text-blue-600 text-sm"><i class="fas fa-arrow-left mr-2"></i>กลับ Admin</a>
+                    <div id="nav-user-area"></div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                <div class="max-w-2xl mx-auto space-y-6">
+
+                    <!-- Contact Info Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-headset text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-slate-800">ข้อมูลติดต่อทีม IT</h2>
+                                <p class="text-xs text-slate-400">แสดงในหน้าแจ้งซ่อม เพื่อให้ user ติดต่อได้</p>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <label class="lbl"><i class="fas fa-phone text-purple-400 mr-1"></i>เบอร์โทรศัพท์ / ต่อภายใน</label>
+                                <input type="text" id="it-phone" class="frm" placeholder="เช่น ต่อภายใน 1234 หรือ 081-234-5678">
+                            </div>
+                            <div>
+                                <label class="lbl"><i class="fab fa-line text-green-500 mr-1"></i>LINE ID ทีม IT (แสดงเป็นข้อความ)</label>
+                                <input type="text" id="it-line" class="frm" placeholder="เช่น @PTCITSupport">
+                                <p class="text-xs text-slate-400 mt-1">ข้อความ LINE ID แสดงในหน้าแจ้งซ่อม — ไม่ใช่ URL</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SLA Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                                <i class="fas fa-clock text-green-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-slate-800">เวลาตอบสนอง (SLA)</h2>
+                                <p class="text-xs text-slate-400">แสดงในหน้าแจ้งซ่อม เป็นข้อมูลอ้างอิงสำหรับ user</p>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
+                                    <span style="font-size:12.5px;font-weight:600;color:#374151;">ทั่วไป</span>
+                                    <input type="text" id="sla-normal" class="frm" placeholder="เช่น ภายใน 4 ชม. (วันทำการ)">
+                                </div>
+                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
+                                    <span style="font-size:12.5px;font-weight:600;color:#d97706;">เร่งด่วน</span>
+                                    <input type="text" id="sla-urgent" class="frm" placeholder="เช่น ภายใน 2 ชม.">
+                                </div>
+                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
+                                    <span style="font-size:12.5px;font-weight:600;color:#dc2626;">ด่วนที่สุด</span>
+                                    <input type="text" id="sla-critical" class="frm" placeholder="เช่น ภายใน 30 นาที">
+                                </div>
+                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
+                                    <span style="font-size:12.5px;font-weight:600;color:#64748b;">เวลาทำการ</span>
+                                    <input type="text" id="sla-hours" class="frm" placeholder="เช่น จ.–ศ. 08:00–17:30">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Scan URL Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
+                                <i class="fas fa-qrcode text-sky-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-slate-800">ตั้งค่า QR Code พัสดุ</h2>
+                                <p class="text-xs text-slate-400">URL ที่ใช้สร้าง QR บนสติ๊กเกอร์พัสดุ — ใช้ 2 URL เผื่อเชื่อมต่อนอก WiFi</p>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <label class="lbl"><i class="fas fa-wifi text-sky-500 mr-1"></i>URL หลัก (WiFi / ในสำนักงาน)</label>
+                                <input type="text" id="scan-url-primary" class="frm" placeholder="เช่น http://192.168.0.2/PowertechCenter">
+                                <p class="text-xs text-slate-400 mt-1">ใช้เมื่อเชื่อมต่อ WiFi ภายในองค์กร (เร็วกว่า)</p>
+                            </div>
+                            <div>
+                                <label class="lbl"><i class="fas fa-globe text-indigo-500 mr-1"></i>URL สำรอง (อินเทอร์เน็ต)</label>
+                                <input type="text" id="scan-url-backup" class="frm" placeholder="เช่น https://powertecha.myqnapcloud.com:8081/PowertechCenter">
+                                <p class="text-xs text-slate-400 mt-1">ใช้เมื่อสแกนจากนอกสำนักงาน — QR บนสติ๊กเกอร์จะมี 2 QR โดยอัตโนมัติ</p>
+                            </div>
+                            <div>
+                                <label class="lbl"><i class="fab fa-line text-green-500 mr-1"></i>LINE กลุ่ม IT Support (URL สำหรับปุ่มเปิด LINE)</label>
+                                <input type="text" id="scan-line-group" class="frm" placeholder="เช่น https://line.me/ti/g2/xxxxx">
+                                <p class="text-xs text-slate-400 mt-1">URL ที่ใช้เปิดกลุ่ม LINE โดยตรง — แสดงเป็นปุ่ม "เปิด LINE กลุ่ม IT" ในหน้าสแกน QR พัสดุ</p>
+                            </div>
+                            <div class="bg-sky-50 rounded-xl p-3 flex gap-2" style="font-size:12px;color:#0369a1">
+                                <i class="fas fa-circle-info mt-0.5 flex-shrink-0"></i>
+                                <span>ค่าเหล่านี้จะมีผลทันทีกับการพิมพ์ Label ใหม่ และหน้า <b>scan.php</b> ที่ผู้ใช้เปิดจาก QR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LINE QR Code Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#dcfce7">
+                                <i class="fab fa-line" style="color:#16a34a;font-size:18px"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-slate-800">LINE QR Code ประจำบริษัท</h2>
+                                <p class="text-xs text-slate-400">URL ของรูป QR LINE แต่ละบริษัท — ใช้พิมพ์ลงสติ๊กเกอร์พัสดุและหน้าอื่นๆ</p>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-5">
+                            <!-- PTE -->
+                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
+                                <div class="flex items-center gap-2"><span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PTE</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech Energy</span></div>
+                                <div>
+                                    <label class="lbl">URL รูป QR LINE</label>
+                                    <div class="flex gap-3 items-start">
+                                        <input type="text" id="line-qr-pte" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_BW.png?oat_content=qr" oninput="previewQR('pte',this.value)">
+                                        <div id="preview-pte" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
+                                            <i class="fab fa-line text-slate-300 text-xl"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
+                                    <input type="text" id="line-id-pte" class="frm" placeholder="เช่น @PTCITSupport-PTE">
+                                </div>
+                            </div>
+                            <!-- PT4 -->
+                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
+                                <div class="flex items-center gap-2"><span style="background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PT4</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech 2004</span></div>
+                                <div>
+                                    <label class="lbl">URL รูป QR LINE</label>
+                                    <div class="flex gap-3 items-start">
+                                        <input type="text" id="line-qr-pt4" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_GW.png?oat_content=qr" oninput="previewQR('pt4',this.value)">
+                                        <div id="preview-pt4" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
+                                            <i class="fab fa-line text-slate-300 text-xl"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
+                                    <input type="text" id="line-id-pt4" class="frm" placeholder="เช่น @PTCITSupport-PT4">
+                                </div>
+                            </div>
+                            <!-- PTA -->
+                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
+                                <div class="flex items-center gap-2"><span style="background:#fce7f3;color:#9d174d;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PTA</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech Assembly</span></div>
+                                <div>
+                                    <label class="lbl">URL รูป QR LINE</label>
+                                    <div class="flex gap-3 items-start">
+                                        <input type="text" id="line-qr-pta" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_GW.png?oat_content=qr" oninput="previewQR('pta',this.value)">
+                                        <div id="preview-pta" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
+                                            <i class="fab fa-line text-slate-300 text-xl"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
+                                    <input type="text" id="line-id-pta" class="frm" placeholder="เช่น @PTCITSupport-PTA">
+                                </div>
+                            </div>
+                            <div class="bg-green-50 rounded-xl p-3 flex gap-2" style="font-size:12px;color:#15803d">
+                                <i class="fab fa-line mt-0.5 flex-shrink-0"></i>
+                                <span>วาง URL จาก LINE Official Account Manager → QR Code → คลิกขวา "Copy image address" แล้ว paste ที่นี่</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="flex justify-end">
+                        <button onclick="saveSettings()" id="save-btn" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+                            <i class="fas fa-save"></i> บันทึกการตั้งค่า
+                        </button>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        async function loadSettings() {
+            try {
+                const [r1, r2] = await Promise.all([
+                    fetch('api.php?action=get_it_support_settings'),
+                    fetch('api.php?action=get_scan_settings'),
+                ]);
+                const d1 = await r1.json();
+                const d2 = await r2.json();
+                if (d1.status === 'success') {
+                    document.getElementById('it-phone').value     = d1.phone        || '';
+                    document.getElementById('it-line').value      = d1.line         || '';
+                    document.getElementById('sla-normal').value   = d1.sla_normal   || '';
+                    document.getElementById('sla-urgent').value   = d1.sla_urgent   || '';
+                    document.getElementById('sla-critical').value = d1.sla_critical || '';
+                    document.getElementById('sla-hours').value    = d1.sla_hours    || '';
+                }
+                if (d2.status === 'success') {
+                    document.getElementById('scan-url-primary').value = d2.primary_url    || '';
+                    document.getElementById('scan-url-backup').value  = d2.backup_url     || '';
+                    document.getElementById('scan-line-group').value  = d2.line_group_url || '';
+                    document.getElementById('line-qr-pte').value      = extractUrl(d2.line_qr_pte || '');
+                    document.getElementById('line-qr-pt4').value      = extractUrl(d2.line_qr_pt4 || '');
+                    document.getElementById('line-qr-pta').value      = extractUrl(d2.line_qr_pta || '');
+                    document.getElementById('line-id-pte').value      = d2.line_id_pte    || '';
+                    document.getElementById('line-id-pt4').value      = d2.line_id_pt4    || '';
+                    document.getElementById('line-id-pta').value      = d2.line_id_pta    || '';
+                    previewQR('pte', d2.line_qr_pte || '');
+                    previewQR('pt4', d2.line_qr_pt4 || '');
+                    previewQR('pta', d2.line_qr_pta || '');
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function saveSettings() {
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+            try {
+                const fd1 = new FormData();
+                fd1.append('action', 'save_it_support_settings');
+                fd1.append('phone',        document.getElementById('it-phone').value.trim());
+                fd1.append('line',         document.getElementById('it-line').value.trim());
+                fd1.append('sla_normal',   document.getElementById('sla-normal').value.trim());
+                fd1.append('sla_urgent',   document.getElementById('sla-urgent').value.trim());
+                fd1.append('sla_critical', document.getElementById('sla-critical').value.trim());
+                fd1.append('sla_hours',    document.getElementById('sla-hours').value.trim());
+
+                const fd2 = new FormData();
+                fd2.append('action', 'save_scan_settings');
+                fd2.append('primary_url',    document.getElementById('scan-url-primary').value.trim());
+                fd2.append('backup_url',     document.getElementById('scan-url-backup').value.trim());
+                fd2.append('line_group_url', document.getElementById('scan-line-group').value.trim());
+                fd2.append('line_qr_pte',    document.getElementById('line-qr-pte').value.trim());
+                fd2.append('line_qr_pt4',    document.getElementById('line-qr-pt4').value.trim());
+                fd2.append('line_qr_pta',    document.getElementById('line-qr-pta').value.trim());
+                fd2.append('line_id_pte',    document.getElementById('line-id-pte').value.trim());
+                fd2.append('line_id_pt4',    document.getElementById('line-id-pt4').value.trim());
+                fd2.append('line_id_pta',    document.getElementById('line-id-pta').value.trim());
+
+                const [r1, r2] = await Promise.all([
+                    fetch('api.php', { method: 'POST', body: fd1 }),
+                    fetch('api.php', { method: 'POST', body: fd2 }),
+                ]);
+                const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+                if (d1.status === 'success' && d2.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', timer: 1500, showConfirmButton: false });
+                } else {
+                    throw new Error(d1.message || d2.message || 'เกิดข้อผิดพลาด');
+                }
+            } catch(e) {
+                Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> บันทึกการตั้งค่า';
+            }
+        }
+
+        function extractUrl(raw) {
+            const trimmed = raw.trim();
+            // ถ้าเป็น <img src="..."> หรือ <img src='...'> ให้ดึงแค่ URL
+            const m = trimmed.match(/src=["']([^"']+)["']/i);
+            if (m) return m[1].trim();
+            return trimmed;
+        }
+
+        function previewQR(company, raw) {
+            const box = document.getElementById('preview-' + company);
+            const input = document.getElementById('line-qr-' + company);
+            if (!box) return;
+            const url = extractUrl(raw);
+            // ถ้า input มี tag HTML อยู่ ให้ clean ให้เลย
+            if (input && url !== raw.trim()) input.value = url;
+            if (!url) {
+                box.innerHTML = '<i class="fab fa-line text-slate-300 text-xl"></i>';
+                return;
+            }
+            const img = document.createElement('img');
+            img.style.cssText = 'width:100%;height:100%;object-fit:contain';
+            img.onerror = () => { box.innerHTML = '<i class="fab fa-line text-red-300 text-xl"></i>'; };
+            img.src = url;
+            box.innerHTML = '';
+            box.appendChild(img);
+        }
+
+        loadSettings();
+    </script>
+<script src="js/sidebar.js"></script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 <?php
 // api/actions/check_session.php
 
+require_once __DIR__ . '/../ticket/task_center_hrga_helper.php';
+
 // แปลงรหัสบริษัทเป็นชื่อเต็ม
 $company_code = $_SESSION['company'] ?? null;
 $company_full = $company_code;
@@ -25,6 +27,12 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
+if (isset($_SESSION['user_id']) && function_exists('refreshSessionPermissions')) {
+    refreshSessionPermissions($conn);
+}
+
+$effective = $_SESSION['effective_permissions'] ?? [];
+
 echo json_encode([
     'loggedin' => isset($_SESSION['user_id']),
     'user_id' => $_SESSION['user_id'] ?? null,
@@ -32,9 +40,19 @@ echo json_encode([
     'role' => $_SESSION['role'] ?? 'guest',
     'display_name' => $_SESSION['display_name'] ?? 'Guest',
     'company' => $company_code,
-    'company_full_name' => $company_full, // ส่งชื่อเต็มกลับไปด้วย
+    'company_full_name' => $company_full,
     'available_companies' => $available_companies,
     'primary_department' => $_SESSION['primary_department'] ?? null,
-    'image' => $_SESSION['image'] ?? null
+    'image' => $_SESSION['image'] ?? null,
+    'can_manage_stock' => intval($_SESSION['can_manage_stock'] ?? 0),
+    'can_access_admin' => !empty($_SESSION['can_access_admin']),
+    'effective_permissions' => $effective,
+    'hrga_mode' => taskCenterHrGaModeEnabled(
+        $_SESSION['role'] ?? 'guest',
+        $_SESSION['primary_department'] ?? '',
+        $conn,
+        isset($_SESSION['user_id']) ? (string)$_SESSION['user_id'] : null
+    ),
+    'hrga_department' => TASK_CENTER_HRGA_DEPT,
 ]);
 ?>
