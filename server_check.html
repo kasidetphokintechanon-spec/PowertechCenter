@@ -291,6 +291,49 @@ html.dark .leg-item{color:#94a3b8;}
 @media (prefers-reduced-motion: reduce) {
   .tv-banner.crit, .tv-room.ok .tv-lamp-big, .tv-room.issue .tv-lamp-big, .tv-room.pending .tv-lamp-big { animation:none; }
 }
+
+/* ── วันหยุดบริษัท (หน้าต่างในหน้านี้ — เดิมเป็นหน้าแยก holidays.html) ── */
+.hd-backdrop{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.45);}
+.hd-backdrop.open{display:flex;}
+.hd-modal{width:min(820px,100%);max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:var(--ptc-surface);color:var(--ptc-text);border:1px solid var(--ptc-border);border-radius:14px;box-shadow:var(--ptc-shadow-xl);overflow:hidden;}
+.hd-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--ptc-border);}
+.hd-head .ic{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;flex-shrink:0;}
+html.dark .hd-head .ic{background:rgba(234,88,12,.12);border-color:rgba(234,88,12,.35);}
+.hd-head h3{margin:0;font-size:15px;font-weight:700;}
+.hd-head p{margin:2px 0 0;font-size:12px;color:var(--ptc-text-muted);}
+.hd-x{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-muted);cursor:pointer;}
+.hd-body{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:0;flex:1;}
+.hd-side{padding:16px;border-right:1px solid var(--ptc-border);background:var(--ptc-surface-2);overflow-y:auto;}
+.hd-main{padding:16px;overflow-y:auto;display:flex;flex-direction:column;min-height:0;}
+.hd-year{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
+.hd-year button{width:28px;height:28px;border-radius:7px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-muted);cursor:pointer;}
+.hd-year b{min-width:64px;text-align:center;font-size:15px;}
+.hd-year .cnt{margin-left:auto;font-size:12px;color:var(--ptc-text-muted);}
+.hd-lbl{display:block;font-size:12px;font-weight:600;color:var(--ptc-text-2);margin:0 0 4px;}
+.hd-in{width:100%;height:36px;padding:0 10px;border:1px solid var(--ptc-border);border-radius:8px;background:var(--ptc-surface);color:var(--ptc-text);font:inherit;font-size:13px;outline:none;margin-bottom:10px;}
+.hd-in:focus{border-color:var(--ptc-primary);box-shadow:0 0 0 3px var(--ptc-primary-ring);}
+.hd-add{width:100%;height:36px;border:0;border-radius:8px;background:var(--ptc-primary);color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+.hd-add:disabled{opacity:.5;cursor:default;}
+.hd-pre-t{font-size:11px;font-weight:600;color:var(--ptc-text-faint);margin:14px 0 6px;}
+.hd-pre{display:flex;flex-wrap:wrap;gap:4px;}
+.hd-pre button{font:inherit;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-2);cursor:pointer;}
+.hd-pre button:hover{border-color:var(--ptc-primary);color:var(--ptc-primary);}
+.hd-pre button.done{color:var(--ptc-success);border-color:var(--ptc-success);}
+.hd-months{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+.hd-months button{font:inherit;font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-muted);cursor:pointer;}
+.hd-months button.has{color:#ea580c;border-color:#fed7aa;font-weight:600;}
+.hd-months button.on{background:var(--ptc-primary);border-color:var(--ptc-primary);color:#fff;}
+.hd-list{display:flex;flex-direction:column;gap:4px;}
+.hd-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--ptc-border);border-radius:8px;background:var(--ptc-surface-2);font-size:13px;}
+.hd-item .d{font-weight:700;min-width:96px;font-size:12px;}
+.hd-item .w{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--ptc-info-bg);color:var(--ptc-info);}
+.hd-item .w.we{background:var(--ptc-danger-bg);color:var(--ptc-danger);}
+.hd-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hd-item button{width:26px;height:26px;border:0;border-radius:6px;background:transparent;color:var(--ptc-text-faint);cursor:pointer;}
+.hd-item button:hover{background:var(--ptc-danger-bg);color:var(--ptc-danger);}
+.hd-empty{text-align:center;padding:30px;color:var(--ptc-text-faint);font-size:13px;}
+.hd-msg{min-height:16px;font-size:12px;color:var(--ptc-danger);margin:-4px 0 8px;}
+@media(max-width:720px){.hd-body{grid-template-columns:1fr;}.hd-side{border-right:0;border-bottom:1px solid var(--ptc-border);}.hd-backdrop{padding:0;}.hd-modal{max-height:none;height:100%;border-radius:0;}}
 </style>
 </head>
 <body>
@@ -318,9 +361,9 @@ html.dark .leg-item{color:#94a3b8;}
     <button class="sc-today-btn" onclick="goThisMonth()">วันนี้</button>
     <div class="sc-badge" id="overall-badge"><i class="fa fa-circle-half-stroke"></i><span id="overall-text">...</span></div>
     <div class="sc-co-filter" id="sc-co-filter"></div>
-    <a href="holidays.html" class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;color:#ea580c;border-color:#fed7aa;">
+    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;color:#ea580c;border-color:#fed7aa;" onclick="openHolidays()" title="จัดการวันหยุดบริษัท (วันที่ไม่ต้องตรวจ)">
         <i class="fa fa-calendar-xmark"></i> วันหยุด
-    </a>
+    </button>
     <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;" onclick="enterTvMode()" title="โหมดจอมอนิเตอร์ (สำหรับขึ้นจอ TV)">
         <i class="fa fa-tv"></i> TV Mode
     </button>
@@ -1172,5 +1215,110 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 <script src="js/nav-chip.js?v=20260707"></script>
+<!-- วันหยุดบริษัท: วันที่ไม่ต้องตรวจห้อง Server -->
+<div class="hd-backdrop" id="hd-backdrop" onmousedown="if(event.target===this)closeHolidays()">
+  <div class="hd-modal" role="dialog" aria-labelledby="hd-title">
+    <div class="hd-head">
+      <div class="ic"><i class="fa fa-calendar-xmark"></i></div>
+      <div><h3 id="hd-title">วันหยุดบริษัท</h3><p>วันที่ตั้งไว้ระบบจะข้ามให้ ไม่ต้องตรวจห้อง Server</p></div>
+      <button class="hd-x" onclick="closeHolidays()" title="ปิด (Esc)"><i class="fa fa-xmark"></i></button>
+    </div>
+    <div class="hd-body">
+      <div class="hd-side">
+        <div class="hd-year"><button onclick="hdYear(-1)" title="ปีก่อน"><i class="fa fa-chevron-left"></i></button><b id="hd-year"></b><button onclick="hdYear(1)" title="ปีถัดไป"><i class="fa fa-chevron-right"></i></button><span class="cnt" id="hd-count"></span></div>
+        <label class="hd-lbl" for="hd-date">วันที่</label><input class="hd-in" type="date" id="hd-date">
+        <label class="hd-lbl" for="hd-name">ชื่อวันหยุด</label><input class="hd-in" id="hd-name" placeholder="เช่น วันสงกรานต์" autocomplete="off">
+        <div class="hd-msg" id="hd-msg"></div>
+        <button class="hd-add" id="hd-add" onclick="addHoliday()"><i class="fa fa-plus"></i> เพิ่มวันหยุด</button>
+        <div class="hd-pre-t">วันหยุดราชการ — กดเพื่อเติมให้</div>
+        <div class="hd-pre" id="hd-pre"></div>
+      </div>
+      <div class="hd-main">
+        <div class="hd-months" id="hd-months"></div>
+        <div class="hd-list" id="hd-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ── วันหยุดบริษัท (ย้ายมาจาก holidays.html) ──
+const HD_MONTHS = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const HD_DOWS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const HD_PRESETS = [
+    ['01-01','วันขึ้นปีใหม่'],['04-06','วันจักรี'],['04-13','วันสงกรานต์'],['04-14','วันสงกรานต์'],['04-15','วันสงกรานต์'],
+    ['05-01','วันแรงงานแห่งชาติ'],['05-04','วันฉัตรมงคล'],['06-03','วันเฉลิมพระชนมพรรษา ราชินี'],['07-28','วันเฉลิมพระชนมพรรษา ร.10'],
+    ['08-12','วันแม่แห่งชาติ'],['10-13','วันคล้ายวันสวรรคต ร.9'],['10-23','วันปิยมหาราช'],['12-05','วันพ่อแห่งชาติ'],['12-10','วันรัฐธรรมนูญ'],['12-31','วันสิ้นปี'],
+];
+const hd = { year: new Date().getFullYear(), list: [], month: 0, changed: false };
+
+function openHolidays() {
+    hd.year = currentYear; hd.month = 0; hd.changed = false;
+    document.getElementById('hd-backdrop').classList.add('open');
+    document.getElementById('hd-date').value = `${hd.year}-${pad2(currentMonth)}-01`;
+    hdLoad();
+    setTimeout(() => document.getElementById('hd-name').focus(), 50);
+}
+function closeHolidays() {
+    document.getElementById('hd-backdrop').classList.remove('open');
+    if (hd.changed) load(); // วันหยุดเปลี่ยน → วาดตารางเดือนนี้ใหม่
+}
+function hdYear(d) { hd.year += d; hd.month = 0; document.getElementById('hd-date').value = `${hd.year}-01-01`; hdLoad(); }
+async function hdLoad() {
+    document.getElementById('hd-year').textContent = hd.year + 543;
+    try {
+        const r = await fetch(`${API}?action=get_holidays&year=${hd.year}`);
+        const d = await r.json();
+        hd.list = d.holidays || [];
+    } catch (e) { hd.list = []; }
+    hdRender();
+}
+function hdRender() {
+    document.getElementById('hd-count').textContent = `${hd.list.length} วัน`;
+    const months = new Set(hd.list.map(h => parseInt(h.holiday_date.split('-')[1], 10)));
+    document.getElementById('hd-months').innerHTML = `<button class="${hd.month ? '' : 'on'}" onclick="hd.month=0;hdRender()">ทั้งปี</button>`
+        + HD_MONTHS.slice(1).map((m, i) => `<button class="${hd.month === i + 1 ? 'on' : months.has(i + 1) ? 'has' : ''}" onclick="hd.month=${i + 1};hdRender()">${m}</button>`).join('');
+    const rows = hd.month ? hd.list.filter(h => parseInt(h.holiday_date.split('-')[1], 10) === hd.month) : hd.list;
+    document.getElementById('hd-list').innerHTML = rows.length ? rows.map(h => {
+        const dt = new Date(h.holiday_date + 'T00:00:00'), dow = dt.getDay();
+        return `<div class="hd-item"><span class="d">${pad2(dt.getDate())} ${HD_MONTHS[dt.getMonth() + 1]} ${dt.getFullYear() + 543}</span>
+            <span class="w ${dow === 0 || dow === 6 ? 'we' : ''}">${HD_DOWS[dow]}</span><span class="n">${esc(h.name)}</span>
+            <button onclick="delHoliday(${parseInt(h.id, 10)})" title="ลบ"><i class="fa fa-trash"></i></button></div>`;
+    }).join('') : `<div class="hd-empty"><i class="fa fa-calendar-xmark"></i><br>ยังไม่มีวันหยุด${hd.month ? 'ในเดือนนี้' : `ในปี ${hd.year + 543}`}</div>`;
+    const have = new Set(hd.list.map(h => h.holiday_date));
+    document.getElementById('hd-pre').innerHTML = HD_PRESETS.map(([md, name]) => {
+        const date = `${hd.year}-${md}`;
+        return `<button class="${have.has(date) ? 'done' : ''}" onclick="hdFill('${date}', this.dataset.n)" data-n="${esc(name)}">${have.has(date) ? '<i class="fa fa-check"></i> ' : ''}${esc(name.replace(/^วัน/, ''))}</button>`;
+    }).join('');
+}
+function hdFill(date, name) { document.getElementById('hd-date').value = date; document.getElementById('hd-name').value = name; document.getElementById('hd-name').focus(); }
+async function addHoliday() {
+    const date = document.getElementById('hd-date').value, name = document.getElementById('hd-name').value.trim();
+    const msg = document.getElementById('hd-msg');
+    if (!date || !name) { msg.textContent = 'กรอกวันที่และชื่อวันหยุด'; return; }
+    msg.textContent = '';
+    const btn = document.getElementById('hd-add'); btn.disabled = true;
+    const fd = new FormData(); fd.append('action', 'save_holiday'); fd.append('holiday_date', date); fd.append('name', name);
+    try {
+        const d = await (await fetch(API, { method: 'POST', body: fd })).json();
+        if (d.status !== 'success') throw new Error(d.message || 'บันทึกไม่สำเร็จ');
+        hd.changed = true;
+        document.getElementById('hd-name').value = '';
+        if (parseInt(date.slice(0, 4), 10) !== hd.year) hd.year = parseInt(date.slice(0, 4), 10);
+        await hdLoad();
+    } catch (e) { msg.textContent = e.message; }
+    btn.disabled = false;
+}
+async function delHoliday(id) {
+    if (!confirm('ลบวันหยุดนี้?')) return;
+    const fd = new FormData(); fd.append('action', 'delete_holiday'); fd.append('id', id);
+    try {
+        const d = await (await fetch(API, { method: 'POST', body: fd })).json();
+        if (d.status !== 'success') throw new Error(d.message || 'ลบไม่สำเร็จ');
+        hd.changed = true; await hdLoad();
+    } catch (e) { document.getElementById('hd-msg').textContent = e.message; }
+}
+document.getElementById('hd-name').addEventListener('keydown', e => { if (e.key === 'Enter') addHoliday(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('hd-backdrop').classList.contains('open')) closeHolidays(); });
+</script>
 </body>
 </html>

@@ -2,7 +2,8 @@
 // api/actions/server_check/delete_holiday.php
 $_role = $_SESSION['role'] ?? 'guest';
 $_dept = $_SESSION['primary_department'] ?? '';
-if (!isset($_SESSION['user_id']) || ($_role !== 'admin' && $_dept !== 'IT')) {
+// แผนก IT ในระบบชื่อ "Information Technology" (เดิมเช็กแค่ "IT" ช่างที่ไม่ใช่ admin เลยแก้ไม่ได้)
+if (!isset($_SESSION['user_id']) || ($_role !== 'admin' && !in_array($_dept, ['IT', 'Information Technology'], true))) {
     echo json_encode(['status'=>'error','message'=>'Unauthorized — IT only']); exit;
 }
 
