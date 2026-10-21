@@ -8,7 +8,7 @@ $selected_company = trim((string)($json_data['company'] ?? ''));
 $remember_me = !empty($json_data['remember_me']);
 
 // ตรวจสอบข้อมูลจากตาราง employees
-$stmt = $conn->prepare("SELECT id, username, password, role, name, image, responsible_department FROM employees WHERE (username = ? OR id = ?) AND employment_status = 'active' ORDER BY id LIMIT 1");
+$stmt = $conn->prepare("SELECT id, username, password, role, name, image, responsible_department, can_manage_stock FROM employees WHERE (username = ? OR id = ?) AND employment_status = 'active' ORDER BY id LIMIT 1");
 if (!$stmt) throw new Exception("Prepare failed (Login): " . $conn->error);
 $stmt->bind_param("ss", $username, $username);
 $stmt->execute();
@@ -69,6 +69,7 @@ if ($row = $result->fetch_assoc()) {
         $_SESSION['display_name'] = $row['name'];
         $_SESSION['image'] = $row['image'] ?? null;
         $_SESSION['responsible_department'] = $row['responsible_department'] ?? null;
+        $_SESSION['can_manage_stock'] = intval($row['can_manage_stock'] ?? 0);
 
         // Find primary assignment and store in session
         $user_id = $row['id'];
@@ -117,6 +118,8 @@ if ($row = $result->fetch_assoc()) {
             $_SESSION['company'] = $selected_company;
         }
 
+        refreshSessionPermissions($conn);
+
         // แปลงรหัสบริษัทเป็นชื่อเต็มสำหรับ Response ตอน Login
         $company_code = $_SESSION['company'] ?? null;
         $company_full = $company_code;
@@ -130,15 +133,17 @@ if ($row = $result->fetch_assoc()) {
         }
 
         echo json_encode([
-            'status' => 'success', 
+            'status' => 'success',
             'role' => $_SESSION['role'],
             'company' => $company_code,
-            'company_full_name' => $company_full
+            'company_full_name' => $company_full,
+            'can_access_admin' => !empty($_SESSION['can_access_admin']),
+            'can_manage_stock' => intval($_SESSION['can_manage_stock'] ?? 0),
         ]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'รหัสผ่านไม่ถูกต้อง']);
+        echo json_encode(['status' => 'error', 'message' => 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง']);
     }
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'ไม่พบชื่อผู้ใช้งานนี้']);
+    echo json_encode(['status' => 'error', 'message' => 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง']);
 }
 ?>

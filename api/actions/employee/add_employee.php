@@ -1,11 +1,15 @@
 <?php
 // api/actions/add_employee.php
 
-if (!isset($_SESSION['user_id']) || !in_array(($_SESSION['role'] ?? 'guest'), ['admin', 'staff'], true)) {
+if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Access Denied']);
     exit;
 }
-if (($_SESSION['role'] ?? '') === 'staff') {
+requirePermission($conn, 'employee.manage');
+
+$sessionRole = $_SESSION['role'] ?? 'guest';
+$canEditSensitive = ($sessionRole === 'admin') || hasPermission($conn, 'admin.manage_permissions');
+if (!$canEditSensitive) {
     $_POST['role'] = 'user';
     $_POST['username'] = '';
     $_POST['password'] = '';
@@ -26,6 +30,11 @@ if (!$colCheck || intval($colCheck->num_rows) === 0) {
 $colCheck = $conn->query("SHOW COLUMNS FROM employees LIKE 'is_technician'");
 if (!$colCheck || intval($colCheck->num_rows) === 0) {
     $conn->query("ALTER TABLE employees ADD COLUMN is_technician TINYINT(1) NOT NULL DEFAULT 0 AFTER is_management");
+}
+
+$colCheck = $conn->query("SHOW COLUMNS FROM employees LIKE 'can_manage_stock'");
+if (!$colCheck || intval($colCheck->num_rows) === 0) {
+    $conn->query("ALTER TABLE employees ADD COLUMN can_manage_stock TINYINT(1) NOT NULL DEFAULT 0 AFTER is_technician");
 }
 
 // จัดการรูปภาพพนักงาน
@@ -52,9 +61,11 @@ $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 $role = $_POST['role'] ?? 'user';
 $responsible_department = $_POST['responsible_department'] ?? null;
+$manage_system_user = (($_POST['manage_system_user'] ?? '0') === '1') ? 1 : 0;
 $is_executive = (($_POST['is_executive'] ?? '0') === '1') ? 1 : 0;
 $is_management = (($_POST['is_management'] ?? '0') === '1') ? 1 : 0;
 $is_technician = (($_POST['is_technician'] ?? '0') === '1') ? 1 : 0;
+$can_manage_stock = 0;
 $assignmentsJSON = $_POST['assignments'] ?? '[]'; // JSON String
 $assignments = json_decode($assignmentsJSON, true);
 if (!is_array($assignments)) $assignments = [];
@@ -71,6 +82,20 @@ if ($is_technician === 1 && count($validAssignments) === 0) {
     exit;
 }
 
+if (!$canEditSensitive || $manage_system_user !== 1) {
+    $username = '';
+    $password = '';
+    $role = 'user';
+    $responsible_department = null;
+    $can_manage_stock = 0;
+} else {
+    $username = trim((string)$username);
+    if ($username === '' || trim((string)$password) === '') {
+        echo json_encode(['status' => 'error', 'message' => 'กรุณาระบุ Username และ Password สำหรับบัญชีผู้ใช้ระบบ']);
+        exit;
+    }
+}
+
 $conn->begin_transaction();
 try {
     $check_stmt = $conn->prepare("SELECT id FROM employees WHERE id = ?");
@@ -80,14 +105,14 @@ try {
     $check_result = $check_stmt->get_result();
     if ($check_result->num_rows > 0) throw new Exception("Employee ID $id already exists");
 
-    // Hash Password ก่อนบันทึก
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Hash Password เฉพาะกรณีมีการสร้างบัญชีผู้ใช้ระบบ
+    $hashed_password = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '';
 
-    $sql = "INSERT INTO employees (id, name, name_th, position, is_executive, is_management, is_technician, phone, birthdate, start_date, employment_status, username, password, role, image, responsible_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO employees (id, name, name_th, position, is_executive, is_management, is_technician, can_manage_stock, phone, birthdate, start_date, employment_status, username, password, role, image, responsible_department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     if (!$stmt) throw new Exception("Prepare failed (Add Employee): " . $conn->error);
-    $params = [$id, $name, $name_th, $position, $is_executive, $is_management, $is_technician, $phone, $birthdate, $start_date, $status, $username, $hashed_password, $role, $imagePath, $responsible_department];
-    $types = "ssssiii" . str_repeat("s", 9);
+    $params = [$id, $name, $name_th, $position, $is_executive, $is_management, $is_technician, $can_manage_stock, $phone, $birthdate, $start_date, $status, $username, $hashed_password, $role, $imagePath, $responsible_department];
+    $types = "ssssiiii" . str_repeat("s", 9);
     $bind = [];
     $bind[] = $types;
     foreach ($params as $k => $v) {
@@ -116,6 +141,7 @@ try {
     }
 
     $conn->commit();
+    syncEmployeeStockFlagFromPermissions($conn, $id);
     echo json_encode(['status' => 'success']);
 } catch (Exception $e) {
     $conn->rollback();
