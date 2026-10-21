@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=server_check.html">
+<title>Server Check — รายงานรายเดือน</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+</head>
+<body>
+<script>
+// Preserve month/year params if any
+var p = new URLSearchParams(location.search);
+var q = new URLSearchParams();
+if (p.get('month')) q.set('month', p.get('month'));
+if (p.get('year'))  q.set('year',  p.get('year'));
+var qs = q.toString();
+window.location.replace('server_check.html' + (qs ? '?' + qs : ''));
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 <?php
 // api/actions/system/save_line_settings.php
 $channel_token = $_POST['channel_token'] ?? '';
+$channel_secret = $_POST['channel_secret'] ?? '';
 $dest_id = $_POST['dest_id'] ?? '';
 $active = $_POST['active'] ?? '0';
 
@@ -11,6 +12,7 @@ try {
 
     $settings = [
         'line_channel_token' => $channel_token,
+        'line_channel_secret' => $channel_secret,
         'line_dest_id' => $dest_id,
         'line_active' => $active
     ];

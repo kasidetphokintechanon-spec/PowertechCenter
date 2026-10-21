@@ -19,6 +19,7 @@ if (!permissionTablesExist($conn)) {
 $targetUser = $_POST['user_id'] ?? '';
 $rawRoles = $_POST['role_ids'] ?? '[]';
 $rawPerms = $_POST['permissions'] ?? '[]';
+$baseRole = trim((string)($_POST['base_role'] ?? ''));
 
 $roleIds = json_decode($rawRoles, true);
 $permKeys = json_decode($rawPerms, true);
@@ -29,6 +30,12 @@ if (!is_string($targetUser) || $targetUser === '') {
 }
 if (!is_array($roleIds)) $roleIds = [];
 if (!is_array($permKeys)) $permKeys = [];
+
+$baseRoleDefinitions = getPowertechBaseRoleDefinitions();
+if ($baseRole !== '' && !array_key_exists($baseRole, $baseRoleDefinitions)) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid base role']);
+    exit;
+}
 
 $stmtEmp = $conn->prepare("SELECT id FROM employees WHERE id = ? LIMIT 1");
 if (!$stmtEmp) {
@@ -45,7 +52,6 @@ if (!$resEmp->fetch_assoc()) {
 
 $roleIds = array_values(array_unique(array_filter(array_map('intval', $roleIds), function($v) { return $v > 0; })));
 $permKeys = array_values(array_unique(array_filter(array_map('strval', $permKeys), function($v) { return $v !== ''; })));
-
 $conn->begin_transaction();
 try {
     $stmtDelRoles = $conn->prepare("DELETE FROM user_permission_roles WHERE user_id = ?");
@@ -78,7 +84,19 @@ try {
         }
     }
 
+    if ($baseRole !== '') {
+        $stmtUpdateRole = $conn->prepare("UPDATE employees SET role = ? WHERE id = ?");
+        if ($stmtUpdateRole) {
+            $stmtUpdateRole->bind_param("ss", $baseRole, $targetUser);
+            $stmtUpdateRole->execute();
+        }
+    }
+
     $conn->commit();
+    syncEmployeeStockFlagFromPermissions($conn, $targetUser);
+    if ($targetUser === ($_SESSION['user_id'] ?? '')) {
+        refreshSessionPermissions($conn);
+    }
     echo json_encode(['status' => 'success']);
 } catch (Throwable $e) {
     $conn->rollback();
