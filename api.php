@@ -506,7 +506,7 @@ try {
         'test_notify_channel' => ['settings.notifications'], 'test_notify_routing' => ['settings.notifications'],
         'get_notify_log' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
-        'save_it_support_settings' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],
+        'save_it_support_settings' => ['admin.access_admin'], 'save_doc_forms' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],
         'reorder_services' => ['admin.access_admin'], 'probe_host' => ['admin.access_admin', 'it_log.access'],
         'save_stock_summary_schedule' => ['stock.manage'], 'saveStockSummarySchedule' => ['stock.manage'],
         'deleteStockSummarySchedule' => ['stock.manage'], 'initStockTables' => ['stock.manage'],

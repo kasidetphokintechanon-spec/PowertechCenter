@@ -1,0 +1,109 @@
+/* doc-print.css — หน้าตาใบพิมพ์มาตรฐานของ Powertech Center (ทุกใบใช้ชุดนี้)
+   สร้างผ่าน js/doc-print.js เท่านั้น (หน้า PHP ส่งข้อมูล JSON ให้ DocPrint สร้างใบ เช่น print_asset.php)
+   ตัวแปร: --acc = สีบริษัท, --doc = สีแถบชื่อเอกสาร */
+@page { size: A4 portrait; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #e5e7eb; }
+body { font-family: 'Sarabun', Tahoma, sans-serif; color: #0f172a; font-size: 9.5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.dp-page { width: 210mm; height: 297mm; margin: 0 auto 6mm; background: #fff; padding: 10mm 11mm; overflow: hidden; position: relative; }
+.dp-page.land { width: 297mm; height: 210mm; }
+.dp-page.a5l { width: 210mm; height: 148mm; }
+.dp-page.flow { height: auto; min-height: 297mm; overflow: visible; }
+.dp-page.flow.land { min-height: 210mm; }
+.dp-fit { transform-origin: top left; display: flex; flex-direction: column; min-height: 100%; }
+
+/* หัวใบ */
+.dp-hd { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 7px; border-bottom: 2px solid var(--acc, #334155); }
+.dp-logo { height: 40px; width: auto; }
+.dp-co { flex: 1; min-width: 0; border-left: 3px solid var(--acc, #334155); padding-left: 9px; }
+.dp-co b { font-size: 12.5pt; display: block; line-height: 1.25; }
+.dp-co span { font-size: 8.5pt; color: #475569; display: block; }
+.dp-co small { font-size: 7.5pt; color: #64748b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dp-meta { text-align: right; display: flex; gap: 8px; align-items: flex-start; }
+.dp-meta .t { font-size: 7.5pt; color: #64748b; line-height: 1.45; }
+.dp-meta .id { font-family: Consolas, monospace; font-size: 11.5pt; font-weight: 800; color: var(--acc, #334155); }
+.dp-meta .st { display: inline-block; margin-top: 2px; padding: 0 7px; border-radius: 99px; font-size: 7.5pt; font-weight: 700; background: #f1f5f9; color: #334155; }
+.dp-qr { width: 19mm; height: 19mm; }
+.dp-fm { border-collapse: collapse; font-size: 7pt; margin-top: 3px; margin-left: auto; }
+.dp-fm td { border: 1px solid #cbd5e1; padding: 1px 5px; } .dp-fm td:first-child { background: #f1f5f9; color: #64748b; }
+.dp-class { display: inline-block; border: 1px solid #b91c1c; color: #b91c1c; border-radius: 3px; padding: 0 5px; font-size: 7pt; font-weight: 800; letter-spacing: .03em; }
+
+/* แถบชื่อเอกสาร */
+.dp-title { margin: 7px 0; padding: 6px 12px; border-radius: 5px; background: var(--doc, #2563eb); color: #fff; display: flex; justify-content: space-between; align-items: baseline; }
+.dp-title b { font-size: 12.5pt; } .dp-title span { font-size: 8pt; opacity: .9; }
+
+/* ตารางข้อมูล 2 คอลัมน์ */
+.dp-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #e2e8f0; border-radius: 5px; overflow: hidden; }
+.dp-f { display: flex; gap: 8px; padding: 4px 9px; border-bottom: 1px solid #eef2f6; min-width: 0; }
+.dp-f:nth-child(odd) { border-right: 1px solid #eef2f6; }
+.dp-f .l { flex: 0 0 31mm; font-size: 7.8pt; color: #64748b; font-weight: 600; }
+.dp-f .v { flex: 1; min-width: 0; font-size: 9pt; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* กล่องหัวข้อ */
+.dp-sec { margin-top: 6px; border: 1px solid #e2e8f0; border-radius: 5px; overflow: hidden; break-inside: avoid; }
+.dp-sh { font-size: 7.5pt; font-weight: 700; letter-spacing: .03em; color: #475569; background: #f8fafc; padding: 3px 9px; border-bottom: 1px solid #e2e8f0; }
+.dp-sb { padding: 5px 9px; font-size: 9.2pt; line-height: 1.5; white-space: pre-line; overflow: hidden; }
+.dp-sb.html { white-space: normal; }
+/* ตัดเป็นบรรทัดเต็ม + "…" ที่ตัวข้อความ — clamp ตั้งผ่าน style="--clamp:N" */
+.dp-tx { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: var(--clamp, 999); }
+.dp-sec.ok .dp-sb { background: #f0fdf4; } .dp-sec.ok .dp-sh { color: #15803d; }
+.dp-sec.bad .dp-sb { background: #fef2f2; } .dp-sec.bad .dp-sh { color: #b91c1c; }
+.dp-sec.warn .dp-sb { background: #fffbeb; } .dp-sec.warn .dp-sh { color: #b45309; }
+.dp-sec.lined .dp-sb { background: repeating-linear-gradient(#fff 0 6.9mm, #e2e8f0 6.9mm 7mm); }
+
+/* ตารางในกล่อง */
+.dp-tbl { width: 100%; border-collapse: collapse; font-size: 8.6pt; }
+.dp-tbl th { background: #f8fafc; font-size: 7.6pt; font-weight: 700; color: #475569; text-align: left; padding: 3px 7px; border: 1px solid #e2e8f0; }
+.dp-tbl td { padding: 3px 7px; border: 1px solid #e2e8f0; vertical-align: top; }
+.dp-tbl tr { break-inside: avoid; }
+.dp-tbl thead { display: table-header-group; }
+.dp-tbl .grp td { background: #f8fafc; font-weight: 700; border-top: 1.5px solid #64748b; }
+.dp-tbl .mono { font-family: Consolas, monospace; font-size: 8pt; }
+
+/* เช็กลิสต์หลายคอลัมน์ */
+.dp-chk { columns: 3; column-gap: 10px; font-size: 8.4pt; padding: 4px 9px 6px; }
+.dp-chk .cat { break-after: avoid; font-size: 7.6pt; font-weight: 700; color: var(--acc, #334155); margin-top: 3px; border-bottom: 1px solid #e2e8f0; }
+.dp-chk .it { break-inside: avoid; display: flex; gap: 4px; line-height: 1.45; }
+.dp-chk .bx { flex: 0 0 9px; height: 9px; margin-top: 3px; border: 1px solid #94a3b8; border-radius: 2px; font-size: 7pt; line-height: 8px; text-align: center; }
+.dp-chk .done .bx { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+.dp-chk .skip { color: #94a3b8; text-decoration: line-through; }
+
+/* รูปแนบ */
+.dp-ig { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 5px 9px 7px; }
+.dp-im { height: 36mm; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; background: #f8fafc; }
+.dp-im img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ข้อความรับทราบ / หมายเหตุเล็ก */
+.dp-note { margin-top: 6px; border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 9px; font-size: 8pt; line-height: 1.55; }
+.dp-grow { flex: 1; }
+
+/* ช่องเซ็น */
+.dp-sigs { display: grid; gap: 8px; margin-top: 8px; break-inside: avoid; }
+.dp-sig { border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 9px 6px; text-align: center; }
+.dp-sig .sr { font-size: 8pt; font-weight: 700; text-align: left; color: #334155; }
+.dp-sig .sp { height: 15mm; display: flex; align-items: flex-end; justify-content: center; }
+.dp-sig .sig-img { max-height: 14mm; max-width: 100%; }
+.dp-stamp { border: 1.5px solid #16a34a; color: #15803d; border-radius: 4px; padding: 1px 8px; font-size: 8pt; font-weight: 700; transform: rotate(-3deg); }
+.dp-sig .sl { border-bottom: 1px solid #475569; margin: 2px 8px 3px; }
+.dp-sig .sn { font-size: 8pt; color: #334155; } .dp-sig .sd { font-size: 7.5pt; color: #64748b; }
+
+/* ท้ายใบ */
+.dp-ft { margin-top: 6px; padding-top: 4px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 10px; font-size: 7pt; color: #94a3b8; }
+
+/* แถบเครื่องมือ (ดูบนจอเท่านั้น) */
+.dp-bar { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 10px; background: #0f172a; color: #e2e8f0; font-size: 13px; }
+.dp-bar button, .dp-bar a { font: inherit; font-weight: 700; padding: 6px 16px; border-radius: 6px; border: 0; cursor: pointer; text-decoration: none; background: #fff; color: #0f172a; }
+.dp-bar .pri { background: #2563eb; color: #fff; }
+.dp-bar .seg { display: inline-flex; border-radius: 6px; overflow: hidden; }
+.dp-bar .seg a { border-radius: 0; background: #334155; color: #e2e8f0; padding: 6px 12px; }
+.dp-bar .seg a.on { background: #fff; color: #0f172a; }
+
+@media print {
+    html, body { background: #fff; }
+    .dp-page { margin: 0; }
+    .dp-page + .dp-page { break-before: page; }
+    .dp-bar { display: none !important; }
+    /* หลายหน้า: ขอบกระดาษมาจาก @page แล้ว */
+    .dp-page.flow { width: auto; min-height: 0; padding: 0; }
+}

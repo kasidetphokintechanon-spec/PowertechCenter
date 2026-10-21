@@ -96,6 +96,77 @@ $thDate = (int)$now->format('j') . ' ' . $thMonths[(int)$now->format('n')] . ' '
 
 $docCo = $company ?: ($assets[0]['company'] ?? '');
 $docNo = $mode === 'audit' ? 'AUD-' . ($docCo ?: 'ALL') . '-' . $now->format('Ymd-Hi') : 'LBL-' . $now->format('Ymd-Hi');
+// ── ใบตรวจนับ: หน้าตามาตรฐานเดียวกับทุกใบ (js/doc-print.js · แนวนอน หลายหน้าได้ · เลขฟอร์ม audit) ──
+if ($mode === 'audit') {
+    $groups = [];
+    foreach ($assets as $a) {
+        $key = $group === 'location' ? (trim((string)$a['location']) ?: 'ไม่ระบุที่ตั้ง') : ($a['dept_name'] ?: 'ไม่ระบุแผนก');
+        $groups[$key][] = [
+            'code' => $a['equipment_id'], 'name' => $a['name'], 'model' => trim(($a['brand'] ?? '') . ' ' . ($a['model'] ?? '')), 'cat' => $a['cat_name'],
+            'sn' => $a['serial_number'], 'holder' => holderOf($a), 'status' => $a['status'],
+            // ที่ตั้ง "PTA/PT4/PTE" คือค่าเก่าที่ใส่ชื่อบริษัทแทนที่ตั้ง → ไม่แสดง
+            'other' => $group === 'location' ? $a['dept_name'] : (preg_match('/^(PTA|PT4|PTE)$/i', (string)$a['location']) ? '' : $a['location']),
+        ];
+    }
+    ksort($groups, SORT_NATURAL);
+    $seg = fn($items) => '<span class="seg">' . implode('', array_map(fn($it) => '<a href="' . qs($it[0]) . '" class="' . ($it[2] ? 'on' : '') . '">' . h($it[1]) . '</a>', $items)) . '</span>';
+    $bar = 'จัดกลุ่มตาม ' . $seg([[['group' => 'dept'], 'แผนก', $group === 'dept'], [['group' => 'location'], 'ที่ตั้ง', $group === 'location']])
+         . (!$ids ? ' ' . $seg([[['retired' => ''], 'เฉพาะที่ใช้อยู่', !$retired], [['retired' => '1'], 'รวมที่เลิกใช้', $retired]]) : '');
+    $data = ['company' => $docCo, 'docNo' => $docNo, 'printedBy' => $printedBy, 'group' => $group, 'groups' => $groups, 'count' => count($assets), 'bar' => $bar,
+             'log' => ['count' => count($assets), 'company' => $docCo, 'ids' => array_slice(array_map('intval', array_column($assets, 'id')), 0, 200)]];
+    header('Content-Type: text/html; charset=utf-8');
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ใบตรวจนับทรัพย์สิน — <?= h($docNo) ?></title></head>
+<body>
+<p style="font-family:sans-serif;padding:40px;color:#64748b">กำลังเตรียมเอกสาร...</p>
+<script src="js/doc-print.js?v=20261022"></script>
+<script>
+(async () => {
+    const D = <?= json_encode($data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const { esc, section, thDate } = DocPrint;
+    const box = '<span style="display:inline-block;width:9px;height:9px;border:1px solid #334155;border-radius:2px;margin:0 2px 0 5px;vertical-align:-1px"></span>';
+    let n = 0;
+    const body = Object.entries(D.groups).map(([g, rows]) => `<tr class="grp"><td colspan="9">${esc(g)} <span style="font-weight:400;color:#64748b">· ${rows.length} รายการ</span></td></tr>`
+        + rows.map(a => `<tr><td style="text-align:center;color:#64748b">${++n}</td><td class="mono" style="font-weight:700">${esc(a.code)}</td>
+            <td>${esc(a.name)}${a.model ? `<div style="font-size:7.6pt;color:#64748b">${esc(a.model)}${a.cat ? ' · ' + esc(a.cat) : ''}</div>` : ''}</td>
+            <td class="mono" style="font-size:7.6pt">${esc(a.sn || '-')}</td><td>${esc(a.holder || '— ว่าง —')}</td><td>${esc(a.other || '-')}</td><td>${esc(a.status || '-')}</td>
+            <td style="white-space:nowrap;font-size:8pt">${box}พบ${box}ไม่พบ${box}ชำรุด</td><td></td></tr>`).join('')).join('');
+    const blank = '<span style="display:block;border-bottom:1px dotted #94a3b8;height:1.2em"></span>';
+    const fill = '<span style="display:inline-block;width:40px;border-bottom:1px dotted #64748b"></span>';
+
+    const html = await DocPrint.build({
+        company: D.company, formKey: 'audit', classified: true, toolbar: true, barHtml: D.bar, size: 'land', flow: true,
+        docNo: D.docNo, dateText: 'พิมพ์ ' + thDate(new Date(), true) + (D.printedBy ? ' โดย ' + D.printedBy : ''),
+        title: { th: 'ใบตรวจนับทรัพย์สิน IT', en: `IT Asset Physical Count Sheet · ${D.count} รายการ · ${Object.keys(D.groups).length} ${D.group === 'location' ? 'ที่ตั้ง' : 'แผนก'}` },
+        info: [['วันที่ตรวจ', blank, true], ['รอบการตรวจ', blank, true], ['ผู้ตรวจนับ', blank, true], ['ผู้ร่วมตรวจ', blank, true]],
+        blocks: [
+            `<div class="dp-sec" style="break-inside:auto"><table class="dp-tbl"><thead><tr><th style="width:26px">#</th><th style="width:130px">รหัสพัสดุ</th><th>อุปกรณ์ / ยี่ห้อ-รุ่น</th><th>S/N</th>
+                <th>ผู้ถือครอง</th><th>${D.group === 'location' ? 'แผนก' : 'ที่ตั้ง'}</th><th>สถานะในระบบ</th><th style="width:150px">ผลตรวจ</th><th style="width:130px">หมายเหตุ</th></tr></thead><tbody>${body}</tbody></table></div>`,
+            `<div class="dp-note" style="break-inside:avoid"><b>สรุปผล</b> ทั้งหมด <b>${D.count}</b> รายการ · พบ ${fill} · ไม่พบ ${fill} · ชำรุด ${fill} · ไม่อยู่ในทะเบียน (พบเพิ่ม) ${fill}
+                <div style="color:#64748b;margin-top:2px">รายการที่ "ไม่พบ" หรือ "ชำรุด" ให้แจ้งฝ่าย IT ภายใน 3 วันทำการ เพื่อปรับปรุงทะเบียน</div></div>`,
+        ],
+        sigs: [{ role: 'ผู้ตรวจนับ / Counted By' }, { role: 'หัวหน้าแผนก / ผู้รับรอง' }, { role: 'ฝ่าย IT (ผู้ดูแลทะเบียน)' }],
+    });
+    document.open(); document.write(html); document.close();
+    // TISAX: เก็บร่องรอยว่าใครพิมพ์ใบตรวจนับอะไร เมื่อไร (ผูกหลังเขียนหน้าใหม่ — document.open ล้าง listener เดิม)
+    let logged = false;
+    window.addEventListener('beforeprint', () => {
+        if (logged) return; logged = true;
+        const fd = new FormData();
+        fd.append('document_type', 'asset_audit_sheet'); fd.append('document_id', D.docNo); fd.append('event_type', 'PRINT');
+        fd.append('client_meta', JSON.stringify(D.log));
+        navigator.sendBeacon ? navigator.sendBeacon('api.php?action=log_print_event', fd) : fetch('api.php?action=log_print_event', { method: 'POST', body: fd });
+    });
+})();
+</script>
+</body>
+</html>
+<?php
+    exit;
+}
+
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <!DOCTYPE html>
@@ -103,7 +174,7 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= $mode === 'audit' ? 'ใบตรวจนับทรัพย์สิน' : 'สติกเกอร์พัสดุ' ?> — <?= h($docNo) ?></title>
+<title>สติกเกอร์พัสดุ — <?= h($docNo) ?></title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -164,59 +235,19 @@ header('Content-Type: text/html; charset=utf-8');
     .lbl.s .lbl-sn, .lbl.s .lbl-foot { display: none; }
     .lbl.s .lbl-qr { width: 17mm; height: 17mm; }
 
-    /* ═════ ใบตรวจนับ ═════ */
-    .doc { width: 297mm; min-height: 210mm; margin: 0 auto 16px; background: #fff; padding: 10mm 11mm; box-shadow: 0 1px 4px rgba(15,23,42,.12); font-size: 9.5pt; }
-    .doc-head { display: flex; align-items: flex-start; gap: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--co, #0f172a); }
-    .doc-head img { height: 40px; width: auto; }
-    .doc-co { flex: 1; }
-    .doc-co b { display: block; font-size: 12.5pt; }
-    .doc-co span { font-size: 9pt; color: #475569; }
-    .doc-meta { text-align: right; font-size: 8.5pt; color: #475569; line-height: 1.5; }
-    .doc-meta .no { font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--co, #0f172a); font-size: 9.5pt; }
-    .class-tag { display: inline-block; border: 1px solid #b91c1c; color: #b91c1c; font-weight: 800; font-size: 7.5pt; padding: 0 5px; border-radius: 3px; letter-spacing: .04em; }
-    .doc-title { display: flex; align-items: baseline; gap: 10px; margin: 9px 0 6px; }
-    .doc-title h2 { font-size: 14pt; }
-    .doc-title span { color: #64748b; font-size: 9pt; }
-    .doc-fill { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; margin-bottom: 8px; font-size: 9pt; }
-    .doc-fill div { display: flex; gap: 6px; white-space: nowrap; }
-    .doc-fill i { flex: 1; border-bottom: 1px dotted #64748b; }
-    table.cnt { width: 100%; border-collapse: collapse; }
-    table.cnt th { background: #f1f5f9; font-size: 8pt; font-weight: 700; color: #334155; text-align: left; padding: 4px 5px; border: 1px solid #cbd5e1; }
-    table.cnt td { padding: 4px 5px; border: 1px solid #cbd5e1; vertical-align: top; font-size: 8.6pt; }
-    table.cnt tr { page-break-inside: avoid; }
-    table.cnt .grp td { background: #f8fafc; font-weight: 700; font-size: 9pt; border-top: 1.5px solid #64748b; }
-    table.cnt .grp small { font-weight: 400; color: #64748b; margin-left: 6px; }
-    .c-no { width: 26px; text-align: center; color: #64748b; }
-    .c-code { width: 138px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 8pt !important; }
-    .c-sub { color: #64748b; font-size: 7.6pt; }
-    .c-res { width: 150px; white-space: nowrap; font-size: 8pt !important; }
-    .box { display: inline-block; width: 9px; height: 9px; border: 1px solid #334155; border-radius: 2px; margin: 0 2px 0 5px; vertical-align: -1px; }
-    .c-note { width: 140px; }
-    .doc-sum { display: flex; gap: 18px; align-items: center; margin: 10px 0 0; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 9pt; page-break-inside: avoid; }
-    .doc-sum i { display: inline-block; width: 40px; border-bottom: 1px dotted #64748b; }
-    .sigs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; page-break-inside: avoid; }
-    .sig { border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px 8px; text-align: center; font-size: 8.5pt; }
-    .sig b { display: block; text-align: left; font-size: 8.5pt; margin-bottom: 26px; }
-    .sig .ln { border-bottom: 1px solid #475569; margin: 0 10px 3px; }
-    .sig small { color: #64748b; }
-    .doc-foot { margin-top: 8px; font-size: 7.5pt; color: #64748b; display: flex; justify-content: space-between; }
-
     @media print {
         body { background: #fff; }
         .bar { display: none !important; }
         .stage { padding: 0; }
-        .sheet, .doc, .roll .cell { box-shadow: none; margin: 0; }
+        .sheet, .roll .cell { box-shadow: none; margin: 0; }
         .cell { outline: 0; }
-        .doc { width: auto; min-height: 0; padding: 0; }
         .sheet { page-break-after: always; }
         .sheet:last-child { page-break-after: auto; }
         .roll { display: block; }
         .roll .cell { page-break-after: always; }
         .roll .cell:last-child { page-break-after: auto; }
     }
-<?php if ($mode === 'audit'): ?>
-    @page { size: A4 landscape; margin: 9mm 10mm 11mm; @bottom-right { content: "หน้า " counter(page) " / " counter(pages); font: 7.5pt Sarabun, sans-serif; color: #64748b; } @bottom-left { content: "<?= h($docNo) ?> · ข้อมูลภายใน (Internal)"; font: 7.5pt Sarabun, sans-serif; color: #64748b; } }
-<?php elseif ($layout === 'roll'): ?>
+<?php if ($layout === 'roll'): ?>
     @page { size: <?= $size === 's' ? '50mm 25mm' : '70mm 40mm' ?>; margin: 0; }
     @media print { .roll .cell { width: <?= $size === 's' ? '50mm' : '70mm' ?>; height: <?= $size === 's' ? '25mm' : '40mm' ?>; } }
 <?php else: ?>
@@ -225,7 +256,6 @@ header('Content-Type: text/html; charset=utf-8');
 </style>
 </head>
 <body>
-<?php if ($mode === 'labels'): ?>
 <div class="bar">
     <h1><i class="fa fa-tags" style="color:#2563eb;margin-right:6px"></i>พิมพ์สติกเกอร์พัสดุ<small><?= count($assets) ?> ชิ้น</small></h1>
     <span class="seg-lbl">ขนาด</span>
@@ -275,83 +305,6 @@ header('Content-Type: text/html; charset=utf-8');
 <?php   endforeach; echo '</div>'; endforeach; ?>
 </div>
 
-<?php else: /* ═════ ใบตรวจนับ ═════ */
-    $co = $CO[$docCo] ?? ['color' => '#0f172a', 'en' => 'Powertech Group', 'th' => 'กลุ่มบริษัท พาวเวอร์เทค'];
-    $groups = [];
-    foreach ($assets as $a) {
-        $key = $group === 'location' ? (trim((string)$a['location']) ?: 'ไม่ระบุที่ตั้ง') : ($a['dept_name'] ?: 'ไม่ระบุแผนก');
-        $groups[$key][] = $a;
-    }
-    ksort($groups, SORT_NATURAL);
-    $logo = ['PTA' => 'uploads/logos/pta_logo.png', 'PT4' => 'uploads/logos/pt4_logo.png', 'PTE' => 'uploads/logos/pte_logo.png'][$docCo] ?? '';
-?>
-<div class="bar">
-    <h1><i class="fa fa-clipboard-check" style="color:#2563eb;margin-right:6px"></i>ใบตรวจนับทรัพย์สิน<small><?= h($docCo ?: 'ที่เลือก') ?> · <?= count($assets) ?> รายการ</small></h1>
-    <span class="seg-lbl">จัดกลุ่มตาม</span>
-    <div class="seg">
-        <a href="<?= qs(['group' => 'dept']) ?>" class="<?= $group === 'dept' ? 'on' : '' ?>">แผนก</a>
-        <a href="<?= qs(['group' => 'location']) ?>" class="<?= $group === 'location' ? 'on' : '' ?>">ที่ตั้ง</a>
-    </div>
-<?php if (!$ids): ?>
-    <div class="seg">
-        <a href="<?= qs(['retired' => '']) ?>" class="<?= !$retired ? 'on' : '' ?>">เฉพาะที่ใช้อยู่</a>
-        <a href="<?= qs(['retired' => '1']) ?>" class="<?= $retired ? 'on' : '' ?>">รวมที่เลิกใช้</a>
-    </div>
-<?php endif; ?>
-    <button class="btn primary" onclick="window.print()"><i class="fa fa-print"></i> พิมพ์ / PDF</button>
-    <button class="btn" onclick="window.close()">ปิด</button>
-</div>
-<div class="stage">
-<div class="doc" style="--co:<?= h($co['color']) ?>">
-    <div class="doc-head">
-        <?php if ($logo): ?><img src="<?= h($logo) ?>" alt="" onerror="this.remove()"><?php endif; ?>
-        <div class="doc-co"><b><?= h($co['th']) ?></b><span><?= h($co['en']) ?> · ฝ่าย IT</span></div>
-        <div class="doc-meta">
-            <span class="class-tag">ข้อมูลภายใน · INTERNAL</span><br>
-            เลขที่ <span class="no"><?= h($docNo) ?></span><br>
-            พิมพ์ <?= h($thDate . ' ' . $now->format('H:i')) ?> น. โดย <?= h($printedBy) ?>
-        </div>
-    </div>
-    <div class="doc-title"><h2>ใบตรวจนับทรัพย์สิน IT</h2><span>IT Asset Physical Count Sheet · <?= count($assets) ?> รายการ · <?= count($groups) ?> <?= $group === 'location' ? 'ที่ตั้ง' : 'แผนก' ?></span></div>
-    <div class="doc-fill">
-        <div>วันที่ตรวจ <i></i></div><div>รอบการตรวจ <i></i></div><div>ผู้ตรวจนับ <i></i></div><div>ผู้ร่วมตรวจ <i></i></div>
-    </div>
-    <table class="cnt">
-        <thead><tr>
-            <th class="c-no">#</th><th class="c-code">รหัสพัสดุ</th><th>อุปกรณ์ / ยี่ห้อ-รุ่น</th><th>S/N</th>
-            <th>ผู้ถือครอง</th><th><?= $group === 'location' ? 'แผนก' : 'ที่ตั้ง' ?></th><th>สถานะในระบบ</th>
-            <th class="c-res">ผลตรวจ</th><th class="c-note">หมายเหตุ</th>
-        </tr></thead>
-        <tbody>
-<?php $n = 0; foreach ($groups as $gName => $rows): ?>
-            <tr class="grp"><td colspan="9"><?= h($gName) ?><small><?= count($rows) ?> รายการ</small></td></tr>
-<?php   foreach ($rows as $a): $n++; $model = trim(($a['brand'] ?? '') . ' ' . ($a['model'] ?? '')); ?>
-            <tr>
-                <td class="c-no"><?= $n ?></td>
-                <td class="c-code"><?= h($a['equipment_id']) ?></td>
-                <td><?= h($a['name']) ?><?php if ($model): ?><div class="c-sub"><?= h($model) ?><?= $a['cat_name'] ? ' · ' . h($a['cat_name']) : '' ?></div><?php endif; ?></td>
-                <td class="mono" style="font-size:7.6pt"><?= h($a['serial_number'] ?: '-') ?></td>
-                <td><?= h(holderOf($a) ?: '— ว่าง —') ?></td>
-                <td><?= h($group === 'location' ? ($a['dept_name'] ?: '-') : (preg_match('/^(PTA|PT4|PTE)$/i', (string)$a['location']) ? '-' : ($a['location'] ?: '-'))) ?></td>
-                <td><?= h($a['status'] ?: '-') ?></td>
-                <td class="c-res"><span class="box"></span>พบ<span class="box"></span>ไม่พบ<span class="box"></span>ชำรุด</td>
-                <td class="c-note"></td>
-            </tr>
-<?php endforeach; endforeach; ?>
-        </tbody>
-    </table>
-    <div class="doc-sum">
-        <b>สรุปผล</b> ทั้งหมด <b><?= count($assets) ?></b> รายการ · พบ <i></i> · ไม่พบ <i></i> · ชำรุด <i></i> · ไม่อยู่ในทะเบียน (พบเพิ่ม) <i></i>
-    </div>
-    <div class="sigs">
-        <div class="sig"><b>ผู้ตรวจนับ</b><div class="ln"></div><small>(.................................................)<br>วันที่ ......../......../........</small></div>
-        <div class="sig"><b>หัวหน้าแผนก / ผู้รับรอง</b><div class="ln"></div><small>(.................................................)<br>วันที่ ......../......../........</small></div>
-        <div class="sig"><b>ฝ่าย IT (ผู้ดูแลทะเบียน)</b><div class="ln"></div><small>(.................................................)<br>วันที่ ......../......../........</small></div>
-    </div>
-    <div class="doc-foot"><span>รายการที่ "ไม่พบ" หรือ "ชำรุด" ให้แจ้งฝ่าย IT ภายใน 3 วันทำการ เพื่อปรับปรุงทะเบียน</span><span><?= h($docNo) ?></span></div>
-</div>
-</div>
-<?php endif; ?>
 
 <script>
     // วาด QR ทุกดวง (ภาพคมพอสำหรับ 300dpi) แล้วค่อยให้พิมพ์ได้
@@ -363,7 +316,7 @@ header('Content-Type: text/html; charset=utf-8');
     window.addEventListener('beforeprint', () => {
         if (_logged) return; _logged = true;
         const fd = new FormData();
-        fd.append('document_type', <?= json_encode($mode === 'audit' ? 'asset_audit_sheet' : 'asset_labels') ?>);
+        fd.append('document_type', 'asset_labels');
         fd.append('document_id', <?= json_encode($docNo) ?>);
         fd.append('event_type', 'PRINT');
         fd.append('client_meta', <?= json_encode(json_encode(['count' => count($assets), 'company' => $docCo, 'ids' => array_slice(array_map('intval', array_column($assets, 'id')), 0, 200)])) ?>);

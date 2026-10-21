@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
     <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/vendor/qrcode.min.js"></script>
+    <script src="js/doc-print.js?v=20261022"></script>
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
     <style>
@@ -552,128 +554,39 @@ async function completeOffboard() {
     } catch(e) { Swal.fire('บันทึกไม่สำเร็จ', 'เชื่อมต่อระบบไม่ได้', 'error'); }
 }
 
+// ใบคืนเครื่องและถอนสิทธิ์ (A4 แผ่นเดียว — แกนกลาง js/doc-print.js)
 function printOffboard() {
-    const fmtDate = d => d ? d.split('-').reverse().join('/') : '-';
+    const { esc, section, thDate } = DocPrint;
     const r = setupData || {};
-    const allItems = [...OB_CHECKS, ...((r.custom_items||[]).map(c=>({...c, isCustom:true})))];
-    const cats = [...new Set(allItems.map(c=>c.cat))];
+    const allItems = [...OB_CHECKS, ...((r.custom_items || []).map(c => ({ ...c, isCustom: true })))];
+    const cats = [...new Set(allItems.map(c => c.cat))];
+    const item = c => { const st = obStates[c.id] || 'pending';
+        return `<div class="it ${st === 'done' ? 'done' : st === 'skipped' ? 'skip' : ''}"><span class="bx">${st === 'done' ? '✓' : st === 'skipped' ? '–' : ''}</span><span>${c.isCustom ? 'ถอน: ' : ''}${esc(c.title)}${c.critical ? ' ⚠' : ''}</span></div>`; };
+    const chk = cats.map(cat => `<div class="cat">${esc(cat)}</div>${allItems.filter(c => c.cat === cat).map(item).join('')}`).join('');
 
-    const checklistHtml = cats.map(cat => {
-        const items = allItems.filter(c=>c.cat===cat);
-        return `<div style="break-inside:avoid;margin-bottom:10px;">
-            <div style="font-size:9pt;font-weight:700;color:#dc2626;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;text-transform:uppercase;">${cat}</div>
-            ${items.map(c=>{
-                const st = obStates[c.id]||'pending';
-                const box = st==='done'
-                    ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #16a34a;border-radius:3px;background:#dcfce7;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#16a34a;">✓</span>`
-                    : st==='skipped'
-                    ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;background:#f1f5f9;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#94a3b8;">—</span>`
-                    : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #cbd5e1;border-radius:3px;background:#fff;margin-right:5px;vertical-align:middle;"></span>`;
-                const style = st==='skipped'?'text-decoration:line-through;color:#94a3b8;':st==='done'?'color:#166534;':'';
-                const label = c.isCustom ? `ถอน: ${escH(c.title)}` : c.title;
-                return `<div style="font-size:9pt;padding:2px 0;${style}">${box}${label}${c.critical?' ⚠':''}</div>`;
-            }).join('')}
-        </div>`;
-    }).join('');
+    const blocks = [`<div class="dp-sec"><div class="dp-sh">รายการคืนและถอนสิทธิ์ / OFFBOARDING CHECKLIST · ⚠ = ข้อสำคัญ</div><div class="dp-chk" style="columns:2">${chk}</div></div>`];
+    // เครื่องที่เก็บคืน + สถานะล้างข้อมูล (หลักฐาน TISAX ว่าข้อมูลไม่ติดเครื่องออกไป)
+    if (heldAssets.length) blocks.push(section('เครื่องที่เก็บคืน / RETURNED ASSETS', `<table class="dp-tbl"><tr><th>รหัส</th><th>อุปกรณ์</th><th>สถานะ</th><th>ข้อมูลในเครื่อง</th></tr>${heldAssets.map(x => `<tr>
+        <td class="mono">${esc(x.equipment_id)}</td><td>${esc(x.name)}</td><td>${x._returned ? '✓ รับคืนแล้ว' : '☐ ยังไม่คืน'}</td>
+        <td>${x._wiped === 'yes' ? 'ล้างแล้ว' : x._wiped === 'na' ? 'ไม่มีข้อมูล' : x._returned ? 'ยังไม่ล้าง' : '-'}</td></tr>`).join('')}</table>`, { html: true }));
+    const SYS = { ptc: 'PowertechCenter', carsys: 'CarSys', roomsys: 'RoomSys', erpN: 'ERP (ตัวใหม่)', erpO: 'ERP (ตัวเก่า)', mrpN: 'MRP (ตัวใหม่)', mrpO: 'MRP (ตัวเก่า)', ictrl: 'Icontrol' };
+    const granted = Object.entries(r.granted_systems || {}).filter(([, v]) => v).map(([k]) => esc(SYS[k] || k));
+    if (granted.length) blocks.push(section('ระบบที่ต้องปิดสิทธิ์ (จากใบติดตั้ง) / SYSTEMS TO REVOKE', granted.join(' · '), { html: true }));
+    const notes = document.getElementById('ob-notes').value;
+    if (notes.trim()) blocks.push(section('หมายเหตุ / NOTES', esc(notes), { clamp: 4 }));
 
-    const notes = escH(document.getElementById('ob-notes').value);
-    const company = (r.company||'').toUpperCase();
-    // เครื่องที่เก็บคืนจากหน้านี้ + สถานะล้างข้อมูล (หลักฐาน TISAX ว่าข้อมูลไม่ติดเครื่องออกไป)
-    const heldRows = heldAssets.map(a => `<tr><td style="padding:3px 6px;font-family:monospace;font-size:8pt;">${escH(a.equipment_id)}</td><td style="padding:3px 6px;">${escH(a.name)}</td>
-        <td style="padding:3px 6px;">${a._returned ? '✓ รับคืนแล้ว' : '☐ ยังไม่คืน'}</td><td style="padding:3px 6px;">${a._wiped === 'yes' ? 'ล้างแล้ว' : a._wiped === 'na' ? 'ไม่มีข้อมูล' : a._returned ? 'ยังไม่ล้าง' : '-'}</td></tr>`).join('');
-    const heldHtml = heldAssets.length ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;break-inside:avoid;">
-        <div style="font-size:.6rem;font-weight:700;letter-spacing:.05em;color:#94a3b8;margin-bottom:6px;">เครื่องที่เก็บคืน / RETURNED ASSETS</div>
-        <table style="width:100%;border-collapse:collapse;font-size:8.5pt;"><tr style="background:#f1f5f9;"><td style="padding:2px 6px;font-weight:700;">รหัส</td><td style="padding:2px 6px;font-weight:700;">อุปกรณ์</td><td style="padding:2px 6px;font-weight:700;">สถานะ</td><td style="padding:2px 6px;font-weight:700;">ข้อมูลในเครื่อง</td></tr>${heldRows}</table></div>` : '';
-    // ระบบที่เคยเปิดสิทธิ์ไว้ตอนติดตั้ง → ต้องปิดให้ครบ
-    const SYS = { ptc:'PowertechCenter', carsys:'CarSys', roomsys:'RoomSys', erpN:'ERP (ตัวใหม่)', erpO:'ERP (ตัวเก่า)', mrpN:'MRP (ตัวใหม่)', mrpO:'MRP (ตัวเก่า)', ictrl:'Icontrol' };
-    const grantedList = Object.entries(r.granted_systems || {}).filter(([, v]) => v).map(([k]) => SYS[k] || k);
-    const grantedHtml = grantedList.length ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:7px 10px;margin-bottom:10px;font-size:8.5pt;"><b style="font-size:.6rem;color:#64748b;">ระบบที่ต้องปิดสิทธิ์ (จากใบติดตั้ง):</b> ${grantedList.map(escH).join(' · ')}</div>` : '';
-    const obAccentColor = {PTA:'#059669',PT4:'#dc2626',PTE:'#2563eb'}[company]||'#334155';
-    const obGrad = {PTA:'linear-gradient(135deg,#065f46,#059669)',PT4:'linear-gradient(135deg,#991b1b,#dc2626)',PTE:'linear-gradient(135deg,#1d4ed8,#2563eb)'}[company]||'linear-gradient(135deg,#374151,#1e293b)';
-    const obCoNameTh = {PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด',PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด',PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด'}[company]||'Powertech Group of Companies';
-    const obCoNameEn = {PTA:'Powertech Engine Assembly Co., Ltd.',PT4:'Powertech 2004 Co., Ltd.',PTE:'Powertech Energy Solutions Co., Ltd.'}[company]||'Powertech Group';
-    const _obBase = window.location.origin + window.location.pathname.replace(/\/[^/]*$/,'/');
-    const obLogoUrl = {PTA:_obBase+'uploads/logos/pta_logo.png',PT4:_obBase+'uploads/logos/pt4_logo.png',PTE:_obBase+'uploads/logos/pte_logo.png'}[company]||'';
-    const obLogoHtml = obLogoUrl ? `<img src="${obLogoUrl}" alt="" onerror="this.remove()" style="height:44px;width:auto;object-fit:contain;">` : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${obAccentColor};">${company||'IT'}</div>`;
-    const obPrintDate = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-    const _obCell = (l,v,right) => `<div style="display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #e2e8f0;${right?'border-right:1px solid #e2e8f0;':''}gap:7px;"><span style="font-size:.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:88px;">${l}</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:16px;">${escH(v)||'-'}</span></div>`;
-    const _obSig = (label,name,date) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px 6px;text-align:center;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:24px;">${label}</div><div style="border-bottom:1.5px solid #cbd5e1;margin:0 8px 5px;"></div><div style="font-size:.67rem;color:#64748b;">( ${name||'................................'} )</div><div style="font-size:.62rem;color:#94a3b8;margin-top:2px;">วันที่ ${date||'........./........./.........&nbsp;'}</div></div>`;
-    const obInfoHtml = [
-        ['ชื่อพนักงาน', r.employee_name, 'แผนก', r.department],
-        ['Asset Code', r.asset_code, 'ชื่อเครื่อง (PC)', r.pc_name],
-        ['วันที่ Setup เดิม', fmtDate(r.setup_date), 'ช่าง IT (ผู้รับคืน)', r.status === 'offboarded' ? r.offboard_by : (window._sessName || r.tech_name)],
-    ].map(([l1,v1,l2,v2])=>_obCell(l1,v1,true)+_obCell(l2,v2,false)).join('');
-    const html = `<!DOCTYPE html><html><head>
-        <meta charset="utf-8">
-        <title>Offboarding — ${escH(r.employee_name||'User')}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <style>
-            @page { size:auto; margin:12mm 10mm; }
-            * { box-sizing:border-box; margin:0; padding:0; }
-            body { font-family:'Sarabun',Arial,sans-serif; font-size:9pt; color:#1e293b; background:#e5e7eb; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-            .wrap { width:100%; max-width:740px; margin:0 auto; background:#fff; padding:12mm 10mm; }
-            @media print { body { background:#fff !important; } .wrap { padding:0; min-height:273mm; display:flex; flex-direction:column; } }
-            @media print and (orientation:landscape) { .wrap { min-height:186mm; } }
-            .checks-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
-        </style>
-    </head><body><div class="wrap">
-
-        <!-- HEADER -->
-        <div style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${obAccentColor};padding-bottom:12px;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:10px;border-left:4px solid ${obAccentColor};padding-left:12px;">
-                ${obLogoHtml}
-                <div>
-                    <div style="font-size:1.05rem;font-weight:800;color:#1e293b;letter-spacing:-.01em;">${obCoNameEn}</div>
-                    <div style="font-size:.72rem;color:#475569;margin-top:2px;font-weight:500;">${obCoNameTh}</div>
-                    <div style="font-size:.65rem;color:#94a3b8;margin-top:2px;">IT Support &amp; Maintenance Dept.</div>
-                </div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-                <table style="border:1px solid #e2e8f0;border-radius:5px;font-size:.6rem;border-collapse:collapse;">
-                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Form No.</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">IT-FM-002</td></tr>
-                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Revision</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#dc2626;font-weight:600;">Rev. 01</td></tr>
-                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Eff. Date</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">${obPrintDate}</td></tr>
-                </table>
-            </div>
-        </div>
-
-        <!-- TITLE BAR -->
-        <div style="background:${obGrad};color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-            <div style="font-size:.9375rem;font-weight:700;letter-spacing:.02em;">ใบคืนเครื่องและถอนสิทธิ์ / IT Offboarding Checksheet</div>
-            <div style="font-size:.67rem;opacity:.85;margin-top:1px;">IT Support &amp; Maintenance Dept. | IT-FM-002 Rev.01</div>
-        </div>
-
-        <!-- INFO GRID -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
-            ${obInfoHtml}
-        </div>
-
-        <!-- CHECKLIST -->
-        <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px;">รายการคืนและถอนสิทธิ์ / Offboarding Checklist</div>
-            <div class="checks-grid">${checklistHtml}</div>
-        </div>
-        ${heldHtml}${grantedHtml}
-
-        ${notes ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:4px;">หมายเหตุ / Notes</div><div style="font-size:.775rem;color:#1e293b;">${notes}</div></div>` : ''}
-
-        <!-- SIGNATURES -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;break-inside:avoid;page-break-inside:avoid;">
-            ${_obSig('ผู้คืนเครื่อง / Employee', escH(r.employee_name), '')}
-            ${_obSig('ช่าง IT (รับคืน) / Technician', escH(r.status === 'offboarded' ? r.offboard_by : (window._sessName || r.tech_name)), obPrintDate)}
-        </div>
-
-        <!-- FOOTER -->
-        <div style="margin-top:14px;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:.6rem;color:#94a3b8;">ออกโดยระบบ Powertech System Center · พิมพ์: ${obPrintDate}</div>
-            <div style="font-size:.6rem;color:#94a3b8;">IT-FM-002 Rev.01 · หน้า 1/1 · IT / Information Technology</div>
-        </div>
-    </div></body></html>`;
-
-    const w = window.open('', '', 'width=820,height=1000');
-    w.document.write(html);
-    w.document.close();
-    setTimeout(() => { w.focus(); w.print(); }, 600);
+    const tech = r.status === 'offboarded' ? r.offboard_by : (window._sessName || r.tech_name);
+    DocPrint.print({
+        company: r.company, formKey: 'offboard', classified: true,
+        docNo: r.asset_code || ('SETUP-' + (r.id || '')), dateText: 'ใบติดตั้งเดิม ' + thDate(r.setup_date),
+        statusText: r.status === 'offboarded' ? 'ปิดงานแล้ว' : 'ระหว่างดำเนินการ',
+        title: { th: 'ใบคืนเครื่องและถอนสิทธิ์', en: 'IT Offboarding', color: '#b45309' },
+        info: [['พนักงาน', r.employee_name], ['แผนก', r.department], ['รหัสพนักงาน', r.employee_id], ['รหัสพัสดุ', r.asset_code],
+               ['ชื่อเครื่อง', r.pc_name], ['ช่าง IT (ผู้รับคืน)', tech]],
+        blocks,
+        sigs: [{ role: 'ผู้คืนเครื่อง / Employee', name: r.employee_name },
+               { role: 'ช่าง IT (รับคืน) / Technician', name: tech, date: thDate(r.offboard_date || new Date()) }],
+    });
 }
 
 // Init

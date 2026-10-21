@@ -22,6 +22,8 @@
     <script src="js/service-gateway.js"></script>
     <script src="js/vendor/chart.min.js"></script>
     <script src="js/vendor/qrcode.min.js"></script>
+    <script src="js/doc-print.js?v=20261022"></script>
+    <script src="js/ticket-print.js?v=20261022"></script>
     <script src="js/vendor/jsbarcode.min.js"></script>
     <script src="js/vendor/sortable.min.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
@@ -5935,137 +5937,17 @@
 
     var _repairLastJobNo = '';
 
+    // ใบแจ้งซ่อมจากทะเบียนพัสดุ = ใบงานซ่อมมาตรฐานเดียวกับหน้าช่าง (js/ticket-print.js)
     window.printRepairTicket = function(jobNoOverride) {
-        const item      = _repairItem || {};
-        const assetId   = String(item['ID อุปกรณ์'] || item.asset_id || '');
-        const assetName = String(item['ชื่ออุปกรณ์'] || '');
-        const serial    = String(item['Serial Number'] || item.serial_number || '');
-        const brand     = String(item.brand || '');
-        const model     = String(item.model || '');
-        const cat       = String(item['หมวดหมู่'] || '');
-        const dept      = String(item.owning_department_name || item.owning_department || '');
-        const company   = String(item.company || '');
-        const loc       = String(item.location || '');
-        const locDisplay = loc && !/^(PTA|PT4|PTE)$/i.test(loc) ? loc : '';
-
-        const problem    = gid('repair-problem') ? gid('repair-problem').value.trim() : '';
-        const solution   = gid('repair-solution') ? gid('repair-solution').value.trim() : '';
-        const status     = gid('repair-status') ? gid('repair-status').value : 'Pending';
-        const servicedBy = gid('repair-serviced-by') ? gid('repair-serviced-by').value.trim() : 'IT';
-        const dateStr    = gid('repair-date') ? gid('repair-date').value : new Date().toISOString().slice(0,10);
-        const jobNo      = jobNoOverride || _repairLastJobNo || ('RPR-' + dateStr.replace(/-/g,'') + '-XXXX');
-
-        const coMap = { PTA:{color:'#059669',label:'Powertech Engine Assembly'}, PT4:{color:'#dc2626',label:'Powertech 2004'}, PTE:{color:'#2563eb',label:'Powertech Energy Solutions'} };
-        const STATUS_TH = { 'Pending':'รอดำเนินการ', 'In Progress':'กำลังซ่อม', 'Waiting for Parts':'รออะไหล่', 'Completed':'เสร็จแล้ว', 'Cancelled':'ยกเลิก' };
-        const co    = coMap[company] || { color:'#334155', label: company || 'PowerTech Center' };
-
-        const dateFormatted = dateStr ? new Date(dateStr+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '';
-
-        const win = window.open('','_blank','width=850,height=1100');
-        if (!win) return;
-        win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Repair Ticket — ${jobNo}</title><style>
-            *{box-sizing:border-box;margin:0;padding:0}
-            body{font-family:'Sarabun','Segoe UI',Arial,sans-serif;background:#fff;color:#1e293b;font-size:13px;padding:0}
-            @page{size:A4;margin:14mm 14mm 14mm 14mm}
-            @media print{body{padding:0}.no-print{display:none!important}}
-            .page{max-width:780px;margin:0 auto;padding:20px}
-            /* Header */
-            .ticket-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-radius:10px;background:${co.color};color:#fff;margin-bottom:18px}
-            .ticket-header-left{display:flex;flex-direction:column;gap:3px}
-            .ticket-header-co{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.85}
-            .ticket-header-title{font-size:20px;font-weight:800;letter-spacing:-.3px}
-            .ticket-header-right{text-align:right}
-            .ticket-jobno{font-family:ui-monospace,monospace;font-size:18px;font-weight:800;letter-spacing:.5px}
-            .ticket-date{font-size:11px;opacity:.85;margin-top:3px}
-            /* Section */
-            .section{margin-bottom:16px}
-            .section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:${co.color};border-bottom:2px solid ${co.color};padding-bottom:4px;margin-bottom:10px}
-            /* Grid */
-            .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
-            .info-item label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#64748b;display:block;margin-bottom:2px}
-            .info-item .val{font-size:13px;font-weight:600;color:#0f172a}
-            /* Text area fields */
-            .field-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:10px 12px;min-height:60px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-            .field-box.empty{color:#94a3b8;font-style:italic}
-            /* Status badge */
-            .status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
-            .status-badge.completed{background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
-            .status-badge.inprogress{background:#fffbeb;color:#b45309;border-color:#fde68a}
-            .status-badge.pending{background:#f8fafc;color:#475569;border-color:#e2e8f0}
-            /* Signature row */
-            .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
-            .sig-box{text-align:center;font-size:11px;color:#64748b;padding-top:44px;line-height:1.7}
-            .sig-line{border-top:1.5px solid #334155;margin:0 24px 4px}
-            /* Footer */
-            .ticket-footer{text-align:center;margin-top:18px;font-size:10px;color:#94a3b8;border-top:1px dashed #e2e8f0;padding-top:10px}
-            /* Print button */
-            .print-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:${co.color};color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:18px}
-        </style></head><body>
-        <div class="page">
-            <div class="no-print" style="margin-bottom:12px">
-                <button class="print-btn" onclick="window.print()">พิมพ์ใบซ่อม</button>
-            </div>
-
-            <!-- Header -->
-            <div class="ticket-header">
-                <div class="ticket-header-left">
-                    <div class="ticket-header-co">${escapeHtml(co.label)} · IT Department</div>
-                    <div class="ticket-header-title">ใบซ่อม / Repair Ticket</div>
-                </div>
-                <div class="ticket-header-right">
-                    <div class="ticket-jobno">${escapeHtml(jobNo)}</div>
-                    <div class="ticket-date">${escapeHtml(dateFormatted)}</div>
-                </div>
-            </div>
-
-            <!-- Asset Info -->
-            <div class="section">
-                <div class="section-title">ข้อมูลอุปกรณ์ / Asset Information</div>
-                <div class="info-grid">
-                    <div class="info-item"><label>รหัสพัสดุ (Asset ID)</label><div class="val" style="font-family:ui-monospace,monospace">${escapeHtml(assetId) || '—'}</div></div>
-                    <div class="info-item"><label>ชื่ออุปกรณ์</label><div class="val">${escapeHtml(assetName) || '—'}</div></div>
-                    <div class="info-item"><label>หมายเลขเครื่อง (S/N)</label><div class="val" style="font-family:ui-monospace,monospace">${escapeHtml(serial) || '—'}</div></div>
-                    <div class="info-item"><label>หมวดหมู่</label><div class="val">${escapeHtml(cat) || '—'}</div></div>
-                    <div class="info-item"><label>ยี่ห้อ / รุ่น</label><div class="val">${escapeHtml([brand,model].filter(Boolean).join(' ') || '—')}</div></div>
-                    <div class="info-item"><label>แผนก / สถานที่</label><div class="val">${escapeHtml([dept, locDisplay].filter(Boolean).join(' · ') || '—')}</div></div>
-                </div>
-            </div>
-
-            <!-- Repair Info -->
-            <div class="section">
-                <div class="section-title">รายละเอียดการซ่อม / Repair Details</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-                    <div class="info-item"><label>ช่างผู้รับงาน</label><div class="val">${escapeHtml(servicedBy) || '—'}</div></div>
-                    <div class="info-item"><label>สถานะ</label><div class="val"><span class="status-badge ${status==='Completed'?'completed':status==='In Progress'?'inprogress':'pending'}">${escapeHtml(STATUS_TH[status] || status)}</span></div></div>
-                </div>
-                <div style="margin-bottom:10px">
-                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#64748b;margin-bottom:5px">อาการเสีย / Problem</div>
-                    <div class="field-box ${problem?'':'empty'}">${problem ? escapeHtml(problem) : 'ยังไม่ได้ระบุ'}</div>
-                </div>
-                <div>
-                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#64748b;margin-bottom:5px">วิธีแก้ไข / Solution</div>
-                    <div class="field-box ${solution?'':'empty'}">${solution ? escapeHtml(solution) : 'ยังไม่ได้ระบุ (กรอกหลังซ่อมเสร็จ)'}</div>
-                </div>
-            </div>
-
-            <!-- Signatures -->
-            <div class="sig-row">
-                <div class="sig-box">
-                    <div class="sig-line"></div>
-                    ผู้แจ้งซ่อม / Reported By<br>( ...................................... )<br>วันที่ ......../......../........
-                </div>
-                <div class="sig-box">
-                    <div class="sig-line"></div>
-                    ช่าง IT / Technician<br>( ${escapeHtml(servicedBy) || '......................................'} )<br>วันที่ ......../......../........
-                </div>
-            </div>
-
-            <div class="ticket-footer">PowerTech Center · IT Service Management · พิมพ์โดยระบบอัตโนมัติ · ${escapeHtml(jobNo)}</div>
-        </div>
-        <script>window.onload=function(){}<\/script>
-        </body></html>`);
-        win.document.close();
-        setTimeout(() => win.focus(), 200);
+        const item = _repairItem || {};
+        const v = id => (gid(id)?.value || '').trim();
+        TicketPrint.print({
+            id: jobNoOverride || _repairLastJobNo || '',
+            company: item.company || '', date: v('repair-date') || new Date().toISOString().slice(0, 10),
+            status: v('repair-status') || 'Pending', requester: v('repair-serviced-by') || '', department: item.owning_department_name || '',
+            servicedBy: v('repair-serviced-by'), type: item['หมวดหมู่'] || '', urgency: 'ปกติ',
+            asset_id: item['ID อุปกรณ์'] || item.asset_id || '', problem: v('repair-problem'), solution: v('repair-solution'),
+        }, { includeImages: false });
     };
 
     window.exportEmployees = function() {
