@@ -52,12 +52,25 @@ if ($search) {
 }
 
 $sql = "SELECT id, employee_name, employee_id, department, company, asset_code, pc_name,
-               tech_name, setup_date, status, offboard_date, job_type, created_at
+               tech_name, setup_date, status, offboard_date, offboard_notes, job_type, created_at,
+               it_asset_id, checklist_states, custom_items
         FROM setup_records WHERE ".implode(' AND ',$where)." ORDER BY created_at DESC LIMIT 200";
 
 $stmt = $conn->prepare($sql);
 if ($types) $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// ความคืบหน้าเช็กลิสต์ (ทำแล้ว/ข้าม นับว่าจัดการแล้ว) — 25 = จำนวนข้อมาตรฐานใน CHECKS ของ setup.html
+foreach ($rows as &$r) {
+    $states = json_decode($r['checklist_states'] ?? '{}', true) ?: [];
+    $custom = json_decode($r['custom_items'] ?? '[]', true) ?: [];
+    $done = count(array_filter($states, fn($v) => in_array($v, ['done', 'skipped'], true)));
+    foreach ($custom as $c) if (in_array($c['state'] ?? '', ['done', 'skipped'], true)) $done++;
+    $r['progress_done']  = $done;
+    $r['progress_total'] = 25 + count($custom);
+    unset($r['checklist_states'], $r['custom_items']);
+}
+unset($r);
 
 echo json_encode(['status'=>'success','records'=>$rows,'total'=>count($rows)]);

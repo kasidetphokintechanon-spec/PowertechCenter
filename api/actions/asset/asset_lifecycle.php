@@ -160,6 +160,11 @@ if ($op === 'return') {
                                               custodian_dept_id = NULL, department = NULL, status = ? WHERE id = ?");
     $u->bind_param('si', $newStatus, $id);
     $u->execute();
+    $closeNote = 'คืนเครื่อง: ' . $reason . ' · ' . $cond . ' · ' . $wiped;
+    $sr = $conn->prepare("UPDATE setup_records SET status='offboarded', offboard_date=CURDATE(), offboard_notes=?, offboard_by=?
+                          WHERE status='active' AND (it_asset_id = ? OR (asset_code <> '' AND asset_code = ?))");
+    $sr->bind_param('ssis', $closeNote, $actor, $id, $asset['equipment_id']);
+    $sr->execute();
     logAssetHistory($conn, $id, 'RETURN', 'คืนจาก ' . ($holderName ?: $asset['custodian_employee_id']) . ' · ' . $reason . ' · ' . $cond . ' · ' . $wiped . ($note ? ' · ' . $note : ''));
     echo json_encode(['status' => 'success', 'message' => 'รับคืนเครื่องแล้ว — สถานะ: ' . $newStatus, 'new_status' => $newStatus], JSON_UNESCAPED_UNICODE);
     exit;

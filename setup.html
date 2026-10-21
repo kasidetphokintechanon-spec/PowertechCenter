@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windows Setup Checksheet — IT</title>
+    <title>ใบติดตั้งเครื่อง — IT</title>
     <link rel="icon" href="favicon.ico">
     <script src="js/favicon-version.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
     <style>
         /* Override app-shell lock — this page scrolls normally */
@@ -302,8 +304,8 @@
     <div class="ptc-nav-brand">
         <div class="ptc-nav-icon" id="nav-icon" style="background:#2563eb"><i class="fa fa-laptop-code"></i></div>
         <div>
-            <div class="ptc-nav-title">Windows Setup Checksheet</div>
-            <div class="ptc-nav-sub">IT Delivery Certificate</div>
+            <div class="ptc-nav-title">ใบติดตั้งเครื่อง</div>
+            <div class="ptc-nav-sub">ติดตั้ง / ส่งมอบคอมพิวเตอร์ · IT-FM-001</div>
         </div>
     </div>
     <div style="flex:1"></div>
@@ -772,7 +774,7 @@
     <!-- ปุ่มรองเป็นแบบโปร่ง ให้ "บันทึก" เด่นปุ่มเดียว (เดิมน้ำเงินเท่ากันหมด แยกไม่ออก) -->
     <button class="ptc-ghost" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> รีเซ็ต</button>
     <button class="ptc-ghost" onclick="switchTab('checklist');filterPending()"><i class="fa fa-clock"></i> ที่ยังไม่เสร็จ</button>
-    <a id="btn-offboard" href="#" class="ptc-ghost" style="display:none;color:#dc2626;border-color:#fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> Offboard เครื่อง</a>
+    <a id="btn-offboard" href="#" class="ptc-ghost" style="display:none;color:#dc2626;border-color:#fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> พนักงานออก / คืนเครื่อง</a>
     <button class="ptc-ghost" onclick="switchTab('email');refreshEmail()"><i class="fa fa-envelope"></i> Onboarding Mail</button>
     <button class="ptc-ghost" onclick="printSetup()"><i class="fa fa-print"></i> ปริ้นใบส่งมอบ</button>
     <button class="ptc-btn" onclick="saveRecord()" id="btn-save-db"><i class="fa fa-floppy-disk"></i> บันทึก</button>
@@ -1060,10 +1062,11 @@ function updateOffboardBtn() {
     if (recordId > 0) { btn.style.display = 'inline-flex'; btn.href = `setup_offboard.html?id=${recordId}`; }
     else { btn.style.display = 'none'; }
 }
-function goOffboard(e) {
+async function goOffboard(e) {
     e.preventDefault();
     if (!recordId) return;
-    if (!confirm('ต้องการเปิดหน้า Offboard เครื่องสำหรับพนักงานนี้?')) return;
+    const r = await Swal.fire({ icon:'question', title:'พนักงานคนนี้ออก / คืนเครื่อง?', text:'จะเปิดหน้าเช็กลิสต์ปิดสิทธิ์และเก็บเครื่องคืน', showCancelButton:true, confirmButtonText:'เปิดหน้าพนักงานออก', cancelButtonText:'ยกเลิก' });
+    if (!r.isConfirmed) return;
     window.open(`setup_offboard.html?id=${recordId}`, '_blank');
 }
 
@@ -1402,8 +1405,9 @@ function filterPending() {
     });
 }
 
-function resetChecklist() {
-    if (!confirm('รีเซ็ต checklist ทั้งหมด?')) return;
+async function resetChecklist() {
+    const r = await Swal.fire({ icon:'warning', title:'ล้างเช็กลิสต์ทั้งหมด?', text:'ทุกข้อจะกลับเป็น "ยังไม่ทำ"', showCancelButton:true, confirmButtonText:'ล้างเช็กลิสต์', confirmButtonColor:'#dc2626', cancelButtonText:'ยกเลิก' });
+    if (!r.isConfirmed) return;
     CHECKS.forEach(c => states[c.id] = 'pending');
     saveStates(); renderChecklist(); updateProgress();
 }
@@ -1729,7 +1733,8 @@ async function saveEmailImage() {
 
 // ── Print ──────────────────────────────────────────────────────
 function printSetup() {
-    const get = id => document.getElementById(id)?.value || '';
+    const escP = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    const get = id => escP(document.getElementById(id)?.value || '');
     const fmtDate = d => { if (!d) return '-'; const p = d.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d; };
     const coAccess = getCompanyAccess().filter(c => c.active);
     const doneIds = CHECKS.filter(c=>states[c.id]==='done').map(c=>c.id);
@@ -1780,7 +1785,7 @@ function printSetup() {
             <td style="padding:3px 6px 3px 0;">
                 <span style="display:inline-block;background:${coBadgeBg};color:${coBadgeColor};font-size:8pt;font-weight:700;padding:1px 7px;border-radius:99px;">${c.co}</span>
             </td>
-            <td style="font-size:8.5pt;font-family:monospace;padding:3px 6px 3px 0;">${c.netuser||'-'}</td>
+            <td style="font-size:8.5pt;font-family:monospace;padding:3px 6px 3px 0;">${escP(c.netuser)||'-'}</td>
             <td style="font-size:8pt;padding:3px 0;color:${c.vpn?coBadgeColor:'#94a3b8'};">${c.vpn?'✅':'—'}</td>
             <td style="font-size:8pt;padding:3px 0;color:${c.inet?coBadgeColor:'#94a3b8'};">${c.inet?'✅':'—'}</td>
         </tr>`;
@@ -1812,8 +1817,13 @@ function printSetup() {
     const gradColor = gradMap[company]||'linear-gradient(135deg,#1e3a5f,#2563eb)';
     const _base = window.location.origin + window.location.pathname.replace(/\/[^/]*$/,'/');
     const logoMap = {PTA:_base+'uploads/logos/pta_logo.png',PT4:_base+'uploads/logos/pt4_logo.png',PTE:_base+'uploads/logos/pte_logo.png'};
-    const logoHtml = logoMap[company] ? `<img src="${logoMap[company]}" alt="${company}" style="height:44px;width:auto;object-fit:contain;">` : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${accentColor};">${company||'IT'}</div>`;
+    const logoHtml = logoMap[company] ? `<img src="${logoMap[company]}" alt="" onerror="this.remove()" style="height:44px;width:auto;object-fit:contain;">` : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${accentColor};">${company||'IT'}</div>`;
     const printDateStr = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+    // ระบบที่เปิดสิทธิ์ให้ (แท็บ "สิทธิ์") — ต้องอยู่ในใบด้วย ตอนพนักงานออกจะได้รู้ว่าต้องปิดอะไรบ้าง
+    const granted = GRANTED_SYSTEM_KEYS.filter(k => document.getElementById('epchk-' + k)?.checked)
+        .map(k => { const n = (document.querySelector('#ep-' + k + ' .ep-name')?.textContent || k).trim(), t = (document.querySelector('#ep-' + k + ' .ep-tag')?.textContent || '').trim();
+                    return escP(t && t !== 'รหัสพนักงาน' ? `${n} (${t})` : n); });
+    const grantedHtml = granted.length ? `<div style="margin-top:6px;font-size:8.5pt;"><b style="font-size:.6rem;color:#64748b;">ระบบที่ได้รับสิทธิ์:</b> ${granted.join(' · ')}</div>` : '';
     const _cell = (l,v,right) => `<div style="display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #e2e8f0;${right?'border-right:1px solid #e2e8f0;':''}gap:7px;"><span style="font-size:.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:88px;">${l}</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:16px;">${v||'-'}</span></div>`;
     const infoRows = [
         ['ชื่อผู้ใช้งาน', get('f-user'), 'แผนก', get('f-dept')],
@@ -1877,7 +1887,7 @@ function printSetup() {
             ${infoRowsHtml}
         </div>
 
-        ${netSection ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:6px;">สิทธิ์การเข้าใช้ / Access Rights</div><table style="width:100%;border-collapse:collapse;font-size:8.5pt;"><tr style="background:#f1f5f9;"><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">บริษัท</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">Net User / Domain</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">VPN</td></tr>${coAccessRows}</table></div>` : ''}
+        ${netSection ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:6px;">สิทธิ์การเข้าใช้ / Access Rights</div><table style="width:100%;border-collapse:collapse;font-size:8.5pt;"><tr style="background:#f1f5f9;"><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">บริษัท</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">Net User / Domain</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;width:50px;">VPN</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;width:60px;">Internet</td></tr>${coAccessRows}</table>${grantedHtml}</div>` : (grantedHtml ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">${grantedHtml}</div>` : '')}
 
         <!-- CHECKLIST -->
         <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">
@@ -1886,6 +1896,15 @@ function printSetup() {
         </div>
 
         ${get('f-notes') ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:4px;">หมายเหตุ / Notes</div><div class="notes-box" style="background:transparent;border:none;padding:0;">${get('f-notes')}</div></div>` : ''}
+
+        <div style="border:1px solid #e2e8f0;border-radius:5px;padding:7px 10px;margin-bottom:10px;font-size:8pt;line-height:1.55;break-inside:avoid;">
+            <b>การรับทราบของผู้รับเครื่อง</b> — ข้าพเจ้าได้รับเครื่องตามรายการข้างต้นในสภาพใช้งานได้ และรับทราบว่า
+            (1) เครื่องและข้อมูลในเครื่องเป็นทรัพย์สินของบริษัท ใช้เพื่องานเท่านั้น
+            (2) จะไม่เปิดเผยรหัสผ่านหรือให้ผู้อื่นใช้บัญชีของข้าพเจ้า
+            (3) จะไม่ติดตั้งโปรแกรมหรือปิดระบบป้องกันไวรัส/การเข้ารหัสเอง
+            (4) หากเครื่องสูญหาย ถูกขโมย หรือสงสัยว่าข้อมูลรั่วไหล จะแจ้งฝ่าย IT ทันที
+            (5) เมื่อพ้นสภาพพนักงานหรือย้ายงาน จะคืนเครื่องและอุปกรณ์ให้ฝ่าย IT
+        </div>
 
         <!-- SIGNATURES -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;break-inside:avoid;page-break-inside:avoid;">

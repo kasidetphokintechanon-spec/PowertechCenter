@@ -20,5 +20,6 @@ $row['company_access']     = json_decode($row['company_access']     ?? '[]', tru
 $row['printer_buildings']  = json_decode($row['printer_buildings']  ?? '[]', true) ?: [];
 $row['offboard_checklist'] = json_decode($row['offboard_checklist'] ?? '[]', true) ?: [];
 $row['granted_systems']    = json_decode($row['granted_systems']    ?? '{}', true) ?: [];
+unset($row['net_password']); // TISAX: ไม่ส่งรหัสผ่านออกจาก server (เลิกเก็บแล้ว แต่ใบเก่าอาจยังมีค้าง)
 
 echo json_encode(['status'=>'success','record'=>$row]);

@@ -510,6 +510,10 @@ try {
         'reorder_services' => ['admin.access_admin'], 'probe_host' => ['admin.access_admin', 'it_log.access'],
         'save_stock_summary_schedule' => ['stock.manage'], 'saveStockSummarySchedule' => ['stock.manage'],
         'deleteStockSummarySchedule' => ['stock.manage'], 'initStockTables' => ['stock.manage'],
+        // ใบติดตั้งมี IP / ชื่อผู้ใช้ VPN / สิทธิ์ระบบ — เฉพาะ IT (เดิมพนักงานทั่วไปเปิดดู/ลบได้)
+        'getSetupRecords' => ['it_log.access', 'asset.manage'], 'getSetupRecord' => ['it_log.access', 'asset.manage'],
+        'saveSetupRecord' => ['it_log.access', 'asset.manage'], 'deleteSetupRecord' => ['it_log.access', 'asset.manage'],
+        'findSetupRecordByAsset' => ['it_log.access', 'asset.manage'], 'getSetupAssetCodes' => ['it_log.access', 'asset.manage'],
         'clear_loan_history' => ['loan.manage'], 'denyRequest' => ['loan.manage'], 'update_loan_status' => ['loan.manage'],
     ];
     if (isset($ACTION_PERMS[$safeAction])) {

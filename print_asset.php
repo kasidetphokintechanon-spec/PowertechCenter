@@ -168,7 +168,7 @@ header('Content-Type: text/html; charset=utf-8');
         <button class="copy-btn" onclick="setCopy('copy2',this)">สำเนา 2 — ผู้รับ</button>
     </div>
     <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์ / PDF</button>
-    <a class="close-btn" href="asset.html"><i class="fas fa-times"></i> ปิด</a>
+    <a class="close-btn" href="admin.html?tab=it_assets" onclick="if (window.opener) { window.close(); return false; }"><i class="fas fa-times"></i> ปิด</a>
 </div>
 
 <div class="a4 <?= h($themeClass) ?>" id="a4doc" style="position:relative">

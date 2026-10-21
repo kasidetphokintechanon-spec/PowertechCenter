@@ -4989,7 +4989,7 @@
         SETUP_SYNC: ['fa-laptop-code', 'อัปเดตจากใบติดตั้ง', '#0891b2', 'data'], NOTE: ['fa-comment', 'บันทึกโน้ต', '#64748b', 'data'],
         TRANSFER: ['fa-right-left', 'โอนย้ายบริษัท', '#7c3aed', 'holder'], ASSIGN: ['fa-user-plus', 'มอบเครื่อง', '#16a34a', 'holder'],
         RETURN: ['fa-arrow-rotate-left', 'รับคืนเครื่อง', '#0d9488', 'holder'], RETIRE: ['fa-ban', 'ตัดจำหน่าย', '#dc2626', 'holder'],
-        SETUP: ['fa-screwdriver', 'ติดตั้งเครื่อง', '#0891b2', 'holder'], OFFBOARD: ['fa-user-minus', 'พนักงานออก', '#b45309', 'holder'],
+        SETUP: ['fa-screwdriver', 'ติดตั้งเครื่อง', '#0891b2', 'holder'], SETUP_DELETE: ['fa-trash', 'ลบใบติดตั้ง', '#dc2626', 'data'], OFFBOARD: ['fa-user-minus', 'พนักงานออก', '#b45309', 'holder'],
         LOAN_OUT: ['fa-arrow-up-from-bracket', 'ยืมออก', '#ea580c', 'holder'], LOAN_BACK: ['fa-arrow-rotate-left', 'คืนจากการยืม', '#0d9488', 'holder'],
         LOAN_REQUEST: ['fa-paper-plane', 'ขอยืม', '#ea580c', 'holder'], LOAN_APPROVED: ['fa-check', 'อนุมัติการยืม', '#16a34a', 'holder'],
         LOAN_DENIED: ['fa-xmark', 'ปฏิเสธการยืม', '#64748b', 'holder'], LOAN_RETURNED: ['fa-arrow-rotate-left', 'คืนจากการยืม', '#0d9488', 'holder'],
@@ -5955,7 +5955,8 @@
         const dateStr    = gid('repair-date') ? gid('repair-date').value : new Date().toISOString().slice(0,10);
         const jobNo      = jobNoOverride || _repairLastJobNo || ('RPR-' + dateStr.replace(/-/g,'') + '-XXXX');
 
-        const coMap = { PTA:{color:'#059669',label:'PowerTech Assembly'}, PT4:{color:'#dc2626',label:'PowerTech 2004'}, PTE:{color:'#2563eb',label:'PowerTech Energy'} };
+        const coMap = { PTA:{color:'#059669',label:'Powertech Engine Assembly'}, PT4:{color:'#dc2626',label:'Powertech 2004'}, PTE:{color:'#2563eb',label:'Powertech Energy Solutions'} };
+        const STATUS_TH = { 'Pending':'รอดำเนินการ', 'In Progress':'กำลังซ่อม', 'Waiting for Parts':'รออะไหล่', 'Completed':'เสร็จแล้ว', 'Cancelled':'ยกเลิก' };
         const co    = coMap[company] || { color:'#334155', label: company || 'PowerTech Center' };
 
         const dateFormatted = dateStr ? new Date(dateStr+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'}) : '';
@@ -5993,7 +5994,8 @@
             .status-badge.pending{background:#f8fafc;color:#475569;border-color:#e2e8f0}
             /* Signature row */
             .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
-            .sig-box{border-top:1.5px solid #334155;padding-top:6px;text-align:center;font-size:11px;color:#64748b}
+            .sig-box{text-align:center;font-size:11px;color:#64748b;padding-top:44px;line-height:1.7}
+            .sig-line{border-top:1.5px solid #334155;margin:0 24px 4px}
             /* Footer */
             .ticket-footer{text-align:center;margin-top:18px;font-size:10px;color:#94a3b8;border-top:1px dashed #e2e8f0;padding-top:10px}
             /* Print button */
@@ -6001,7 +6003,7 @@
         </style></head><body>
         <div class="page">
             <div class="no-print" style="margin-bottom:12px">
-                <button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button>
+                <button class="print-btn" onclick="window.print()">พิมพ์ใบซ่อม</button>
             </div>
 
             <!-- Header -->
@@ -6022,9 +6024,9 @@
                 <div class="info-grid">
                     <div class="info-item"><label>รหัสพัสดุ (Asset ID)</label><div class="val" style="font-family:ui-monospace,monospace">${escapeHtml(assetId) || '—'}</div></div>
                     <div class="info-item"><label>ชื่ออุปกรณ์</label><div class="val">${escapeHtml(assetName) || '—'}</div></div>
-                    <div class="info-item"><label>Serial Number</label><div class="val" style="font-family:ui-monospace,monospace">${escapeHtml(serial) || '—'}</div></div>
+                    <div class="info-item"><label>หมายเลขเครื่อง (S/N)</label><div class="val" style="font-family:ui-monospace,monospace">${escapeHtml(serial) || '—'}</div></div>
                     <div class="info-item"><label>หมวดหมู่</label><div class="val">${escapeHtml(cat) || '—'}</div></div>
-                    <div class="info-item"><label>Brand / Model</label><div class="val">${escapeHtml([brand,model].filter(Boolean).join(' ') || '—')}</div></div>
+                    <div class="info-item"><label>ยี่ห้อ / รุ่น</label><div class="val">${escapeHtml([brand,model].filter(Boolean).join(' ') || '—')}</div></div>
                     <div class="info-item"><label>แผนก / สถานที่</label><div class="val">${escapeHtml([dept, locDisplay].filter(Boolean).join(' · ') || '—')}</div></div>
                 </div>
             </div>
@@ -6034,7 +6036,7 @@
                 <div class="section-title">รายละเอียดการซ่อม / Repair Details</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
                     <div class="info-item"><label>ช่างผู้รับงาน</label><div class="val">${escapeHtml(servicedBy) || '—'}</div></div>
-                    <div class="info-item"><label>สถานะ</label><div class="val"><span class="status-badge ${status==='Completed'?'completed':status==='In Progress'?'inprogress':'pending'}">${escapeHtml(status)}</span></div></div>
+                    <div class="info-item"><label>สถานะ</label><div class="val"><span class="status-badge ${status==='Completed'?'completed':status==='In Progress'?'inprogress':'pending'}">${escapeHtml(STATUS_TH[status] || status)}</span></div></div>
                 </div>
                 <div style="margin-bottom:10px">
                     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#64748b;margin-bottom:5px">อาการเสีย / Problem</div>
@@ -6049,14 +6051,12 @@
             <!-- Signatures -->
             <div class="sig-row">
                 <div class="sig-box">
-                    <div style="height:36px"></div>
-                    ลายมือชื่อ ผู้แจ้งซ่อม / Reported By<br>
-                    <span style="font-style:italic;color:#334155">____________________________</span>
+                    <div class="sig-line"></div>
+                    ผู้แจ้งซ่อม / Reported By<br>( ...................................... )<br>วันที่ ......../......../........
                 </div>
                 <div class="sig-box">
-                    <div style="height:36px"></div>
-                    ลายมือชื่อ ช่าง IT / Technician<br>
-                    <span style="font-style:italic;color:#334155">${escapeHtml(servicedBy) || '____________________________'}</span>
+                    <div class="sig-line"></div>
+                    ช่าง IT / Technician<br>( ${escapeHtml(servicedBy) || '......................................'} )<br>วันที่ ......../......../........
                 </div>
             </div>
 
