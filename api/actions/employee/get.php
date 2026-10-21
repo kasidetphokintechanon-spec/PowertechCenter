@@ -54,6 +54,8 @@ if ($file === 'employees') {
     $employees = [];
     if ($result) {
         while ($row = $result->fetch_assoc()) {
+            // ห้ามส่ง hash รหัสผ่าน / remember_token ออกไปหน้าเว็บ — token ใช้สวมรอยล็อกอินได้ (ดู config.php)
+            unset($row['password'], $row['remember_token']);
             $row['assignments'] = []; // เตรียม array สำหรับเก็บสังกัด
             $employees[$row['id']] = $row;
         }
