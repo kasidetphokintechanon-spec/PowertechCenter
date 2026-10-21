@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ประวัติคำขอเบิกสินค้า - PowertechCenter</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="manifest" href="app-manifest.json">
+    <script src="js/pwa.js" defer></script>
+    <meta name="theme-color" content="#2563eb">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/responsive-platform.css?v=20260529hist">
+    <link rel="stylesheet" href="css/stock-workflow-ui.css?v=20260529hist">
+    <link rel="stylesheet" href="css/stock-center-theme.css?v=20260609">
+    <link rel="stylesheet" href="css/stock-management-ui.css?v=20260529hist">
+    <link rel="stylesheet" href="css/powerstock-ui.css?v=20260609b">
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529hist">
+    <link rel="stylesheet" href="css/stock-unified-theme.css?v=20260529hist">
+    <link rel="stylesheet" href="css/stock-history-unified-theme.css?v=20260609c">
+    <script src="js/stock-workflow-ui.js?v=20260529hist"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/enterprise-swal.js?v=20260529hist"></script>
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme') || 'light';
+            if (t === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    <style>
+        body { font-family: 'Kanit', sans-serif !important; }
+        .status-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+        .status-pending  { background:#fef9c3; color:#854d0e; }
+        .status-approved { background:#dcfce7; color:#14532d; }
+        .status-rejected { background:#fee2e2; color:#7f1d1d; }
+        .status-cancelled{ background:#f1f5f9; color:#475569; }
+        .qty-change { color:#64748b; }
+        .qty-reduced { color:#dc2626; font-weight:600; }
+        .qty-same { color:#16a34a; }
+        .workflow-track { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px; align-items:center; }
+        .wf-chip { font-size:10px; padding:2px 9px; border-radius:5px; border:1px solid #e2e8f0; background:#f8fafc; color:#94a3b8; white-space:nowrap; font-weight:500; }
+        html.dark .wf-chip { border-color:#334155; background:#1e293b; color:#64748b; }
+        .wf-chip.active { border-color:#bfdbfe; background:#eff6ff; color:#2563eb; font-weight:700; }
+        .wf-chip.done { border-color:#e2e8f0; background:#f1f5f9; color:#64748b; font-weight:500; }
+        .workflow-note { font-size:11px; color:#64748b; }
+        html.dark .workflow-note { color:#94a3b8; }
+        .fade-in { animation:fadeIn 0.3s ease both; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .job-num { display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:0.5px;background:#f1f5f9;color:#334155;padding:3px 9px;border-radius:6px;border:1px solid #e2e8f0; }
+        html.dark .job-num { background:#0f172a;color:#94a3b8;border-color:#334155; }
+        .edit-item-row { display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:6px; }
+        html.dark .edit-item-row { background:#0f172a; }
+        .qty-input { width:56px;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;text-align:center;font-family:'Kanit',sans-serif; }
+        html.dark .qty-input { background:#1e293b;border-color:#475569;color:#f1f5f9; }
+        /* Status summary cards */
+        .sh-status-summary { display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+        .sh-stat-card { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px; border:1px solid; cursor:pointer; transition:opacity 0.15s; flex:1; min-width:100px; }
+        .sh-stat-card:hover { opacity:0.75; }
+        .sh-stat-num { font-size:22px; font-weight:700; line-height:1; }
+        .sh-stat-label { font-size:11px; font-weight:500; margin-top:2px; }
+        /* Info row */
+        .sh-info-row { display:flex; align-items:center; gap:6px; font-size:11px; color:#64748b; padding:7px 11px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:8px; }
+        html.dark .sh-info-row { background:#1e293b; border-color:#334155; color:#94a3b8; }
+        /* Re-order button */
+        .reorder-btn { font-size:12px; padding:5px 14px; border-radius:8px; border:1px solid #bfdbfe; color:#1d4ed8; background:#eff6ff; cursor:pointer; font-family:'Kanit',sans-serif; display:inline-flex; align-items:center; gap:4px; }
+        .reorder-btn:hover { background:#dbeafe; }
+    </style>
+</head>
+<body class="stock-history-page stock-center-history stock-ps-ui stock-unified-v1 stock-history-unified-v1 ptc-unified-v1 ptc-normalize">
+
+    <header class="sc-history-topbar fixed w-full z-50">
+        <div class="sc-history-topbar-inner">
+            <div class="sc-history-brand">
+                <a href="javascript:history.back()" class="sc-icon-btn" aria-label="กลับ"><i class="fas fa-arrow-left"></i></a>
+                <div class="sc-history-icon"><i class="fas fa-clock-rotate-left"></i></div>
+                <div>
+                    <h1 class="sc-history-title">ประวัติคำขอเบิก</h1>
+                    <p class="sc-history-sub">Stock Request History · Stock Center</p>
+                </div>
+            </div>
+            <div class="sc-history-actions">
+                <span id="user-name-badge" class="sc-history-user hidden">
+                    <i class="fas fa-user-circle" style="color:var(--accent,#2563eb);"></i>
+                    <span id="user-name-text">-</span>
+                </span>
+                <button type="button" id="theme-toggle" class="sc-icon-btn" aria-label="สลับธีม">
+                    <i class="fas fa-sun block dark:hidden"></i><i class="fas fa-moon hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="stock-module-nav" class="stock-module-nav-host fixed w-full z-40"></div>
+
+    <main class="sh-main">
+
+        <div id="sh-status-summary" class="sh-status-summary" style="display:none;"></div>
+        <div class="sh-info-row">
+            <i class="fas fa-circle-info" style="color:#2563eb;flex-shrink:0;"></i>
+            <span>หน้านี้ใช้ดูสถานะคำขอ · กด <strong>"เบิกซ้ำ"</strong> เพื่อเบิกรายการเดิมอีกครั้ง · พิมพ์ใบเบิก · แก้ไขคำขอที่รออนุมัติ</span>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="sh-filter-bar">
+            <button type="button" class="tab-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+            <button type="button" class="tab-btn" onclick="setFilter('pending', this)">
+                <i class="fas fa-clock mr-1" style="color:#d97706;"></i>รออนุมัติ
+            </button>
+            <button type="button" class="tab-btn" onclick="setFilter('approved', this)">
+                <i class="fas fa-check-circle mr-1" style="color:#16a34a;"></i>อนุมัติแล้ว
+            </button>
+            <button type="button" class="tab-btn" onclick="setFilter('rejected', this)">
+                <i class="fas fa-times-circle mr-1" style="color:#dc2626;"></i>ปฏิเสธ
+            </button>
+            <div class="sh-filter-actions">
+                <select id="type-filter" onchange="loadHistory()" class="ptc-input">
+                    <option value="">ทุกประเภท</option>
+                    <option value="stationery">เครื่องเขียน</option>
+                    <option value="maid">Maid Stock</option>
+                </select>
+                <button type="button" onclick="loadHistory()" class="sh-icon-btn" aria-label="รีเฟรช">
+                    <i class="fas fa-sync" id="refresh-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- List -->
+        <div id="loading-state" class="sh-state">
+            <i class="fas fa-circle-notch fa-spin sh-state-icon is-spin"></i>
+            <div class="sh-state-title">กำลังโหลด...</div>
+        </div>
+        <div id="empty-state" class="sh-state hidden">
+            <i class="fas fa-box-open sh-state-icon"></i>
+            <p class="sh-state-title" id="empty-title">ไม่มีประวัติคำขอ</p>
+            <p class="sh-state-sub" id="empty-subtitle">เมื่อคุณส่งคำขอเบิก จะปรากฏที่นี่</p>
+            <button type="button" id="empty-reset-filter" onclick="resetHistoryFilters()" class="sh-reset-btn hidden">
+                <i class="fas fa-rotate-left"></i> ล้างตัวกรอง
+            </button>
+        </div>
+        <div id="request-list"></div>
+        <div id="load-more-wrap" class="sh-load-more-wrap hidden">
+            <button type="button" id="load-more-btn" onclick="loadNextPage()" class="sh-load-more-btn">
+                <i class="fas fa-chevron-down"></i> โหลดเพิ่ม
+            </button>
+            <div id="page-info" class="sh-page-info"></div>
+        </div>
+    </main>
+
+    <!-- Edit modal -->
+    <div id="edit-modal" class="ptc-modal" style="display:none;z-index:9000;">
+        <div class="ptc-modal-overlay" onclick="closeEditModal()"></div>
+        <div class="ptc-modal-dialog modal-sm" style="max-width:480px;">
+            <div class="ptc-modal-header">
+                <div>
+                    <h2 class="ptc-modal-title"><i class="fas fa-pen-to-square" style="color:var(--accent,#2563eb);"></i> แก้ไขคำขอ</h2>
+                    <div id="edit-modal-jobnum" style="font-size:11px;color:#64748b;margin-top:4px;"></div>
+                </div>
+                <button type="button" onclick="closeEditModal()" class="ptc-modal-close" aria-label="ปิด"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="ptc-modal-body" id="edit-modal-body">
+                <div class="ptc-label" style="margin-bottom:8px;">รายการสินค้า</div>
+                <div id="edit-items-list"></div>
+                <div style="margin-top:14px;">
+                    <label class="ptc-label" for="edit-notes">หมายเหตุ</label>
+                    <textarea id="edit-notes" rows="2" class="ptc-input" style="resize:none;" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+                </div>
+            </div>
+            <div class="ptc-modal-footer">
+                <button type="button" onclick="closeEditModal()" class="ptc-ghost">ยกเลิก</button>
+                <button type="button" id="edit-save-btn" onclick="saveEditModal()" class="ptc-btn ptc-btn-primary">
+                    <i class="fas fa-save"></i> บันทึกการแก้ไข
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let SESSION = {};
+    let currentFilter = 'all';
+    let ALL_REQUESTS = [];
+    let ITEMS_CACHE = {};   // reqId → items[]
+    let currentPage  = 0;
+    const PAGE_SIZE  = 12;
+
+    const STATUS_LABEL = {
+        pending:   { label: 'รออนุมัติ',   cls: 'status-pending',   icon: 'fa-clock' },
+        approved:  { label: 'อนุมัติแล้ว', cls: 'status-approved',  icon: 'fa-check-circle' },
+        rejected:  { label: 'ปฏิเสธ',      cls: 'status-rejected',  icon: 'fa-times-circle' },
+        cancelled: { label: 'ยกเลิกแล้ว',  cls: 'status-cancelled', icon: 'fa-ban' },
+    };
+
+    const TYPE_LABEL = { stationery: '📎 เครื่องเขียน', maid: '🧹 Maid Stock' };
+
+    function escHtml(s) {
+        return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatDate(str) {
+        if (!str) return '-';
+        const d = new Date(str);
+        return d.toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    async function init() {
+        try {
+            const res = await fetch('api.php?action=check_session');
+            SESSION = await res.json();
+            if (!SESSION.loggedin) { window.location.href = 'login.html'; return; }
+            document.getElementById('user-name-badge').classList.remove('hidden');
+            document.getElementById('user-name-text').textContent = SESSION.display_name || SESSION.username || '-';
+            StockWorkflowUI.mountModuleNav('history', 'stock-module-nav', SESSION);
+        } catch(e) { window.location.href = 'login.html'; return; }
+
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        loadHistory();
+    }
+
+    function getFiltered() {
+        return currentFilter === 'all'
+            ? ALL_REQUESTS
+            : ALL_REQUESTS.filter(r => r.status === currentFilter);
+    }
+
+    function setFilter(status, btn) {
+        currentFilter = status;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        currentPage = 0;
+        document.getElementById('request-list').innerHTML = '';
+        renderPage();
+    }
+
+    function resetHistoryFilters() {
+        currentFilter = 'all';
+        document.getElementById('type-filter').value = '';
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach((b, i) => b.classList.toggle('active', i === 0));
+        loadHistory();
+    }
+
+    function renderStatusSummary() {
+        const wrap = document.getElementById('sh-status-summary');
+        if (!wrap) return;
+        if (!ALL_REQUESTS.length) { wrap.style.display = 'none'; return; }
+        const pending  = ALL_REQUESTS.filter(r => r.status === 'pending').length;
+        const approved = ALL_REQUESTS.filter(r => r.status === 'approved').length;
+        const rejected = ALL_REQUESTS.filter(r => r.status === 'rejected').length;
+        wrap.style.display = 'flex';
+        wrap.innerHTML = `
+            <div class="sh-stat-card" style="background:#fefce8;border-color:#fde68a;color:#854d0e;" onclick="setFilter('pending', document.querySelectorAll('.tab-btn')[1])">
+                <div><div class="sh-stat-num">${pending}</div><div class="sh-stat-label">🕐 รออนุมัติ</div></div>
+            </div>
+            <div class="sh-stat-card" style="background:#f0fdf4;border-color:#bbf7d0;color:#14532d;" onclick="setFilter('approved', document.querySelectorAll('.tab-btn')[2])">
+                <div><div class="sh-stat-num">${approved}</div><div class="sh-stat-label">✅ อนุมัติแล้ว</div></div>
+            </div>
+            <div class="sh-stat-card" style="background:#fef2f2;border-color:#fecaca;color:#7f1d1d;" onclick="setFilter('rejected', document.querySelectorAll('.tab-btn')[3])">
+                <div><div class="sh-stat-num">${rejected}</div><div class="sh-stat-label">❌ ไม่อนุมัติ</div></div>
+            </div>
+            <div class="sh-stat-card" style="background:#f8fafc;border-color:#e2e8f0;color:#475569;" onclick="setFilter('all', document.querySelectorAll('.tab-btn')[0])">
+                <div><div class="sh-stat-num">${ALL_REQUESTS.length}</div><div class="sh-stat-label">📋 ทั้งหมด</div></div>
+            </div>`;
+    }
+
+    async function reorderRequest(reqId) {
+        const req = ALL_REQUESTS.find(r => r.id === reqId);
+        if (!req) return;
+        if (!req._items || !req._items.length) {
+            try {
+                const ir = await fetch(`api.php?action=getRequestItems&request_id=${reqId}`);
+                const data = await ir.json();
+                req._items = Array.isArray(data) ? data : [];
+            } catch(e) { req._items = []; }
+        }
+        if (!req._items.length) { Swal.fire('แจ้งเตือน', 'ไม่พบรายการในคำขอนี้', 'warning'); return; }
+        const reorderData = {
+            items: req._items.map(it => ({ item_id: it.item_id, qty: it.qty_requested || it.qty || 1 })),
+            notes: req.notes || ''
+        };
+        sessionStorage.setItem('ptc_reorder', JSON.stringify(reorderData));
+        const page = (req.stock_type === 'stationery') ? 'stationery_stock.html' : 'maid_stock.html';
+        location.href = `${page}?reorder=1`;
+    }
+
+    function updateEmptyStateMessage() {
+        const title = document.getElementById('empty-title');
+        const subtitle = document.getElementById('empty-subtitle');
+        const resetBtn = document.getElementById('empty-reset-filter');
+        const stockType = document.getElementById('type-filter').value;
+        const hasFilter = currentFilter !== 'all' || !!stockType;
+        resetBtn.classList.toggle('hidden', !hasFilter);
+        if (ALL_REQUESTS.length === 0) {
+            title.textContent = 'ยังไม่มีประวัติคำขอของคุณ';
+            subtitle.textContent = 'เมื่อส่งคำขอเบิกจากหน้าเครื่องเขียนหรือแม่บ้าน รายการจะปรากฏที่นี่';
+            return;
+        }
+        title.textContent = 'ไม่พบข้อมูลตามตัวกรองที่เลือก';
+        subtitle.textContent = 'ลองเปลี่ยนสถานะ/ประเภท หรือกด "ล้างตัวกรอง" เพื่อดูทั้งหมด';
+    }
+
+    async function loadHistory() {
+        document.getElementById('loading-state').classList.remove('hidden');
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('request-list').innerHTML = '';
+        document.getElementById('load-more-wrap').classList.add('hidden');
+        document.getElementById('refresh-icon').classList.add('fa-spin');
+
+        const stockType = document.getElementById('type-filter').value;
+        let url = `api.php?action=getStockRequests&status=all&my=1`;
+        if (stockType) url += `&stock_type=${stockType}`;
+
+        try {
+            const res = await fetch(url);
+            const parsed = await res.json();
+            ALL_REQUESTS = Array.isArray(parsed) ? parsed : [];
+            ITEMS_CACHE = {};  // clear cache on full reload
+        } catch(e) {
+            ALL_REQUESTS = [];
+        }
+
+        document.getElementById('refresh-icon').classList.remove('fa-spin');
+        document.getElementById('loading-state').classList.add('hidden');
+        currentPage = 0;
+        renderPage();
+    }
+
+    async function renderPage(append = false) {
+        if (!append) renderStatusSummary();
+        const filtered = getFiltered();
+        if (!filtered.length && !append) {
+            updateEmptyStateMessage();
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('load-more-wrap').classList.add('hidden');
+            return;
+        }
+        document.getElementById('empty-state').classList.add('hidden');
+
+        const start = currentPage * PAGE_SIZE;
+        const pageItems = filtered.slice(start, start + PAGE_SIZE);
+        const hasMore = filtered.length > start + PAGE_SIZE;
+
+        // Show skeleton for new cards while fetching items
+        const list = document.getElementById('request-list');
+
+        // Fetch items for this page only (use cache to avoid re-fetching)
+        await Promise.all(pageItems.map(async req => {
+            if (ITEMS_CACHE[req.id] !== undefined) { req._items = ITEMS_CACHE[req.id]; return; }
+            try {
+                const ir = await fetch(`api.php?action=getRequestItems&request_id=${req.id}`);
+                const data = await ir.json();
+                req._items = Array.isArray(data) ? data : [];
+            } catch(e) { req._items = []; }
+            ITEMS_CACHE[req.id] = req._items;
+        }));
+
+        // Render cards for this page
+        renderCards(pageItems, list);
+
+        // Load more button
+        const wrap = document.getElementById('load-more-wrap');
+        if (hasMore) {
+            wrap.classList.remove('hidden');
+            document.getElementById('page-info').textContent =
+                `แสดง ${Math.min(start + PAGE_SIZE, filtered.length)} จาก ${filtered.length} รายการ`;
+        } else {
+            wrap.classList.add('hidden');
+        }
+    }
+
+    async function loadNextPage() {
+        currentPage++;
+        const btn = document.getElementById('load-more-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2 text-xs"></i>กำลังโหลด...';
+        await renderPage(true);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-chevron-down mr-2 text-xs"></i>โหลดเพิ่ม';
+    }
+
+    function renderCards(pageItems, list) {
+        pageItems.forEach(req => {
+            const s = STATUS_LABEL[req.status] || { label: req.status, cls: '', icon: 'fa-circle' };
+            const reqItems = req._items || [];
+            const typeLabel = TYPE_LABEL[req.stock_type] || req.stock_type;
+
+            const itemsHtml = reqItems.length
+                ? reqItems.map(item => {
+                    const requested = parseInt(item.qty_requested);
+                    const approved  = item.qty_approved !== null ? parseInt(item.qty_approved) : null;
+                    let qtyHtml;
+                    if (approved === null) {
+                        qtyHtml = `<span class="qty-change">ขอ ${requested} ${escHtml(item.unit)}</span>`;
+                    } else if (approved < requested) {
+                        qtyHtml = `<span class="qty-reduced">ขอ ${requested} → อนุมัติ ${approved} ${escHtml(item.unit)} ⚠️</span>`;
+                    } else {
+                        qtyHtml = `<span class="qty-same">อนุมัติ ${approved} ${escHtml(item.unit)}</span>`;
+                    }
+                    return `<div class="item-row">
+                        <i class="fas fa-box text-slate-400" style="font-size:11px;flex-shrink:0;"></i>
+                        <span style="flex:1;color:#475569;" class="dark:text-slate-300">${escHtml(item.name)}</span>
+                        ${qtyHtml}
+                    </div>`;
+                }).join('')
+                : `<div class="item-row text-slate-400">${escHtml(req.items_summary || '-')}</div>`;
+
+            const jobNum = genJobNumber(req);
+            const card = document.createElement('div');
+            card.className = 'request-card fade-in';
+            card.innerHTML = `
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                            <span class="job-num"><i class="fas fa-hashtag" style="font-size:10px;"></i>${escHtml(jobNum)}</span>
+                            <span style="font-size:12px;color:#64748b;" class="dark:text-slate-400">${typeLabel}</span>
+                        </div>
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                            <i class="fas fa-calendar-alt mr-1"></i>${formatDate(req.request_date)}
+                            ${req.branch ? ` · <i class="fas fa-building mr-1"></i>${escHtml(req.branch)}` : ''}
+                        </div>
+                        ${req.notes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;font-style:italic;">"${escHtml(req.notes)}"</div>` : ''}
+                        ${req.approved_by ? `<div style="font-size:11px;color:#64748b;margin-top:2px;"><i class="fas fa-user-check mr-1"></i>อนุมัติโดย: ${escHtml(req.approved_by)}</div>` : ''}
+                        ${req.status === 'rejected' && req.deny_reason ? `
+                        <div style="background:#fef2f2;border:1px solid #fecaca;border-left:3px solid #dc2626;border-radius:8px;padding:9px 12px;margin-top:8px;">
+                            <div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:3px;"><i class="fas fa-ban" style="margin-right:4px;"></i>เหตุผลที่ไม่อนุมัติ</div>
+                            <div style="font-size:12px;color:#7f1d1d;line-height:1.5;">${escHtml(req.deny_reason)}</div>
+                        </div>` : ''}
+                    </div>
+                    <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                        ${typeof StockWorkflowUI !== 'undefined' && StockWorkflowUI.stockStatusBadge
+                            ? StockWorkflowUI.stockStatusBadge(req.status, s.label)
+                            : `<span class="status-pill ${s.cls}"><i class="fas ${s.icon}"></i>${s.label}</span>`}
+                        <button onclick="openPrintSlip(${req.id})" title="พิมพ์ใบเบิก" style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #e2e8f0;color:#64748b;background:#f8fafc;cursor:pointer;font-family:'Kanit',sans-serif;display:flex;align-items:center;gap:4px;" class="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300">
+                            <i class="fas fa-print"></i>พิมพ์
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-bottom:${req.status === 'pending' ? 10 : 0}px;">
+                    ${itemsHtml}
+                </div>
+                <div style="padding-top:8px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;" class="dark:border-slate-700">
+                    ${req.status === 'pending' ? `
+                    <button onclick="openEditModal(${req.id})" style="font-size:12px;padding:5px 14px;border-radius:8px;border:1px solid #93c5fd;color:#2563eb;background:#eff6ff;cursor:pointer;font-family:'Kanit',sans-serif;">
+                        <i class="fas fa-edit mr-1"></i>แก้ไขคำขอ
+                    </button>
+                    <button onclick="cancelRequest(${req.id})" style="font-size:12px;padding:5px 14px;border-radius:8px;border:1px solid #fca5a5;color:#dc2626;background:#fef2f2;cursor:pointer;font-family:'Kanit',sans-serif;">
+                        <i class="fas fa-times mr-1"></i>ยกเลิกคำขอ
+                    </button>` : ''}
+                    <button onclick="reorderRequest(${req.id})" class="reorder-btn">
+                        <i class="fas fa-rotate-right"></i>เบิกซ้ำ
+                    </button>
+                </div>`;
+            list.appendChild(card);
+        });
+    }
+
+    // ── HELPERS ───────────────────────────────────────────
+    function genBranchAbbr(branch) {
+        if (!branch) return 'HQ';
+        const letters = branch.replace(/[^a-zA-Z]/g, '');
+        if (letters.length >= 2) return letters.slice(0, 2).toUpperCase();
+        return branch.trim().slice(0, 2).toUpperCase() || 'HQ';
+    }
+
+    function genJobNumber(req) {
+        const d = new Date(req.request_date || Date.now());
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const seq = String(req.id).padStart(2, '0');
+        const br  = genBranchAbbr(req.branch);
+        return `${req.company}-${br}-${yy}${mm}${seq}`;
+    }
+
+    // ── EDIT MODAL ────────────────────────────────────────
+    let EDIT_REQUEST_ID = 0;
+
+    async function openEditModal(reqId) {
+        const req = ALL_REQUESTS.find(r => r.id === reqId);
+        if (!req) return;
+        EDIT_REQUEST_ID = reqId;
+        document.getElementById('edit-modal-jobnum').textContent = genJobNumber(req);
+        document.getElementById('edit-notes').value = req.notes || '';
+        document.getElementById('edit-modal').style.display = 'flex';
+
+        const list = document.getElementById('edit-items-list');
+        list.innerHTML = '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:12px;"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลด...</div>';
+
+        // Always re-fetch to ensure fresh data
+        try {
+            const ir = await fetch(`api.php?action=getRequestItems&request_id=${reqId}`);
+            const data = await ir.json();
+            req._items = Array.isArray(data) ? data : [];
+        } catch(e) { req._items = []; }
+
+        list.innerHTML = '';
+        const items = req._items;
+        if (!items.length) {
+            list.innerHTML = '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:12px;">ไม่มีรายการ</div>';
+        } else {
+            items.forEach(it => {
+                const row = document.createElement('div');
+                row.className = 'edit-item-row';
+                row.dataset.itemId = it.item_id;
+                row.innerHTML = `
+                    <span style="flex:1;font-size:12px;" class="dark:text-slate-200">${escHtml(it.name)}</span>
+                    <span style="font-size:11px;color:#94a3b8;white-space:nowrap;">${escHtml(it.unit)}</span>
+                    <input type="number" class="qty-input" value="${parseInt(it.qty_requested)}" min="1" max="9999">
+                    <button onclick="removeEditRow(this)" title="ลบรายการ" style="width:26px;height:26px;border-radius:6px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(row);
+            });
+        }
+    }
+
+    function removeEditRow(btn) {
+        btn.closest('.edit-item-row').remove();
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+        EDIT_REQUEST_ID = 0;
+    }
+
+    async function saveEditModal() {
+        if (!EDIT_REQUEST_ID) return;
+        const rows = document.querySelectorAll('#edit-items-list .edit-item-row');
+        if (!rows.length) { Swal.fire('แจ้งเตือน', 'กรุณาเก็บรายการอย่างน้อย 1 รายการ', 'warning'); return; }
+        const items = Array.from(rows).map(r => ({
+            item_id: parseInt(r.dataset.itemId),
+            qty: Math.max(1, parseInt(r.querySelector('.qty-input').value) || 1)
+        }));
+        const notes = document.getElementById('edit-notes').value.trim();
+        const btn = document.getElementById('edit-save-btn');
+        btn.disabled = true;
+        const fd = new FormData();
+        fd.append('action', 'updateStockRequest');
+        fd.append('request_id', EDIT_REQUEST_ID);
+        fd.append('items', JSON.stringify(items));
+        fd.append('notes', notes);
+        try {
+            const data = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+            if (data.status === 'success') {
+                closeEditModal();
+                Swal.fire({ title: 'บันทึกแล้ว', icon: 'success', timer: 1200, showConfirmButton: false });
+                loadHistory();
+            } else throw new Error(data.message);
+        } catch(e) { Swal.fire('Error', e.message, 'error'); }
+        finally { btn.disabled = false; }
+    }
+
+    // ── PRINT ─────────────────────────────────────────────
+    async function openPrintSlip(reqId) {
+        const req = ALL_REQUESTS.find(r => r.id === reqId);
+        if (!req) return;
+        const items   = req._items || [];
+        const jobNum  = genJobNumber(req);
+        const company = (req.company || 'PTA').toUpperCase();
+        const isMaid  = req.stock_type === 'maid';
+        const coPalette = {
+            PTA:{accent:'#059669',grad:'linear-gradient(135deg,#065f46,#059669)'},
+            PT4:{accent:'#dc2626',grad:'linear-gradient(135deg,#991b1b,#dc2626)'},
+            PTE:{accent:'#2563eb',grad:'linear-gradient(135deg,#1d4ed8,#2563eb)'},
+        };
+        const coLogos = {
+            PTA: location.origin + '/PowertechCenter/uploads/logos/pta_logo.png',
+            PT4: location.origin + '/PowertechCenter/uploads/logos/pt4_logo.png',
+            PTE: location.origin + '/PowertechCenter/uploads/logos/pte_logo.png',
+        };
+        const coNamesEn = { PTA:'Powertech Engine Assembly Co., Ltd.', PT4:'Powertech 2004 Co., Ltd.', PTE:'Powertech Energy Solutions Co., Ltd.' };
+        const coNamesTh = { PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด', PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด', PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด' };
+        // Load company info (address/phone) — cached globally
+        if (!window._coInfoCache) window._coInfoCache = {};
+        if (!window._coInfoCache[company]) {
+            try {
+                const _r = await fetch('api.php?action=get_company_info');
+                const _j = await _r.json();
+                if (_j.status === 'success') window._coInfoCache = _j.data;
+            } catch(e) { /* silent */ }
+        }
+        const coInfo   = (window._coInfoCache && window._coInfoCache[company]) || {};
+        const palette   = coPalette[company] || coPalette.PTE;
+        const logoUrl   = coLogos[company] || coLogos.PTA;
+        const coNameEn  = coNamesEn[company] || company;
+        const coNameTh  = coNamesTh[company] || company;
+        const _addr     = coInfo.address_th || coInfo.address_en || '';
+        const addrLine  = _addr ? `<div style="font-size:.6rem;color:#64748b;margin-top:1px;">${_addr}</div>` : '';
+        const phoneLine = (coInfo.phone || coInfo.fax)
+            ? `<div style="font-size:.6rem;color:#64748b;">${coInfo.phone ? 'โทร.&nbsp;'+coInfo.phone : ''}${coInfo.phone && coInfo.fax ? '&nbsp;|&nbsp;' : ''}${coInfo.fax ? 'Fax&nbsp;'+coInfo.fax : ''}</div>`
+            : '';
+        const d = new Date(req.request_date || Date.now());
+        const dateStr   = d.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+        const printDate = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+        const requester = SESSION.display_name || SESSION.username || '-';
+        const dept      = SESSION.primary_department || SESSION.department || '-';
+        const formNo    = isMaid ? 'FM-MS-001' : 'FM-SN-001';
+        const typeLabel = isMaid ? 'Maid Stock' : 'เครื่องเขียน/อุปกรณ์';
+        const qrUrl     = `https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(location.href)}`;
+        const rowsHtml  = items.map((it, i) => `
+            <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="text-align:center;padding:5px 8px;font-size:.75rem;">${i+1}</td>
+                <td style="padding:5px 8px;font-size:.75rem;">${it.item_code || '-'}</td>
+                <td style="padding:5px 8px;font-size:.775rem;">${it.name || '-'}</td>
+                <td style="text-align:center;padding:5px 8px;font-size:.75rem;">${it.unit || '-'}</td>
+                <td style="text-align:center;padding:5px 8px;font-size:.75rem;">${it.qty_requested || it.qty || '-'}</td>
+                <td style="padding:5px 8px;"></td>
+            </tr>`).join('');
+        const sigBox = (title, val) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px 6px;text-align:center;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:24px;">${title}</div><div style="border-bottom:1.5px solid #cbd5e1;margin:0 8px 5px;"></div><div style="font-size:.67rem;color:#64748b;">( ${val||'................................'} )</div><div style="font-size:.62rem;color:#94a3b8;margin-top:1px;">วันที่ ........./........./.........&nbsp;</div></div>`;
+        const win = window.open('', '_blank', 'width=820,height=1050');
+        if (!win) { alert('กรุณาอนุญาต Popup ในเบราว์เซอร์เพื่อพิมพ์ใบเบิก'); return; }
+        win.document.write(`<!DOCTYPE html><html lang="th"><head>
+<meta charset="UTF-8">
+<title>ใบขอเบิกสินค้า ${jobNum}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;font-size:12.5px;color:#1e293b;background:#fff;padding:28px 36px 32px;line-height:1.5;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;display:flex;flex-direction:column;min-height:277mm;}
+@page{size:auto;margin:1cm}
+@media print{.btn-bar{display:none!important} body{padding:0;}}
+@media print and (orientation:landscape){body{min-height:190mm;}}
+</style></head><body>
+
+<!-- HEADER -->
+<div style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${palette.accent};padding-bottom:12px;margin-bottom:10px;">
+  <div style="display:flex;align-items:center;gap:10px;border-left:4px solid ${palette.accent};padding-left:12px;">
+    <img src="${logoUrl}" alt="${company}" style="height:52px;width:auto;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">
+    <div>
+      <div style="font-size:1.05rem;font-weight:800;color:#1e293b;letter-spacing:-.01em;">${coNameEn}</div>
+      <div style="font-size:.72rem;color:#475569;margin-top:2px;font-weight:500;">${coNameTh}</div>
+      ${addrLine}${phoneLine}
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+      <div style="font-size:.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;">เลขที่ใบเบิก / Doc No.</div>
+      <div style="font-size:.9375rem;font-weight:700;color:${palette.accent};">${jobNum}</div>
+      <div style="font-size:.68rem;color:#64748b;">วันที่: ${dateStr}</div>
+    </div>
+    <table style="border:1px solid #e2e8f0;border-radius:5px;font-size:.6rem;border-collapse:collapse;">
+      <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Form No.</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">${formNo}</td></tr>
+      <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Revision</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#dc2626;font-weight:600;">Rev. 01</td></tr>
+      <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Eff. Date</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">01/01/2569</td></tr>
+    </table>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <img src="${qrUrl}" style="width:60px;height:60px;border:1px solid #e2e8f0;border-radius:4px;padding:2px;">
+      <span style="font-size:.55rem;color:#94a3b8;">Scan เพื่อดูสถานะ</span>
+    </div>
+  </div>
+</div>
+
+<!-- TITLE BAR -->
+<div style="background:${palette.grad};color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+  <div style="font-size:.9375rem;font-weight:700;letter-spacing:.02em;">ใบขอเบิกสินค้า / Material Requisition · ${typeLabel}</div>
+  <div style="font-size:.67rem;opacity:.85;margin-top:1px;">General Services Dept. | ${formNo} Rev.01</div>
+</div>
+
+<!-- INFO GRID -->
+<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
+  <div style="display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">ผู้ขอเบิก</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${requester}</span></div>
+  <div style="display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #e2e8f0;gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">วันที่</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${dateStr}</span></div>
+  <div style="display:flex;align-items:center;padding:6px 10px;border-right:1px solid #e2e8f0;gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">แผนก</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${dept}</span></div>
+  <div style="display:flex;align-items:center;padding:6px 10px;gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">บริษัท</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${coNameEn}</span></div>
+</div>
+
+<!-- ITEMS TABLE -->
+<div style="border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:10px;">
+  <div style="background:${palette.grad};color:#fff;padding:5px 10px;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;-webkit-print-color-adjust:exact;print-color-adjust:exact;">รายการสินค้า / Item List</div>
+  <table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+      <th style="text-align:center;padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;width:36px;border-right:1px solid #e2e8f0;">ลำดับ</th>
+      <th style="padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;width:100px;border-right:1px solid #e2e8f0;">รหัสสินค้า</th>
+      <th style="padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;border-right:1px solid #e2e8f0;">ชื่อรายการ</th>
+      <th style="text-align:center;padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;width:56px;border-right:1px solid #e2e8f0;">หน่วย</th>
+      <th style="text-align:center;padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;width:72px;border-right:1px solid #e2e8f0;">จำนวนขอ</th>
+      <th style="text-align:center;padding:5px 8px;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;width:72px;">จำนวนจ่าย</th>
+    </tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+</div>
+${req.notes ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:4px;">หมายเหตุ / Notes</div><div style="font-size:.775rem;color:#1e293b;">${req.notes}</div></div>` : ''}
+
+<!-- SIGNATURES -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:auto;break-inside:avoid;page-break-inside:avoid;">
+  ${sigBox('ผู้ขอเบิก / Requester', requester)}
+  ${sigBox('หัวหน้าแผนก / Supervisor', '')}
+  ${sigBox('ผู้จ่ายของ / Issuer', '')}
+</div>
+
+<!-- FOOTER -->
+<div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;">
+  <div style="font-size:.6rem;color:#94a3b8;">ออกโดยระบบ Powertech System Center · พิมพ์: ${printDate}</div>
+  <div style="font-size:.6rem;color:#94a3b8;text-align:right;">${formNo} Rev.01 · หน้า 1/1 · ${jobNum}</div>
+</div>
+
+<div class="btn-bar" style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
+  <button style="padding:8px 24px;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;font-weight:600;background:${palette.accent};color:#fff;" onclick="window.print()">🖨 พิมพ์</button>
+  <button style="padding:8px 24px;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;font-weight:600;background:#f1f5f9;color:#333;" onclick="window.close()">ปิด</button>
+</div>
+</body></html>`);
+        win.document.close();
+    }
+
+    async function cancelRequest(requestId) {
+        const confirm = await Swal.fire({
+            title: 'ยกเลิกคำขอ?',
+            text: 'คำขอจะถูกลบและไม่สามารถกู้คืนได้',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'ยกเลิกคำขอ', cancelButtonText: 'ไม่',
+            confirmButtonColor: '#dc2626'
+        });
+        if (!confirm.isConfirmed) return;
+        const fd = new FormData();
+        fd.append('action', 'cancelStockRequest');
+        fd.append('request_id', requestId);
+        try {
+            const data = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+            if (data.status === 'success') {
+                Swal.fire({ title: 'ยกเลิกแล้ว', icon: 'success', timer: 1200, showConfirmButton: false });
+                loadHistory();
+            } else throw new Error(data.message);
+        } catch(e) { Swal.fire('Error', e.message, 'error'); }
+    }
+
+    init();
+    </script>
+</body>
+</html>
