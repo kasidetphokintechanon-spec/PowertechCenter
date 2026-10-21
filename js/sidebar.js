@@ -80,6 +80,27 @@
 }
 #ptc-sidebar.collapsed { width: 56px; }
 
+/* ── มือถือ (≤768px): เมนูซ่อน กด ☰ แล้วเลื่อนออกจากซ้าย (เดิมกว้าง 220px ตลอด บังเนื้อหาทั้งจอ) ── */
+.psb-mobile-btn { display: none; }
+#psb-scrim { display: none; }
+@media (max-width: 768px) {
+    #ptc-sidebar, #ptc-sidebar.collapsed {
+        position: fixed; top: 0; left: 0; bottom: 0; width: 272px; z-index: 1200;
+        transform: translateX(-100%); transition: transform .22s ease; box-shadow: none;
+    }
+    #ptc-sidebar.mobile-open { transform: none; box-shadow: 8px 0 24px rgba(15,23,42,.18); }
+    #ptc-sidebar.collapsed .psb-label, #ptc-sidebar.collapsed .psb-title, #ptc-sidebar.collapsed .psb-group-label { opacity: 1; max-width: none; width: auto; pointer-events: auto; }
+    #ptc-sidebar .psb-toggle { display: none; }
+    #psb-scrim { display: block; position: fixed; inset: 0; z-index: 1199; background: rgba(15,23,42,.4); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    #psb-scrim.on { opacity: 1; pointer-events: auto; }
+    .psb-mobile-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 9px; border: 1px solid var(--ptc-border, #e2e8f0); background: var(--ptc-surface, #fff); color: var(--ptc-text, #0f172a); cursor: pointer; }
+    /* แถบบนให้พอดีจอ */
+    .ptc-nav .ptc-nav-sub, .ptc-nav .nav-search-wrap, #warranty-alert-btn > :not(i):not(span) { display: none !important; }
+    .ptc-nav { gap: 8px; padding-left: 10px !important; padding-right: 10px !important; }
+    .ptc-nav .nav-user-info, .ptc-nav .nav-user-chip > i, .ptc-nav .nav-user-chip > .fa-chevron-down { display: none !important; } /* เหลือแค่รูปย่อผู้ใช้ */
+    .ptc-nav-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
 .psb-header {
     display: flex;
     align-items: center;
@@ -433,6 +454,27 @@
     }
 
     // ── Init ─────────────────────────────────────────────────────────────
+    function setupMobile(el) {
+        if (document.getElementById('psb-scrim')) return;
+        const scrim = document.createElement('div');
+        scrim.id = 'psb-scrim';
+        document.body.appendChild(scrim);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'psb-mobile-btn';
+        btn.title = 'เมนู';
+        btn.setAttribute('aria-label', 'เปิดเมนู');
+        btn.innerHTML = '<i class="fas fa-bars"></i>';
+        const nav = document.querySelector('.ptc-nav');
+        if (nav) nav.insertBefore(btn, nav.firstChild);
+        else { btn.style.cssText = 'position:fixed;top:10px;left:10px;z-index:1100'; document.body.appendChild(btn); }
+        const open = on => { el.classList.toggle('mobile-open', on); scrim.classList.toggle('on', on); };
+        btn.addEventListener('click', () => open(!el.classList.contains('mobile-open')));
+        scrim.addEventListener('click', () => open(false));
+        el.addEventListener('click', e => { if (e.target.closest('.psb-item')) open(false); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+    }
+
     async function init() {
         if (!document.getElementById('ptc-sidebar-css')) {
             const style = document.createElement('style');
@@ -458,6 +500,7 @@
         }
 
         sessionStorage.setItem('ptc_sess_role', role);
+        setupMobile(el); // ปุ่ม ☰ เฉพาะคนที่เห็นเมนู
 
         // Re-render with full session (includes effective_permissions for perm filtering)
         render(el, session);

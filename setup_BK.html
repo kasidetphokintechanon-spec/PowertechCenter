@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Setup Checksheet — IT</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+    <style>
+        /* Override app-shell lock — this page scrolls normally */
+        html, body { overflow: auto !important; height: auto !important; }
+
+        body { font-family: 'Inter','Kanit',sans-serif; background:#f1f5f9; color:#334155; padding-bottom:60px; }
+        html.dark body { background:#0a0f1e; color:#e2e8f0; }
+
+        .setup-page { max-width:900px; margin:0 auto; padding:16px 16px 40px; display:flex; flex-direction:column; gap:14px; }
+
+        /* ── Cards ── */
+        .s-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:18px 20px; }
+        html.dark .s-card { background:#1e293b; border-color:#334155; }
+        .s-card-title { font-size:13px; font-weight:700; color:#0f172a; display:flex; align-items:center; gap:7px; margin-bottom:14px; }
+        html.dark .s-card-title { color:#f1f5f9; }
+        .s-card-title .s-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+
+        /* ── Form grid ── */
+        .s-grid { display:grid; gap:10px; }
+        .s-grid-2 { grid-template-columns:1fr 1fr; }
+        .s-grid-3 { grid-template-columns:1fr 1fr 1fr; }
+        @media(max-width:640px){ .s-grid-2,.s-grid-3{ grid-template-columns:1fr; } }
+        .s-field label { display:block; font-size:11px; font-weight:600; color:#64748b; margin-bottom:4px; }
+        html.dark .s-field label { color:#94a3b8; }
+        .s-input { width:100%; height:36px; padding:0 10px; border:1px solid #e2e8f0; border-radius:7px; font-size:13px; font-family:inherit; background:#fff; color:#0f172a; outline:none; transition:border .15s,box-shadow .15s; }
+        .s-input:focus { border-color:#93c5fd; box-shadow:0 0 0 3px rgba(37,99,235,.10); }
+        .s-input.req-error { border-color:#f87171 !important; box-shadow:0 0 0 3px rgba(239,68,68,.12) !important; }
+        html.dark .s-input { background:#0f172a; border-color:#334155; color:#e2e8f0; }
+        textarea.s-input { height:auto; min-height:72px; padding:8px 10px; resize:vertical; }
+        select.s-input { cursor:pointer; }
+
+        /* ── Progress header ── */
+        .progress-card { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+        .progress-ring-wrap { position:relative; width:56px; height:56px; flex-shrink:0; }
+        .progress-ring-wrap svg { transform:rotate(-90deg); }
+        .progress-ring-bg { stroke:#e2e8f0; }
+        html.dark .progress-ring-bg { stroke:#334155; }
+        .progress-ring-fill { stroke:#2563eb; stroke-linecap:round; transition:stroke-dashoffset .4s ease; }
+        .progress-pct-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#2563eb; }
+        .progress-stats { display:flex; gap:14px; flex-wrap:wrap; }
+        .pstat { display:flex; flex-direction:column; }
+        .pstat-val { font-size:18px; font-weight:800; color:#0f172a; line-height:1; }
+        html.dark .pstat-val { color:#f1f5f9; }
+        .pstat-lbl { font-size:10px; color:#94a3b8; margin-top:2px; }
+        .progress-bar-wrap { flex:1; min-width:160px; }
+        .progress-bar-track { height:8px; background:#e2e8f0; border-radius:99px; overflow:hidden; }
+        html.dark .progress-bar-track { background:#334155; }
+        .progress-bar-fill { height:100%; background:linear-gradient(90deg,#2563eb,#7c3aed); border-radius:99px; transition:width .35s ease; width:0%; }
+        .readiness-label { font-size:11px; font-weight:700; margin-top:4px; color:#2563eb; }
+
+        /* ── Company Access Table ── */
+        .co-access-table { border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; margin-top:8px; }
+        html.dark .co-access-table { border-color:#334155; }
+        .co-access-hdr { display:grid; grid-template-columns:120px 1fr 68px 68px; padding:6px 12px; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+        html.dark .co-access-hdr { background:#0f172a; border-color:#334155; color:#475569; }
+        .co-access-row { display:grid; grid-template-columns:120px 1fr 68px 68px; align-items:center; padding:8px 12px; border-bottom:1px solid #f1f5f9; gap:8px; transition:background .15s; }
+        html.dark .co-access-row { border-color:#1e293b; }
+        .co-access-row:last-child { border-bottom:none; }
+        .co-access-row.co-active { background:#f0f9ff; }
+        html.dark .co-access-row.co-active { background:rgba(14,165,233,.08); }
+        .co-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+        .co-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; }
+        .co-pta { background:#dcfce7; color:#166534; }
+        .co-pt4 { background:#fee2e2; color:#991b1b; }
+        .co-pte { background:#dbeafe; color:#1e40af; }
+        .co-input { font-size:12px !important; padding:5px 8px !important; }
+        .co-input:disabled { opacity:.35; background:#f8fafc !important; cursor:not-allowed; }
+        html.dark .co-input:disabled { background:#0f172a !important; }
+        .co-chk-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:9px; font-weight:700; color:#64748b; cursor:pointer; user-select:none; }
+        .co-chk-wrap input:disabled { opacity:.35; cursor:not-allowed; }
+        .co-chk-wrap.inet-on { color:#0284c7; }
+        .co-chk-wrap.vpn-on  { color:#7c3aed; }
+
+        /* ── Checklist ── */
+        .check-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid #f1f5f9; background:#fafafa; transition:all .15s; margin-bottom:6px; cursor:pointer; }
+        .check-item:hover { border-color:#e2e8f0; background:#fff; }
+        html.dark .check-item { background:#0f172a; border-color:#1e293b; }
+        html.dark .check-item:hover { border-color:#334155; }
+        .check-item.done { background:#f0fdf4; border-color:#bbf7d0; }
+        html.dark .check-item.done { background:rgba(20,83,45,.3); border-color:#166534; }
+        .check-item.skipped { opacity:.55; background:#f8fafc; }
+        .check-item.skipped .check-title { text-decoration:line-through; color:#94a3b8 !important; }
+        .check-toggle { width:22px; height:22px; border-radius:5px; border:1.5px solid #cbd5e1; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; transition:all .15s; }
+        html.dark .check-toggle { background:#1e293b; border-color:#475569; }
+        .check-item.done .check-toggle { background:#22c55e; border-color:#16a34a; color:#fff; }
+        .check-item.skipped .check-toggle { background:#e2e8f0; border-color:#cbd5e1; color:#94a3b8; }
+        .check-toggle i { font-size:10px; }
+        .check-content { flex:1; min-width:0; }
+        .check-title { font-size:12.5px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+        html.dark .check-title { color:#e2e8f0; }
+        .critical-badge { font-size:9px; font-weight:700; background:#fee2e2; color:#dc2626; padding:1px 5px; border-radius:3px; flex-shrink:0; }
+        .check-desc { font-size:11px; color:#64748b; margin-top:2px; }
+        .skip-btn {
+            display:inline-flex; align-items:center; gap:3px;
+            background:none; border:1px solid #e2e8f0; border-radius:5px;
+            color:#94a3b8; cursor:pointer; padding:2px 7px; font-size:10px; font-weight:600;
+            transition:all .15s; flex-shrink:0; margin-top:1px;
+            font-family:inherit; white-space:nowrap;
+        }
+        .skip-btn:hover { background:#f1f5f9; border-color:#cbd5e1; color:#64748b; }
+        html.dark .skip-btn { border-color:#334155; color:#475569; }
+        html.dark .skip-btn:hover { background:#1e293b; color:#94a3b8; }
+        .check-item.done .skip-btn { opacity:0; pointer-events:none; }
+        .check-item.skipped .skip-btn { background:#fef9c3; border-color:#fde68a; color:#b45309; }
+        .check-item.skipped .skip-btn:hover { background:#fef3c7; }
+
+        /* Category header */
+        .cat-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .cat-title { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:5px; }
+        .cat-badge { font-size:10px; background:#f1f5f9; color:#64748b; padding:1px 7px; border-radius:99px; border:1px solid #e2e8f0; }
+
+        /* ── Onboarding Email Card ── */
+        .email-section-hdr { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .email-section-hdr::after { content:''; flex:1; height:1px; background:#f1f5f9; }
+        html.dark .email-section-hdr::after { background:#1e293b; }
+
+        .email-prog-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; }
+        @media(max-width:640px){ .email-prog-grid { grid-template-columns:1fr 1fr 1fr; } }
+        .email-prog-card { border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; cursor:pointer; user-select:none; background:#fff; transition:all .15s; text-align:center; position:relative; }
+        html.dark .email-prog-card { background:#1e293b; border-color:#334155; }
+        .email-prog-card:hover { border-color:#bfdbfe; background:#f8fafc; }
+        html.dark .email-prog-card:hover { border-color:#3b82f6; background:#0f172a; }
+        .email-prog-card.ep-on { background:#eff6ff; border-color:#93c5fd; }
+        html.dark .email-prog-card.ep-on { background:rgba(37,99,235,.12); border-color:#3b82f6; }
+        .email-prog-card .ep-dot { width:6px; height:6px; border-radius:50%; background:#e2e8f0; margin:0 auto 5px; transition:all .15s; }
+        .email-prog-card.ep-on .ep-dot { background:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+        .email-prog-card .ep-name { font-size:11px; font-weight:700; color:#64748b; display:flex; align-items:center; justify-content:center; gap:4px; }
+        html.dark .email-prog-card .ep-name { color:#94a3b8; }
+        .email-prog-card.ep-on .ep-name { color:#1d4ed8; }
+        html.dark .email-prog-card.ep-on .ep-name { color:#93c5fd; }
+        .email-prog-card .ep-tag { font-size:9px; color:#94a3b8; margin-top:2px; }
+        .email-prog-card.ep-on .ep-tag { color:#3b82f6; }
+
+        /* ── Printer building chips ── */
+        .printer-bldg-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+        .printer-bldg-chip { border:1px solid #e2e8f0; border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700; cursor:pointer; user-select:none; background:#fff; color:#64748b; transition:all .15s; }
+        html.dark .printer-bldg-chip { background:#1e293b; border-color:#334155; color:#94a3b8; }
+        .printer-bldg-chip:hover { border-color:#bfdbfe; color:#1d4ed8; }
+        .printer-bldg-chip.pb-on { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
+        html.dark .printer-bldg-chip.pb-on { background:rgba(37,99,235,.12); border-color:#3b82f6; color:#93c5fd; }
+
+        .email-subject-bar { background:#f8fafc; border:1px solid #e2e8f0; border-radius:7px; padding:8px 12px; font-size:12px; color:#334155; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        html.dark .email-subject-bar { background:#0f172a; border-color:#334155; color:#cbd5e1; }
+        .email-subject-bar .esb-label { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; padding:2px 7px; background:#e2e8f0; border-radius:4px; flex-shrink:0; }
+        html.dark .email-subject-bar .esb-label { background:#334155; color:#64748b; }
+
+        .email-preview-box { border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; background:#fff; max-height:380px; overflow-y:auto; }
+        html.dark .email-preview-box { background:#0f172a; border-color:#334155; }
+        .email-copy-toast { display:none; background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:99px; align-items:center; gap:5px; }
+        .email-copy-toast.show { display:inline-flex; }
+
+        /* ── ISO Print Header ── */
+        .iso-header { display:none; }
+        .iso-doc-badge { display:inline-flex; align-items:center; gap:6px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:3px 10px; font-size:10px; font-weight:700; color:#1d4ed8; }
+
+        /* ── Tab navigation ── */
+        .setup-tab-nav {
+            background:#fff; border-bottom:2px solid #e2e8f0;
+            display:flex; gap:0; overflow-x:auto;
+            padding:0 12px;
+            position:sticky; top:52px; z-index:50;
+            scrollbar-width:none;
+        }
+        .setup-tab-nav::-webkit-scrollbar { display:none; }
+        html.dark .setup-tab-nav { background:#1e293b; border-color:#334155; }
+        .tab-btn {
+            flex-shrink:0; display:flex; align-items:center; gap:7px;
+            padding:10px 18px; font-size:12.5px; font-weight:600;
+            color:#64748b; background:none; border:none;
+            border-bottom:2.5px solid transparent; margin-bottom:-2px;
+            cursor:pointer; white-space:nowrap; font-family:inherit;
+            transition:color .15s,border-color .15s;
+        }
+        .tab-btn:hover { color:#334155; }
+        html.dark .tab-btn { color:#94a3b8; }
+        html.dark .tab-btn:hover { color:#e2e8f0; }
+        .tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; }
+        html.dark .tab-btn.active { color:#60a5fa; border-bottom-color:#60a5fa; }
+        .tab-pct { font-size:10px; background:#f1f5f9; color:#64748b; padding:1px 7px; border-radius:99px; transition:background .2s,color .2s; }
+        .tab-btn.active .tab-pct { background:#dbeafe; color:#2563eb; }
+        .tab-panel { display:none; }
+        .tab-panel.active { display:contents; }
+
+        /* ── Print styles ── */
+        @media print {
+            * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+            body { background:#fff !important; padding:0; font-size:10pt; }
+            .ptc-nav, .setup-controls, .no-print, .setup-tab-nav { display:none !important; }
+            .setup-page { padding:0; gap:0; max-width:100%; }
+            .tab-panel { display:contents !important; }
+
+            /* Cards */
+            .s-card { border-radius:0 !important; box-shadow:none !important; page-break-inside:avoid;
+                       border:none !important; border-bottom:1px solid #ddd !important; padding:8px 14px; margin:0 !important; }
+
+            /* ISO header */
+            .iso-header { display:block !important; border-bottom:2px solid #1a1a2e; margin-bottom:0; padding:8px 12px; }
+            .iso-doc-badge { display:none !important; }
+            .print-only { display:block !important; }
+
+            /* Employee fields */
+            #f-empid { font-weight:700; font-size:13pt; }
+
+            /* Checklist items — compact */
+            .check-item { padding:3px 8px; margin-bottom:2px; border-radius:4px !important; border:1px solid #e2e8f0 !important; }
+            .check-item.done { background:#f0fdf4 !important; border-color:#bbf7d0 !important; }
+            .check-item.skipped { background:#f8fafc !important; opacity:.6; }
+            .check-desc { display:none !important; }
+
+            /* Check toggle — show as visual indicator */
+            .check-toggle { border-radius:3px !important; width:18px !important; height:18px !important; }
+            .check-item.done .check-toggle { background:#22c55e !important; border-color:#16a34a !important; }
+            .check-item.skipped .check-toggle { background:#e2e8f0 !important; }
+            .check-title { font-size:10pt; }
+
+            /* Hide UI-only elements */
+            .skip-btn { display:none !important; }
+            .custom-add-row { display:none !important; }
+            .cat-badge { display:none !important; }
+            .s-input[disabled] { color:#334155 !important; background:transparent !important; border:none !important; padding:0 !important; font-weight:600; }
+
+            /* Access table — keep borders */
+            .co-access-table { font-size:9.5pt; }
+            .co-access-hdr, .co-access-row { border-bottom:1px solid #e2e8f0 !important; }
+
+            /* Colored card icons */
+            .s-icon { border-radius:5px !important; }
+
+            /* Yellow callout */
+            #empid-callout { background:#fffbeb !important; border:1px solid #fde68a !important; }
+
+            /* Printer chips */
+            .printer-bldg-chip { border:1px solid #e2e8f0 !important; border-radius:4px !important; }
+            .printer-bldg-chip.pb-on { background:#eff6ff !important; border-color:#93c5fd !important; color:#1d4ed8 !important; }
+
+            /* Page break hints */
+            #custom-checklist-card { page-break-before:auto; }
+        }
+        .print-only { display:none; }
+
+        /* ── Bottom action bar ── */
+        .setup-controls { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e8f0; padding:10px 16px; display:flex; justify-content:center; gap:8px; z-index:100; flex-wrap:wrap; }
+        html.dark .setup-controls { background:#1e293b; border-color:#334155; }
+        @media print { .setup-controls { display:none; } }
+
+        /* ── Custom checklist ── */
+        .custom-add-row { display:flex; gap:8px; margin-top:10px; align-items:center; }
+        .custom-add-row input { flex:1; }
+        .custom-add-row select { width:160px; }
+        .custom-item-tag { display:inline-flex; align-items:center; gap:5px; font-size:10px; background:#ede9fe; color:#5b21b6; border-radius:3px; padding:1px 5px; flex-shrink:0; }
+
+        /* ── Save status ── */
+        .save-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:4px 10px; border-radius:99px; background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+        .save-badge.unsaved { background:#fef9c3; color:#a16207; border-color:#fde68a; }
+        .save-badge.saving  { background:#dbeafe; color:#1d4ed8; border-color:#93c5fd; }
+
+        /* ── Offboard banner ── */
+        .offboard-banner { background:#fee2e2; border:1px solid #fca5a5; border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px; font-size:13px; color:#991b1b; font-weight:600; }
+        .offboard-banner a { color:#dc2626; font-weight:700; }
+
+        /* ── Asset registry lookup ── */
+        .asset-lookup-wrap { position:relative; }
+        .asset-lookup-row { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+        .asset-lookup-row .s-field { flex:1; min-width:180px; margin:0; }
+        .asset-lookup-results { position:absolute; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 8px 24px rgba(15,23,42,.12); z-index:120; max-height:220px; overflow-y:auto; display:none; }
+        html.dark .asset-lookup-results { background:#1e293b; border-color:#334155; }
+        .asset-lookup-item { padding:9px 12px; cursor:pointer; border-bottom:1px solid #f1f5f9; font-size:12px; }
+        html.dark .asset-lookup-item { border-color:#334155; }
+        .asset-lookup-item:hover { background:#f8fafc; }
+        html.dark .asset-lookup-item:hover { background:#0f172a; }
+        .asset-lookup-item:last-child { border-bottom:none; }
+        .asset-lookup-code { font-family:ui-monospace,monospace; font-weight:700; color:#2563eb; font-size:12px; }
+        .registry-link-badge { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0 10px; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:11px; color:#166534; }
+        html.dark .registry-link-badge { background:rgba(20,83,45,.25); border-color:#166534; color:#86efac; }
+        .registry-link-badge.warn { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+        html.dark .registry-link-badge.warn { background:rgba(120,53,15,.25); border-color:#92400e; color:#fde68a; }
+        .registry-sync-note { font-size:11px; margin:0 0 10px; padding:7px 10px; border-radius:7px; display:none; }
+        .registry-sync-note.ok { display:block; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+        .registry-sync-note.warn { display:block; background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+        .registry-sync-note.err { display:block; background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="ptc-nav">
+    <a href="setup_list.html" class="nav-back" title="รายการทั้งหมด"><i class="fa fa-arrow-left"></i></a>
+    <div class="ptc-nav-brand">
+        <div class="ptc-nav-icon" id="nav-icon" style="background:#2563eb"><i class="fa fa-laptop-code"></i></div>
+        <div>
+            <div class="ptc-nav-title">Windows Setup Checksheet</div>
+            <div class="ptc-nav-sub">IT Delivery Certificate</div>
+        </div>
+    </div>
+    <div style="flex:1"></div>
+    <span class="iso-doc-badge no-print"><i class="fa fa-file-shield"></i> IT-FM-001 Rev.01</span>
+    <button id="theme-toggle" class="ptc-ghost no-print" title="สลับธีม" style="font-size:15px;padding:6px 10px;"><i id="theme-icon" class="fa fa-sun"></i></button>
+    <div id="nav-user-area"></div>
+</nav>
+
+
+<!-- ISO Document Header (print only) -->
+<div class="iso-header print-only">
+    <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+        <tr>
+            <td rowspan="4" style="width:180px;border:1px solid #333;padding:8px 12px;text-align:center;vertical-align:middle;">
+                <div style="font-size:13pt;font-weight:800;color:#1a1a2e;letter-spacing:.03em">PowerTech</div>
+                <div style="font-size:8pt;color:#555;margin-top:2px">Group of Companies</div>
+            </td>
+            <td colspan="4" style="border:1px solid #333;padding:6px 12px;text-align:center;">
+                <div style="font-size:13pt;font-weight:700;color:#1a1a2e;">ใบส่งมอบและติดตั้งคอมพิวเตอร์</div>
+                <div style="font-size:9pt;color:#555;">Computer Setup &amp; Delivery Checklist</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;width:130px;"><strong>เลขที่เอกสาร</strong></td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;font-weight:700;">IT-FM-001</td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;width:80px;"><strong>Rev.</strong></td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;font-weight:700;">01</td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>แผนกผู้รับผิดชอบ</strong></td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;">IT / Information Technology</td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>หน้า</strong></td>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;">1 / 1</td>
+        </tr>
+        <tr>
+            <td style="border:1px solid #333;padding:4px 10px;font-size:9pt;"><strong>วันที่มีผลบังคับใช้</strong></td>
+            <td colspan="3" style="border:1px solid #333;padding:4px 10px;font-size:9pt;" id="iso-eff-date">—</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Tab nav -->
+<div class="setup-tab-nav no-print" id="tab-nav">
+    <button class="tab-btn active" data-tab="info" onclick="switchTab('info')">
+        <i class="fa fa-user" style="font-size:11px"></i> ① ข้อมูล
+        <span class="tab-pct" id="tab-info-pct" style="display:none"></span>
+    </button>
+    <button class="tab-btn" data-tab="access" onclick="switchTab('access')">
+        <i class="fa fa-shield-halved" style="font-size:11px"></i> ② สิทธิ์
+    </button>
+    <button class="tab-btn" data-tab="checklist" onclick="switchTab('checklist')">
+        <i class="fa fa-list-check" style="font-size:11px"></i> ③ Checklist
+        <span class="tab-pct" id="tab-checklist-pct">0%</span>
+    </button>
+    <button class="tab-btn" data-tab="email" onclick="switchTab('email')">
+        <i class="fa fa-envelope" style="font-size:11px"></i> ④ ส่งมอบ
+    </button>
+</div>
+
+<div class="setup-page">
+
+    <!-- ① Progress card -->
+    <div class="s-card progress-card no-print">
+        <div class="progress-ring-wrap">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="progress-ring-bg" cx="28" cy="28" r="23" fill="none" stroke-width="5"/>
+                <circle id="prog-ring" class="progress-ring-fill" cx="28" cy="28" r="23" fill="none" stroke-width="5"
+                    stroke-dasharray="144.5" stroke-dashoffset="144.5"/>
+            </svg>
+            <div class="progress-pct-label" id="prog-pct">0%</div>
+        </div>
+        <div style="flex:1">
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-track"><div class="progress-bar-fill" id="prog-bar"></div></div>
+                <div class="readiness-label" id="readiness-label">ยังไม่ได้เริ่ม</div>
+            </div>
+        </div>
+        <div class="progress-stats">
+            <div class="pstat"><div class="pstat-val" id="stat-done">0</div><div class="pstat-lbl">เสร็จ</div></div>
+            <div class="pstat"><div class="pstat-val" id="stat-total" style="color:#94a3b8">0</div><div class="pstat-lbl">ทั้งหมด</div></div>
+            <div class="pstat"><div class="pstat-val" id="stat-critical" style="color:#dc2626">0</div><div class="pstat-lbl">Critical</div></div>
+        </div>
+    </div>
+
+    <!-- ② Tab: ข้อมูล -->
+    <div class="tab-panel active" id="tab-info">
+    <div class="s-card">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#dbeafe;color:#2563eb"><i class="fa fa-user"></i></div>
+            พนักงาน
+        </div>
+
+        <!-- ชื่อ + รหัส (2 col, empid prominent) -->
+        <div class="s-grid" style="grid-template-columns:1fr 200px;gap:10px;margin-bottom:10px;">
+            <div class="s-field">
+                <label>ชื่อ-สกุล</label>
+                <input type="text" id="f-user" class="s-input" placeholder="ชื่อ-สกุลพนักงาน" style="font-size:14px;">
+            </div>
+            <div class="s-field">
+                <label>รหัสพนักงาน</label>
+                <input type="text" id="f-empid" class="s-input" placeholder="เช่น 5902267"
+                    style="font-size:15px;font-weight:700;letter-spacing:.05em;text-align:center;"
+                    oninput="markDirty();refreshEmail();scheduleEmpLookup()">
+                <div id="empid-found" style="display:none;font-size:11px;color:#16a34a;margin-top:3px;"><i class="fa fa-circle-check"></i> <span id="empid-found-name"></span></div>
+            </div>
+        </div>
+        <!-- callout: รหัสพนักงานใช้ที่ไหนบ้าง -->
+        <div id="empid-callout" style="background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 12px;font-size:11px;color:#92400e;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+            <i class="fa fa-key" style="color:#d97706"></i>
+            <span><strong>รหัสพนักงาน</strong> ถูกใช้เป็น Password สำหรับ:
+            <span style="margin-left:4px">Internet / Fortigate</span> ·
+            <span>VPN</span> ·
+            <span>ERP</span> ·
+            <span>MRP</span> ·
+            <span>รหัสเครื่องพิมพ์</span></span>
+        </div>
+        <div class="s-grid s-grid-3" style="margin-bottom:0">
+            <div class="s-field">
+                <label>บริษัทที่สังกัด</label>
+                <select id="f-company" class="s-input">
+                    <option value="">-- เลือก --</option>
+                    <option value="PTA">PowerTech Assembly (PTA)</option>
+                    <option value="PT4">PowerTech 2004 (PT4)</option>
+                    <option value="PTE">PowerTech Energy (PTE)</option>
+                </select>
+            </div>
+            <div class="s-field">
+                <label>แผนก</label>
+                <input type="text" id="f-dept" class="s-input" placeholder="เช่น Operation, HR, Finance">
+            </div>
+        </div>
+
+        <!-- divider -->
+        <div style="border-top:1px solid #f1f5f9;margin:16px -20px;"></div>
+
+        <div class="s-card-title" style="margin-bottom:12px;">
+            <div class="s-icon" style="background:#dbeafe;color:#2563eb"><i class="fa fa-desktop"></i></div>
+            เครื่อง <span style="font-size:11px;font-weight:500;color:#64748b;margin-left:6px">— ดึงจากทะเบียนพัสดุ IT แล้วบันทึกจะ sync กลับอัตโนมัติ</span>
+        </div>
+        <div id="registry-link-badge" class="registry-link-badge" style="display:none">
+            <i class="fa fa-link"></i>
+            <span>ผูกทะเบียน: <strong id="registry-link-code">—</strong></span>
+            <a href="admin.html" id="registry-admin-link" target="_blank" rel="noopener" style="color:inherit;font-weight:700;text-decoration:underline">เปิด Admin</a>
+        </div>
+        <div id="registry-sync-note" class="registry-sync-note"></div>
+        <div class="asset-lookup-wrap" style="margin-bottom:10px">
+            <div class="asset-lookup-row">
+                <div class="s-field">
+                    <label>รหัสพัสดุ IT (Asset Code)</label>
+                    <input type="text" id="f-asset" class="s-input ptc-code-input" placeholder="เช่น PTE-OP-NB-0001" autocomplete="off"
+                        oninput="markDirty();onAssetCodeInput()" onblur="lookupAssetByCodeExact()" onfocus="onAssetCodeFocus()">
+                </div>
+                <button type="button" class="ptc-btn ptc-btn-sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;height:36px" onclick="lookupAssetByCodeExact(true)"><i class="fa fa-database"></i> ดึงจากทะเบียน</button>
+            </div>
+            <div id="asset-lookup-results" class="asset-lookup-results"></div>
+        </div>
+        <div class="s-grid s-grid-3" style="margin-bottom:10px;">
+            <div class="s-field"><label>Serial Number</label><input type="text" id="f-serial" class="s-input" placeholder="S/N ของเครื่อง" oninput="markDirty()"></div>
+            <div class="s-field"><label>ชื่อเครื่อง (PC Name)</label><input type="text" id="f-pcname" class="s-input" placeholder="เช่น IT-LAPTOP01" oninput="markDirty()"></div>
+            <div class="s-field"><label>IP Address / Subnet</label><input type="text" id="f-ip" class="s-input" placeholder="เช่น 192.168.1.10/24" oninput="markDirty()"></div>
+        </div>
+        <div class="s-grid s-grid-3" style="margin-bottom:10px;">
+            <div class="s-field"><label>Gateway / DNS</label><input type="text" id="f-gw" class="s-input" placeholder="เช่น 192.168.1.1"></div>
+            <div class="s-field"><label>รหัสผ่าน Internet / Proxy</label><input type="password" id="f-netpass" class="s-input" placeholder="ถ้าแตกต่างจากรหัสพนักงาน"></div>
+        </div>
+        <div class="s-grid s-grid-3" style="margin-bottom:10px;">
+            <div class="s-field"><label>วันที่ติดตั้ง</label><input type="date" id="f-date" class="s-input"></div>
+            <div class="s-field"><label>ช่าง IT</label><input type="text" id="f-tech" class="s-input" placeholder="ชื่อผู้ติดตั้ง"></div>
+            <div class="s-field"><label>ประเภทงาน</label>
+                <select id="f-jobtype" class="s-input">
+                    <option>ติดตั้งใหม่</option>
+                    <option>ส่งมอบเครื่องใหม่</option>
+                    <option>รีเซ็ตเครื่อง</option>
+                    <option>อัปเกรดเครื่องเดิม</option>
+                </select>
+            </div>
+        </div>
+        <div class="s-field">
+            <label>หมายเหตุ</label>
+            <textarea id="f-notes" class="s-input" rows="2" placeholder="บันทึกเพิ่มเติม เช่น โปรแกรมพิเศษ, เครื่องพิมพ์เฉพาะ, สิทธิ์พิเศษ"></textarea>
+        </div>
+    </div>
+    </div><!-- /tab-info -->
+
+    <!-- ③ Tab: สิทธิ์ -->
+    <div class="tab-panel" id="tab-access">
+
+    <!-- สิทธิ์การเข้าใช้ -->
+    <div class="s-card">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#ede9fe;color:#7c3aed"><i class="fa fa-shield-halved"></i></div>
+            สิทธิ์การเข้าใช้
+        </div>
+        <div class="s-field">
+            <label>บัญชีผู้ใช้ตามบริษัท <span style="color:#94a3b8;font-weight:400">— ติ๊กบริษัทที่ต้องเปิดสิทธิ์</span></label>
+            <div class="co-access-table">
+                <div class="co-access-hdr">
+                    <span>บริษัท</span>
+                    <span>Net User / Domain Account</span>
+                    <span style="text-align:center">Internet</span>
+                    <span style="text-align:center">VPN</span>
+                </div>
+                <!-- PTA -->
+                <div class="co-access-row" id="co-row-PTA">
+                    <label class="co-toggle">
+                        <input type="checkbox" id="co-active-PTA" onchange="toggleCoRow('PTA')">
+                        <span class="co-badge co-pta">🏢 PTA</span>
+                    </label>
+                    <input type="text" id="co-netuser-PTA" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <label class="co-chk-wrap" id="co-inet-wrap-PTA">
+                        <input type="checkbox" id="co-inet-PTA" disabled>
+                        <span>Internet</span>
+                    </label>
+                    <label class="co-chk-wrap" id="co-vpn-wrap-PTA">
+                        <input type="checkbox" id="co-vpn-PTA" disabled>
+                        <span>VPN</span>
+                    </label>
+                </div>
+                <!-- PT4 -->
+                <div class="co-access-row" id="co-row-PT4">
+                    <label class="co-toggle">
+                        <input type="checkbox" id="co-active-PT4" onchange="toggleCoRow('PT4')">
+                        <span class="co-badge co-pt4">🏭 PT4</span>
+                    </label>
+                    <input type="text" id="co-netuser-PT4" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <label class="co-chk-wrap" id="co-inet-wrap-PT4">
+                        <input type="checkbox" id="co-inet-PT4" disabled>
+                        <span>Internet</span>
+                    </label>
+                    <label class="co-chk-wrap" id="co-vpn-wrap-PT4">
+                        <input type="checkbox" id="co-vpn-PT4" disabled>
+                        <span>VPN</span>
+                    </label>
+                </div>
+                <!-- PTE -->
+                <div class="co-access-row" id="co-row-PTE">
+                    <label class="co-toggle">
+                        <input type="checkbox" id="co-active-PTE" onchange="toggleCoRow('PTE')">
+                        <span class="co-badge co-pte">🌏 PTE</span>
+                    </label>
+                    <input type="text" id="co-netuser-PTE" class="s-input co-input" placeholder="เช่น domain\firstname.l" disabled>
+                    <label class="co-chk-wrap" id="co-inet-wrap-PTE">
+                        <input type="checkbox" id="co-inet-PTE" disabled>
+                        <span>Internet</span>
+                    </label>
+                    <label class="co-chk-wrap" id="co-vpn-wrap-PTE">
+                        <input type="checkbox" id="co-vpn-PTE" disabled>
+                        <span>VPN</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- Printer buildings -->
+        <div style="border-top:1px solid #f1f5f9;margin:14px 0 12px;"></div>
+        <div class="s-field">
+            <label>เครื่องพิมพ์ <span style="color:#94a3b8;font-weight:400">— เลือกตึกที่เปิดสิทธิ์</span></label>
+            <div class="printer-bldg-grid" style="margin-top:6px;margin-bottom:0" id="printer-bldg-wrap">
+                <span class="printer-bldg-chip" id="pb-F4"  onclick="togglePB('F4')">F4</span>
+                <span class="printer-bldg-chip" id="pb-F5"  onclick="togglePB('F5')">F5</span>
+                <span class="printer-bldg-chip" id="pb-F6"  onclick="togglePB('F6')">F6</span>
+                <span class="printer-bldg-chip" id="pb-F7"  onclick="togglePB('F7')">F7</span>
+                <span class="printer-bldg-chip" id="pb-F8"  onclick="togglePB('F8')">F8</span>
+                <span class="printer-bldg-chip" id="pb-F16" onclick="togglePB('F16')">F16</span>
+                <span class="printer-bldg-chip" id="pb-F17" onclick="togglePB('F17')">F17</span>
+                <span class="printer-bldg-chip" id="pb-PTE" onclick="togglePB('PTE')">PTE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offboard banner (shown when loaded from offboarded record) -->
+    <div id="offboard-banner" class="offboard-banner" style="display:none">
+        <i class="fa fa-triangle-exclamation"></i>
+        <span>เครื่องนี้ <strong>Offboard แล้ว</strong> — ดูเฉพาะข้อมูล &nbsp;|&nbsp; <a href="#" id="offboard-link">ดูใบ Offboarding →</a></span>
+    </div>
+    </div><!-- /tab-access -->
+
+    <!-- ④ Tab: Checklist -->
+    <div class="tab-panel" id="tab-checklist">
+    <div id="checklist-wrap"></div>
+
+    <!-- ⑤ Custom checklist items -->
+    <div class="s-card" id="custom-checklist-card">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#fef3c7;color:#b45309"><i class="fa fa-list-check"></i></div>
+            รายการเพิ่มเติม (Custom)
+            <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:4px">— เพิ่มโปรแกรมหรืองานพิเศษที่ไม่อยู่ใน checklist มาตรฐาน</span>
+        </div>
+        <div id="custom-items-list"></div>
+        <div class="custom-add-row">
+            <select id="custom-cat" class="s-input">
+                <option value="แอปพลิเคชัน">📦 แอปพลิเคชัน</option>
+                <option value="ระบบพื้นฐาน">🪟 ระบบพื้นฐาน</option>
+                <option value="เครือข่าย">🌐 เครือข่าย</option>
+                <option value="ความปลอดภัย">🛡️ ความปลอดภัย</option>
+                <option value="องค์กรเฉพาะทาง">🏢 องค์กรเฉพาะทาง</option>
+                <option value="อื่นๆ">➕ อื่นๆ</option>
+            </select>
+            <input type="text" id="custom-title" class="s-input" placeholder="เช่น ติดตั้ง AutoCAD 2024, ลง VPN FortiClient..." style="flex:1">
+            <button type="button" class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="addCustomItem()">
+                <i class="fa fa-plus"></i> เพิ่ม
+            </button>
+        </div>
+    </div>
+    </div><!-- /tab-checklist -->
+
+    <!-- ⑥ Tab: ส่งมอบ -->
+    <div class="tab-panel" id="tab-email">
+
+    <!-- Onboarding Email Generator -->
+    <div class="s-card no-print" id="email-card">
+        <div class="s-card-title">
+            <div class="s-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fa fa-envelope"></i></div>
+            Onboarding Email
+            <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:2px">— เมลต้อนรับพนักงานใหม่</span>
+            <span id="email-toast" class="email-copy-toast" style="margin-left:auto"><i class="fa fa-check"></i> คัดลอกแล้ว!</span>
+        </div>
+
+        <!-- Override fields -->
+        <div class="email-section-hdr">ข้อมูลในเมล</div>
+        <div class="s-grid s-grid-3" style="margin-bottom:16px;">
+            <div class="s-field">
+                <label>ชื่อพนักงาน <span style="color:#94a3b8;font-weight:400">(ถ้าไม่กรอก ใช้ชื่อจากด้านบน)</span></label>
+                <input type="text" id="em-name" class="s-input" placeholder="เช่น คุณสมชาย" oninput="refreshEmail()">
+            </div>
+            <div class="s-field">
+                <label>Windows Password <span style="color:#94a3b8;font-weight:400">(แจ้งในเมล)</span></label>
+                <input type="text" id="em-winpass" class="s-input" placeholder="ค่าเริ่มต้น: aaAA1234" oninput="refreshEmail()">
+            </div>
+            <div class="s-field">
+                <label>ผู้ติดต่อ IT <span style="color:#94a3b8;font-weight:400">(บันทึกอัตโนมัติ)</span></label>
+                <input type="text" id="em-itcontact" class="s-input" placeholder="IT Support โทร. 123" oninput="refreshEmail()">
+            </div>
+        </div>
+
+        <!-- Program selection -->
+        <div class="email-section-hdr">โปรแกรมที่เปิดสิทธิ์</div>
+        <div class="email-prog-grid" style="grid-template-columns:repeat(4,1fr);">
+            <label class="email-prog-card ep-on" id="ep-ptc" onclick="toggleEP('ptc')">
+                <input type="checkbox" id="epchk-ptc" checked style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-globe" style="font-size:10px"></i> PTC</div>
+                <div class="ep-tag">PowertechCenter</div>
+            </label>
+            <label class="email-prog-card" id="ep-carsys" onclick="toggleEP('carsys')">
+                <input type="checkbox" id="epchk-carsys" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-car" style="font-size:10px"></i> CARSYS</div>
+                <div class="ep-tag">รหัสพนักงาน</div>
+            </label>
+            <label class="email-prog-card" id="ep-roomsys" onclick="toggleEP('roomsys')">
+                <input type="checkbox" id="epchk-roomsys" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-door-open" style="font-size:10px"></i> ROOMSYS</div>
+                <div class="ep-tag">รหัสพนักงาน</div>
+            </label>
+            <label class="email-prog-card" id="ep-erpN" onclick="toggleEP('erpN')">
+                <input type="checkbox" id="epchk-erpN" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-database" style="font-size:10px"></i> ERP</div>
+                <div class="ep-tag">ตัวใหม่</div>
+            </label>
+            <label class="email-prog-card" id="ep-erpO" onclick="toggleEP('erpO')">
+                <input type="checkbox" id="epchk-erpO" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-database" style="font-size:10px"></i> ERP</div>
+                <div class="ep-tag">ตัวเก่า</div>
+            </label>
+            <label class="email-prog-card" id="ep-mrpN" onclick="toggleEP('mrpN')">
+                <input type="checkbox" id="epchk-mrpN" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-boxes-stacked" style="font-size:10px"></i> MRP</div>
+                <div class="ep-tag">ตัวใหม่</div>
+            </label>
+            <label class="email-prog-card" id="ep-mrpO" onclick="toggleEP('mrpO')">
+                <input type="checkbox" id="epchk-mrpO" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-boxes-stacked" style="font-size:10px"></i> MRP</div>
+                <div class="ep-tag">ตัวเก่า</div>
+            </label>
+            <label class="email-prog-card" id="ep-ictrl" onclick="toggleEP('ictrl')">
+                <input type="checkbox" id="epchk-ictrl" style="display:none">
+                <div class="ep-dot"></div>
+                <div class="ep-name"><i class="fa fa-sliders" style="font-size:10px"></i> Icontrol</div>
+                <div class="ep-tag">ระบบควบคุม</div>
+            </label>
+        </div>
+
+        <!-- Subject bar -->
+        <div class="email-subject-bar">
+            <span class="esb-label">Subject</span>
+            <span id="em-subject-text" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;"></span>
+            <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="flex-shrink:0;padding:3px 10px;font-size:10px;" onclick="copyEmailSubject()">
+                <i class="fa fa-copy"></i> คัดลอก
+            </button>
+        </div>
+
+        <!-- Email preview -->
+        <div class="email-section-hdr" style="margin-bottom:8px;">ตัวอย่างเมล</div>
+        <div class="email-preview-box" id="em-preview"></div>
+
+        <!-- Buttons -->
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+            <button class="ptc-btn ptc-btn-primary" onclick="copyEmailBody()">
+                <i class="fa fa-paper-plane"></i> คัดลอกเนื้อหา (พร้อมรูปแบบ)
+            </button>
+            <button class="ptc-btn ptc-btn-secondary" onclick="saveEmailImage()">
+                <i class="fa fa-image"></i> บันทึกเป็นภาพ
+            </button>
+            <span style="font-size:11px;color:#94a3b8">วางใน Gmail หรือ Outlook ได้เลย / หรือบันทึกเป็น PNG ส่งทาง LINE ก็ได้</span>
+        </div>
+    </div>
+
+    <!-- ⑤ Print-only signature section -->
+    <div class="s-card print-only" style="page-break-inside:avoid;">
+        <div style="font-size:11px;font-weight:700;color:#334155;margin-bottom:12px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">
+            การรับรองและลงนาม / Certification &amp; Signature
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+            <tr>
+                <td style="width:50%;border:1px solid #cbd5e1;border-radius:0;padding:0;vertical-align:top;overflow:hidden;">
+                    <div style="padding:5px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:baseline;gap:6px;">
+                        <span style="font-size:9pt;font-weight:700;color:#1e293b;">ผู้ส่งมอบ</span>
+                        <span style="font-size:8pt;color:#64748b;">IT Technician</span>
+                    </div>
+                    <div style="padding:8px 12px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;">
+                        <div style="font-size:8pt;color:#64748b;margin-bottom:8px;text-align:center;">ข้าพเจ้าขอรับรองว่าได้ทำการติดตั้งและทดสอบเรียบร้อยแล้ว</div>
+                        <div style="min-height:32px;width:100%;"></div>
+                        <div style="width:100%;text-align:center;margin-bottom:1px;">
+                            <div style="border-bottom:1px solid #475569;margin:0 6px 3px;"></div>
+                            <div style="font-size:7.5pt;color:#64748b;letter-spacing:.04em;">ลงชื่อ / Signature</div>
+                        </div>
+                        <div style="font-size:9pt;color:#334155;text-align:center;">( <span id="sig-tech-name" style="font-weight:600"></span><span id="sig-tech-dots" style="color:#94a3b8;"></span> )</div>
+                        <div style="font-size:8pt;color:#475569;text-align:center;margin-top:2px;">วันที่ &nbsp;.......... / .......... / ..............</div>
+                    </div>
+                </td>
+                <td style="width:50%;border:1px solid #cbd5e1;border-radius:0;padding:0;vertical-align:top;overflow:hidden;border-left:none;">
+                    <div style="padding:5px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:baseline;gap:6px;">
+                        <span style="font-size:9pt;font-weight:700;color:#1e293b;">ผู้รับเครื่อง</span>
+                        <span style="font-size:8pt;color:#64748b;">End User</span>
+                    </div>
+                    <div style="padding:8px 12px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;">
+                        <div style="font-size:8pt;color:#64748b;margin-bottom:8px;text-align:center;">ข้าพเจ้าได้รับมอบเครื่องคอมพิวเตอร์ในสภาพเรียบร้อยและพร้อมใช้งาน</div>
+                        <div style="min-height:32px;width:100%;"></div>
+                        <div style="width:100%;text-align:center;margin-bottom:1px;">
+                            <div style="border-bottom:1px solid #475569;margin:0 6px 3px;"></div>
+                            <div style="font-size:7.5pt;color:#64748b;letter-spacing:.04em;">ลงชื่อ / Signature</div>
+                        </div>
+                        <div style="font-size:9pt;color:#334155;text-align:center;">( <span id="sig-user-name" style="font-weight:600"></span><span id="sig-user-dots" style="color:#94a3b8;"></span> )</div>
+                        <div style="font-size:8pt;color:#475569;text-align:center;margin-top:2px;">วันที่ &nbsp;.......... / .......... / ..............</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div style="margin-top:10px;padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:8pt;color:#64748b;">
+            <strong>หมายเหตุ:</strong> เอกสารนี้ใช้สำหรับการส่งมอบเครื่องคอมพิวเตอร์เท่านั้น กรุณาเก็บรักษาไว้เป็นหลักฐาน
+            &nbsp;|&nbsp; <strong>IT-FM-001</strong> Rev.01 &nbsp;|&nbsp; IT / Information Technology
+        </div>
+    </div>
+    </div><!-- /tab-email -->
+
+</div>
+
+<!-- Bottom action bar -->
+<div class="setup-controls no-print">
+    <span id="save-badge" class="save-badge unsaved" style="display:none"><i class="fa fa-circle-dot"></i> ยังไม่ได้บันทึก</span>
+    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="resetChecklist()"><i class="fa fa-rotate-left"></i> รีเซ็ต</button>
+    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="switchTab('checklist');filterPending()"><i class="fa fa-clock"></i> ที่ยังไม่เสร็จ</button>
+    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" onclick="saveRecord()" id="btn-save-db"><i class="fa fa-floppy-disk"></i> บันทึก</button>
+    <a id="btn-offboard" href="#" class="ptc-btn ptc-btn-sm" style="display:none;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;" onclick="goOffboard(event)"><i class="fa fa-right-from-bracket"></i> Offboard เครื่อง</a>
+    <button class="ptc-btn ptc-btn-sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;" onclick="switchTab('email');refreshEmail()"><i class="fa fa-envelope"></i> Onboarding Mail</button>
+    <button class="ptc-btn ptc-btn-primary" onclick="printSetup()"><i class="fa fa-print"></i> ปริ้นใบส่งมอบ</button>
+</div>
+
+<script>
+const API_PATH = 'api.php';
+
+// ── Record ID (from DB) ─────────────────────────────────────
+let recordId = 0;
+let isDirty   = false;
+let linkedAssetId = 0;
+let assetLookupTimer = null;
+
+function debounceAssetLookup(fn, ms) {
+    return function(...args) {
+        clearTimeout(assetLookupTimer);
+        assetLookupTimer = setTimeout(() => fn.apply(this, args), ms);
+    };
+}
+
+function updateRegistryBadge(code, assetId, warn) {
+    const badge = document.getElementById('registry-link-badge');
+    const codeEl = document.getElementById('registry-link-code');
+    if (!badge || !codeEl) return;
+    linkedAssetId = assetId ? parseInt(assetId, 10) || 0 : 0;
+    if (!code) {
+        badge.style.display = 'none';
+        return;
+    }
+    codeEl.textContent = code;
+    badge.style.display = 'flex';
+    badge.classList.toggle('warn', !!warn);
+}
+
+function showRegistrySyncNote(sync) {
+    const el = document.getElementById('registry-sync-note');
+    if (!el || !sync) { if (el) el.className = 'registry-sync-note'; return; }
+    el.className = 'registry-sync-note';
+    if (sync.status === 'success' || sync.status === 'linked') {
+        el.classList.add('ok');
+        el.innerHTML = `<i class="fa fa-circle-check"></i> ${sync.message || 'อัปเดตทะเบียนพัสดุแล้ว'}`;
+        if (sync.it_asset_id) updateRegistryBadge(getVal('f-asset'), sync.it_asset_id, false);
+    } else if (sync.status === 'not_found') {
+        el.classList.add('warn');
+        el.innerHTML = `<i class="fa fa-triangle-exclamation"></i> ${sync.message || 'ไม่พบทะเบียน — สร้างรหัสใน Admin ก่อน'}`;
+        updateRegistryBadge(getVal('f-asset'), 0, true);
+    } else if (sync.status === 'error') {
+        el.classList.add('err');
+        el.innerHTML = `<i class="fa fa-circle-xmark"></i> ${sync.message || 'Sync ทะเบียนไม่สำเร็จ'}`;
+    } else {
+        el.className = 'registry-sync-note';
+    }
+}
+
+function applyAssetFromRegistry(item) {
+    if (!item) return;
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val != null && String(val).trim() !== '') el.value = val; };
+    set('f-asset', item.equipment_id);
+    set('f-serial', item.serial_number);
+    set('f-pcname', item.hostname);
+    set('f-ip', item.ip_address);
+    if (item.company) set('f-company', item.company);
+    const deptName = item.owning_department_name || item.department || '';
+    if (deptName) set('f-dept', deptName);
+    const custId = item.custodian_employee_id || item.borrower_id || '';
+    if (custId) set('f-empid', custId);
+    if (item.borrower && !String(item.borrower).startsWith('แผนก ')) set('f-user', item.borrower);
+    updateRegistryBadge(item.equipment_id || '', item.db_id, false);
+    hideAssetLookupResults();
+    markDirty();
+    refreshEmail();
+    syncSigNames();
+}
+
+function hideAssetLookupResults() {
+    const box = document.getElementById('asset-lookup-results');
+    if (box) box.style.display = 'none';
+}
+
+function renderAssetLookupResults(items) {
+    const box = document.getElementById('asset-lookup-results');
+    if (!box) return;
+    if (!items || !items.length) {
+        box.innerHTML = '<div class="asset-lookup-item" style="color:#94a3b8;cursor:default">ไม่พบในทะเบียน</div>';
+        box.style.display = 'block';
+        return;
+    }
+    box.innerHTML = items.map((it, idx) => {
+        const code = escapeHtml(it.equipment_id || '');
+        const name = escapeHtml(it.name || '');
+        const sn = escapeHtml(it.serial_number || '—');
+        const host = escapeHtml(it.hostname || '—');
+        return `<div class="asset-lookup-item" data-idx="${idx}"><div class="asset-lookup-code">${code}</div><div style="color:#64748b;margin-top:2px">${name}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">S/N ${sn} · ${host}</div></div>`;
+    }).join('');
+    box._items = items;
+    box.querySelectorAll('.asset-lookup-item[data-idx]').forEach(el => {
+        el.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const it = box._items[parseInt(el.dataset.idx, 10)];
+            applyAssetFromRegistry(it);
+        });
+    });
+    box.style.display = 'block';
+}
+
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const searchAssetRegistryDebounced = debounceAssetLookup(async function(term) {
+    const q = String(term || '').trim();
+    const box = document.getElementById('asset-lookup-results');
+    if (!q || q.length < 2) { hideAssetLookupResults(); return; }
+    try {
+        const res = await fetch(`${API_PATH}?action=lookupEquipment&q=${encodeURIComponent(q)}&limit=8`);
+        const data = await res.json();
+        if (data.status === 'success') renderAssetLookupResults(data.items || []);
+    } catch (e) { hideAssetLookupResults(); }
+}, 200);
+
+function onAssetCodeInput() {
+    searchAssetRegistryDebounced(getVal('f-asset'));
+}
+
+function onAssetCodeFocus() {
+    const q = getVal('f-asset');
+    if (q.length >= 2) searchAssetRegistryDebounced(q);
+}
+
+async function lookupAssetByCodeExact(forceApply) {
+    const code = getVal('f-asset').trim();
+    if (!code) { hideAssetLookupResults(); return; }
+    try {
+        const res = await fetch(`${API_PATH}?action=lookupEquipment&exact=${encodeURIComponent(code)}`);
+        const data = await res.json();
+        if (data.status !== 'success') return;
+        const items = data.items || [];
+        if (items.length === 1) {
+            if (forceApply || !linkedAssetId) applyAssetFromRegistry(items[0]);
+            else updateRegistryBadge(code, items[0].db_id, false);
+        } else if (items.length > 1) {
+            renderAssetLookupResults(items);
+        } else if (forceApply) {
+            updateRegistryBadge(code, 0, true);
+            const note = document.getElementById('registry-sync-note');
+            if (note) {
+                note.className = 'registry-sync-note warn';
+                note.innerHTML = `<i class="fa fa-triangle-exclamation"></i> ไม่พบรหัส "${escapeHtml(code)}" ในทะเบียน — สร้างใน Admin ก่อน`;
+            }
+        }
+    } catch (e) { /* ignore */ }
+}
+
+document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.asset-lookup-wrap');
+    if (wrap && !wrap.contains(e.target)) hideAssetLookupResults();
+});
+
+// ── Custom items ────────────────────────────────────────────
+// [{id, cat, title, state:'pending'|'done'|'skipped'}]
+let customItems = [];
+
+function addCustomItem() {
+    const title = document.getElementById('custom-title').value.trim();
+    const cat   = document.getElementById('custom-cat').value;
+    if (!title) { document.getElementById('custom-title').focus(); return; }
+    customItems.push({ id: 'c' + Date.now(), cat, title, state: 'pending' });
+    document.getElementById('custom-title').value = '';
+    renderCustomItems();
+    markDirty();
+}
+
+function removeCustomItem(id) {
+    customItems = customItems.filter(c => c.id !== id);
+    renderCustomItems();
+    markDirty();
+}
+
+function toggleCustomItem(id) {
+    if (editingCustomId === id) return; // ไม่ toggle ขณะ edit
+    const c = customItems.find(x => x.id === id);
+    if (!c) return;
+    c.state = c.state === 'pending' ? 'done' : c.state === 'done' ? 'pending' : 'pending';
+    renderCustomItems();
+    markDirty();
+}
+
+function skipCustomItem(id) {
+    const c = customItems.find(x => x.id === id);
+    if (!c) return;
+    c.state = c.state === 'skipped' ? 'pending' : 'skipped';
+    renderCustomItems();
+    markDirty();
+}
+
+let editingCustomId = null;
+
+function editCustomItem(id) {
+    editingCustomId = id;
+    renderCustomItems();
+    // focus input
+    const inp = document.getElementById('cedit-title-' + id);
+    if (inp) { inp.focus(); inp.select(); }
+}
+
+function saveCustomEdit(id) {
+    const c = customItems.find(x => x.id === id);
+    if (!c) return;
+    const inp = document.getElementById('cedit-title-' + id);
+    const sel = document.getElementById('cedit-cat-' + id);
+    const newTitle = inp ? inp.value.trim() : c.title;
+    if (!newTitle) return; // ไม่บันทึกถ้าว่าง
+    c.title = newTitle;
+    if (sel) c.cat = sel.value;
+    editingCustomId = null;
+    renderCustomItems();
+    markDirty();
+}
+
+function cancelCustomEdit() {
+    editingCustomId = null;
+    renderCustomItems();
+}
+
+const CUSTOM_CATS = ['แอปพลิเคชัน','ระบบพื้นฐาน','เครือข่าย','ความปลอดภัย','องค์กรเฉพาะทาง','อื่นๆ'];
+
+function renderCustomItems() {
+    const wrap = document.getElementById('custom-items-list');
+    if (!customItems.length) { wrap.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:6px 0;">ยังไม่มีรายการ — เพิ่มได้ด้านล่าง</div>'; return; }
+    wrap.innerHTML = customItems.map(c => {
+        const isEditing = editingCustomId === c.id;
+        if (isEditing) {
+            const catOpts = CUSTOM_CATS.map(cat =>
+                `<option value="${cat}" ${c.cat===cat?'selected':''}>${cat}</option>`
+            ).join('');
+            return `
+            <div class="check-item" style="margin-bottom:6px;background:#fffbeb;border-color:#fde68a;">
+                <div class="check-content" style="flex:1;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                    <select id="cedit-cat-${c.id}" class="s-input" style="width:140px;font-size:11px;padding:3px 6px;" onclick="event.stopPropagation()">
+                        ${catOpts}
+                    </select>
+                    <input id="cedit-title-${c.id}" class="s-input" value="${c.title.replace(/"/g,'&quot;')}"
+                        style="flex:1;min-width:160px;font-size:12px;padding:4px 8px;"
+                        onclick="event.stopPropagation()"
+                        onkeydown="if(event.key==='Enter')saveCustomEdit('${c.id}');if(event.key==='Escape')cancelCustomEdit()">
+                </div>
+                <button class="skip-btn" style="color:#16a34a;border-color:#86efac;font-weight:700;" onclick="saveCustomEdit('${c.id}');event.stopPropagation()" title="บันทึก">
+                    <i class="fa fa-check"></i> บันทึก
+                </button>
+                <button class="skip-btn" onclick="cancelCustomEdit();event.stopPropagation()" title="ยกเลิก">
+                    <i class="fa fa-xmark"></i>
+                </button>
+            </div>`;
+        }
+        return `
+        <div class="check-item ${c.state==='done'?'done':c.state==='skipped'?'skipped':''}" style="margin-bottom:6px;" onclick="toggleCustomItem('${c.id}')">
+            <button class="check-toggle" onclick="toggleCustomItem('${c.id}');event.stopPropagation()">
+                <i class="fa ${c.state==='done'?'fa-check':c.state==='skipped'?'fa-minus':''}"></i>
+            </button>
+            <div class="check-content">
+                <div class="check-title">
+                    ${c.title}
+                    <span class="custom-item-tag">${c.cat}</span>
+                </div>
+            </div>
+            <button class="skip-btn" onclick="skipCustomItem('${c.id}');event.stopPropagation()">
+                <i class="fa ${c.state==='skipped'?'fa-rotate-left':'fa-forward-step'}"></i>
+                ${c.state==='skipped'?'ยกเลิก':'ข้าม'}
+            </button>
+            <button class="skip-btn" style="color:#2563eb;border-color:#93c5fd;" onclick="editCustomItem('${c.id}');event.stopPropagation()" title="แก้ไข">
+                <i class="fa fa-pencil"></i>
+            </button>
+            <button class="skip-btn" style="color:#dc2626;border-color:#fca5a5;" onclick="removeCustomItem('${c.id}');event.stopPropagation()" title="ลบ">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>`;
+    }).join('');
+}
+
+// ── Save / Load DB ──────────────────────────────────────────
+function updateOffboardBtn() {
+    const btn = document.getElementById('btn-offboard');
+    if (!btn) return;
+    if (recordId > 0) { btn.style.display = 'inline-flex'; btn.href = `setup_offboard.html?id=${recordId}`; }
+    else { btn.style.display = 'none'; }
+}
+function goOffboard(e) {
+    e.preventDefault();
+    if (!recordId) return;
+    if (!confirm('ต้องการเปิดหน้า Offboard เครื่องสำหรับพนักงานนี้?')) return;
+    window.open(`setup_offboard.html?id=${recordId}`, '_blank');
+}
+
+function markDirty() {
+    isDirty = true;
+    updateInfoBadge();
+    const badge = document.getElementById('save-badge');
+    if (badge) { badge.style.display='inline-flex'; badge.className='save-badge unsaved'; badge.innerHTML='<i class="fa fa-circle-dot"></i> ยังไม่ได้บันทึก'; }
+}
+
+function markSaved() {
+    isDirty = false;
+    const badge = document.getElementById('save-badge');
+    if (badge) { badge.style.display='inline-flex'; badge.className='save-badge'; badge.innerHTML='<i class="fa fa-circle-check"></i> บันทึกแล้ว'; }
+}
+
+function getVal(id) { return document.getElementById(id)?.value || ''; }
+
+async function saveRecord() {
+    // Validate required fields
+    const required = [
+        { id: 'f-user',  label: 'ชื่อ-สกุล' },
+        { id: 'f-empid', label: 'รหัสพนักงาน' },
+        { id: 'f-dept',  label: 'แผนก' },
+        { id: 'f-asset', label: 'Asset Code' },
+    ];
+    const missing = [];
+    required.forEach(({ id, label }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const empty = !el.value.trim();
+        el.classList.toggle('req-error', empty);
+        if (empty) missing.push(label);
+    });
+    if (missing.length) {
+        switchTab('info');
+        showToast('กรุณากรอก: ' + missing.join(', '), 'warn');
+        return;
+    }
+    required.forEach(({ id }) => document.getElementById(id)?.classList.remove('req-error'));
+
+    const badge = document.getElementById('save-badge');
+    if (badge) { badge.style.display='inline-flex'; badge.className='save-badge saving'; badge.innerHTML='<i class="fa fa-spinner fa-spin"></i> กำลังบันทึก...'; }
+
+    const coAccess = getCompanyAccess();
+
+    const fd = new FormData();
+    fd.append('action',           'saveSetupRecord');
+    fd.append('id',               recordId);
+    fd.append('employee_name',    getVal('f-user'));
+    fd.append('employee_id',      getVal('f-empid'));
+    fd.append('department',       getVal('f-dept'));
+    fd.append('company',          getVal('f-company'));
+    fd.append('asset_code',       getVal('f-asset'));
+    fd.append('serial_number',    getVal('f-serial'));
+    fd.append('pc_name',          getVal('f-pcname'));
+    fd.append('tech_name',        getVal('f-tech'));
+    fd.append('job_type',         getVal('f-jobtype'));
+    fd.append('setup_date',       getVal('f-date'));
+    fd.append('ip_address',       getVal('f-ip'));
+    fd.append('gateway',          getVal('f-gw'));
+    fd.append('net_password',     getVal('f-netpass'));
+    fd.append('company_access',    JSON.stringify(coAccess));
+    fd.append('printer_buildings', JSON.stringify(getPrinterBuildings()));
+    fd.append('notes',             getVal('f-notes'));
+    fd.append('checklist_states', JSON.stringify(states));
+    fd.append('custom_items',     JSON.stringify(customItems));
+    fd.append('granted_systems',  JSON.stringify(getGrantedSystems()));
+
+    try {
+        const res  = await fetch(API_PATH, { method:'POST', body:fd });
+        const data = await res.json();
+        if (data.status === 'success') {
+            recordId = data.id;
+            // Update URL without reload
+            const url = new URL(location.href);
+            url.searchParams.set('id', recordId);
+            history.replaceState({}, '', url.toString());
+            updateOffboardBtn();
+            markSaved();
+            showRegistrySyncNote(data.registry_sync);
+        } else {
+            if (badge) { badge.className='save-badge unsaved'; badge.innerHTML='<i class="fa fa-triangle-exclamation"></i> บันทึกไม่สำเร็จ'; }
+        }
+    } catch(e) {
+        if (badge) { badge.className='save-badge unsaved'; badge.innerHTML='<i class="fa fa-triangle-exclamation"></i> เกิดข้อผิดพลาด'; }
+    }
+}
+
+// Global: sync signature name display (ใช้ใน loadRecord และ DOMContentLoaded)
+function syncSigNames() {
+    const tech = document.getElementById('f-tech')?.value || '—';
+    const user = document.getElementById('f-user')?.value || '—';
+    const techEl = document.getElementById('sig-tech-name');
+    const userEl = document.getElementById('sig-user-name');
+    if (techEl) techEl.textContent = tech;
+    if (userEl) userEl.textContent = user;
+}
+
+async function loadRecord(id) {
+    try {
+        const res  = await fetch(`${API_PATH}?action=getSetupRecord&id=${id}`);
+        const data = await res.json();
+        if (data.status !== 'success') return;
+        const r = data.record;
+        recordId = r.id;
+
+        // Fill form
+        const setVal = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val || ''; };
+        setVal('f-user',    r.employee_name);
+        setVal('f-empid',   r.employee_id);
+        setVal('f-dept',    r.department);
+        setVal('f-company', r.company);
+        setVal('f-asset',   r.asset_code);
+        setVal('f-serial',  r.serial_number);
+        setVal('f-pcname',  r.pc_name);
+        setVal('f-tech',    r.tech_name);
+        setVal('f-jobtype', r.job_type);
+        setVal('f-date',    r.setup_date);
+        setVal('f-ip',      r.ip_address);
+        setVal('f-gw',      r.gateway);
+        setVal('f-netpass', r.net_password);
+        setVal('f-notes',   r.notes);
+
+        if (r.it_asset_id) {
+            linkedAssetId = parseInt(r.it_asset_id, 10) || 0;
+            updateRegistryBadge(r.asset_code, linkedAssetId, false);
+        } else if (r.asset_code) {
+            lookupAssetByCodeExact(false);
+        }
+
+        // Company Access Table
+        if (r.company_access && Array.isArray(r.company_access)) {
+            setCompanyAccess(r.company_access);
+        }
+
+        // Printer Buildings
+        if (r.printer_buildings && Array.isArray(r.printer_buildings)) {
+            setPrinterBuildings(r.printer_buildings);
+        }
+
+        // Checklist states
+        if (r.checklist_states && typeof r.checklist_states === 'object') {
+            Object.assign(states, r.checklist_states);
+            saveStates(); renderChecklist(); updateProgress();
+        }
+
+        // Custom items
+        customItems = Array.isArray(r.custom_items) ? r.custom_items : [];
+        renderCustomItems();
+
+        // Granted systems (สำหรับ Onboarding Email + offboard notify)
+        if (r.granted_systems && typeof r.granted_systems === 'object') {
+            setGrantedSystems(r.granted_systems);
+            refreshEmail();
+        }
+
+        // Offboard banner
+        if (r.status === 'offboarded') {
+            const banner = document.getElementById('offboard-banner');
+            if (banner) banner.style.display = 'flex';
+            const link = document.getElementById('offboard-link');
+            if (link) link.href = `setup_offboard.html?id=${r.id}`;
+            // Make form readonly
+            document.querySelectorAll('.s-input').forEach(el => el.setAttribute('readonly',''));
+            document.querySelectorAll('select.s-input').forEach(el => el.setAttribute('disabled',''));
+            document.getElementById('btn-save-db').style.display = 'none';
+            document.getElementById('custom-checklist-card').style.display = 'none';
+        }
+
+        updateOffboardBtn();
+        syncSigNames();
+        markSaved();
+        updateInfoBadge();
+
+        // Auto-print ถ้ามาจาก setup_list ด้วย ?autoprint=1 → ใช้ printSetup() (ใบส่งมอบ)
+        if (new URLSearchParams(location.search).get('autoprint') === '1') {
+            setTimeout(() => { printSetup(); }, 600);
+        }
+    } catch(e) { console.warn('loadRecord error', e); }
+}
+
+// ── Checklist data ──────────────────────────────────────────
+const CHECKS = [
+    { id:1,  cat:'ระบบพื้นฐาน',              title:'ติดตั้ง Windows',            desc:'Windows 10/11 Pro หรือ Enterprise พร้อม Activation',   critical:true },
+    { id:2,  cat:'ระบบพื้นฐาน',              title:'Windows Update',             desc:'อัปเดตระบบและ Patch ล่าสุดก่อนส่งมอบ',                critical:true },
+    { id:3,  cat:'ระบบพื้นฐาน',              title:'ติดตั้ง Driver',             desc:'ลง Driver ครบจากผู้ผลิต ทดสอบอุปกรณ์ครบ',             critical:true },
+    { id:4,  cat:'ระบบพื้นฐาน',              title:'เปลี่ยนภาษา EN/TH',         desc:'พร้อมสลับภาษา ใช้งานสะดวก',                           critical:false },
+    { id:5,  cat:'ระบบพื้นฐาน',              title:'ตั้งวันที่และ Timezone',     desc:'กำหนดเป็น dd/mm/yyyy และ Bangkok (+7)',                critical:false },
+    { id:6,  cat:'เครือข่าย',               title:'ตั้งชื่อเครื่อง',            desc:'ตั้งตามมาตรฐานองค์กร',                                critical:true },
+    { id:7,  cat:'เครือข่าย',               title:'Join Domain / Azure AD',     desc:'ผูกเข้าระบบองค์กรตามนโยบาย',                         critical:true },
+    { id:8,  cat:'เครือข่าย',               title:'Map Network Drive',          desc:'เชื่อมต่อ Network Share พร้อมใช้งาน',                 critical:false },
+    { id:9,  cat:'เครือข่าย',               title:'ติดตั้ง Printer',            desc:'ลงเครื่องพิมพ์แผนกหรือส่วนตัว',                     critical:false },
+    { id:10, cat:'แอปพลิเคชัน',             title:'ติดตั้ง Microsoft Office',   desc:'Microsoft 365 หรือ Office LTSC พร้อม Activate',        critical:true },
+    { id:11, cat:'แอปพลิเคชัน',             title:'ติดตั้ง Browser',            desc:'Chrome, Firefox หรือ Edge ตามมาตรฐาน',                critical:false },
+    { id:12, cat:'แอปพลิเคชัน',             title:'ติดตั้ง PDF Reader',         desc:'Adobe Reader หรือ Foxit',                              critical:false },
+    { id:13, cat:'แอปพลิเคชัน',             title:'บีบอัดไฟล์',                desc:'WinRAR หรือ 7-Zip',                                    critical:false },
+    { id:14, cat:'แอปพลิเคชัน',             title:'Remote Support Tool',        desc:'AnyDesk, TeamViewer หรือ RustDesk',                    critical:false },
+    { id:15, cat:'ความปลอดภัย',             title:'ติดตั้ง Antivirus',          desc:'Windows Defender หรือขององค์กร',                      critical:true },
+    { id:16, cat:'ความปลอดภัย',             title:'เปิดใช้งาน BitLocker',       desc:'เข้ารหัสข้อมูล Drive ตามนโยบาย',                      critical:true },
+    { id:17, cat:'ความปลอดภัย',             title:'ตรวจสอบ Firewall',           desc:'ยืนยันสถานะและนโยบาย Firewall',                       critical:true },
+    { id:18, cat:'ความปลอดภัย',             title:'ลบบัญชีที่ไม่จำเป็น',       desc:'เคลียร์ User ชั่วคราวหรือบัญชีที่ไม่ใช้',             critical:true },
+    { id:19, cat:'ความปลอดภัย',             title:'สร้าง Restore Point',        desc:'เผื่อย้อนกลับได้หลังติดตั้ง',                        critical:false },
+    { id:20, cat:'องค์กรเฉพาะทาง',          title:'โปรแกรมเฉพาะองค์กร',        desc:'เช่น ERP, HRM, POS, ระบบบัญชี, ระบบ Scan',            critical:false },
+    { id:25, cat:'องค์กรเฉพาะทาง',          title:'ติดตั้ง Shortcut PowertechCenter', desc:'วาง Shortcut บน Desktop — powertecha.myqnapcloud.com:8081/PowertechCenter', critical:false },
+    { id:21, cat:'ตรวจสอบก่อนส่งมอบ',       title:'ทดสอบ Login / Internet',    desc:'เช็กเข้าระบบพื้นฐานได้จริง',                         critical:true },
+    { id:22, cat:'ตรวจสอบก่อนส่งมอบ',       title:'ทดสอบ Printer / Drive',     desc:'ยืนยันอุปกรณ์และ Network Share ใช้งานได้',            critical:false },
+    { id:23, cat:'ตรวจสอบก่อนส่งมอบ',       title:'แจ้ง Account / Password',   desc:'แจ้งผู้ใช้ทราบ credentials ที่จำเป็น',               critical:true },
+    { id:24, cat:'ตรวจสอบก่อนส่งมอบ',       title:'ยืนยันผู้ใช้พร้อมรับ',     desc:'สรุปงานและเก็บรายละเอียดก่อนส่งมอบ — เซ็นรับ',       critical:true },
+];
+
+const CAT_ICONS = {
+    'ระบบพื้นฐาน':        { icon:'fa-windows',         color:'#2563eb', bg:'#dbeafe' },
+    'เครือข่าย':          { icon:'fa-network-wired',   color:'#7c3aed', bg:'#ede9fe' },
+    'แอปพลิเคชัน':        { icon:'fa-box-open',        color:'#059669', bg:'#d1fae5' },
+    'ความปลอดภัย':        { icon:'fa-shield-halved',   color:'#dc2626', bg:'#fee2e2' },
+    'องค์กรเฉพาะทาง':     { icon:'fa-building',        color:'#b45309', bg:'#fef3c7' },
+    'ตรวจสอบก่อนส่งมอบ':  { icon:'fa-circle-check',    color:'#0891b2', bg:'#cffafe' },
+};
+
+let states = {}; // id → 'pending' | 'done' | 'skipped'
+let filterMode = false;
+
+function initStates(freshForm = false) {
+    if (freshForm) localStorage.removeItem('setup-states');
+    const saved = localStorage.getItem('setup-states');
+    if (saved) { try { states = JSON.parse(saved); } catch{} }
+    CHECKS.forEach(c => { if (!states[c.id]) states[c.id] = 'pending'; });
+}
+
+function saveStates() { localStorage.setItem('setup-states', JSON.stringify(states)); markDirty(); }
+
+function toggleCheck(id) {
+    const cur = states[id];
+    states[id] = cur === 'pending' ? 'done' : cur === 'done' ? 'pending' : 'pending';
+    saveStates(); refreshItem(id); updateProgress();
+}
+function skipCheck(id, e) {
+    if (e) e.stopPropagation();
+    states[id] = states[id] === 'skipped' ? 'pending' : 'skipped';
+    saveStates(); refreshItem(id); updateProgress();
+}
+
+function refreshItem(id) {
+    const el = document.getElementById('ci-' + id);
+    if (!el) return;
+    const st = states[id];
+    el.className = 'check-item ' + (st === 'done' ? 'done' : st === 'skipped' ? 'skipped' : '');
+    const icon = el.querySelector('.check-toggle i');
+    if (icon) icon.className = st === 'done' ? 'fa fa-check' : st === 'skipped' ? 'fa fa-minus' : '';
+    // Update skip button text + icon
+    const skipBtn = el.querySelector('.skip-btn');
+    if (skipBtn) {
+        const isSkipped = st === 'skipped';
+        skipBtn.title = isSkipped ? 'ยกเลิกข้าม' : 'ข้ามรายการนี้';
+        skipBtn.innerHTML = `<i class="fa ${isSkipped ? 'fa-rotate-left' : 'fa-forward-step'}"></i>${isSkipped ? 'ยกเลิก' : 'ข้าม'}`;
+    }
+}
+
+function updateProgress() {
+    const total = CHECKS.length;
+    const done = CHECKS.filter(c => states[c.id] === 'done').length;
+    const criticalDone = CHECKS.filter(c => c.critical && states[c.id] === 'done').length;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    const circumference = 2 * Math.PI * 23;
+
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-bar').style.width = pct + '%';
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-critical').textContent = criticalDone;
+
+    const ring = document.getElementById('prog-ring');
+    if (ring) ring.style.strokeDashoffset = circumference * (1 - pct/100);
+
+    const readinessEl = document.getElementById('readiness-label');
+    if (readinessEl) {
+        const labels = [[0,'ยังไม่ได้เริ่ม','#94a3b8'],[25,'เริ่มต้นแล้ว','#f59e0b'],[50,'กำลังดำเนินการ','#f59e0b'],[75,'เกือบเสร็จแล้ว','#2563eb'],[95,'พร้อมส่งมอบ','#16a34a'],[100,'ส่งมอบได้เลย ✅','#16a34a']];
+        const match = [...labels].reverse().find(l => pct >= l[0]);
+        readinessEl.textContent = match[1];
+        readinessEl.style.color = match[2];
+    }
+    const tabPct = document.getElementById('tab-checklist-pct');
+    if (tabPct) tabPct.textContent = pct + '%';
+}
+
+// ── Render ────────────────────────────────────────────────────
+function renderChecklist() {
+    const cats = [...new Set(CHECKS.map(c => c.cat))];
+    const wrap = document.getElementById('checklist-wrap');
+    wrap.innerHTML = '';
+
+    cats.forEach(cat => {
+        const items = CHECKS.filter(c => c.cat === cat);
+        const catInfo = CAT_ICONS[cat] || { icon:'fa-list', color:'#64748b', bg:'#f1f5f9' };
+        const doneCount = items.filter(c => states[c.id] === 'done').length;
+
+        const card = document.createElement('div');
+        card.className = 's-card';
+        card.innerHTML = `
+            <div class="cat-header">
+                <div class="cat-title">
+                    <div class="s-icon" style="background:${catInfo.bg};color:${catInfo.color}"><i class="fa ${catInfo.icon}"></i></div>
+                    ${cat}
+                </div>
+                <span class="cat-badge">${doneCount}/${items.length}</span>
+            </div>
+            <div id="cat-items-${cat.replace(/\s/g,'_')}">
+                ${items.map(c => `
+                <div class="check-item ${states[c.id]==='done'?'done':states[c.id]==='skipped'?'skipped':''}" id="ci-${c.id}" onclick="toggleCheck(${c.id})">
+                    <button class="check-toggle" onclick="toggleCheck(${c.id});event.stopPropagation()">
+                        <i class="fa ${states[c.id]==='done'?'fa-check':states[c.id]==='skipped'?'fa-minus':''}"></i>
+                    </button>
+                    <div class="check-content">
+                        <div class="check-title">${c.title}${c.critical?'<span class="critical-badge">Critical</span>':''}</div>
+                        <div class="check-desc">${c.desc}</div>
+                    </div>
+                    <button class="skip-btn" onclick="skipCheck(${c.id},event)" title="${states[c.id]==='skipped'?'ยกเลิกข้าม':'ข้ามรายการนี้'}">
+                        <i class="fa ${states[c.id]==='skipped'?'fa-rotate-left':'fa-forward-step'}"></i>
+                        ${states[c.id]==='skipped'?'ยกเลิก':'ข้าม'}
+                    </button>
+                </div>`).join('')}
+            </div>`;
+        wrap.appendChild(card);
+    });
+}
+
+function filterPending() {
+    filterMode = !filterMode;
+    document.querySelectorAll('.check-item').forEach(el => {
+        if (filterMode) {
+            el.style.display = el.classList.contains('done') || el.classList.contains('skipped') ? 'none' : '';
+        } else {
+            el.style.display = '';
+        }
+    });
+}
+
+function resetChecklist() {
+    if (!confirm('รีเซ็ต checklist ทั้งหมด?')) return;
+    CHECKS.forEach(c => states[c.id] = 'pending');
+    saveStates(); renderChecklist(); updateProgress();
+}
+
+// ── Company Access Table ───────────────────────────────────────
+function toggleCoRow(co) {
+    const active = document.getElementById('co-active-' + co)?.checked;
+    const row    = document.getElementById('co-row-' + co);
+    const input  = document.getElementById('co-netuser-' + co);
+    const inet   = document.getElementById('co-inet-' + co);
+    const vpn    = document.getElementById('co-vpn-' + co);
+    if (!row) return;
+    row.classList.toggle('co-active', active);
+    input.disabled = !active;
+    if (inet) inet.disabled = !active;
+    vpn.disabled   = !active;
+    if (!active) {
+        input.value = '';
+        if (inet) inet.checked = false;
+        vpn.checked = false;
+    }
+    markDirty();
+}
+
+function getCompanyAccess() {
+    return ['PTA','PT4','PTE'].map(co => ({
+        co,
+        active:  document.getElementById('co-active-'  + co)?.checked || false,
+        netuser: document.getElementById('co-netuser-' + co)?.value   || '',
+        inet:    document.getElementById('co-inet-'    + co)?.checked || false,
+        vpn:     document.getElementById('co-vpn-'     + co)?.checked || false,
+    }));
+}
+
+function setCompanyAccess(data) {
+    if (!Array.isArray(data)) return;
+    data.forEach(item => {
+        const chk = document.getElementById('co-active-' + item.co);
+        if (!chk) return;
+        chk.checked = !!item.active;
+        toggleCoRow(item.co);
+        if (item.netuser) document.getElementById('co-netuser-' + item.co).value = item.netuser;
+        const inetEl = document.getElementById('co-inet-' + item.co);
+        if (inetEl) inetEl.checked = !!item.inet;
+        const vpnEl = document.getElementById('co-vpn-' + item.co);
+        if (vpnEl) vpnEl.checked = !!item.vpn;
+    });
+}
+
+// ── Onboarding Email ───────────────────────────────────────────
+function toggleEP(key) {
+    const chk = document.getElementById('epchk-' + key);
+    const card = document.getElementById('ep-' + key);
+    chk.checked = !chk.checked;
+    card.classList.toggle('ep-on', chk.checked);
+    refreshEmail();
+}
+
+const GRANTED_SYSTEM_KEYS = ['ptc','carsys','roomsys','erpN','erpO','mrpN','mrpO','ictrl'];
+function getGrantedSystems() {
+    const out = {};
+    GRANTED_SYSTEM_KEYS.forEach(k => { out[k] = !!document.getElementById('epchk-' + k)?.checked; });
+    return out;
+}
+function setGrantedSystems(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    GRANTED_SYSTEM_KEYS.forEach(k => {
+        const chk = document.getElementById('epchk-' + k);
+        const card = document.getElementById('ep-' + k);
+        if (!chk || !card) return;
+        chk.checked = !!obj[k];
+        card.classList.toggle('ep-on', chk.checked);
+    });
+}
+
+function togglePB(bldg) {
+    const chip = document.getElementById('pb-' + bldg);
+    if (chip) chip.classList.toggle('pb-on');
+    markDirty();
+    refreshEmail();
+}
+function getPrinterBuildings() {
+    return ['F4','F5','F6','F7','F8','F16','F17','PTE']
+        .filter(b => document.getElementById('pb-' + b)?.classList.contains('pb-on'));
+}
+function setPrinterBuildings(list) {
+    ['F4','F5','F6','F7','F8','F16','F17','PTE'].forEach(b => {
+        document.getElementById('pb-' + b)?.classList.toggle('pb-on', list.includes(b));
+    });
+}
+
+function getEmailData() {
+    const getV = id => document.getElementById(id)?.value || '';
+    const empName   = getV('em-name')    || getV('f-user') || 'พนักงานใหม่';
+    const staffId   = getV('f-empid')    || '';
+    const company   = getV('f-company')  || 'Powertech';
+    const winPass   = getV('em-winpass') || 'aaAA1234';
+    const itContact = getV('em-itcontact') || 'ฝ่าย IT Support';
+
+    const coLabel = { PTA:'PowerTech Assembly Co., Ltd.', PT4:'PowerTech 2004 Co., Ltd.', PTE:'PowerTech Energy Co., Ltd.' };
+    const companyFull = coLabel[company] || company;
+
+    // หา net user จาก company access ของบริษัทที่ตรงกับ f-company ก่อน fallback ไปอันอื่น
+    let winUser = '';
+    const access = getCompanyAccess().filter(c => c.active);
+    const mainAccess = access.find(c => c.co === company) || access[0];
+    if (mainAccess?.netuser) {
+        // ดึงแค่ส่วน username (หลัง \ หรือ /)
+        winUser = mainAccess.netuser.replace(/^.*[\\\/]/, '');
+    }
+    // Auto-generate จากชื่อถ้า netuser ว่าง: "Mr.Anan Atthajak" → "Anan.Atthajak"
+    if (!winUser && empName && empName !== 'พนักงานใหม่') {
+        // ตัด prefix คำนำหน้า (Mr. Mrs. Ms. Miss นาย นาง นางสาว ฯลฯ)
+        const stripped = empName.replace(/^(Mr\.|Mrs\.|Ms\.|Miss\.?|Dr\.|นาย|นาง(?:สาว)?)\s*/i, '').trim();
+        const parts = stripped.split(/\s+/);
+        if (parts.length >= 2) {
+            const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+            winUser = capFirst(parts[0]) + '.' + parts[parts.length - 1].charAt(0).toUpperCase();
+        }
+    }
+
+    const printerBuildings = getPrinterBuildings();
+    return { empName, staffId, company, companyFull, winUser, winPass, itContact, access, printerBuildings };
+}
+
+function buildEmailHTML(d) {
+    const { empName, staffId, companyFull, winUser, winPass, itContact, access, printerBuildings } = d;
+    const ptc    = document.getElementById('epchk-ptc')?.checked;
+    const erpN   = document.getElementById('epchk-erpN')?.checked;
+    const erpO   = document.getElementById('epchk-erpO')?.checked;
+    const mrpN   = document.getElementById('epchk-mrpN')?.checked;
+    const mrpO   = document.getElementById('epchk-mrpO')?.checked;
+    const ictrl  = document.getElementById('epchk-ictrl')?.checked;
+    const carsys = document.getElementById('epchk-carsys')?.checked;
+    const roomsys= document.getElementById('epchk-roomsys')?.checked;
+
+    const cd = t => `<code style="font-family:'Consolas',monospace;font-size:12px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:4px;padding:3px 9px;color:#0F172A;display:inline-block">${t}</code>`;
+    const row = (label, sub, codes, last=false) => `
+        <tr>
+            <td style="padding:12px 18px;${last?'':'border-bottom:1px solid #EEF2F6;'}vertical-align:middle;background:#ffffff">
+                <span style="font-weight:600;font-size:13px;color:#0F172A">${label}</span>
+                ${sub ? `<br><span style="font-size:11px;color:#94A3B8">${sub}</span>` : ''}
+            </td>
+            <td style="padding:12px 18px;${last?'':'border-bottom:1px solid #EEF2F6;'}text-align:right;vertical-align:middle;background:#ffffff">${codes}</td>
+        </tr>`;
+
+    // ชื่อจริงเท่านั้น (ตัดนามสกุลออก) สำหรับ Internet/VPN
+    const baseUser = winUser.split('.')[0] || (() => {
+        const stripped = empName.replace(/^(Mr\.|Mrs\.|Ms\.|Miss\.?|Dr\.|นาย|นาง(?:สาว)?)\s*/i,'').trim();
+        return stripped.split(/\s+/)[0] || staffId;
+    })();
+    const userLow = winUser.toLowerCase();
+
+    // แถว Windows Login
+    let rows = row('Windows Login', '', cd('User: ' + (winUser||'—')) + ' &nbsp; ' + cd('Pass: ' + winPass));
+
+    // รวม Internet + VPN เป็นแถวเดียว (credential เดียวกัน)
+    const inetCos = access.filter(c => c.inet).map(c => c.co);
+    const vpnCos  = access.filter(c => c.vpn).map(c => c.co);
+    const mergedCos = [...new Set([...inetCos, ...vpnCos])];
+    if (mergedCos.length > 0) {
+        // สร้าง label จากระบบที่เปิดใช้
+        const systems = ['Internet / VPN'];
+        if (carsys)  systems.push('CARSYS');
+        if (roomsys) systems.push('ROOMSYS');
+        const label = systems.join(' / ');
+        // subtitle = บริษัท + แยก VPN-only ถ้าต่างกัน
+        const sub = mergedCos.join(' · ');
+        rows += row(label, sub, cd('User: ' + baseUser) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    }
+
+    // PowertechCenter (User = staffId, Pass = staffId → ทั้งคู่คือรหัสพนักงาน)
+    if (ptc) rows += row('PowertechCenter', 'ระบบภายในองค์กร — ID และ Password คือรหัสพนักงาน',
+        cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+
+    // ERP / MRP ตัวใหม่ ใช้ credential สูตรเดียวกัน (User: รหัสพนักงาน / Pass: Pte@รหัสพนักงาน) → ยุบรวมถ้าติ๊กทั้งคู่
+    if (erpN && mrpN) {
+        rows += row('ERP / MRP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
+    } else if (erpN) {
+        rows += row('ERP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
+    } else if (mrpN) {
+        rows += row('MRP', 'ตัวใหม่', cd('User: รหัสพนักงาน') + ' &nbsp; ' + cd('Pass: Pte@รหัสพนักงาน'));
+    }
+
+    // ERP ตัวเก่า / Icontrol ใช้ credential สูตรเดียวกัน (User: winUser ตัวพิมพ์เล็ก / Pass: รหัสพนักงาน) → ยุบรวมถ้าติ๊กทั้งคู่
+    if (erpO && ictrl) {
+        rows += row('ERP / Icontrol', 'ตัวเก่า', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    } else if (erpO) {
+        rows += row('ERP', 'ตัวเก่า', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    } else if (ictrl) {
+        rows += row('Icontrol', '', cd('User: ' + userLow) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+    }
+
+    // MRP ตัวเก่า แยกไว้เสมอ (username มี .s ต่อท้าย ไม่ตรงกับสูตรอื่น)
+    if (mrpO) rows += row('MRP', 'ตัวเก่า', cd('User: ' + (baseUser.toLowerCase()+'.s')) + ' &nbsp; ' + cd('Pass: รหัสพนักงาน'));
+
+    // รหัสเครื่องพิมพ์ (แถวสุดท้าย) — ค่าเดียวกับรหัสพนักงาน ไม่พิมพ์ตัวเลขซ้ำ
+    const bldgSub = printerBuildings?.length ? 'ตึก ' + printerBuildings.join(' · ') : '';
+    rows += row('รหัสเครื่องพิมพ์', bldgSub,
+        `<span style="font-family:monospace;font-size:13px;font-weight:700;background:#EBF4FF;border:1px solid #185FA5;border-radius:4px;padding:3px 12px;color:#185FA5">= รหัสพนักงานของคุณ</span>`,
+        true);
+
+    return `<div style="font-family:'Segoe UI',Tahoma,Geneva,sans-serif;color:#0F172A;max-width:640px;margin:0 auto;background:#F8FAFC;padding:28px 16px">
+<div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
+
+    <div style="background:#0F2A4A;padding:20px 28px">
+        <table role="presentation" style="border-collapse:collapse"><tr>
+            <td style="width:38px;height:38px;background:#ffffff;border-radius:8px;text-align:center;vertical-align:middle;font-weight:800;font-size:14px;color:#0F2A4A">IT</td>
+            <td style="padding-left:12px;vertical-align:middle">
+                <div style="color:#ffffff;font-size:15px;font-weight:700;letter-spacing:.01em">Powertech Group</div>
+                <div style="color:#93C5FD;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:1px">IT Onboarding Notice</div>
+            </td>
+        </tr></table>
+    </div>
+
+    <div style="padding:26px 28px 8px;line-height:1.7">
+        <p style="margin:0">เรียน <strong>${empName}</strong>,</p>
+        <p style="margin:12px 0 0">ในนามของฝ่ายไอที ยินดีต้อนรับคุณเข้าสู่ <strong>${companyFull}</strong> ครับ เพื่อให้การเริ่มงานวันแรกเป็นไปอย่างราบรื่น เราได้จัดเตรียมบัญชีผู้ใช้งานไว้ให้เรียบร้อยแล้ว ดังนี้:</p>
+    </div>
+
+    <div style="margin:16px 28px 0;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden">
+        <div style="background:#F1F5F9;border-bottom:1px solid #E2E8F0;padding:11px 18px;font-weight:700;font-size:12px;color:#334155;letter-spacing:.02em">
+            🔒&nbsp; ข้อมูลการเข้าระบบ (Credentials)
+        </div>
+        <table style="width:100%;border-collapse:collapse">${rows}</table>
+    </div>
+
+    <div style="padding:14px 28px 0">
+        <p style="font-size:12px;color:#94A3B8;margin:0;font-style:italic">* สำหรับ Windows โปรดเปลี่ยนรหัสผ่านใหม่ทันทีเมื่อเข้าสู่ระบบครั้งแรก</p>
+    </div>
+
+    <div style="margin:18px 28px 0;padding:13px 16px;border-left:3px solid #D97706;background:#FFFBEB;border-radius:0 6px 6px 0">
+        <strong style="color:#92400E;font-size:13px">ต้องการความช่วยเหลือ?</strong><br>
+        <span style="font-size:13px;color:#92400E">หากพบปัญหาการใช้งาน ติดต่อได้ที่ ${itContact} ครับ</span>
+    </div>
+
+    <div style="padding:22px 28px 26px;line-height:1.7">
+        <p style="margin:0">ขอให้มีความสุขกับการทำงานครับ</p>
+    </div>
+
+    <div style="border-top:1px solid #E2E8F0;padding:14px 28px;background:#F8FAFC">
+        <p style="margin:0;font-size:11px;color:#94A3B8">อีเมลฉบับนี้สร้างโดยระบบอัตโนมัติจากฝ่ายเทคโนโลยีสารสนเทศ — โปรดเก็บข้อมูลนี้เป็นความลับ</p>
+    </div>
+
+</div>
+</div>`;
+}
+
+function refreshEmail() {
+    const d = getEmailData();
+    const coLabel = { PTA:'PowerTech Assembly', PT4:'PowerTech 2004', PTE:'PowerTech Energy' };
+    const coName = coLabel[d.company] || d.company;
+    const subject = `ยินดีต้อนรับสู่ ${coName}! – ข้อมูลการเข้าระบบสำหรับ ${d.empName}`;
+    const el = document.getElementById('em-subject-text');
+    if (el) el.textContent = subject;
+    const preview = document.getElementById('em-preview');
+    if (preview) preview.innerHTML = buildEmailHTML(d);
+    // Save IT contact to localStorage
+    const itEl = document.getElementById('em-itcontact');
+    if (itEl?.value) localStorage.setItem('em-itcontact', itEl.value);
+}
+
+function copyEmailSubject() {
+    const d = getEmailData();
+    const coLabel = { PTA:'PowerTech Assembly', PT4:'PowerTech 2004', PTE:'PowerTech Energy' };
+    const subject = `ยินดีต้อนรับสู่ ${coLabel[d.company]||d.company}! – ข้อมูลการเข้าระบบสำหรับ ${d.empName}`;
+    navigator.clipboard.writeText(subject).then(() => showEmailToast());
+}
+
+async function copyEmailBody() {
+    const d = getEmailData();
+    const html = buildEmailHTML(d);
+    const full = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${html}</body></html>`;
+    try {
+        const blob = new Blob([full], { type:'text/html' });
+        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
+    } catch {
+        const el = document.getElementById('em-preview');
+        const r = document.createRange(); r.selectNodeContents(el);
+        const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        document.execCommand('copy'); s.removeAllRanges();
+    }
+    showEmailToast();
+}
+
+function showEmailToast() {
+    const t = document.getElementById('email-toast');
+    if (!t) return;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function saveEmailImage() {
+    const el = document.getElementById('em-preview');
+    if (!el || typeof html2canvas === 'undefined') return;
+
+    // #em-preview is normally a scroll box (max-height + overflow-y:auto) so
+    // html2canvas only grabs the visible viewport — expand it fully before capture.
+    const prevMaxHeight = el.style.maxHeight;
+    const prevOverflow = el.style.overflow;
+    el.style.maxHeight = 'none';
+    el.style.overflow = 'visible';
+
+    const canvas = await html2canvas(el, {
+        backgroundColor: '#F8FAFC',
+        scale: 2,
+        useCORS: true,
+        height: el.scrollHeight,
+        windowHeight: el.scrollHeight
+    });
+
+    el.style.maxHeight = prevMaxHeight;
+    el.style.overflow = prevOverflow;
+
+    const d = getEmailData();
+    const safeName = (d.empName || 'onboarding').replace(/[^\p{L}\p{N}]+/gu, '_');
+    const link = document.createElement('a');
+    link.download = `onboarding-${safeName}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showEmailToast();
+}
+
+// ── Print ──────────────────────────────────────────────────────
+function printSetup() {
+    const get = id => document.getElementById(id)?.value || '';
+    const fmtDate = d => { if (!d) return '-'; const p = d.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d; };
+    const coAccess = getCompanyAccess().filter(c => c.active);
+    const doneIds = CHECKS.filter(c=>states[c.id]==='done').map(c=>c.id);
+    const skipIds = CHECKS.filter(c=>states[c.id]==='skipped').map(c=>c.id);
+    const cats = [...new Set(CHECKS.map(c=>c.cat))];
+
+    const coLabel = { PTA:'PowerTech Assembly',PT4:'PowerTech 2004',PTE:'PowerTech Energy' };
+    const company = get('f-company');
+    const coName = coLabel[company] || company || 'Powertech Center';
+    const coColors = { PTA:'#059669',PT4:'#dc2626',PTE:'#2563eb' };
+    const accentColor = coColors[company] || '#334155';
+
+    const checklistHtml = cats.map(cat => {
+        const items = CHECKS.filter(c => c.cat === cat);
+        return `
+        <div style="break-inside:avoid;margin-bottom:10px;">
+            <div style="font-size:9pt;font-weight:700;color:${accentColor};border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">${cat}</div>
+            ${items.map(c => {
+                const done = doneIds.includes(c.id);
+                const skipped = skipIds.includes(c.id);
+                const box = done ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #16a34a;border-radius:3px;background:#dcfce7;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#16a34a;">✓</span>`
+                           : skipped ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;background:#f1f5f9;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#94a3b8;">—</span>`
+                           : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #cbd5e1;border-radius:3px;background:#fff;margin-right:5px;vertical-align:middle;"></span>`;
+                const style = skipped ? 'text-decoration:line-through;color:#94a3b8;' : done ? 'color:#166534;' : '';
+                return `<div style="font-size:9pt;padding:2px 0;${style}">${box}${c.title}${c.critical?' ⚠':''}${skipped?' (ข้าม)':''}</div>`;
+            }).join('')}
+        </div>`;
+    }).join('');
+
+    // Custom items (เพิ่มเติม)
+    const customHtml = customItems.length ? `
+        <div style="break-inside:avoid;margin-bottom:10px;grid-column:1/-1;">
+            <div style="font-size:9pt;font-weight:700;color:#b45309;border-bottom:1px solid #fde68a;padding-bottom:3px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">รายการเพิ่มเติม (Custom)</div>
+            ${customItems.map(c => {
+                const done = c.state==='done', skipped = c.state==='skipped';
+                const box = done ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #16a34a;border-radius:3px;background:#dcfce7;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#16a34a;">✓</span>`
+                           : skipped ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;background:#f1f5f9;margin-right:5px;vertical-align:middle;text-align:center;font-size:9pt;line-height:13px;color:#94a3b8;">—</span>`
+                           : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #fbbf24;border-radius:3px;background:#fffbeb;margin-right:5px;vertical-align:middle;"></span>`;
+                const style = skipped ? 'text-decoration:line-through;color:#94a3b8;' : done ? 'color:#166534;' : '';
+                return `<div style="font-size:9pt;padding:2px 0;${style}">${box}${c.title} <span style="font-size:7.5pt;color:#b45309;background:#fef3c7;padding:1px 5px;border-radius:3px;margin-left:3px;">${c.cat}</span>${skipped?' (ข้าม)':''}</div>`;
+            }).join('')}
+        </div>` : '';
+
+    const coAccessRows = coAccess.map(c => {
+        const coBadgeColor = { PTA:'#166534', PT4:'#991b1b', PTE:'#1e40af' }[c.co] || '#334155';
+        const coBadgeBg    = { PTA:'#dcfce7', PT4:'#fee2e2', PTE:'#dbeafe' }[c.co] || '#f1f5f9';
+        return `<tr>
+            <td style="padding:3px 6px 3px 0;">
+                <span style="display:inline-block;background:${coBadgeBg};color:${coBadgeColor};font-size:8pt;font-weight:700;padding:1px 7px;border-radius:99px;">${c.co}</span>
+            </td>
+            <td style="font-size:8.5pt;font-family:monospace;padding:3px 6px 3px 0;">${c.netuser||'-'}</td>
+            <td style="font-size:8pt;padding:3px 0;color:${c.vpn?coBadgeColor:'#94a3b8'};">${c.vpn?'✅':'—'}</td>
+            <td style="font-size:8pt;padding:3px 0;color:${c.inet?coBadgeColor:'#94a3b8'};">${c.inet?'✅':'—'}</td>
+        </tr>`;
+    }).join('');
+
+    const netSection = (coAccess.length || get('f-ip')) ? `
+        <tr><td colspan="4" style="padding-top:8px;font-weight:700;font-size:8pt;color:${accentColor};border-bottom:1px solid #e2e8f0;">เครือข่าย / สิทธิ์การใช้งาน</td></tr>
+        ${coAccess.length ? `<tr><td colspan="4" style="padding:4px 0 2px;">
+            <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+                <tr style="background:#f8fafc;">
+                    <td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;width:60px;">บริษัท</td>
+                    <td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">Net User / Domain</td>
+                    <td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;width:50px;">VPN</td>
+                    <td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;width:60px;">Internet</td>
+                </tr>
+                ${coAccessRows}
+            </table>
+        </td></tr>` : ''}
+        ${get('f-ip') ? `<tr>
+            <td style="color:#64748b;font-size:8pt;padding:3px 6px 3px 0;">IP Address</td>
+            <td style="font-size:8.5pt;font-family:monospace;">${get('f-ip')}</td>
+            <td style="color:#64748b;font-size:8pt;padding:3px 6px 3px 12px;">Gateway/DNS</td>
+            <td style="font-size:8.5pt;font-family:monospace;">${get('f-gw')||'-'}</td>
+        </tr>` : ''}` : '';
+
+    const coNameTh = {PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด',PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด',PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด'}[company]||'Powertech Group of Companies';
+    const coNameEn = {PTA:'Powertech Engine Assembly Co., Ltd.',PT4:'Powertech 2004 Co., Ltd.',PTE:'Powertech Energy Solutions Co., Ltd.'}[company]||'Powertech Group';
+    const gradMap  = {PTA:'linear-gradient(135deg,#065f46,#059669)',PT4:'linear-gradient(135deg,#991b1b,#dc2626)',PTE:'linear-gradient(135deg,#1d4ed8,#2563eb)'}
+    const gradColor = gradMap[company]||'linear-gradient(135deg,#1e3a5f,#2563eb)';
+    const _base = window.location.origin + window.location.pathname.replace(/\/[^/]*$/,'/');
+    const logoMap = {PTA:_base+'uploads/logos/pta_logo.png',PT4:_base+'uploads/logos/pt4_logo.png',PTE:_base+'uploads/logos/pte_logo.png'};
+    const logoHtml = logoMap[company] ? `<img src="${logoMap[company]}" alt="${company}" style="height:44px;width:auto;object-fit:contain;">` : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${accentColor};">${company||'IT'}</div>`;
+    const printDateStr = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+    const _cell = (l,v,right) => `<div style="display:flex;align-items:center;padding:5px 10px;border-bottom:1px solid #e2e8f0;${right?'border-right:1px solid #e2e8f0;':''}gap:7px;"><span style="font-size:.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:88px;">${l}</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:16px;">${v||'-'}</span></div>`;
+    const infoRows = [
+        ['ชื่อผู้ใช้งาน', get('f-user'), 'แผนก', get('f-dept')],
+        ['รหัสพนักงาน', get('f-empid'), 'ประเภทงาน', get('f-jobtype')],
+        ['Asset Code', get('f-asset'), 'Serial Number', get('f-serial')],
+        ['ชื่อเครื่อง (PC)', get('f-pcname'), 'IP / Subnet', get('f-ip')],
+        ['วันที่ติดตั้ง', fmtDate(get('f-date')), 'ช่าง IT', get('f-tech')],
+    ];
+    const infoRowsHtml = infoRows.map(([l1,v1,l2,v2])=>_cell(l1,v1,true)+_cell(l2,v2,false)).join('');
+    const _sigBox = (label,name,date) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px 6px;text-align:center;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:24px;">${label}</div><div style="border-bottom:1.5px solid #cbd5e1;margin:0 8px 5px;"></div><div style="font-size:.67rem;color:#64748b;">( ${name||'................................'} )</div><div style="font-size:.62rem;color:#94a3b8;margin-top:2px;">วันที่ ${date||'........./........./.........&nbsp;'}</div></div>`;
+
+    const html = `<!DOCTYPE html><html><head>
+        <meta charset="utf-8">
+        <title>Setup Sheet — ${get('f-user')||'User'}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            @page { size:auto; margin:12mm 10mm; }
+            * { box-sizing:border-box; margin:0; padding:0; }
+            body { font-family:'Sarabun',Arial,sans-serif; font-size:9pt; color:#1e293b; background:#e5e7eb; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .wrap { width:100%; max-width:740px; margin:0 auto; background:#fff; padding:12mm 10mm; }
+            @media print {
+                body { background:#fff !important; color:#000 !important; }
+                .wrap { padding:0; min-height:273mm; display:flex; flex-direction:column; }
+                * { color:#000 !important; border-color:#555 !important; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+                [style*="color:#94a3b8"],[style*="color:#64748b"],[style*="color:#475569"] { color:#333 !important; }
+            }
+            @media print and (orientation:landscape) { .wrap { min-height:186mm; } }
+            .checks-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; margin-bottom:10px; }
+            .notes-box { border:1px solid #e2e8f0; border-radius:4px; padding:7px 10px; min-height:30px; font-size:8.5pt; color:#374151; background:#fafafa; }
+        </style>
+    </head><body>
+    <div class="wrap">
+
+        <!-- HEADER (request.html style) -->
+        <div style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${accentColor};padding-bottom:12px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:10px;border-left:4px solid ${accentColor};padding-left:12px;">
+                ${logoHtml}
+                <div>
+                    <div style="font-size:1.05rem;font-weight:800;color:#1e293b;letter-spacing:-.01em;">${coNameEn}</div>
+                    <div style="font-size:.72rem;color:#475569;margin-top:2px;font-weight:500;">${coNameTh}</div>
+                    <div style="font-size:.65rem;color:#94a3b8;margin-top:2px;">IT Support &amp; Maintenance Dept.</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+                <table style="border:1px solid #e2e8f0;border-radius:5px;font-size:.6rem;border-collapse:collapse;">
+                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Form No.</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">IT-FM-001</td></tr>
+                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Revision</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#dc2626;font-weight:600;">Rev. 01</td></tr>
+                    <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Eff. Date</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">01/01/2569</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- TITLE BAR -->
+        <div style="background:${gradColor};color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+            <div style="font-size:.9375rem;font-weight:700;letter-spacing:.02em;">ใบส่งมอบและติดตั้งคอมพิวเตอร์ / Computer Setup &amp; Delivery Checklist</div>
+            <div style="font-size:.67rem;opacity:.85;margin-top:1px;">IT Support &amp; Maintenance Dept. | IT-FM-001 Rev.01</div>
+        </div>
+
+        <!-- INFO GRID -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
+            ${infoRowsHtml}
+        </div>
+
+        ${netSection ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:6px;">สิทธิ์การเข้าใช้ / Access Rights</div><table style="width:100%;border-collapse:collapse;font-size:8.5pt;"><tr style="background:#f1f5f9;"><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">บริษัท</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">Net User / Domain</td><td style="padding:2px 6px;font-size:8pt;font-weight:700;color:#64748b;">VPN</td></tr>${coAccessRows}</table></div>` : ''}
+
+        <!-- CHECKLIST -->
+        <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:8px;">รายการติดตั้ง / Setup Checklist</div>
+            <div class="checks-grid">${checklistHtml}${customHtml}</div>
+        </div>
+
+        ${get('f-notes') ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:4px;">หมายเหตุ / Notes</div><div class="notes-box" style="background:transparent;border:none;padding:0;">${get('f-notes')}</div></div>` : ''}
+
+        <!-- SIGNATURES -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;break-inside:avoid;page-break-inside:avoid;">
+            ${_sigBox('ผู้รับเครื่อง / End User', get('f-user'), '')}
+            ${_sigBox('ช่างผู้ติดตั้ง / IT Technician', get('f-tech'), fmtDate(get('f-date')))}
+        </div>
+
+        <!-- FOOTER -->
+        <div style="margin-top:14px;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:.6rem;color:#94a3b8;">ออกโดยระบบ Powertech System Center · พิมพ์: ${printDateStr}</div>
+            <div style="font-size:.6rem;color:#94a3b8;">IT-FM-001 Rev.01 · หน้า 1/1 · IT / Information Technology</div>
+        </div>
+    </div>
+    </body></html>`;
+
+    const w = window.open('', '', 'width=820,height=1000');
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 600);
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type = 'success') {
+    let t = document.getElementById('setup-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'setup-toast';
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:opacity .25s;pointer-events:none;';
+        document.body.appendChild(t);
+    }
+    const colors = { success:'background:#dcfce7;color:#166534;', warn:'background:#fef3c7;color:#92400e;', error:'background:#fee2e2;color:#991b1b;' };
+    t.style.cssText += colors[type] || colors.success;
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// ── Employee ID auto-fill ──────────────────────────────────────
+let _empCache = null, _empTimer;
+function scheduleEmpLookup() {
+    clearTimeout(_empTimer);
+    _empTimer = setTimeout(lookupEmpById, 420);
+}
+async function lookupEmpById() {
+    const id = (document.getElementById('f-empid')?.value || '').trim();
+    const hint = document.getElementById('empid-found');
+    const hintName = document.getElementById('empid-found-name');
+    if (!id || id.length < 3) { if (hint) hint.style.display = 'none'; return; }
+    try {
+        if (!_empCache) {
+            const r = await fetch('api.php?action=get&file=employees&scope=assignable');
+            const j = await r.json();
+            _empCache = Array.isArray(j) ? j : (j.data || []);
+        }
+        const match = _empCache.find(e => e.id === id);
+        if (match) {
+            const userEl = document.getElementById('f-user');
+            const deptEl = document.getElementById('f-dept');
+            const coEl   = document.getElementById('f-company');
+            if (userEl && !userEl.value.trim()) { userEl.value = match.name; markDirty(); refreshEmail(); }
+            const primaryAsgn = (match.assignments || []).find(a => a.is_primary == 1) || (match.assignments || [])[0];
+            if (primaryAsgn) {
+                if (deptEl && !deptEl.value.trim()) { deptEl.value = primaryAsgn.department || ''; markDirty(); }
+                if (coEl   && !coEl.value.trim())   { coEl.value   = primaryAsgn.company   || ''; markDirty(); }
+            }
+            if (hint && hintName) { hintName.textContent = match.name; hint.style.display = 'block'; }
+            updateInfoBadge();
+        } else {
+            if (hint) hint.style.display = 'none';
+        }
+    } catch { if (hint) hint.style.display = 'none'; }
+}
+
+// ── Info tab completion badge ──────────────────────────────────
+function updateInfoBadge() {
+    const fields = ['f-user', 'f-empid', 'f-dept', 'f-company', 'f-asset', 'f-date'];
+    const filled = fields.filter(id => (document.getElementById(id)?.value || '').trim()).length;
+    const badge = document.getElementById('tab-info-pct');
+    if (!badge) return;
+    if (filled === 0) { badge.style.display = 'none'; return; }
+    badge.style.display = '';
+    badge.textContent = filled + '/' + fields.length;
+    badge.style.background = filled === fields.length ? '#dcfce7' : '#f1f5f9';
+    badge.style.color       = filled === fields.length ? '#166534' : '#64748b';
+}
+
+// ── Tab switching ──────────────────────────────────────────────
+let activeTab = 'info';
+function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === name);
+    });
+    activeTab = name;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Theme toggle
+    const updateIcon = () => { document.getElementById('theme-icon').className = document.documentElement.classList.contains('dark') ? 'fa fa-moon' : 'fa fa-sun'; };
+    updateIcon();
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('dark-theme');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+    });
+
+    // URL params pre-fill (e.g., from directory employee card) — set early
+    const p = new URLSearchParams(location.search);
+    if (p.get('user'))   document.getElementById('f-user').value   = p.get('user');
+    if (p.get('dept'))   document.getElementById('f-dept').value   = p.get('dept');
+    if (p.get('asset'))  document.getElementById('f-asset').value  = p.get('asset');
+    if (p.get('serial')) document.getElementById('f-serial').value = p.get('serial');
+    if (p.get('pcname')) document.getElementById('f-pcname').value = p.get('pcname');
+    if (p.get('ip'))     document.getElementById('f-ip').value     = p.get('ip');
+    if (p.get('empid'))  document.getElementById('f-empid').value  = p.get('empid');
+
+    // Login check — set company from session only if URL param didn't supply one
+    fetch('api.php?action=check_session').then(r=>r.json()).then(s => {
+        if (!s.loggedin) { window.location.href='login.html?returnUrl=setup.html'; return; }
+        document.getElementById('f-tech').value = s.display_name || s.username || '';
+        // URL param company wins; fallback to session company
+        const urlCompany = p.get('company');
+        document.getElementById('f-company').value = urlCompany || s.company || '';
+        // Company theme (use urlCompany if present, else session)
+        const activeCompany = urlCompany || s.company;
+        const coColors = { PTA:'#059669', PT4:'#dc2626', PTE:'#2563eb' };
+        const ic = document.getElementById('nav-icon');
+        if (ic && coColors[activeCompany]) ic.style.background = coColors[activeCompany];
+        refreshEmail();
+    }).catch(() => {});
+
+    // Set today's date
+    document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+
+    // Init checklist — clear localStorage state if this is a fresh form (no ?id=)
+    const isNewForm = !new URLSearchParams(location.search).get('id');
+    initStates(isNewForm);
+    renderChecklist();
+    updateProgress();
+    renderCustomItems();
+
+    // Load IT contact from localStorage
+    const savedItContact = localStorage.getItem('em-itcontact');
+    if (savedItContact) document.getElementById('em-itcontact').value = savedItContact;
+
+    // ISO doc: effective date (fixed — update after document control registration)
+    const isoDateEl = document.getElementById('iso-eff-date');
+    if (isoDateEl) isoDateEl.textContent = '01/01/2569';
+
+    // ISO: auto-fill signature names on print
+    document.getElementById('f-tech')?.addEventListener('input', syncSigNames);
+    document.getElementById('f-user')?.addEventListener('input', syncSigNames);
+    syncSigNames();
+
+    // Init email preview
+    setTimeout(refreshEmail, 300);
+
+    // Auto-refresh email when any form field changes
+    document.querySelectorAll('#f-user,#f-empid,#f-company,#em-name,#em-winpass,#em-itcontact').forEach(el => {
+        el.addEventListener('input', refreshEmail);
+        el.addEventListener('change', refreshEmail);
+    });
+    document.querySelectorAll('.co-access-table input').forEach(el => el.addEventListener('change', () => { markDirty(); setTimeout(refreshEmail, 50); }));
+
+    // Load from DB if ?id= param
+    const urlId = new URLSearchParams(location.search).get('id');
+    if (urlId) {
+        loadRecord(parseInt(urlId));
+    } else {
+        const assetCode = p.get('asset');
+        if (assetCode) {
+            // เช็คก่อนว่ามี setup_records เดิมของ asset นี้ที่ยัง active อยู่ไหม กันสร้างซ้ำ
+            fetch(`${API_PATH}?action=findSetupRecordByAsset&asset_code=${encodeURIComponent(assetCode)}`)
+                .then(r => r.json())
+                .then(res => {
+                    if (res.status === 'success' && res.found_active && res.id) {
+                        const url = new URL(location.href);
+                        url.searchParams.set('id', res.id);
+                        history.replaceState({}, '', url.toString());
+                        loadRecord(res.id);
+                        showToast('พบ Setup เดิมของทรัพย์สินนี้ โหลดมาให้แก้ไขต่อ');
+                    } else {
+                        setTimeout(() => lookupAssetByCodeExact(true), 450);
+                    }
+                })
+                .catch(() => setTimeout(() => lookupAssetByCodeExact(true), 450));
+        }
+        // Show dirty badge after any form change; clear validation error on input
+        document.querySelectorAll('.s-input').forEach(el => {
+            el.addEventListener('change', markDirty);
+            el.addEventListener('input', () => { markDirty(); el.classList.remove('req-error'); });
+        });
+    }
+
+    // Enter key in custom item input
+    document.getElementById('custom-title').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addCustomItem(); }
+    });
+});
+</script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

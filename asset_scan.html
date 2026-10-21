@@ -129,6 +129,8 @@ textarea.report-input:focus{border-color:#dc2626}
 .report-success-title{font-size:16px;font-weight:700}
 .report-success-sub{font-size:13px;color:#64748b;line-height:1.5}
 .btn-outline{padding:10px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+        .it-open { display:flex; align-items:center; gap:8px; margin:0 12px 8px; padding:9px 12px; border-radius:10px; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:13px; font-weight:600; text-decoration:none; }
+        html.dark .it-open { background:#172554; border-color:#1e40af; color:#bfdbfe; }
 </style>
 </head>
 <body>
@@ -165,6 +167,7 @@ textarea.report-input:focus{border-color:#dc2626}
             <span class="badge" id="bar-badge"></span>
         </div>
 
+        <a id="it-open" class="it-open" href="#" style="display:none"><i class="fas fa-passport"></i> เปิดในทะเบียน (IT) · ประวัติเครื่อง / มอบ / คืน <i class="fas fa-chevron-right" style="margin-left:auto"></i></a>
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('info')" id="tab-btn-info">
                 <i class="fas fa-info-circle"></i> ข้อมูล
@@ -351,6 +354,12 @@ async function init() {
         HIST_OFFSET = data.history.length;
 
         renderHeader(data.asset);
+        const perms = sess.effective_permissions || [];
+        if (sess.role === 'admin' || perms.includes('*') || perms.includes('asset.manage')) {
+            const it = $('it-open');
+            it.href = `admin.html?tab=it_assets&asset=${encodeURIComponent(assetId)}`;
+            it.style.display = 'flex';
+        }
         renderInfoTab(data.asset);
         renderLatestTicket(data.latest_ticket);
         renderHistory(data.history, false);
@@ -374,14 +383,17 @@ function renderHeader(a) {
 
     const statusMap = {
         'ใช้งานปกติ': { cls:'s-active',  icon:'fa-check-circle' },
+        'ว่าง':        { cls:'s-borrow',  icon:'fa-box-open' },
         'ถูกยืม':      { cls:'s-borrow',  icon:'fa-hand-holding' },
         'รอซ่อม':      { cls:'s-repair',  icon:'fa-tools' },
+        'ส่งซ่อม':     { cls:'s-repair',  icon:'fa-tools' },
         'ชำรุด':       { cls:'s-broken',  icon:'fa-exclamation-triangle' },
         'เลิกใช้งาน': { cls:'s-retired', icon:'fa-ban' },
+        'ตัดจำหน่าย': { cls:'s-retired', icon:'fa-ban' },
     };
     const sm = statusMap[a.status] || { cls:'s-retired', icon:'fa-circle' };
     $('bar-badge').className = 'badge ' + sm.cls;
-    $('bar-badge').innerHTML = `<i class="fas ${sm.icon}" style="font-size:9px"></i> ${a.status || '—'}`;
+    $('bar-badge').innerHTML = `<i class="fas ${sm.icon}" style="font-size:9px"></i> ${escHtml(a.status || '—')}`;
 
     const coClass = { PTA:'co-PTA', PT4:'co-PT4', PTE:'co-PTE' };
     $('co-bar').className = 'co-bar ' + (coClass[a.company] || 'co-default');
@@ -473,6 +485,13 @@ function renderLatestTicket(t) {
     card.style.display = 'block';
 }
 
+// ข้อความจากระบบเป็นชื่อฟิลด์ภาษาอังกฤษ → แปลงให้คนทั่วไปอ่านออก
+const HIST_FIELD_TH = { serial_number:'S/N', hostname:'ชื่อเครื่อง', ip_address:'IP', mac_address:'MAC', custodian:'ผู้ถือครอง', company:'บริษัท', status:'สถานะ', location:'สถานที่' };
+function histText(t) {
+    return escHtml(String(t || '').replace(/^Sync จาก Setup:\s*/i, 'อัปเดตจากใบติดตั้ง: '))
+        .replace(/\b([a-z]+(?:_[a-z]+)+|hostname|company|status|location|custodian)\b/g, m => HIST_FIELD_TH[m] || m);
+}
+
 function renderHistory(items, append) {
     const list = $('hist-list');
     if (!append) list.innerHTML = '';
@@ -489,12 +508,14 @@ function renderHistory(items, append) {
         REPAIR_REQUEST:'fa-tools', REPAIR_START:'fa-play-circle',
         REPAIR_COMPLETE:'fa-check-circle', REPAIR_CANCEL:'fa-times-circle',
         REPAIR_UNREPAIRABLE:'fa-ban',
+        ASSIGN:'fa-user-plus', RETURN:'fa-undo', RETIRE:'fa-ban', TRANSFER:'fa-exchange-alt',
+        SETUP_SYNC:'fa-laptop-code', LOAN_APPROVED:'fa-hand-holding', LOAN_RETURNED:'fa-undo',
     };
 
     items.forEach(h => {
         const d    = (() => { try { return JSON.parse(h.details || '{}'); } catch { return {}; } })();
         const text = d.text || h.details || '';
-        const imgEl = d.image ? `<img src="${d.image}" class="hist-img" onclick="window.open(this.src)" onerror="this.style.display='none'">` : '';
+        const imgEl = d.image ? `<img src="${escHtml(d.image)}" class="hist-img" onclick="window.open(this.src)" onerror="this.style.display='none'">` : '';
         const dotCls = 'dot-' + (h.event_type || 'default');
         const icon   = icons[h.event_type] || 'fa-circle';
         const el = document.createElement('div');
@@ -502,7 +523,7 @@ function renderHistory(items, append) {
         el.innerHTML = `
             <div class="hist-dot ${dotCls}"><i class="fas ${icon}"></i></div>
             <div class="hist-content">
-                <div class="hist-text">${escHtml(text)}</div>
+                <div class="hist-text">${histText(text)}</div>
                 ${imgEl}
                 <div class="hist-meta">${escHtml(h.user_name || '')} · ${fmtDate(h.timestamp)}</div>
             </div>`;

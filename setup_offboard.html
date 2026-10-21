@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" href="css/design-system.css">
-    <link rel="stylesheet" href="css/enterprise-theme.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
     <style>
@@ -81,6 +81,24 @@
         .done-banner { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:10px; font-size:13px; color:#166534; font-weight:600; }
 
         /* ISO */
+        .held-item { border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+        html.dark .held-item { border-color:#334155; }
+        .held-item.ok { background:#f0fdf4; border-color:#bbf7d0; }
+        html.dark .held-item.ok { background:rgba(20,83,45,.3); border-color:#166534; }
+        .held-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .held-code { font-family:Consolas,monospace; font-weight:700; font-size:12.5px; color:#1d4ed8; }
+        html.dark .held-code { color:#93c5fd; }
+        .held-name { font-size:12.5px; font-weight:600; flex:1; min-width:140px; }
+        .held-st { font-size:10.5px; color:#64748b; }
+        .held-form { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin-top:8px; padding-top:8px; border-top:1px dashed #e2e8f0; font-size:12px; }
+        html.dark .held-form { border-color:#334155; }
+        .held-form b { font-size:11px; color:#64748b; margin-right:2px; }
+        .held-form label { display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
+        .held-btn { margin-left:auto; padding:5px 12px; border-radius:7px; border:1px solid #7c3aed; background:#7c3aed; color:#fff; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+        .held-btn:disabled { opacity:.5; cursor:default; }
+        .held-done { font-size:12px; font-weight:700; color:#166534; }
+        html.dark .held-done { color:#86efac; }
+        .held-empty { font-size:12.5px; color:#64748b; }
         .iso-header { display:none; }
         .iso-doc-badge { display:inline-flex; align-items:center; gap:6px; background:#fee2e2; border:1px solid #fca5a5; border-radius:6px; padding:3px 10px; font-size:10px; font-weight:700; color:#dc2626; }
 
@@ -166,6 +184,15 @@
                 ข้อมูลเครื่องที่ต้อง Offboard
             </div>
             <div class="info-grid" id="setup-info"></div>
+        </div>
+
+        <!-- เครื่องที่พนักงานยังถือครองตามทะเบียน -->
+        <div class="s-card" id="held-card" style="display:none">
+            <div class="s-card-title">
+                <div class="s-icon" style="background:#ede9fe;color:#7c3aed"><i class="fa fa-laptop"></i></div>
+                เครื่องที่ต้องเก็บคืน <span class="cat-badge" id="held-count"></span>
+            </div>
+            <div id="held-list"></div>
         </div>
 
         <!-- Progress -->
@@ -367,6 +394,63 @@ function renderObChecklist() {
     }
 }
 
+const escH = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// เครื่องที่พนักงานยังถือครองตามทะเบียน — เก็บคืนจากหน้านี้ได้เลย (ลงประวัติเครื่องเหมือนกดในทะเบียน)
+let heldAssets = [];
+async function loadHeldAssets() {
+    const empId = setupData?.employee_id;
+    if (!empId) return;
+    try {
+        const r = await fetch(`${API_PATH}?action=asset_lifecycle&op=held&employee_id=${encodeURIComponent(empId)}`);
+        const j = await r.json();
+        if (j.status !== 'success') return;   // ไม่มีสิทธิ์จัดการพัสดุ → ไม่แสดงการ์ด
+        heldAssets = j.assets || [];
+        document.getElementById('held-card').style.display = '';
+        renderHeldAssets();
+    } catch (_) {}
+}
+function renderHeldAssets() {
+    const box = document.getElementById('held-list');
+    const left = heldAssets.filter(a => !a._returned).length;
+    document.getElementById('held-count').textContent = heldAssets.length ? `เหลือ ${left}/${heldAssets.length}` : '';
+    if (!heldAssets.length) { box.innerHTML = '<div class="held-empty"><i class="fa fa-circle-check" style="color:#16a34a"></i> ไม่มีเครื่องค้างในชื่อพนักงานคนนี้</div>'; return; }
+    box.innerHTML = heldAssets.map(a => {
+        const head = `<div class="held-head"><span class="held-code">${escH(a.equipment_id)}</span><span class="held-name">${escH(a.name)}</span><span class="held-st">${escH([a.cat_name, a.serial_number && 'S/N ' + a.serial_number].filter(Boolean).join(' · '))}</span></div>`;
+        if (a._returned) return `<div class="held-item ok">${head}<div class="held-done"><i class="fa fa-check"></i> รับคืนแล้ว · ${escH(a._returned)}</div></div>`;
+        const rd = (name, opts) => opts.map(([v, t]) => `<label><input type="radio" name="${name}-${a.id}" value="${v}">${t}</label>`).join('');
+        return `<div class="held-item">${head}
+            <div class="held-form"><span><b>สภาพ</b> ${rd('cond', [['good', 'ดี'], ['fair', 'มีรอย'], ['broken', 'ชำรุด']])}</span>
+            <span><b>ข้อมูลในเครื่อง</b> ${rd('wipe', [['yes', 'ล้างแล้ว'], ['no', 'ยังไม่ล้าง'], ['na', 'ไม่มีข้อมูล']])}</span>
+            <button type="button" class="held-btn" onclick="returnHeldAsset(${parseInt(a.id, 10)}, this)"><i class="fa fa-arrow-rotate-left"></i> รับคืน</button></div></div>`;
+    }).join('');
+}
+async function returnHeldAsset(assetId, btn) {
+    const pick = n => document.querySelector(`input[name="${n}-${assetId}"]:checked`)?.value || '';
+    const condition = pick('cond'), wiped = pick('wipe');
+    if (!condition || !wiped) { alert('เลือกสภาพเครื่อง และสถานะข้อมูลในเครื่องก่อน'); return; }
+    btn.disabled = true;
+    const fd = new FormData();
+    fd.append('op', 'return'); fd.append('id', assetId); fd.append('reason', 'resign');
+    fd.append('condition', condition); fd.append('wiped', wiped);
+    fd.append('note', 'Offboard: ' + (setupData?.employee_name || ''));
+    try {
+        const r = await fetch(`${API_PATH}?action=asset_lifecycle`, { method: 'POST', body: fd });
+        const j = await r.json();
+        if (j.status !== 'success') throw new Error(j.message);
+        const a = heldAssets.find(x => String(x.id) === String(assetId));
+        a._returned = (j.new_status || '') + (wiped === 'yes' ? ' · ล้างข้อมูลแล้ว' : '');
+        a._wiped = wiped;
+        renderHeldAssets();
+        // เก็บคืนครบทุกเครื่อง → ติ๊กข้อ "รับเครื่องคืน" + "อัปเดตทะเบียน" ให้เลย (ล้างข้อมูลครบ → ติ๊กข้อล้างข้อมูลด้วย)
+        if (heldAssets.every(x => x._returned)) {
+            ['ob6', 'ob13'].forEach(id => { obStates[id] = 'done'; refreshObItem(id); });
+            if (heldAssets.every(x => x._wiped !== 'no')) { obStates.ob10 = 'done'; refreshObItem('ob10'); }
+            updateObProgress();
+        }
+    } catch (e) { btn.disabled = false; alert('รับคืนไม่สำเร็จ: ' + e.message); }
+}
+
 async function loadSetupRecord(id) {
     try {
         const res  = await fetch(`${API_PATH}?action=getSetupRecord&id=${id}`);
@@ -394,7 +478,7 @@ async function loadSetupRecord(id) {
         ].map(([lbl,val])=>`
             <div class="info-row">
                 <div class="info-lbl">${lbl}</div>
-                <div class="info-val">${val}</div>
+                <div class="info-val">${escH(val)}</div>
             </div>`).join('');
 
         // Already offboarded?
@@ -418,6 +502,7 @@ async function loadSetupRecord(id) {
         // Render
         renderObChecklist();
         updateObProgress();
+        if (setupData.status !== 'offboarded') loadHeldAssets();
 
         // Show content
         document.getElementById('loading-card').style.display = 'none';

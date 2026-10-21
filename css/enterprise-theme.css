@@ -636,9 +636,14 @@ html.dark .ptc-hamburger:hover { background: #1e293b; }
 .ptc-swal-deny {
     display: inline-flex !important;
 }
-/* ป้องกัน CSS override SweetAlert hide (showDenyButton: false) */
+/* ป้องกัน CSS override SweetAlert hide (showDenyButton/showCancelButton/showConfirmButton: false)
+   เดิมยกเว้นแค่ deny → กล่องแจ้งเตือนธรรมดามีปุ่ม "ยกเลิก" โผล่ทุกหน้า */
 .swal2-deny[style*="display: none"],
-.swal2-deny[style*="display:none"] {
+.swal2-deny[style*="display:none"],
+.swal2-cancel[style*="display: none"],
+.swal2-cancel[style*="display:none"],
+.swal2-confirm[style*="display: none"],
+.swal2-confirm[style*="display:none"] {
     display: none !important;
 }
 .ptc-swal-confirm,

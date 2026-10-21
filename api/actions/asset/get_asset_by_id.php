@@ -64,12 +64,12 @@ if (!empty($row['images'])) {
 
 $histLimit = max(1, min(50, intval($_GET['history_limit'] ?? 10)));
 
-$cstmt = $conn->prepare("SELECT COUNT(*) as total FROM asset_history WHERE asset_db_id = ?");
+$cstmt = $conn->prepare("SELECT COUNT(*) as total FROM asset_history WHERE asset_db_id = ? AND event_type <> 'ACCESS'");
 $cstmt->bind_param("i", $id);
 $cstmt->execute();
 $histTotal = intval($cstmt->get_result()->fetch_assoc()['total']);
 
-$hstmt = $conn->prepare("SELECT history_id, event_type, details, user_name, timestamp FROM asset_history WHERE asset_db_id = ? ORDER BY timestamp DESC LIMIT ?");
+$hstmt = $conn->prepare("SELECT history_id, event_type, details, user_name, timestamp FROM asset_history WHERE asset_db_id = ? AND event_type <> 'ACCESS' ORDER BY timestamp DESC, history_id DESC LIMIT ?");
 $hstmt->bind_param("ii", $id, $histLimit);
 $hstmt->execute();
 $hres = $hstmt->get_result();

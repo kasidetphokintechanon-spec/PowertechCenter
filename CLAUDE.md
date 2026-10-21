@@ -15,7 +15,9 @@
 - ห้ามใช้ Tailwind `hidden` กับ element ที่มี CSS `display` ผูกกับ ID (เช่น modal) — ใช้ `el.style.display` แทน
 
 ## PHP / API
-- action ที่ต้อง login: เช็ก `$_SESSION['user_id']` ก่อน · action ที่ต้องมีสิทธิ์: `requirePermission($conn, '<perm>')` / `hasPermission()`
+- **ด่านกลาง (TISAX)** ใน `api.php`: ทุก action ต้องล็อกอิน ยกเว้นที่อยู่ใน `$PUBLIC_ACTIONS` · action ที่ต้องมีสิทธิ์เฉพาะใส่ใน `$ACTION_PERMS` — เพิ่ม action ใหม่ที่หน้าไม่ล็อกอินต้องใช้ ต้องเพิ่มชื่อใน `$PUBLIC_ACTIONS` ด้วย
+- action ที่ต้องมีสิทธิ์: `requirePermission($conn, '<perm>')` / `hasPermission()` (หรือใส่ใน `$ACTION_PERMS`)
+- ห้ามเก็บรหัสผ่านผู้ใช้เป็นข้อความธรรมดา · ห้ามลบประวัติพัสดุ (ใช้ "ตัดจำหน่าย" แทน)
 - SQL ใช้ prepared statement เท่านั้น ห้ามต่อ string จาก input
 - ตอบกลับเป็น JSON `{status: 'success'|'error', message, ...}`
 - แจ้งเตือน LINE/Telegram ผ่าน `sendNotify()` ใน `includes/notify_helper.php`
