@@ -482,7 +482,7 @@ try {
         'get_public_directory', 'get_company_order', 'get_directory_categories', 'get_job_positions', // Contact List (ดูได้โดยไม่ล็อกอิน)
         'get_kb_data', 'get_kb_article_by_id', 'suggest_kb_articles',             // KB อ่านอย่างเดียว
         'get_audit_confirm', 'submit_audit_confirm',                               // ลิงก์ตรวจนับ (ใช้ token แทนล็อกอิน)
-        'get_kiosk_data', 'create_walkin_booking', 'get_monthly_schedule', 'get_job_plans',
+        'get_kiosk_data', 'create_walkin_booking', 'get_monthly_schedule',
     ];
     // action 'get' เป็นตัวดึงข้อมูลรวมหลายตาราง — เปิดให้คนไม่ล็อกอินเฉพาะรายชื่อแผนก (ตัวกรองใน Contact List)
     $isPublicGet = $safeAction === 'get' && in_array($_GET['file'] ?? '', ['departments'], true);

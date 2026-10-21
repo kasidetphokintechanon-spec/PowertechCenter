@@ -122,9 +122,6 @@
             </div>
         </div>
         <div class="dash-topbar__right">
-            <a href="job_plan.html" id="link-job-plan" class="dash-link-btn" style="display:none">
-                <i class="fas fa-calendar-alt"></i> Job Plan
-            </a>
             <select id="dashboard-company-filter" class="company-select" onchange="filterDashboard()" title="กรองตามบริษัท">
                 <option value="all">ทุกบริษัท</option>
                 <option value="PTA">PTA</option>
@@ -362,8 +359,6 @@
             }
             currentUserId = s.user_id;
             if (!currentUserId) throw new Error('User ID not found in session.');
-            const jpl = gid('link-job-plan');
-            if (jpl) jpl.style.display = 'inline-flex';
             await Promise.all([loadAllLogs(), loadDashboardStats()]);
             initMyJobs();
         } catch (err) {

@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/doc-print.js?v=20261022"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Sarabun',sans-serif;background:#f1f5f9;color:#1e293b;font-size:14px;min-height:100vh}
@@ -173,7 +174,7 @@ html.dark #theme-toggle:hover{background:#1e293b}
     <button class="btn-load" onclick="loadReport()">โหลด</button>
   </div>
   <div class="topbar-right">
-    <button class="btn-print" onclick="window.print()">&#128438; พิมพ์</button>
+    <button class="btn-print" onclick="printITReport()">&#128438; พิมพ์</button>
     <button type="button" id="theme-toggle" title="สลับธีม" style="height:34px;width:34px;border-radius:6px;border:1px solid #e2e8f0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b">
       <i id="theme-icon" class="fas fa-sun"></i>
     </button>
@@ -331,7 +332,9 @@ function loadReport(){
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
+let _report = null;
 function renderReport(d, year){
+  _report = { d, year };
   renderKPI(d.kpi, year);
   renderMonthly(d.monthly);
   renderStatus(d.by_status);
@@ -419,7 +422,7 @@ function renderDept(rows){
     <thead><tr><th>#</th><th>แผนก</th><th style="text-align:right">Ticket</th><th style="min-width:80px"></th></tr></thead>
     <tbody>${rows.map((r,i)=>`<tr>
       <td><span class="rank-num ${i<3?'rank-'+(i+1):''}">${i+1}</span></td>
-      <td>${r.department||'ไม่ระบุ'}</td>
+      <td>${DocPrint.esc(r.department||'ไม่ระบุ')}</td>
       <td style="text-align:right;font-weight:600">${fmt(r.count)}</td>
       <td><div class="bar-mini"><div class="bar-fill" style="width:${pct(r.count,max)}%"></div></div></td>
     </tr>`).join('')}</tbody>
@@ -494,6 +497,42 @@ function renderRating(rows){
       <div class="star-count">${cnt}</div>
     </div>`;
   }).join('');
+}
+
+// ── พิมพ์: รายงาน A4 แผ่นเดียว (แกนกลาง js/doc-print.js) — กราฟแปลงเป็นรูปจากที่แสดงบนจอ ──
+function printITReport(){
+  if(!_report){ alert('ยังไม่มีข้อมูล กรุณากดโหลดก่อน'); return; }
+  const { esc, section } = DocPrint;
+  const { d, year } = _report;
+  const k = d.kpi || {};
+  const coSel = document.getElementById('selCompany');
+  const company = coSel.value === 'all' ? '' : coSel.value;
+  const img = (id, h) => charts[id] ? `<img src="${charts[id].toBase64Image()}" style="width:100%;height:${h};object-fit:contain;display:block">` : '<div style="color:#94a3b8;padding:8px">ไม่มีข้อมูล</div>';
+  const box = (title, body) => `<div class="dp-sec" style="margin-top:0"><div class="dp-sh">${title}</div><div style="padding:4px 8px">${body}</div></div>`;
+  const kpi = [['Ticket ทั้งหมด', fmt(k.total)], ['ปิดงานสำเร็จ', pct(k.completed, k.total) + '%'], ['ผ่าน SLA', k.sla_total ? pct(k.sla_pass, k.sla_total) + '%' : '—'],
+               ['เวลาซ่อมเฉลี่ย (ชม.)', k.mttr_hours ?? '—'], ['ค้างอยู่', fmt(k.open)], ['คะแนนความพึงพอใจ', k.avg_rating ?? '—']];
+  const dept = (d.by_department || []).slice(0, 10);
+  const ag = d.aging || {};
+  const agB = [['d_0_1','≤ 1 วัน'],['d_2_3','2–3 วัน'],['d_4_7','4–7 วัน'],['d_8_14','8–14 วัน'],['d_15_30','15–30 วัน'],['d_30_plus','> 30 วัน']];
+  const rMap = {}; (d.rating_dist || []).forEach(r => rMap[r.rating] = +r.count);
+  const grid = (a, b) => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">${a}${b}</div>`;
+
+  DocPrint.preview({
+    company, formKey: 'it_report', classified: true,
+    docNo: `ITR-${company || 'ALL'}-${year}`, dateText: 'ข้อมูล ณ ' + DocPrint.thDate(new Date(), true),
+    title: { th: 'รายงานผลการให้บริการ IT', en: `IT Service Report · ปี ${+year + 543}` },
+    info: [['บริษัท', company || 'ทุกบริษัท'], ['ปี', +year + 543], ['ช่วงกราฟรายเดือน', document.getElementById('selMonths').selectedOptions[0].text], ['SLA ผ่าน', k.sla_total ? `${k.sla_pass}/${k.sla_total} งาน` : '-']],
+    blocks: [
+      `<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px">${kpi.map(([l, v]) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:4px 7px"><div style="font-size:7pt;color:#64748b">${l}</div><div style="font-size:13pt;font-weight:800">${esc(v)}</div></div>`).join('')}</div>`,
+      section('Ticket รายเดือน / MONTHLY', img('chartMonthly', '50mm'), { html: true }),
+      grid(box('ตามสถานะ / BY STATUS', img('chartStatus', '42mm')), box('ตามความเร่งด่วน / BY URGENCY', img('chartUrgency', '42mm'))),
+      grid(box('ตามประเภทงาน / BY TYPE', img('chartType', '48mm')), box('ตามช่าง / BY TECHNICIAN', img('chartTech', '48mm'))),
+      grid(box('แผนกที่แจ้งมากสุด / TOP DEPARTMENTS', dept.length ? `<table class="dp-tbl">${dept.map((r, i) => `<tr><td style="width:18px;text-align:center">${i + 1}</td><td>${esc(r.department || 'ไม่ระบุ')}</td><td style="text-align:right;font-weight:700">${fmt(r.count)}</td></tr>`).join('')}</table>` : 'ไม่มีข้อมูล'),
+           '<div>' + box('งานค้าง (อายุ) / AGING', `<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:3px;text-align:center">${agB.map(([key, l]) => `<div style="border:1px solid #e2e8f0;border-radius:4px;padding:2px"><b style="font-size:11pt">${+ag[key] || 0}</b><div style="font-size:6.6pt;color:#64748b">${l}</div></div>`).join('')}</div>`)
+           + `<div class="dp-sec" style="margin-top:6px"><div class="dp-sh">คะแนนความพึงพอใจ / RATING</div><div style="padding:4px 8px;font-size:8pt">${[5, 4, 3, 2, 1].map(st => `★${st} = <b>${rMap[st] || 0}</b> ราย`).join(' &nbsp;·&nbsp; ')}</div></div></div>`),
+    ],
+    sigs: [{ role: 'ผู้จัดทำ / Prepared By' }, { role: 'หัวหน้าแผนก IT / Head of IT' }],
+  });
 }
 
 // ── Init year selector ────────────────────────────────────────────────────────
