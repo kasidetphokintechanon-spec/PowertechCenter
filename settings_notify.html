@@ -231,6 +231,7 @@
         <div class="sn-event-tag"><span class="sn-event-dot" style="background:#0F172A;"></span>stock_summary — สรุปสต็อกประจำวัน</div>
         <div class="sn-event-tag"><span class="sn-event-dot" style="background:#7C3AED;"></span>loan_new / loan_approve / loan_reject</div>
         <div class="sn-event-tag"><span class="sn-event-dot" style="background:#B91C1C;"></span>server_check_issue — เช็คห้อง Server พบปัญหา</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#BE123C;"></span>employee_offboard — พนักงานลาออก</div>
     </div>
 
     <!-- CHANNEL LIST -->
@@ -408,6 +409,10 @@
                     <div class="sn-ev-group-items">
                         <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="server_check_issue"> 🔴 server_check_issue — พบปัญหาในการเช็คห้อง Server</label>
                     </div>
+                    <div class="sn-ev-group">👤 พนักงาน</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="employee_offboard"> 🔴 employee_offboard — พนักงานลาออก (IT ต้องปิดสิทธิ์)</label>
+                    </div>
                 </div>
             </div>
 
@@ -436,7 +441,8 @@ const EVENT_COLORS = {
     it_repair:'#EF454D', it_cancel:'#FF9500', it_approve:'#1DB446',
     stock_new:'#2563EB', stock_approve:'#16A34A', stock_reject:'#DC2626', stock_cancel:'#FF9500', stock_low:'#D97706', stock_summary:'#0F172A',
     loan_new:'#7C3AED', loan_approve:'#16A34A', loan_reject:'#DC2626',
-    server_check_issue:'#B91C1C'
+    server_check_issue:'#B91C1C',
+    employee_offboard:'#BE123C'
 };
 
 // ── INIT ────────────────────────────────────────────────────

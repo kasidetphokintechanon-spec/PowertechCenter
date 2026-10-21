@@ -61,6 +61,26 @@ if ($file === 'employees') {
         }
     }
 
+    // สถานะงาน offboard ล่าสุดของแต่ละคน (ให้ HR เห็นว่า IT ปิดสิทธิ์ถึงไหน) — เฉพาะ list เต็ม ไม่ใช่ slim
+    if (!$slimAssignable && !empty($employees)) {
+        // DB ที่ยังไม่มีตาราง/คอลัมน์ (ยังไม่เคยเปิด Task Center) — ข้ามไป ห้ามทำให้รายชื่อทั้งหน้าโหลดไม่ขึ้น
+        $hasTbl = $conn->query("SHOW TABLES LIKE 'personal_tasks'");
+        $hasCol = ($hasTbl && $hasTbl->num_rows > 0) ? $conn->query("SHOW COLUMNS FROM personal_tasks LIKE 'offboard_employee_id'") : null;
+        if ($hasCol && $hasCol->num_rows > 0) {
+            $resOff = $conn->query("SELECT offboard_employee_id, status, progress_pct FROM personal_tasks
+                                    WHERE offboard_employee_id IS NOT NULL ORDER BY id ASC");
+            if ($resOff) {
+                while ($off = $resOff->fetch_assoc()) {
+                    $eid = $off['offboard_employee_id'];
+                    if (isset($employees[$eid])) {
+                        $employees[$eid]['offboard_task_status'] = $off['status'];
+                        $employees[$eid]['offboard_task_pct'] = (int)$off['progress_pct'];
+                    }
+                }
+            }
+        }
+    }
+
     if (!empty($employees)) {
         // ดึงข้อมูลสังกัดทั้งหมดมาจับคู่กับพนักงาน
         $assignSql = $slimAssignable

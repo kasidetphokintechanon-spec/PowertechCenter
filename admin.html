@@ -2617,6 +2617,16 @@
                 const techWarnings = [];
                 if (parseInt(i.is_technician||0)===1&&i.employment_status!=='active') techWarnings.push('ช่างแต่สถานะไม่ Active');
                 if (parseInt(i.is_technician||0)===1&&!hasAssignment) techWarnings.push('ช่างแต่ไม่มีสังกัด');
+                // คนที่ HR ตั้ง inactive แล้ว: บอกว่า IT ปิดสิทธิ์ถึงไหน (มาจากงาน offboard ใน Task Center)
+                let offboardBadge = '';
+                if (i.employment_status === 'inactive' && i.offboard_task_status) {
+                    offboardBadge = i.offboard_task_status === 'done'
+                        ? '<span class="ptc-badge ptc-badge--success" style="margin-top:4px;font-size:10px"><i class="fa fa-check"></i> IT ปิดสิทธิ์ครบแล้ว</span>'
+                        : `<span class="ptc-badge ptc-badge--progress" style="margin-top:4px;font-size:10px"><i class="fa fa-hourglass-half"></i> รอ IT ปิดสิทธิ์${Number(i.offboard_task_pct||0)>0?' · '+Number(i.offboard_task_pct)+'%':''}</span>`;
+                }
+                if (i.resign_date && i.employment_status === 'inactive') {
+                    offboardBadge = `<div style="font-size:10px;color:var(--ptc-text-muted);margin-top:2px">ออก ${escapeHtml(String(i.resign_date).split(' ')[0])}</div>` + offboardBadge;
+                }
                 const warningInfo = techWarnings.length?`<div style="font-size:10px;color:#ef4444;margin-top:2px"><i class="fa fa-exclamation-triangle" style="margin-right:3px"></i>${escapeHtml(techWarnings.join(' • '))}</div>`:'';
                 // Avatar
                 const initials = (i.name||'?').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
@@ -2642,7 +2652,7 @@
                     </td>
                     <td class="ptc-table-td">${escapeHtml(deptName)}</td>
                     <td class="ptc-table-td">${phoneHtml}</td>
-                    <td class="ptc-table-td" style="${statusStyle};font-size:11px;text-transform:uppercase">${escapeHtml(i.employment_status)}</td>
+                    <td class="ptc-table-td"><div style="${statusStyle};font-size:11px;text-transform:uppercase">${escapeHtml(i.employment_status)}</div>${offboardBadge}</td>
                     <td class="ptc-table-td" style="text-align:right">
                         <button onclick="editItem('${escapeJsString(i.id)}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#2563eb"><i class="fa fa-edit"></i></button>
                         <button onclick="deleteItem('${escapeJsString(i.id)}')" class="ptc-btn-ghost ptc-btn-sm" style="color:#ef4444"><i class="fa fa-trash"></i></button>
@@ -3976,6 +3986,7 @@
                             <input type="text" id="form-position-custom" class="${inp}" placeholder="พิมพ์ตำแหน่งที่ต้องการ..." style="margin-top:6px;display:none">
                         </div>
                         <div><label class="${lbl}">เบอร์โทร</label><input type="text" name="phone" value="${item.phone||''}" class="${inp}"></div>
+                        ${item.id?`<div><label class="${lbl}">วันที่ออก <span style="font-weight:400;color:var(--ptc-text-muted)">(ถ้าลาออก)</span></label><input type="date" name="resign_date" value="${escapeHtml(String(item.resign_date||'').split(' ')[0])}" class="${inp}"></div>`:''}
                         ${canEditSystem?`
                         <div><label class="${lbl}">วันเริ่มงาน</label><input type="date" name="start_date" value="${item.start_date||''}" class="${inp}"></div>
                         <div><label class="${lbl}">วันเกิด</label><input type="date" name="birthdate" value="${item.birthdate||''}" class="${inp}"></div>

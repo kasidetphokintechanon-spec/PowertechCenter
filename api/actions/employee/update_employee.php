@@ -10,65 +10,20 @@ requirePermission($conn, 'employee.manage');
 $sessionRole = $_SESSION['role'] ?? 'guest';
 $canEditSensitive = ($sessionRole === 'admin') || hasPermission($conn, 'admin.manage_permissions');
 
+require_once __DIR__ . '/../../../includes/offboard_task_helper.php';
+
 // แจ้งเตือน IT ให้ปิดสิทธิ์ระบบต่างๆ เมื่อพนักงานถูกตั้งเป็น inactive
 // (HR เป็นคนกด inactive แต่ไม่รู้จัก ERP/MRP ฯลฯ เลยแจ้ง IT แทนที่จะเด้ง popup ให้ HR)
-function notifyEmployeeOffboard(mysqli $conn, string $employeeId, string $employeeName): void {
-    $granted = [];
-    $printerBuildings = [];
-    $company = null;
-
-    $stmt = $conn->prepare("SELECT company, granted_systems, printer_buildings
-                             FROM setup_records WHERE employee_id = ? AND status = 'active'
-                             ORDER BY updated_at DESC LIMIT 1");
-    if ($stmt) {
-        $stmt->bind_param("s", $employeeId);
-        $stmt->execute();
-        $rec = $stmt->get_result()->fetch_assoc();
-        if ($rec) {
-            $company = $rec['company'] ?: null;
-            $granted = json_decode($rec['granted_systems'] ?? '{}', true) ?: [];
-            $printerBuildings = json_decode($rec['printer_buildings'] ?? '[]', true) ?: [];
-        }
-    }
-
-    $labels = [
-        'ptc'     => 'PowertechCenter',
-        'erpN'    => 'ERP (ตัวใหม่)',
-        'erpO'    => 'ERP (ตัวเก่า)',
-        'mrpN'    => 'MRP (ตัวใหม่)',
-        'mrpO'    => 'MRP (ตัวเก่า)',
-        'ictrl'   => 'Icontrol',
-        'carsys'  => 'CARSYS',
-        'roomsys' => 'ROOMSYS',
-    ];
-    $systemsToClose = ['Windows Login / AD', 'Internet / VPN'];
-    foreach ($labels as $key => $label) {
-        if (!empty($granted[$key])) $systemsToClose[] = $label;
-    }
-    if (!empty($printerBuildings)) $systemsToClose[] = 'รหัสเครื่องพิมพ์';
-
-    // ทรัพย์สินที่ยังถือครองอยู่ (ต้องรับคืน)
-    $assets = [];
-    $stmtA = $conn->prepare("SELECT equipment_id, name, hostname FROM it_assets WHERE custodian_employee_id = ? LIMIT 20");
-    if ($stmtA) {
-        $stmtA->bind_param("s", $employeeId);
-        $stmtA->execute();
-        $resA = $stmtA->get_result();
-        while ($row = $resA->fetch_assoc()) {
-            $label = trim(($row['equipment_id'] ?: '-') . ' — ' . ($row['name'] ?: ''));
-            if (!empty($row['hostname'])) $label .= " ({$row['hostname']})";
-            $assets[] = $label;
-        }
-    }
-
+function notifyEmployeeOffboard(mysqli $conn, string $employeeId, string $employeeName, array $info, bool $taskCreated): void {
     $msg  = "🔴 <b>พนักงานพ้นสภาพ — ต้องปิดสิทธิ์</b>\n";
     $msg .= "ชื่อ: {$employeeName} (รหัสพนักงาน {$employeeId})\n";
-    $msg .= "ระบบที่ต้องปิด: " . implode(', ', $systemsToClose) . "\n";
-    $msg .= $assets
-        ? "ทรัพย์สินที่ต้องรับคืน: " . implode(', ', $assets) . "\n"
+    $msg .= "ระบบที่ต้องปิด: " . implode(', ', $info['systems']) . "\n";
+    $msg .= $info['assets']
+        ? "ทรัพย์สินที่ต้องรับคืน: " . implode(', ', $info['assets']) . "\n"
         : "ทรัพย์สินที่ต้องรับคืน: ไม่พบในทะเบียน (ตรวจสอบเพิ่มเติม)\n";
+    if ($taskCreated) $msg .= "📋 สร้างงานใน Task Center ให้แล้ว\n";
 
-    sendNotify($conn, $msg, 'employee_offboard', $company);
+    sendNotify($conn, $msg, 'employee_offboard', $info['company']);
 }
 
 $colCheck = $conn->query("SHOW COLUMNS FROM employees LIKE 'is_executive'");
@@ -91,6 +46,11 @@ if (!$colCheck || intval($colCheck->num_rows) === 0) {
     $conn->query("ALTER TABLE employees ADD COLUMN can_manage_stock TINYINT(1) NOT NULL DEFAULT 0 AFTER is_technician");
 }
 
+$colCheck = $conn->query("SHOW COLUMNS FROM employees LIKE 'resign_date'");
+if (!$colCheck || intval($colCheck->num_rows) === 0) {
+    $conn->query("ALTER TABLE employees ADD COLUMN resign_date DATE NULL AFTER start_date");
+}
+
 // จัดการรูปภาพพนักงาน
 $imagePath = null;
 if (isset($_FILES['imageFile']) && $_FILES['imageFile']['error'] === UPLOAD_ERR_OK) {
@@ -111,6 +71,12 @@ $phone = $_POST['phone'] ?? '';
 $birthdate = !empty($_POST['birthdate']) ? $_POST['birthdate'] : NULL;
 $start_date = !empty($_POST['start_date']) ? $_POST['start_date'] : NULL;
 $status = $_POST['employment_status'] ?? 'active';
+$resignDateProvided = array_key_exists('resign_date', $_POST);
+$resign_date = !empty($_POST['resign_date']) ? $_POST['resign_date'] : NULL;
+if ($resign_date !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $resign_date)) {
+    echo json_encode(['status' => 'error', 'message' => 'รูปแบบวันที่ออกไม่ถูกต้อง']);
+    exit;
+}
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 $role = $_POST['role'] ?? 'user';
@@ -138,7 +104,7 @@ $usernameProvided = array_key_exists('username', $_POST) && trim((string)($_POST
 $currentEmployee = null;
 
 if ($id !== '') {
-    $stmtCurrent = $conn->prepare("SELECT username, role, responsible_department, is_executive, is_management, is_technician, can_manage_stock, employment_status FROM employees WHERE id = ? LIMIT 1");
+    $stmtCurrent = $conn->prepare("SELECT username, role, responsible_department, is_executive, is_management, is_technician, can_manage_stock, employment_status, resign_date FROM employees WHERE id = ? LIMIT 1");
     if ($stmtCurrent) {
         $stmtCurrent->bind_param("s", $id);
         $stmtCurrent->execute();
@@ -151,6 +117,7 @@ if ($currentEmployee) {
     if (!$roleProvided) $role = (string)($currentEmployee['role'] ?? 'user');
     if (!$responsibleProvided) $responsible_department = $currentEmployee['responsible_department'] ?? null;
     if (!$canManageStockProvided) $can_manage_stock = intval($currentEmployee['can_manage_stock'] ?? 0) ? 1 : 0;
+    if (!$resignDateProvided) $resign_date = $currentEmployee['resign_date'] ?? null;
     if ($canEditSensitive && $manage_system_user === 1 && !$usernameProvided) {
         $username = (string)($currentEmployee['username'] ?? '');
     }
@@ -187,9 +154,9 @@ if ($is_technician === 1 && count($validAssignments) === 0) {
 
 $conn->begin_transaction();
 try {
-    $sql = "UPDATE employees SET name=?, name_th=?, position=?, is_executive=?, is_management=?, is_technician=?, can_manage_stock=?, phone=?, birthdate=?, start_date=?, employment_status=?, username=?, role=?, responsible_department=?";
-    $params = [$name, $name_th, $position, $is_executive, $is_management, $is_technician, $can_manage_stock, $phone, $birthdate, $start_date, $status, $username, $role, $responsible_department];
-    $types = "sssiiii" . str_repeat("s", 7);
+    $sql = "UPDATE employees SET name=?, name_th=?, position=?, is_executive=?, is_management=?, is_technician=?, can_manage_stock=?, phone=?, birthdate=?, start_date=?, resign_date=?, employment_status=?, username=?, role=?, responsible_department=?";
+    $params = [$name, $name_th, $position, $is_executive, $is_management, $is_technician, $can_manage_stock, $phone, $birthdate, $start_date, $resign_date, $status, $username, $role, $responsible_department];
+    $types = "sssiiii" . str_repeat("s", 8);
     
     if (!empty($password)) {
         $sql .= ", password=?";
@@ -243,9 +210,22 @@ try {
     $conn->commit();
     syncEmployeeStockFlagFromPermissions($conn, $id);
 
-    $wasActive = ($currentEmployee['employment_status'] ?? 'active') !== 'inactive';
-    if ($currentEmployee && $wasActive && $status === 'inactive') {
-        notifyEmployeeOffboard($conn, $id, $name_th ?: $name);
+    // งานต่อเนื่องหลังบันทึกแล้ว — ถ้าพังห้ามทำให้ HR เห็น error เพราะข้อมูลพนักงานบันทึกไปแล้ว (rollback ไม่มีผล)
+    try {
+        $wasActive = ($currentEmployee['employment_status'] ?? 'active') !== 'inactive';
+        if ($currentEmployee && $wasActive && $status === 'inactive') {
+            $displayName = $name_th ?: $name;
+            $offboardInfo = collectOffboardInfo($conn, $id);
+            $taskId = createOffboardTask($conn, $id, $displayName, $resign_date, (string)$_SESSION['user_id'], $offboardInfo);
+            notifyEmployeeOffboard($conn, $id, $displayName, $offboardInfo, $taskId !== null);
+        } elseif ($currentEmployee && !$wasActive && $status === 'active') {
+            removeOpenOffboardTasks($conn, $id);
+        } elseif ($currentEmployee && !$wasActive && $status === 'inactive'
+                  && (string)($currentEmployee['resign_date'] ?? '') !== (string)($resign_date ?? '')) {
+            updateOffboardTaskDueDate($conn, $id, $resign_date);
+        }
+    } catch (Throwable $offErr) {
+        error_log('[Offboard] post-save step failed for ' . $id . ': ' . $offErr->getMessage());
     }
 
     echo json_encode(['status' => 'success']);

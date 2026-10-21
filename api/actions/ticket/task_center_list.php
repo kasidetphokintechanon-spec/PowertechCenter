@@ -135,6 +135,9 @@ $listSql = "SELECT
                 pt.remind_month_end,
                 pt.created_at,
                 pt.updated_at,
+                pt.offboard_employee_id,
+                (SELECT sr.id FROM setup_records sr WHERE CONVERT(sr.employee_id USING utf8mb4) COLLATE utf8mb4_unicode_ci = pt.offboard_employee_id
+                    ORDER BY (sr.status = 'active') DESC, sr.updated_at DESC LIMIT 1) AS offboard_setup_id,
                 COALESCE(e.name_th, e.name, pt.assignee_name, pt.user_id) AS owner_name
             FROM personal_tasks pt
             LEFT JOIN employees e ON pt.user_id = e.id" . $whereSql . "

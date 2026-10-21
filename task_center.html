@@ -800,6 +800,7 @@
             </div>
             <h4 style="font-size:18px;font-weight:700;color:var(--ptc-text);margin:0 0 8px;">${escapeHtml(item.title||'-')}</h4>
             <p style="font-size:13px;color:var(--ptc-text-muted);white-space:pre-wrap;margin:0 0 16px;">${escapeHtml(item.description||'ไม่มีรายละเอียด')}</p>
+            ${item.offboard_employee_id ? `<a href="${item.offboard_setup_id ? 'setup_offboard.html?id='+encodeURIComponent(item.offboard_setup_id) : 'setup_list.html'}" class="ptc-btn ptc-btn-secondary" style="width:100%;justify-content:center;text-decoration:none;box-sizing:border-box;margin-bottom:16px;"><i class="fa fa-list-check"></i> ${item.offboard_setup_id ? 'ไปหน้าเช็กลิสต์ปิดสิทธิ์' : 'ไม่มีข้อมูลติดตั้ง — เปิดรายการ Setup'}</a>` : ''}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
                 ${detailBlock('บริษัท',companyLabel(item))}
                 ${detailBlock('แผนก',item.department||'ไม่ระบุ')}

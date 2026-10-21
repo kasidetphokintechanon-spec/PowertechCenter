@@ -74,6 +74,8 @@ if (!function_exists('ensurePersonalTasksSchema')) {
         ensurePersonalTasksColumn($conn, 'personal_tasks', 'recurring_interval_months', "INT NOT NULL DEFAULT 12");
         ensurePersonalTasksColumn($conn, 'personal_tasks', 'remind_days_before', "INT NOT NULL DEFAULT 0");
         ensurePersonalTasksColumn($conn, 'personal_tasks', 'recurring_parent_id', "INT NULL");
+        // งาน offboard ที่ระบบสร้างให้ IT อัตโนมัติตอน HR ตั้งพนักงานเป็น inactive — จำว่าเป็นของพนักงานคนไหน
+        ensurePersonalTasksColumn($conn, 'personal_tasks', 'offboard_employee_id', "VARCHAR(50) NULL");
 
         $hist = $conn->query("SHOW TABLES LIKE 'personal_task_history'");
         if (!$hist || $hist->num_rows === 0) {
