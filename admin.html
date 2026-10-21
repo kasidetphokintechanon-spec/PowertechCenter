@@ -316,7 +316,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
             <div>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                    <h2 id="page-title" style="font-size:18px;font-weight:700;color:#0f172a;margin:0">ภาพรวมระบบ</h2>
+                    <h2 id="page-title" style="font-size:18px;font-weight:700;color:var(--ptc-text,#0f172a);margin:0">ภาพรวมระบบ</h2>
                     <span id="record-count" class="record-badge" style="display:none">0 items</span>
                 </div>
                 <div id="page-subtitle" style="font-size:11px;color:#94a3b8;margin-top:2px;display:none"></div>
@@ -2199,10 +2199,10 @@
 
         const allClear = !d.tickets?.length && !d.stock_requests?.length && !d.loan_requests?.length && !sc.issue;
         const allClearBanner = allClear ? `
-            <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:12px;padding:24px;text-align:center;margin-bottom:20px">
-                <div style="font-size:32px;margin-bottom:8px">✓</div>
-                <div style="font-size:15px;font-weight:700;color:#15803d">ทุกคิวว่างเปล่า — ไม่มีงานค้าง</div>
-                <div style="font-size:12px;color:#16a34a;margin-top:4px">ไม่มี Ticket / Stock / ยืม-คืน รอดำเนินการ</div>
+            <div style="display:flex;align-items:center;gap:14px;background:var(--ptc-surface,#fff);border:1px solid var(--ptc-border,#e2e8f0);border-left:4px solid var(--ptc-success,#16a34a);border-radius:12px;padding:14px 18px;margin-bottom:20px">
+                <div style="width:40px;height:40px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:var(--ptc-success-bg,#dcfce7);color:var(--ptc-success,#16a34a);font-size:17px"><i class="fa fa-check"></i></div>
+                <div><div style="font-size:14.5px;font-weight:700;color:var(--ptc-text,#0f172a)">ทุกคิวว่างเปล่า — ไม่มีงานค้าง</div>
+                <div style="font-size:12px;color:var(--ptc-text-muted,#64748b);margin-top:2px">ไม่มี Ticket / Stock / ยืม-คืน รอดำเนินการ</div></div>
             </div>` : '';
 
         container.innerHTML = `
@@ -2216,7 +2216,7 @@
                 ${statCard('fa-laptop','#0ea5e9','#f0f9ff','พัสดุ IT ทั้งหมด', assetCount, null, 'it_assets')}
                 ${statCard('fa-wrench','#f59e0b','#fffbeb','Ticket รอดำเนินการ', kpi.pending||0, 'log.html')}
                 ${statCard('fa-boxes','#8b5cf6','#f5f3ff','Stock รอ Approve', kpi.stock_pending||0, 'stock_management.html')}
-                ${statCard('fa-hand-holding-box','#ec4899','#fdf2f8','ยืม-คืน รอ Approve', kpi.loan_pending||0, 'loan.html')}
+                ${statCard('fa-rotate','#ec4899','#fdf2f8','ยืม-คืน รอ Approve', kpi.loan_pending||0, 'borrow_management.html')}
                 ${statCard('fa-check-circle','#10b981','#f0fdf4','เสร็จวันนี้', kpi.completed_today||0, null)}
                 ${statCard('fa-server','#ef4444','#fef2f2', scLabel, scValue, 'server_check.html')}
                 ${statCard('fa-network-wired','#0891b2','#ecfeff','อุปกรณ์ IT Links', itLinksDevices, 'it_links.html')}
@@ -2248,7 +2248,7 @@
 
             <div class="dash-card">
                 <div class="dash-card-hd">
-                    <div class="dash-card-title"><i class="fa fa-hand-holding-box" style="color:#ec4899"></i> ยืม-คืน รออนุมัติ</div>
+                    <div class="dash-card-title"><i class="fa fa-rotate" style="color:#ec4899"></i> ยืม-คืน รออนุมัติ</div>
                     ${pendingBadge(kpi.loan_pending||0)}
                 </div>
                 <table style="width:100%;border-collapse:collapse">
@@ -5773,7 +5773,7 @@
 
 </script>
 <script src="js/employee-form.js?v=20261021b"></script>
-<script src="js/sidebar.js?v=20261021"></script>
+<script src="js/sidebar.js?v=20261021b"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>
