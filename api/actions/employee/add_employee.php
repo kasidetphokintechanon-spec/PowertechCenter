@@ -7,6 +7,10 @@ if (!isset($_SESSION['user_id'])) {
 }
 requirePermission($conn, 'employee.manage');
 
+// ชื่อเล่น / เบอร์ภายใน — ALTER ต้องทำก่อน begin_transaction (ALTER ทำให้ MySQL commit เอง)
+require_once __DIR__ . '/../../../includes/employee_contact_fields.php';
+ensureEmployeeContactColumns($conn);
+
 $sessionRole = $_SESSION['role'] ?? 'guest';
 $canEditSensitive = ($sessionRole === 'admin') || hasPermission($conn, 'admin.manage_permissions');
 if (!$canEditSensitive) {
@@ -140,6 +144,7 @@ try {
         }
     }
 
+    saveEmployeeContactFields($conn, (string)$id);
     $conn->commit();
     syncEmployeeStockFlagFromPermissions($conn, $id);
     echo json_encode(['status' => 'success']);

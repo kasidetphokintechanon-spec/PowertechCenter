@@ -2464,6 +2464,24 @@ function initEmployeeEditorModal() {
 }
 
 async function openEmployeeEditor(mode, baseEmployee) {
+    // ฟอร์มกลาง (js/employee-form.js) — ใช้ร่วมกับ admin.html · ?oldform=1 = กลับไปใช้ฟอร์มเดิมด้านล่าง
+    if (window.PTCEmployeeForm && !/[?&]oldform=1\b/.test(location.search)) {
+        const reloadList = async () => { DIR_CACHE.delEmployees(); await loadEmployeesFromAPI(); filterEmployees(); };
+        window.PTCEmployeeForm.open({
+            mode,
+            employee: mode === 'edit' ? baseEmployee : null, // เพิ่มใหม่ = ฟอร์มว่าง (เดิมดึงข้อมูลคนที่เลือกอยู่มาเติมให้)
+            canEditSensitive: canManageUserPermissions(),
+            canDelete: canManageUserPermissions(),
+            onSaved: async ({ id, isNew }) => {
+                await reloadList();
+                selectEmployee(id);
+                showToast(isNew ? 'เพิ่มพนักงานใหม่เรียบร้อยแล้ว' : 'บันทึกข้อมูลพนักงานเรียบร้อยแล้ว');
+            },
+            onDeleted: async () => { await reloadList(); closeDetail(); showToast('ลบพนักงานแล้ว'); },
+            onOpenPermissions: (id) => window.open(`admin.html?tab=permissions&user_id=${encodeURIComponent(id)}`, '_blank'),
+        });
+        return;
+    }
     const modal = document.getElementById('employee-editor-modal');
     if (!modal) {
         if (mode === 'edit') {

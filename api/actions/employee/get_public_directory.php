@@ -14,7 +14,9 @@ if (!$colCheck || intval($colCheck->num_rows) === 0) {
     $conn->query("ALTER TABLE employees ADD COLUMN is_management TINYINT(1) NOT NULL DEFAULT 0 AFTER is_executive");
 }
 
-$sql = "SELECT id, name, name_th, position, is_executive, is_management, phone, image, employment_status, created_at, updated_at FROM employees";
+require_once __DIR__ . '/../../../includes/employee_contact_fields.php';
+ensureEmployeeContactColumns($conn);
+$sql = "SELECT id, name, name_th, nickname, position, is_executive, is_management, phone, phone_ext, image, employment_status, created_at, updated_at FROM employees";
 if ($status_filter === 'active') {
     $sql .= " WHERE employment_status = 'active'";
 }

@@ -24,6 +24,7 @@
     <script src="js/vendor/jsbarcode.min.js"></script>
     <script src="js/vendor/sortable.min.js"></script>
     <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/employee-form.css?v=20261021c">
     <link rel="stylesheet" href="css/enterprise-theme.css">
     <script>
         tailwind.config = {
@@ -4142,6 +4143,33 @@
     }
 
     window.openModal = function(isEdit=false, item={}) {
+        // พนักงาน: ใช้ฟอร์มกลาง (js/employee-form.js) เหมือนหน้า Contact List · ?oldform=1 = ฟอร์มเดิมด้านล่าง
+        if (activeTab === 'employees' && window.PTCEmployeeForm && !/[?&]oldform=1\b/.test(location.search)) {
+            const sess = window.adminSession || {};
+            const canEditSystem = sess.role === 'admin' || sessionHasPerm(sess, 'admin.manage_permissions');
+            const goPermissions = (id) => { window.pendingPermissionUserId = id; switchTab('permissions'); };
+            window.PTCEmployeeForm.open({
+                mode: isEdit ? 'edit' : 'add',
+                employee: isEdit ? item : null,
+                canEditSensitive: canEditSystem,
+                canDelete: canEditSystem,
+                presetSystemUser: !isEdit && !!(item && item.__forceSystemUser),
+                onOpenPermissions: goPermissions,
+                onDeleted: async () => { Toast.fire({ icon: 'success', title: 'ลบแล้ว' }); await loadAllData(); renderContent(); },
+                onSaved: async ({ id, isNew, hasSystemUser }) => {
+                    await loadAllData(); renderContent();
+                    if (!(isNew && hasSystemUser)) { Toast.fire({ icon: 'success', title: 'บันทึกแล้ว' }); return; }
+                    const r = await Swal.fire({
+                        title: 'เพิ่มพนักงานสำเร็จ',
+                        html: `<div style="font-size:13px;color:#475569;line-height:1.9">ต้องการกำหนดสิทธิ์ระบบให้<br><b>${escapeHtml(id)}</b><br>ตอนนี้เลยหรือไม่?</div>`,
+                        icon: 'success', showCancelButton: true,
+                        confirmButtonText: '<i class="fa fa-key" style="margin-right:5px"></i>กำหนดสิทธิ์เลย', cancelButtonText: 'ข้ามก่อน', confirmButtonColor: '#2563eb',
+                    });
+                    if (r.isConfirmed) goPermissions(id);
+                },
+            });
+            return;
+        }
         isEditing = isEdit;
         if (activeTab === 'it_assets') {
             const code = item['ID อุปกรณ์'] || item.equipment_id || '';
@@ -5744,7 +5772,8 @@
     }
 
 </script>
-<script src="js/sidebar.js"></script>
+<script src="js/employee-form.js?v=20261021b"></script>
+<script src="js/sidebar.js?v=20261021"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>
