@@ -792,12 +792,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        purgeServiceWorker().finally(() => {
-            initSidebar();
-            initSearch();
-            const icon = $('themeIcon');
-            if (icon && document.documentElement.classList.contains('dark')) icon.className = 'fa fa-sun';
-            boot();
-        });
+        // โหลดข้อมูลทันที — เดิมรอล้าง service worker/แคชก่อน ทำให้หน้าแรกขึ้นช้าทุกครั้ง
+        initSidebar();
+        initSearch();
+        const icon = $('themeIcon');
+        if (icon && document.documentElement.classList.contains('dark')) icon.className = 'fa fa-sun';
+        boot();
+        purgeServiceWorker();
     });
 })();
