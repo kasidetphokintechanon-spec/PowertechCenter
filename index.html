@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
-    <link rel="stylesheet" href="css/index.css?v=20260708">
+    <link rel="stylesheet" href="css/index.css?v=20261022e">
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
 </head>
@@ -76,36 +76,30 @@
         </nav>
     </aside>
     <main class="ptc-main-scroll" id="main-scroll">
-        <div class="main-content-pad">
+        <div class="main-content-pad home2">
             <div class="welcome-row">
                 <div>
                     <div class="welcome-title" id="welcomeText">สวัสดี 👋</div>
                     <div class="welcome-date" id="dateText"></div>
                 </div>
-                <div class="welcome-actions">
-                    <button class="ptc-btn quick-request-btn" onclick="location.href='request.html'" aria-label="แจ้งปัญหาใหม่"><i class="fa fa-plus"></i><span class="quick-request-label">แจ้งปัญหา</span></button>
-                </div>
             </div>
+            <div class="h2-msearch"><i class="fa fa-search"></i><input type="search" id="mSearchInput" placeholder="ค้นหาบริการ..." aria-label="ค้นหาบริการ"></div>
 
-            <div class="ptc-kpi-strip kpi-strip" id="kpiStrip"></div>
+            <!-- ปุ่มลัดงานที่ทำบ่อย (ซ่อนปุ่มที่ระบบปลายทางปิดอยู่) -->
+            <div class="h2-quick" id="quickRow"></div>
 
-            <div class="top-status-row" id="topRow">
-                <div id="stat-card-bg" class="status-card-bg">
-                    <div id="my-status-content" class="status-card-content">
-                        <div class="status-card-loading">
-                            <i class="fas fa-spinner fa-spin"></i>
-                        </div>
+            <div class="h2-cols">
+                <section>
+                    <div class="h2-sec">บริการทั้งหมด</div>
+                    <div class="h2-groups" id="appGrid"></div>
+                    <div class="h2-nores" id="noResult" style="display:none">ไม่พบบริการที่ค้นหา</div>
+                </section>
+                <aside class="h2-side">
+                    <div class="h2-panel" id="my-status-content">
+                        <div class="status-card-loading"><i class="fas fa-spinner fa-spin"></i></div>
                     </div>
-                    <div class="status-card-decor" aria-hidden="true"><i class="fas fa-clipboard-list"></i></div>
-                </div>
+                </aside>
             </div>
-
-            <div class="app-grid-head">
-                <div class="app-grid-label">บริการ / ระบบงาน</div>
-                <div class="app-grid-hint">เลือกจากการ์ด · ค้นหา Ctrl+K</div>
-            </div>
-            <div class="app-grid" id="appGrid"></div>
-
         </div>
     </main>
 </div>
@@ -122,6 +116,6 @@
 </div>
 
 
-<script src="js/index-home.js?v=20260707a" defer></script>
+<script src="js/index-home.js?v=20261022e" defer></script>
 </body>
 </html>

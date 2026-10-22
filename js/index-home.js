@@ -66,7 +66,8 @@
         try {
             const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store', credentials: 'same-origin' });
             const text = await res.text();
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            // 401 = ยังไม่ล็อกอิน (ด่านกลางใน api.php) → ส่ง JSON กลับให้ boot() พาไปหน้า login แทนขึ้น "โหลดไม่สำเร็จ"
+            if (!res.ok && res.status !== 401) throw new Error('HTTP ' + res.status);
             return JSON.parse(text);
         } finally {
             clearTimeout(t);
@@ -188,8 +189,12 @@
             img.style.display = '';
             if (icon) icon.style.display = 'none';
         }
+        const hr = new Date().getHours();
+        const greet = hr < 12 ? 'สวัสดีตอนเช้า' : hr < 17 ? 'สวัสดีตอนบ่าย' : 'สวัสดีตอนเย็น';
+        if ($('welcomeText')) $('welcomeText').textContent = greet + ', ' + (displayName.split(' ')[0] || '') + ' 👋';
         if ($('companyTitle') && session.company_full_name) {
             $('companyTitle').textContent = session.company_full_name;
+            if (session.company) $('companyTitle').setAttribute('data-short', session.company);
         }
         const now = new Date();
         if ($('dateText')) {
@@ -228,52 +233,43 @@
         const loanList = Array.isArray(loans) ? loans : [];
         const total = ticketList.length + loanList.length;
 
+        const uidMe = String(session.user_id || '');
+        const mineReq = ticketList.filter((l) => String(l.requester_id ?? '') === uidMe);
+        const kp = [
+            ['รอรับเรื่อง', mineReq.filter((l) => l.status === 'Pending').length, 'var(--ptc-orange, #ea580c)'],
+            ['กำลังดำเนินการ', mineReq.filter((l) => l.status !== 'Pending' && l.status !== 'Awaiting Confirmation').length, 'var(--ptc-primary, #2563eb)'],
+            ['รอคุณยืนยัน', mineReq.filter((l) => l.status === 'Awaiting Confirmation').length, 'var(--ptc-success, #16a34a)'],
+            ['ยืมอยู่', loanList.length, 'var(--ptc-purple, #7c3aed)'],
+        ];
+        const head = '<div class="h2-panel-h">งานของฉัน<a href="request.html?tab=tickets">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a></div>' +
+            '<div class="h2-kp">' + kp.map((k) => '<div><b style="color:' + k[2] + '">' + k[1] + '</b><span>' + k[0] + '</span></div>').join('') + '</div>';
         if (total === 0) {
-            container.innerHTML =
-                '<div style="display:flex;align-items:center;gap:16px;padding:8px 0">' +
-                '<div style="width:48px;height:48px;border-radius:50%;background:#dcfce7;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
-                '<i class="fas fa-check-circle" style="font-size:22px;color:#16a34a"></i></div>' +
-                '<div><div style="font-size:16px;font-weight:700;color:#1e293b">All Clear!</div>' +
-                '<div style="font-size:12px;color:#64748b;margin-top:3px">ไม่มีงานค้างในขณะนี้</div></div></div>';
+            container.innerHTML = head + '<div class="status-clear"><i class="fas fa-circle-check"></i>' +
+                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อมและการยืมของคุณเรียบร้อยทั้งหมด</span></div></div>';
             return;
         }
-
-        const uid = String(session.user_id || '');
-        const rows = [];
-        ticketList.forEach((l) => {
-            const dot = STATUS_DOT[l.status] || '#94a3b8';
+        const STEP = { Pending: 1, Received: 2, 'Awaiting Confirmation': 4 };
+        const steps = (n, cls) => '<div class="h2-steps ' + (cls || '') + '">' + [1, 2, 3, 4, 5].map((i) => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
+        const shortName = (v) => String(v || '').replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|นาย|นาง|นางสาว)\s*/i, '').split(' ')[0];
+        const jobs = [];
+        ticketList.slice(0, 5).forEach((l) => {
             const lbl = STATUS_LABEL[l.status] || l.status;
-            const isMine = String(l.servicedById ?? '') === uid;
-            const tech = l.servicedBy ? esc(String(l.servicedBy).replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|นาย|นาง|นางสาว)\s*/i, '').split(' ')[0]) : '—';
-            rows.push(
-                '<div class="status-row" data-href="request.html?tab=tickets">' +
-                '<div class="status-row-id">' + esc(l.id) + (isMine ? ' <span class="status-my-badge">ของฉัน</span>' : '') + '</div>' +
-                '<span class="status-pill"><span class="status-dot" style="background:' + dot + '"></span>' + esc(lbl) + '</span>' +
-                '<span class="status-tech">' + tech + '</span></div>'
-            );
+            const dot = STATUS_DOT[l.status] || '#94a3b8';
+            const isTech = String(l.servicedById ?? '') === uidMe;
+            const who = l.status === 'Awaiting Confirmation' && !isTech ? 'กดยืนยันปิดงานได้เลย'
+                : isTech ? 'คุณเป็นช่างที่รับผิดชอบ' : (l.servicedBy ? 'ช่าง ' + esc(shortName(l.servicedBy)) : 'ยังไม่มีช่างรับเรื่อง');
+            jobs.push('<a class="h2-job" href="request.html?tab=tickets"><div class="h2-job-top"><b>' + esc(l.problem || ('งานซ่อม ' + l.id)) + '</b>' +
+                '<span class="h2-pill" style="--c:' + dot + '">' + esc(lbl) + '</span></div>' +
+                '<div class="h2-job-sub">' + esc(l.id) + ' · ' + who + '</div>' + steps(STEP[l.status] || 3) + '</a>');
         });
         loanList.forEach((l) => {
             const pending = l.loan_status === 'Pending';
-            rows.push(
-                '<div class="status-row" data-href="my_borrow_history.html">' +
-                '<div class="status-row-id"><span class="status-loan-tag">ยืม</span> ' + esc(l.asset_name || '-') + '</div>' +
-                '<span class="status-pill"><span class="status-dot" style="background:' + (pending ? '#f59e0b' : '#10b981') + '"></span>' +
-                esc(pending ? 'รออนุมัติ' : 'กำลังยืม') + '</span><span class="status-tech">—</span></div>'
-            );
+            jobs.push('<a class="h2-job" href="my_borrow_history.html"><div class="h2-job-top"><b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
+                '<span class="h2-pill" style="--c:' + (pending ? '#d97706' : '#7c3aed') + '">' + (pending ? 'รออนุมัติ' : 'ยืมอยู่') + '</span></div>' +
+                '<div class="h2-job-sub">' + (pending ? 'รอ IT อนุมัติ' : 'อย่าลืมคืนตามกำหนด') + '</div>' + steps(pending ? 2 : 5, pending ? '' : 'loan') + '</a>');
         });
-
-        container.innerHTML =
-            '<div class="status-head"><span class="status-head-label">งานของฉัน <span class="status-count">' + total + '</span></span>' +
-            '<a href="request.html?tab=tickets" class="status-head-link">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a></div>' +
-            '<div class="status-cols"><span>Job No.</span><span>สถานะ</span><span>ช่าง</span></div>' +
-            '<div class="status-rows">' + rows.join('') + '</div>';
-
-        container.querySelectorAll('.status-row').forEach((row) => {
-            row.addEventListener('click', () => {
-                const href = row.getAttribute('data-href');
-                if (href) window.location.href = href;
-            });
-        });
+        const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
+        container.innerHTML = head + jobs.join('') + more;
     }
 
     function canonicalizeRawServiceUrl(raw) {
@@ -425,20 +421,35 @@
         ];
         grid.innerHTML = '';
         const checkableItems = [];
+        const GROUPS = [
+            { key: 'it', t: 'แจ้งปัญหา & IT', c: '#6366f1' },
+            { key: 'booking', t: 'จอง', c: '#14b8a6' },
+            { key: 'stock', t: 'เบิก / ยืม', c: '#f59e0b' },
+            { key: 'info', t: 'ข้อมูล & ระบบงาน', c: '#3b82f6' },
+        ];
+        const groupOf = (tone) => tone === 'itops' || tone === 'knowledge' ? 'it' : tone === 'booking' ? 'booking' : tone === 'stock' ? 'stock' : 'info';
+        const boxes = {};
+        GROUPS.forEach((g) => {
+            const box = document.createElement('div');
+            box.className = 'h2-group';
+            box.innerHTML = '<div class="h2-group-h"><span style="background:' + g.c + '"></span>' + g.t + '<small></small></div><div class="h2-svc"></div>';
+            boxes[g.key] = box;
+        });
         const resolveCardTone = (item) => {
             const text = (String(item.title || '') + ' ' + String(item.sub || '') + ' ' + String(item.url || '')).toLowerCase();
             if (/directory|รายชื่อ|พนักงาน|hr/.test(text)) return 'people';
             if (/request|log|แจ้งซ่อม|task|ticket|mt/.test(text)) return 'itops';
             if (/erp|program|ระบบงาน|เอกสาร|workflow/.test(text)) return 'erp';
             if (/room|car|จองห้อง|จองรถ|booking/.test(text)) return 'booking';
-            if (/loan|stock|ยืม|คืน|เบิก|คลัง|maid|stationery|asset/.test(text)) return 'stock';
             if (/kb|knowledge|ความรู้|guide|help/.test(text)) return 'knowledge';
+            if (/loan|stock|ยืม|คืน|เบิก|คลัง|maid|stationery|asset/.test(text)) return 'stock';
             return 'default';
         };
         items.forEach((item, idx) => {
             const card = document.createElement('a');
             card.className = 'app-card';
-            card.classList.add('app-card-tone-' + resolveCardTone(item));
+            const tone = resolveCardTone(item);
+            card.classList.add('app-card-tone-' + tone);
             const serviceKey = String(item.id || 'service') + '-' + idx;
             card.setAttribute('data-service-key', serviceKey);
             const backup = item.backup && String(item.backup).trim();
@@ -457,12 +468,46 @@
             card.innerHTML =
                 '<span class="app-link-status" title="กำลังตรวจสอบ"><span class="app-link-dot is-checking" aria-hidden="true"></span></span>' +
                 '<div class="app-icon" style="background:' + esc(item.color || '#2563eb') + '"><i class="fas ' + esc(iconClass) + '"></i></div>' +
-                '<div class="app-name">' + esc(item.title) + '</div>' +
-                '<div class="app-sub">' + esc(item.sub) + '</div>';
-            grid.appendChild(card);
+                '<div class="app-txt"><div class="app-name">' + esc(item.title) + '</div>' +
+                '<div class="app-sub">' + esc(item.sub) + '</div></div>' +
+                // ระบบภายนอก (เปิดเว็บอื่น) บอกด้วยไอคอน ต่างจากหน้าในระบบเรา
+                (/^https?:\/\//i.test(url) ? '<i class="fas fa-arrow-up-right-from-square h2-ext" title="เปิดระบบภายนอก"></i>' : '<i class="fas fa-chevron-right h2-go"></i>');
+            boxes[groupOf(tone)].querySelector('.h2-svc').appendChild(card);
+            quickSrc[item.id] = card;
             checkableItems.push({ key: serviceKey, url: url, backup: backup });
         });
+        GROUPS.forEach((g) => {
+            const n = boxes[g.key].querySelectorAll('.app-card').length;
+            if (!n) return;
+            boxes[g.key].querySelector('small').textContent = n + ' ระบบ';
+            grid.appendChild(boxes[g.key]);
+        });
+        renderQuick();
         refreshServiceHealthBadges(checkableItems);
+    }
+
+    // ปุ่มลัด: ใช้ลิงก์เดียวกับการ์ดบริการ (รวมลิงก์สำรอง) · ระบบไหนปิดอยู่ ปุ่มนั้นไม่แสดง
+    const quickSrc = Object.create(null);
+    function renderQuick() {
+        const row = $('quickRow');
+        if (!row) return;
+        const QUICK = [
+            { svc: 'IT -Service', href: 'request.html?tab=form', icon: 'fa-plus', t: 'แจ้งซ่อม IT', s: 'คอม / โปรแกรม / เน็ต', pri: true },
+            { svc: 'service-it-loan', icon: 'fa-right-left', t: 'ยืมอุปกรณ์', s: 'โน้ตบุ๊ก โปรเจกเตอร์', tone: 'stock' },
+            { svc: 'service-room', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
+            { svc: 'service-contact', icon: 'fa-address-book', t: 'หาเบอร์เพื่อน', s: 'สมุดรายชื่อ', tone: 'people' },
+        ];
+        row.innerHTML = '';
+        QUICK.forEach((q) => {
+            const src = quickSrc[q.svc];
+            if (!src) return;
+            const a = document.createElement('a');
+            a.className = 'h2-qa' + (q.pri ? ' pri' : ' app-card-tone-' + q.tone);
+            a.href = q.href || src.getAttribute('href');
+            if (!q.href && src.getAttribute('href') === '#') a.addEventListener('click', (e) => { e.preventDefault(); src.click(); });
+            a.innerHTML = '<i class="fas ' + q.icon + '"></i><div><b>' + q.t + '</b><span>' + q.s + '</span></div>';
+            row.appendChild(a);
+        });
     }
 
     function setServiceHealthBadge(serviceKey, state) {
@@ -706,12 +751,26 @@
     function initSearch() {
         const input = $('searchInput');
         if (!input) return;
-        input.addEventListener('input', function () {
-            const term = this.value.toLowerCase();
-            document.querySelectorAll('.app-card').forEach((card) => {
-                card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+        const apply = (term) => {
+            term = String(term || '').toLowerCase().trim();
+            let shown = 0;
+            document.querySelectorAll('#appGrid .h2-group').forEach((g) => {
+                let n = 0;
+                g.querySelectorAll('.app-card').forEach((card) => {
+                    const ok = card.textContent.toLowerCase().includes(term);
+                    card.style.display = ok ? '' : 'none';
+                    if (ok) n++;
+                });
+                g.style.display = n ? '' : 'none';
+                shown += n;
             });
-        });
+            if ($('noResult')) $('noResult').style.display = shown ? 'none' : '';
+            const qr = $('quickRow');
+            if (qr) qr.style.display = term ? 'none' : '';
+        };
+        input.addEventListener('input', function () { apply(this.value); });
+        const mInput = $('mSearchInput');
+        if (mInput) mInput.addEventListener('input', function () { apply(this.value); });
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input')); }
         });

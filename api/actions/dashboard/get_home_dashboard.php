@@ -90,7 +90,7 @@ try {
 // My tickets (max 8) — user scoped only
 $myTickets = [];
 try {
-    $sql = "SELECT id, date, status, requester_id, servicedById, servicedBy, requester, department
+    $sql = "SELECT id, date, status, requester_id, servicedById, servicedBy, requester, department, LEFT(problem, 120) AS problem
             FROM it_logs
             WHERE (requester_id = ? OR servicedById = ?)
               AND status NOT IN ('Completed','Closed','Cancelled','Unrepairable')

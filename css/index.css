@@ -335,3 +335,132 @@ body.index-page-root .notif-empty { padding: 40px 16px; text-align: center; colo
     body.index-page-root .nav-user-chevron { display: none; }
     body.index-page-root .nav-user-chip    { padding: 3px; gap: 0; }
 }
+
+/* ════ ปรับ 22 ต.ค. 2026: ตัดของไม่จำเป็น + มือถือ ════ */
+/* เมนูซ้ายไม่ขีดเส้นใต้ (เข้าธีม) */
+body.index-page-root .snav, body.index-page-root .snav:hover { text-decoration: none; }
+
+/* ไม่มีงานค้าง: แถบบรรทัดเดียว */
+body.index-page-root .status-card-bg.is-clear { min-height: 0; padding: 12px 16px; }
+body.index-page-root .status-card-bg.is-clear::before { background: #16a34a; }
+body.index-page-root .status-clear { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; flex-wrap: wrap; }
+body.index-page-root .status-clear i { color: #16a34a; font-size: 18px; }
+body.index-page-root .status-clear b { color: #0f172a; font-size: 14px; }
+html.dark body.index-page-root .status-clear { color: #94a3b8; }
+html.dark body.index-page-root .status-clear b { color: #f1f5f9; }
+html.dark body.index-page-root .status-clear i { color: #4ade80; }
+
+/* จุดสถานะการ์ด: โชว์เฉพาะตอนเชื่อมต่อไม่ได้ (เขียว/ส้มไม่มีคำอธิบาย ผู้ใช้ไม่ต้องรู้) */
+body.index-page-root .app-link-status:has(.app-link-dot:not(.is-down)) { display: none; }
+
+/* ── มือถือ ── */
+@media (max-width: 768px) {
+    /* ชื่อบริษัทย่อ เช่น PTA */
+    body.index-page-root .ptc-nav-title[data-short] { font-size: 0; }
+    body.index-page-root .ptc-nav-title[data-short]::after { content: attr(data-short); font-size: 15px; font-weight: 700; }
+    body.index-page-root .nav-user-info { display: none; }
+    /* ปุ่มแจ้งปัญหามีคำกำกับ */
+    body.index-page-root .quick-request-label { display: inline; }
+    /* ตัวเลขสรุป 2×2 ไม่ล้นขวา */
+    body.index-page-root .ptc-kpi-strip { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; }
+    body.index-page-root .kpi-card { min-width: 0; }
+    body.index-page-root .app-grid-hint { display: none; }
+    /* การ์ดบริการเป็นแถวแนวนอน: ไอคอน + ชื่อ + คำอธิบาย — 11 ระบบเห็นได้ในจอครึ่ง */
+    body.index-page-root .app-grid { grid-template-columns: 1fr; gap: 6px; }
+    body.index-page-root .app-card { flex-direction: row; justify-content: flex-start; text-align: left; min-height: 0; padding: 10px 12px 10px 14px; gap: 12px; }
+    body.index-page-root .app-card::before { top: 8px; bottom: 8px; }
+    body.index-page-root .app-icon { width: 36px; height: 36px; font-size: 15px; flex-shrink: 0; border-radius: 10px; }
+    body.index-page-root .app-name { font-size: 13px; }
+    body.index-page-root .app-sub { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    body.index-page-root .app-txt { min-width: 0; flex: 1; }
+}
+
+/* ════ หน้าแรกแบบใหม่ (home2): ปุ่มลัด + บริการแบ่งหมวด + แผงงานของฉัน · สีจาก token design-system (ธีมมืดเปลี่ยนตามเอง) ════ */
+body.index-page-root .home2 { max-width: 1320px; }
+body.index-page-root .home2 .welcome-title { font-size: 1.35rem; font-weight: 800; }
+body.index-page-root .h2-msearch { display: none; }
+
+body.index-page-root .h2-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0 18px; }
+body.index-page-root .h2-qa { display: flex; align-items: center; gap: 11px; padding: 12px 14px; min-width: 0; background: var(--ptc-surface); border: 1px solid var(--ptc-border); border-radius: 10px; color: var(--ptc-text); text-decoration: none; transition: border-color .12s, box-shadow .12s; }
+body.index-page-root .h2-qa:hover { border-color: var(--ptc-primary); box-shadow: var(--ptc-shadow-sm); }
+body.index-page-root .h2-qa > i { width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--card-tone-soft, var(--ptc-primary-light)); color: var(--card-tone-text, var(--ptc-primary)); border: 1px solid var(--card-tone-border, transparent); }
+body.index-page-root .h2-qa div { min-width: 0; }
+body.index-page-root .h2-qa b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-qa span { display: block; font-size: 11.5px; color: var(--ptc-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-qa.pri { background: var(--ptc-primary); border-color: var(--ptc-primary); color: #fff; }
+body.index-page-root .h2-qa.pri > i { background: rgba(255,255,255,.2); color: #fff; border-color: transparent; }
+body.index-page-root .h2-qa.pri span { color: rgba(255,255,255,.82); }
+html.dark body.index-page-root .h2-qa:not(.pri) > i { background: rgba(148,163,184,.12); border-color: transparent; }
+
+body.index-page-root .h2-cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+body.index-page-root .h2-sec { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: var(--ptc-text-2); margin: 0 2px 8px; }
+body.index-page-root .h2-group { background: var(--ptc-surface); border: 1px solid var(--ptc-border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+body.index-page-root .h2-group-h { display: flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 12.5px; font-weight: 700; color: var(--ptc-text-2); border-bottom: 1px solid var(--ptc-border); }
+body.index-page-root .h2-group-h > span { width: 8px; height: 8px; border-radius: 2px; }
+body.index-page-root .h2-group-h small { margin-left: auto; font-weight: 500; color: var(--ptc-text-muted); }
+body.index-page-root .h2-svc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 -1px -1px 0; }
+/* แถวบริการ (ใช้คลาส app-card เดิม — ค้นหา/ตรวจลิงก์ทำงานเหมือนเดิม) */
+body.index-page-root .h2-svc .app-card { flex-direction: row; justify-content: flex-start; text-align: left; gap: 11px; min-height: 0; padding: 12px 14px; border: 0; border-radius: 0; border-right: 1px solid var(--ptc-border); border-bottom: 1px solid var(--ptc-border); background: transparent; box-shadow: none; transform: none; min-width: 0; }
+body.index-page-root .h2-svc .app-card::before { display: none; }
+body.index-page-root .h2-svc .app-card:hover { background: var(--ptc-surface-2); box-shadow: none; transform: none; }
+body.index-page-root .h2-svc .app-icon { width: 36px; height: 36px; font-size: 15px; border-radius: 9px; flex-shrink: 0; }
+body.index-page-root .h2-svc .app-txt { min-width: 0; flex: 1; }
+body.index-page-root .h2-svc .app-name { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ptc-text); }
+body.index-page-root .h2-svc .app-sub { font-size: 11.5px; color: var(--ptc-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-go, body.index-page-root .h2-ext { font-size: 11px; color: var(--ptc-text-faint); flex-shrink: 0; }
+body.index-page-root .h2-go { opacity: 0; transition: opacity .12s; }
+body.index-page-root .h2-svc .app-card:hover .h2-go { opacity: 1; }
+/* ระบบล่ม: ป้ายแดงมีคำอธิบาย แทนจุดสี */
+body.index-page-root .h2-svc .app-link-status { position: static; width: auto; height: auto; order: 3; flex-shrink: 0; }
+body.index-page-root .h2-svc .app-link-status .app-link-dot { display: none; }
+body.index-page-root .h2-svc .app-link-status:has(.is-down) { display: inline-flex; }
+body.index-page-root .h2-svc .app-link-status:has(.is-down)::after { content: 'เชื่อมต่อไม่ได้'; font-size: 10.5px; font-weight: 700; color: var(--ptc-danger, #dc2626); background: var(--ptc-danger-bg, #fef2f2); border: 1px solid rgba(220,38,38,.25); border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+body.index-page-root .h2-svc .app-card:has(.is-down) .h2-ext { display: none; }
+body.index-page-root .h2-nores { padding: 30px; text-align: center; color: var(--ptc-text-muted); background: var(--ptc-surface); border: 1px dashed var(--ptc-border); border-radius: 10px; font-size: 13px; }
+
+/* แผงงานของฉัน */
+body.index-page-root .h2-side { position: sticky; top: 12px; }
+body.index-page-root .h2-panel { background: var(--ptc-surface); border: 1px solid var(--ptc-border); border-radius: 10px; overflow: hidden; }
+body.index-page-root .h2-panel-h { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--ptc-border); font-weight: 700; font-size: 13.5px; color: var(--ptc-text); }
+body.index-page-root .h2-panel-h a { font-size: 12px; font-weight: 500; color: var(--ptc-primary); text-decoration: none; }
+body.index-page-root .h2-kp { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--ptc-border); }
+body.index-page-root .h2-kp div { padding: 10px 4px; text-align: center; border-right: 1px solid var(--ptc-border); }
+body.index-page-root .h2-kp div:last-child { border-right: 0; }
+body.index-page-root .h2-kp b { display: block; font-size: 19px; font-weight: 800; line-height: 1.15; }
+body.index-page-root .h2-kp span { font-size: 10.5px; color: var(--ptc-text-muted); }
+body.index-page-root .h2-job { display: block; padding: 11px 14px; border-bottom: 1px solid var(--ptc-border); text-decoration: none; color: var(--ptc-text); }
+body.index-page-root .h2-job:hover { background: var(--ptc-surface-2); }
+body.index-page-root .h2-job:last-child { border-bottom: 0; }
+body.index-page-root .h2-job-top { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+body.index-page-root .h2-job-top b { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-pill { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; white-space: nowrap; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
+body.index-page-root .h2-job-sub { font-size: 11.5px; color: var(--ptc-text-muted); margin: 3px 0 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-steps { display: flex; gap: 3px; }
+body.index-page-root .h2-steps i { flex: 1; height: 4px; border-radius: 2px; background: var(--ptc-border); }
+body.index-page-root .h2-steps i.on { background: var(--ptc-primary); }
+body.index-page-root .h2-steps.loan i.on { background: #7c3aed; }
+body.index-page-root .h2-more { display: block; padding: 9px 14px; font-size: 12px; text-align: center; color: var(--ptc-primary); text-decoration: none; border-top: 1px solid var(--ptc-border); }
+body.index-page-root .h2-panel .status-clear { padding: 14px; gap: 10px; flex-wrap: nowrap; align-items: flex-start; }
+body.index-page-root .h2-panel .status-clear b { display: block; }
+body.index-page-root .h2-panel .status-clear span { font-size: 12px; color: var(--ptc-text-muted); }
+
+/* แท็บเล็ต: แผงงานลงล่าง */
+@media (max-width: 1100px) {
+    /* minmax(0,…) — ชื่องานยาว (nowrap) ห้ามดันคอลัมน์จนล้นจอ */
+    body.index-page-root .h2-cols { grid-template-columns: minmax(0, 1fr); }
+    body.index-page-root .h2-cols > * { min-width: 0; }
+    body.index-page-root .h2-side { position: static; order: -1; }
+    body.index-page-root .h2-svc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* มือถือ: ช่องค้นหาในหน้า · ปุ่มลัด 4 ปุ่มแถวเดียว · บริการคอลัมน์เดียว */
+@media (max-width: 768px) {
+    body.index-page-root .h2-msearch { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; margin-top: 12px; border: 1px solid var(--ptc-border); border-radius: 9px; background: var(--ptc-surface); color: var(--ptc-text-muted); }
+    body.index-page-root .h2-msearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ptc-text); font: inherit; font-size: 16px; }
+    body.index-page-root .h2-quick { gap: 6px; margin-top: 10px; }
+    body.index-page-root .h2-qa { flex-direction: column; text-align: center; gap: 5px; padding: 10px 4px; }
+    body.index-page-root .h2-qa b { font-size: 11.5px; white-space: normal; }
+    body.index-page-root .h2-qa span { display: none; }
+    body.index-page-root .h2-svc { grid-template-columns: 1fr; }
+    body.index-page-root .h2-svc .app-card { border-right: 0; padding: 11px 12px; }
+    body.index-page-root .h2-go { opacity: 1; }
+}
