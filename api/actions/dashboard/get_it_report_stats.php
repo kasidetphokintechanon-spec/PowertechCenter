@@ -12,9 +12,26 @@ $cWhere    = $company !== 'all' ? " AND company = '{$company}'" : '';
 $yearWhere = " AND YEAR(date) = $yearParam";
 $cYear     = $cWhere . $yearWhere;
 
+// เวลาแจ้งจริง/รับเรื่อง/ช่างซ่อมเสร็จ — it_logs เก็บแค่วันที่ จึงดึงเวลาจากประวัติเหตุการณ์
+// "ซ่อมเสร็จ" = ตอนช่างส่งให้ผู้แจ้งยืนยัน (ไม่รวมเวลาที่รอผู้แจ้งกดยืนยัน ซึ่งอาจนานถึง 3 วัน)
+$evAt = fn($type) => "(SELECT MIN(e.created_at) FROM mt_ticket_events e WHERE e.log_id COLLATE utf8mb4_unicode_ci = l.id COLLATE utf8mb4_unicode_ci AND e.event_type = '$type')";
+$T = "(SELECT l.*, COALESCE({$evAt('CREATE')}, TIMESTAMP(l.date, '08:00:00')) AS c_at, {$evAt('ACCEPT')} AS a_at,
+        COALESCE(l.awaiting_confirmation_at, l.completed_date) AS f_at FROM it_logs l) t";
+
+// เวลารับเรื่องตามที่ตั้งในหน้าตั้งค่า (ข้อความ เช่น "ภายใน 4 ชม.") → นาที · ใช้ค่าเดียวกับบอร์ดคิวงาน
+$respMin = ['ปกติ' => 240, 'ด่วน' => 120, 'ด่วนที่สุด' => 30];
+$sr = $conn->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('sla_normal','sla_urgent','sla_critical')");
+if ($sr) foreach ($sr->fetch_all(MYSQLI_ASSOC) as $row) {
+    if (preg_match('/(\d+(?:\.\d+)?)\s*(ชม|ชั่วโมง|นาที|วัน)/u', (string)$row['setting_value'], $m)) {
+        $min = (float)$m[1] * ($m[2] === 'นาที' ? 1 : ($m[2] === 'วัน' ? 1440 : 60));
+        $respMin[['sla_normal' => 'ปกติ', 'sla_urgent' => 'ด่วน', 'sla_critical' => 'ด่วนที่สุด'][$row['setting_key']]] = (int)$min;
+    }
+}
+
 // ── 1. KPI totals (year scope) ──────────────────────────────────────────────
 $kpi = ['total'=>0,'completed'=>0,'open'=>0,'cancelled'=>0,
-        'sla_pass'=>0,'sla_total'=>0,'mttr_hours'=>null,'avg_rating'=>null];
+        'sla_pass'=>0,'sla_total'=>0,'mttr_hours'=>null,'avg_rating'=>null,
+        'resp_avg_min'=>null,'resp_pass'=>0,'resp_total'=>0];
 
 $r = $conn->query("SELECT
     COUNT(*) AS total,
@@ -31,32 +48,36 @@ if ($r && $row = $r->fetch_assoc()) {
     $kpi['avg_rating'] = $row['avg_rating'] ? floatval($row['avg_rating']) : null;
 }
 
-// SLA compliance
+// SLA ปิดงาน: แจ้งจริง → ช่างซ่อมเสร็จ (ด่วนที่สุด 4 ชม. / ด่วน 24 ชม. / ปกติ 72 ชม.)
 $r = $conn->query("SELECT
     SUM(CASE
-        WHEN urgency IN ('ด่วนที่สุด','Critical') AND
-             TIMESTAMPDIFF(HOUR, date, COALESCE(completed_date, NOW())) <= 4  THEN 1
-        WHEN urgency IN ('ด่วน','Urgent') AND
-             TIMESTAMPDIFF(HOUR, date, COALESCE(completed_date, NOW())) <= 24 THEN 1
-        WHEN (urgency IS NULL OR urgency = 'ปกติ' OR urgency = 'Normal') AND
-             TIMESTAMPDIFF(HOUR, date, COALESCE(completed_date, NOW())) <= 72 THEN 1
-        ELSE 0 END) AS sla_pass,
+        WHEN urgency IN ('ด่วนที่สุด','Critical') THEN TIMESTAMPDIFF(MINUTE, c_at, f_at) <= 240
+        WHEN urgency IN ('ด่วน','Urgent')        THEN TIMESTAMPDIFF(MINUTE, c_at, f_at) <= 1440
+        ELSE TIMESTAMPDIFF(MINUTE, c_at, f_at) <= 4320 END) AS sla_pass,
     COUNT(*) AS sla_total
-    FROM it_logs WHERE status IN ('Completed') $cYear");
+    FROM $T WHERE status = 'Completed' AND f_at IS NOT NULL $cYear");
 if ($r && $row = $r->fetch_assoc()) {
     $kpi['sla_pass']  = intval($row['sla_pass']);
     $kpi['sla_total'] = intval($row['sla_total']);
 }
 
-// MTTR (hours) — year scope
-$r = $conn->query("SELECT ROUND(AVG(
-    IF(total_work_duration_seconds > 0,
-       total_work_duration_seconds,
-       TIMESTAMPDIFF(SECOND, date, completed_date))
-    )/3600, 1) AS avg_hours
-    FROM it_logs WHERE status='Completed' AND completed_date IS NOT NULL $cYear");
+// เวลาซ่อมเฉลี่ย (ชม.): แจ้งจริง → ช่างซ่อมเสร็จ
+$r = $conn->query("SELECT ROUND(AVG(TIMESTAMPDIFF(SECOND, c_at, f_at))/3600, 1) AS avg_hours
+    FROM $T WHERE status = 'Completed' AND f_at IS NOT NULL $cYear");
 if ($r && $row = $r->fetch_assoc()) {
-    $kpi['mttr_hours'] = $row['avg_hours'] ? floatval($row['avg_hours']) : null;
+    $kpi['mttr_hours'] = $row['avg_hours'] !== null ? floatval($row['avg_hours']) : null;
+}
+
+// เวลารับเรื่อง: แจ้ง → ช่างกดรับ (เฉพาะงานที่มีประวัติเวลาแจ้ง/รับจริง)
+$rn = (int)$respMin['ปกติ']; $ru = (int)$respMin['ด่วน']; $rc = (int)$respMin['ด่วนที่สุด'];
+$r = $conn->query("SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE, c_at, a_at))) AS avg_min,
+    SUM(TIMESTAMPDIFF(MINUTE, c_at, a_at) <= CASE WHEN urgency IN ('ด่วนที่สุด','Critical') THEN $rc WHEN urgency IN ('ด่วน','Urgent') THEN $ru ELSE $rn END) AS pass,
+    COUNT(*) AS total
+    FROM $T WHERE a_at IS NOT NULL $cYear");
+if ($r && $row = $r->fetch_assoc()) {
+    $kpi['resp_avg_min'] = $row['avg_min'] !== null ? (int)$row['avg_min'] : null;
+    $kpi['resp_pass'] = (int)$row['pass'];
+    $kpi['resp_total'] = (int)$row['total'];
 }
 
 // ── 2. Monthly trend (N months back) ────────────────────────────────────────
@@ -85,9 +106,8 @@ $by_department = $r ? $r->fetch_all(MYSQLI_ASSOC) : [];
 // ── 6. By technician (year scope, top 10) ───────────────────────────────────
 $r = $conn->query("SELECT servicedBy, COUNT(*) AS total,
     SUM(status='Completed') AS completed,
-    ROUND(AVG(IF(total_work_duration_seconds>0,total_work_duration_seconds,
-        TIMESTAMPDIFF(SECOND,date,completed_date)))/3600,1) AS avg_hours
-    FROM it_logs WHERE servicedBy IS NOT NULL AND servicedBy != '' $cYear
+    ROUND(AVG(IF(status='Completed', TIMESTAMPDIFF(SECOND, c_at, f_at), NULL))/3600,1) AS avg_hours
+    FROM $T WHERE servicedBy IS NOT NULL AND servicedBy != '' $cYear
     GROUP BY servicedBy ORDER BY total DESC LIMIT 10");
 $by_technician = $r ? $r->fetch_all(MYSQLI_ASSOC) : [];
 

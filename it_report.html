@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IT Ticket Report</title>
+<title>รายงาน IT</title>
     <link rel="icon" href="favicon.ico">
     <script src="js/favicon-version.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -157,7 +157,7 @@ html.dark #theme-toggle:hover{background:#1e293b}
 
 <!-- Top bar -->
 <div class="topbar">
-  <div class="topbar-title">IT Ticket Report <span>ผลการให้บริการ</span></div>
+  <div class="topbar-title">รายงาน IT <span>ผลการให้บริการ</span></div>
   <div class="topbar-filters">
     <select id="selCompany">
       <option value="all">ทุกบริษัท</option>
@@ -186,29 +186,34 @@ html.dark #theme-toggle:hover{background:#1e293b}
   <!-- KPI row -->
   <div class="kpi-row" id="kpiRow">
     <div class="kpi-card accent-blue">
-      <div class="kpi-label">Ticket ทั้งหมด</div>
+      <div class="kpi-label">งานทั้งหมด</div>
       <div class="kpi-value" id="kTotal">—</div>
       <div class="kpi-sub" id="kTotalSub">ปีที่เลือก</div>
     </div>
     <div class="kpi-card accent-green">
       <div class="kpi-label">อัตราเสร็จงาน</div>
       <div class="kpi-value" id="kCompleteRate">—</div>
-      <div class="kpi-sub" id="kCompleteSub">Completed</div>
+      <div class="kpi-sub" id="kCompleteSub">เสร็จแล้ว</div>
+    </div>
+    <div class="kpi-card accent-sky">
+      <div class="kpi-label">รับเรื่องเฉลี่ย</div>
+      <div class="kpi-value" id="kResp">—</div>
+      <div class="kpi-sub" id="kRespSub">ทันเวลา —</div>
     </div>
     <div class="kpi-card accent-yellow">
-      <div class="kpi-label">SLA Compliance</div>
+      <div class="kpi-label">ปิดงานทันเวลา</div>
       <div class="kpi-value" id="kSla">—</div>
       <div class="kpi-sub" id="kSlaSub">จากงานที่เสร็จ</div>
     </div>
     <div class="kpi-card accent-purple">
-      <div class="kpi-label">MTTR เฉลี่ย</div>
+      <div class="kpi-label">เวลาซ่อมเฉลี่ย</div>
       <div class="kpi-value" id="kMttr">—</div>
-      <div class="kpi-sub">ชั่วโมง/ticket</div>
+      <div class="kpi-sub">ชม. ตั้งแต่แจ้งจนช่างซ่อมเสร็จ</div>
     </div>
     <div class="kpi-card accent-red">
-      <div class="kpi-label">Ticket ค้างอยู่</div>
+      <div class="kpi-label">งานค้างอยู่</div>
       <div class="kpi-value" id="kOpen">—</div>
-      <div class="kpi-sub">Open / In Progress</div>
+      <div class="kpi-sub">ยังไม่ปิด</div>
     </div>
     <div class="kpi-card accent-sky">
       <div class="kpi-label">คะแนนพึงพอใจ</div>
@@ -220,11 +225,11 @@ html.dark #theme-toggle:hover{background:#1e293b}
   <!-- Monthly trend + Status donut -->
   <div class="chart-grid-wide">
     <div class="card">
-      <div class="card-title">แนวโน้มรายเดือน <small>Total / Completed / Open</small></div>
+      <div class="card-title">แนวโน้มรายเดือน <small>แจ้งเข้า / เสร็จ / ค้าง</small></div>
       <div class="chart-wrap tall"><canvas id="chartMonthly"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">สถานะ Ticket</div>
+      <div class="card-title">สถานะงาน</div>
       <div class="chart-wrap tall"><canvas id="chartStatus"></canvas></div>
     </div>
   </div>
@@ -297,8 +302,15 @@ const fmt = n => n == null ? '—' : Number(n).toLocaleString('th-TH');
 
 const STATUS_COLORS = {
   'Completed':'#059669','Open':'#3b82f6','In Progress':'#f59e0b',
-  'Pending':'#a855f7','Cancelled':'#94a3b8','On Hold':'#e2e8f0'
+  'Pending':'#a855f7','Cancelled':'#94a3b8','On Hold':'#e2e8f0',
+  'Received':'#3b82f6','Awaiting Confirmation':'#7c3aed','Unrepairable':'#64748b','Sent to Vendor':'#0f766e',
+  'PR Submitted':'#0284c7','PO Issued':'#0284c7','Waiting for User':'#dc2626','Temporary Fix':'#4f46e5'
 };
+// ชื่อภาษาไทยชุดเดียวกับหน้าแจ้งซ่อม/หน้าช่าง
+const STATUS_TH = { 'Pending':'รอรับเรื่อง','Received':'รับเรื่องแล้ว','In Progress':'กำลังซ่อม','Waiting for Parts':'รออะไหล่','Waiting Parts':'รออะไหล่','Parts Received':'ได้อะไหล่แล้ว','Waiting for User':'รอผู้แจ้งตอบ','Sent to Vendor':'ส่งซ่อมภายนอก','Temporary Fix':'แก้ชั่วคราว','PR Submitted':'ขอซื้อ (PR)','PO Issued':'สั่งซื้อ (PO)','Awaiting Confirmation':'รอผู้แจ้งยืนยัน','Completed':'เสร็จแล้ว','Unrepairable':'ซ่อมไม่ได้','Cancelled':'ยกเลิก' };
+const TYPE_TH = { 'Computer':'คอม / โน้ตบุ๊ก','Computer / Notebook':'คอม / โน้ตบุ๊ก','WiFi':'อินเทอร์เน็ต / WiFi','Other Hardware':'ฮาร์ดแวร์อื่น','CCTV':'กล้องวงจรปิด','CCTV Footage Request':'ขอดูภาพกล้อง','Printer':'ปริ้นเตอร์','Internet':'อินเทอร์เน็ต / WiFi','WiFi/Internet':'อินเทอร์เน็ต / WiFi','Email':'อีเมล / Outlook','Office':'โปรแกรม Office','Password Reset':'รหัสผ่าน / บัญชี','ERP':'โปรแกรม / ERP','Request New Account':'ขอใช้งาน / ติดตั้ง','Other':'อื่น ๆ' };
+const URG_TH = { 'Critical':'ด่วนที่สุด','Urgent':'ด่วน','Normal':'ปกติ' };
+const minTh = m => m == null ? '—' : m < 60 ? m + ' นาที' : m < 1440 ? (m / 60).toFixed(m < 600 ? 1 : 0) + ' ชม.' : (m / 1440).toFixed(1) + ' วัน';
 const URG_COLORS = {
   'ด่วนที่สุด':'#dc2626','Critical':'#dc2626',
   'ด่วน':'#f59e0b','Urgent':'#f59e0b',
@@ -351,11 +363,13 @@ function renderKPI(k, year){
   document.getElementById('kTotalSub').textContent   = `ปี ${year}`;
   const cr = pct(k.completed, k.total);
   document.getElementById('kCompleteRate').textContent = cr+'%';
-  document.getElementById('kCompleteSub').textContent  = `${fmt(k.completed)} tickets`;
+  document.getElementById('kCompleteSub').textContent  = `${fmt(k.completed)} งาน`;
   const sla = pct(k.sla_pass, k.sla_total);
   document.getElementById('kSla').textContent     = k.sla_total ? sla+'%' : '—';
   document.getElementById('kSlaSub').textContent  = k.sla_total ? `${k.sla_pass}/${k.sla_total}` : 'ไม่มีข้อมูล';
   document.getElementById('kMttr').textContent    = k.mttr_hours != null ? k.mttr_hours : '—';
+  document.getElementById('kResp').textContent    = minTh(k.resp_avg_min);
+  document.getElementById('kRespSub').textContent = k.resp_total ? `ทันเวลา ${pct(k.resp_pass, k.resp_total)}% (${k.resp_pass}/${k.resp_total})` : 'ยังไม่มีข้อมูล';
   document.getElementById('kOpen').textContent    = fmt(k.open);
   document.getElementById('kRating').textContent  = k.avg_rating != null ? k.avg_rating : '—';
 }
@@ -371,9 +385,9 @@ function renderMonthly(rows){
     data:{
       labels,
       datasets:[
-        {label:'Total',data:rows.map(r=>+r.total),backgroundColor:'#c7d2fe',order:2},
-        {label:'Completed',data:rows.map(r=>+r.completed),backgroundColor:'#059669',order:2},
-        {label:'Open',data:rows.map(r=>+r.open),type:'line',
+        {label:'แจ้งเข้า',data:rows.map(r=>+r.total),backgroundColor:'#c7d2fe',order:2},
+        {label:'เสร็จ',data:rows.map(r=>+r.completed),backgroundColor:'#059669',order:2},
+        {label:'ค้าง',data:rows.map(r=>+r.open),type:'line',
          borderColor:'#f59e0b',backgroundColor:'transparent',
          pointRadius:3,borderWidth:2,tension:.3,order:1}
       ]
@@ -389,7 +403,7 @@ function renderStatus(rows){
   charts.chartStatus = new Chart(document.getElementById('chartStatus'),{
     type:'doughnut',
     data:{
-      labels:rows.map(r=>r.status||'ไม่ระบุ'),
+      labels:rows.map(r=>STATUS_TH[r.status]||r.status||'ไม่ระบุ'),
       datasets:[{data:rows.map(r=>+r.count),
         backgroundColor:rows.map(r=>STATUS_COLORS[r.status]||'#94a3b8'),
         borderWidth:1,borderColor:'#fff'}]
@@ -400,11 +414,14 @@ function renderStatus(rows){
 }
 
 function renderType(rows){
+  const agg = {};
+  (rows || []).forEach(r => { const k = TYPE_TH[r.type] || r.type || 'ไม่ระบุ'; agg[k] = (agg[k] || 0) + +r.count; });
+  rows = Object.entries(agg).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
   destroyChart('chartType');
   charts.chartType = new Chart(document.getElementById('chartType'),{
     type:'bar',
     data:{
-      labels:rows.map(r=>r.type||'ไม่ระบุ'),
+      labels:rows.map(r=>TYPE_TH[r.type]||r.type||'ไม่ระบุ'),
       datasets:[{label:'จำนวน',data:rows.map(r=>+r.count),
         backgroundColor:PALETTE,borderRadius:4}]
     },
@@ -419,7 +436,7 @@ function renderDept(rows){
   if(!rows||!rows.length){wrap.innerHTML='<div class="empty-msg">ไม่มีข้อมูล</div>';return;}
   const max = Math.max(...rows.map(r=>+r.count));
   wrap.innerHTML = `<table class="data-table">
-    <thead><tr><th>#</th><th>แผนก</th><th style="text-align:right">Ticket</th><th style="min-width:80px"></th></tr></thead>
+    <thead><tr><th>#</th><th>แผนก</th><th style="text-align:right">งาน</th><th style="min-width:80px"></th></tr></thead>
     <tbody>${rows.map((r,i)=>`<tr>
       <td><span class="rank-num ${i<3?'rank-'+(i+1):''}">${i+1}</span></td>
       <td>${DocPrint.esc(r.department||'ไม่ระบุ')}</td>
@@ -451,7 +468,7 @@ function renderUrgency(rows){
   charts.chartUrgency = new Chart(document.getElementById('chartUrgency'),{
     type:'doughnut',
     data:{
-      labels:rows.map(r=>r.urgency||'ปกติ'),
+      labels:rows.map(r=>URG_TH[r.urgency]||r.urgency||'ปกติ'),
       datasets:[{data:rows.map(r=>+r.count),
         backgroundColor:rows.map(r=>URG_COLORS[r.urgency]||'#94a3b8'),
         borderWidth:1,borderColor:'#fff'}]
@@ -509,8 +526,8 @@ function printITReport(){
   const company = coSel.value === 'all' ? '' : coSel.value;
   const img = (id, h) => charts[id] ? `<img src="${charts[id].toBase64Image()}" style="width:100%;height:${h};object-fit:contain;display:block">` : '<div style="color:#94a3b8;padding:8px">ไม่มีข้อมูล</div>';
   const box = (title, body) => `<div class="dp-sec" style="margin-top:0"><div class="dp-sh">${title}</div><div style="padding:4px 8px">${body}</div></div>`;
-  const kpi = [['Ticket ทั้งหมด', fmt(k.total)], ['ปิดงานสำเร็จ', pct(k.completed, k.total) + '%'], ['ผ่าน SLA', k.sla_total ? pct(k.sla_pass, k.sla_total) + '%' : '—'],
-               ['เวลาซ่อมเฉลี่ย (ชม.)', k.mttr_hours ?? '—'], ['ค้างอยู่', fmt(k.open)], ['คะแนนความพึงพอใจ', k.avg_rating ?? '—']];
+  const kpi = [['งานทั้งหมด', fmt(k.total)], ['ปิดงานสำเร็จ', pct(k.completed, k.total) + '%'], ['รับเรื่องเฉลี่ย', minTh(k.resp_avg_min)], ['ปิดงานทันเวลา', k.sla_total ? pct(k.sla_pass, k.sla_total) + '%' : '—'],
+               ['เวลาซ่อมเฉลี่ย (ชม.)', k.mttr_hours ?? '—'], ['ค้างอยู่', fmt(k.open)], ['ความพึงพอใจ', k.avg_rating ?? '—']];
   const dept = (d.by_department || []).slice(0, 10);
   const ag = d.aging || {};
   const agB = [['d_0_1','≤ 1 วัน'],['d_2_3','2–3 วัน'],['d_4_7','4–7 วัน'],['d_8_14','8–14 วัน'],['d_15_30','15–30 วัน'],['d_30_plus','> 30 วัน']];
@@ -521,9 +538,9 @@ function printITReport(){
     company, formKey: 'it_report', classified: true,
     docNo: `ITR-${company || 'ALL'}-${year}`, dateText: 'ข้อมูล ณ ' + DocPrint.thDate(new Date(), true),
     title: { th: 'รายงานผลการให้บริการ IT', en: `IT Service Report · ปี ${+year + 543}` },
-    info: [['บริษัท', company || 'ทุกบริษัท'], ['ปี', +year + 543], ['ช่วงกราฟรายเดือน', document.getElementById('selMonths').selectedOptions[0].text], ['SLA ผ่าน', k.sla_total ? `${k.sla_pass}/${k.sla_total} งาน` : '-']],
+    info: [['บริษัท', company || 'ทุกบริษัท'], ['ปี', +year + 543], ['ช่วงกราฟรายเดือน', document.getElementById('selMonths').selectedOptions[0].text], ['ปิดงานทันเวลา', k.sla_total ? `${k.sla_pass}/${k.sla_total} งาน` : '-']],
     blocks: [
-      `<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px">${kpi.map(([l, v]) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:4px 7px"><div style="font-size:7pt;color:#64748b">${l}</div><div style="font-size:13pt;font-weight:800">${esc(v)}</div></div>`).join('')}</div>`,
+      `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:6px">${kpi.map(([l, v]) => `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:4px 7px"><div style="font-size:7pt;color:#64748b">${l}</div><div style="font-size:13pt;font-weight:800">${esc(v)}</div></div>`).join('')}</div>`,
       section('Ticket รายเดือน / MONTHLY', img('chartMonthly', '50mm'), { html: true }),
       grid(box('ตามสถานะ / BY STATUS', img('chartStatus', '42mm')), box('ตามความเร่งด่วน / BY URGENCY', img('chartUrgency', '42mm'))),
       grid(box('ตามประเภทงาน / BY TYPE', img('chartType', '48mm')), box('ตามช่าง / BY TECHNICIAN', img('chartTech', '48mm'))),
