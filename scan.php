@@ -1,6 +1,13 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// TISAX: ข้อมูลเครื่องและผู้ถือครองเป็นข้อมูลภายใน — สแกนแล้วต้องล็อกอินก่อน แล้วพากลับมาหน้านี้เอง
+if (empty($_SESSION['user_id'])) {
+    $back = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/scan.php?id=' . preg_replace('/[^A-Za-z0-9\-_]/', '', trim($_GET['id'] ?? ''));
+    header('Location: login.html?returnUrl=' . urlencode($back));
+    exit;
+}
+
 $equipmentId = preg_replace('/[^A-Za-z0-9\-_]/', '', trim($_GET['id'] ?? ''));
 
 $asset        = null;
@@ -42,7 +49,7 @@ if ($conn) {
         $stmt->bind_param(str_repeat('s', count($keys)), ...$keys);
         $stmt->execute();
         $s = [];
-        while ($r = $stmt->get_result()->fetch_assoc()) $s[$r['setting_key']] = $r['setting_value'];
+        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $r) $s[$r['setting_key']] = $r['setting_value'];
         if (!empty($s['asset_scan_url_primary'])) $primaryUrl  = rtrim($s['asset_scan_url_primary'], '/');
         if (!empty($s['asset_scan_url_backup']))  $backupUrl   = rtrim($s['asset_scan_url_backup'],  '/');
         $lineGroupUrl = $s['it_line_group_url'] ?? '';
@@ -98,8 +105,7 @@ $_dir      = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $selfBase  = $_scheme . '://' . $_host . $_dir;
 
 $ticketUrl = $selfBase . '/request.html?asset_id=' . urlencode($equipmentId);
-$loginUrl  = $selfBase . '/login.html?returnUrl=' . urlencode($_dir . '/scan.php?id=' . $equipmentId);
-<?php
+
 // Company display
 $companyKey = strtoupper(trim($asset['company'] ?? ''));
 $companyMap = [
@@ -422,9 +428,9 @@ body{
                 LINE IT
             </a>
             <?php endif; ?>
-            <a class="btn-sm btn-login" href="<?= h($loginUrl) ?>">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                IT Staff Login
+            <a class="btn-sm btn-login" href="<?= h($selfBase . '/index.html') ?>">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                หน้าแรก
             </a>
         </div>
     </div>
