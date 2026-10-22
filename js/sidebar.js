@@ -48,7 +48,7 @@
                 { id: 'kb_categories',   icon: 'fa-folder-tree',        label: 'หมวดหมู่ KB',           tab: 'kb_categories',    page: 'admin',             perm: 'kb.manage' },
                 { id: 'services',        icon: 'fa-link',               label: 'ลิงก์บริการหน้าแรก',     tab: 'services',         page: 'admin',             perm: 'employee.manage' },
                 { id: 'server_check',    icon: 'fa-door-closed',        label: 'ห้อง Server',           tab: 'server_check',     page: 'admin',             perm: 'admin.manage_permissions' },
-                { id: 'admin_logo',      icon: 'fa-image',              label: 'โลโก้บริษัท',           href: 'admin_logo.html', page: 'admin_logo',        perm: 'settings.notifications' },
+                { id: 'admin_logo',      icon: 'fa-building',           label: 'ข้อมูลบริษัท / โลโก้',   href: 'settings_system.html#company', page: 'admin_logo', perm: 'admin' },
                 { id: 'settings_notify', icon: 'fa-bell',               label: 'การแจ้งเตือน',          href: 'settings_notify.html', page: 'settings_notify', perm: 'settings.notifications' },
                 { id: 'settings_system', icon: 'fa-gear',               label: 'ตั้งค่าระบบ',            href: 'settings_system.html', page: 'settings_system', perm: 'admin' },
             ],

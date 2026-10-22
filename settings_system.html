@@ -3,409 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตั้งค่าระบบ IT Support - Powertech System</title>
+    <title>ตั้งค่าระบบ - PowertechCenter</title>
     <link rel="icon" href="favicon.ico">
     <script src="js/favicon-version.js"></script>
-    <link rel="manifest" href="app-manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <script src="js/pwa.js" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { fontFamily: { sans: ['Kanit', 'sans-serif'] } }
-        };
-    </script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .frm { width:100%; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:13.5px; font-family:inherit; outline:none; transition:border-color .15s; }
-        .frm:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
-        .lbl { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:5px; }
-        .section-title { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; padding:0 0 8px; border-bottom:1px solid #f1f5f9; margin-bottom:16px; }
-        /* ── Nav User Chip ── */
-        #nav-user-area{display:flex;align-items:center;flex-shrink:0;position:relative}
-        .nav-user-chip{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;position:relative;transition:background .15s,border-color .15s;user-select:none}
-        .nav-user-chip:hover{background:#f1f5f9;border-color:#cbd5e1}
-        html.dark .nav-user-chip{background:#1e293b;border-color:#334155}
-        html.dark .nav-user-chip:hover{background:#263348}
-        .nav-user-avatar{width:28px;height:28px;border-radius:50%;background:#2563eb;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.5px}
-        .nav-user-info{display:flex;flex-direction:column;line-height:1.2;min-width:0}
-        .nav-user-name{font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
-        html.dark .nav-user-name{color:#f1f5f9}
-        .nav-user-role{font-size:10px;color:#64748b;white-space:nowrap}
-        html.dark .nav-user-role{color:#94a3b8}
-        .nav-user-chevron{font-size:9px;color:#94a3b8;transition:transform .2s;flex-shrink:0}
-        .nav-user-chip.open .nav-user-chevron{transform:rotate(180deg)}
-        .nav-user-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:180px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.12);padding:6px;z-index:500;animation:navDropIn .15s ease}
-        .nav-user-dropdown.open{display:block}
-        html.dark .nav-user-dropdown{background:#1e293b;border-color:#334155;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-        @keyframes navDropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-        .nav-ud-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 12px;border:none;background:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#374151;cursor:pointer;font-family:inherit;transition:background .12s;text-align:left}
-        .nav-ud-item:hover{background:#f1f5f9}
-        html.dark .nav-ud-item{color:#cbd5e1}
-        html.dark .nav-ud-item:hover{background:#263348}
-        .nav-ud-logout{color:#dc2626!important;font-weight:600}
-        .nav-ud-logout:hover{background:#fef2f2!important}
-        html.dark .nav-ud-logout:hover{background:#450a0a!important}
-        .nav-ud-divider{height:1px;background:#f1f5f9;margin:4px 6px}
-        html.dark .nav-ud-divider{background:#334155}
-            .df-head, .df-row { display: grid; grid-template-columns: minmax(150px, 1.4fr) 1fr 70px 110px; gap: 8px; align-items: center; }
-        .df-head { font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
-        .df-row { padding: 6px 0; border-top: 1px solid #f1f5f9; }
-        .df-lbl { font-size: 12.5px; font-weight: 600; color: #374151; }
-        html.dark .df-row { border-color: #334155; } html.dark .df-lbl { color: #e2e8f0; }
-        @media (max-width: 640px) { .df-head { display: none; } .df-row { grid-template-columns: 1fr 1fr; } .df-lbl { grid-column: 1 / -1; } }
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
+    <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark','dark-theme');})()</script>
+<style>
+/* ════ ตั้งค่าระบบ — รวมข้อมูลบริษัท/โลโก้ (เดิม admin_logo.html) + ทีม IT + QR พัสดุ + เลขเอกสาร · สีจาก token design-system ════ */
+html, body { overflow-y:auto !important; height:auto !important; }
+body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; font-family:Kanit, Inter, sans-serif; }
+.st-top { position:sticky; top:0; z-index:100; background:var(--ptc-surface); border-bottom:1px solid var(--ptc-border); border-top:3px solid var(--ptc-primary); display:flex; align-items:center; gap:12px; padding:0 16px; height:56px; }
+.st-back { width:34px; height:34px; border-radius:8px; border:1px solid var(--ptc-border); display:flex; align-items:center; justify-content:center; color:var(--ptc-text-2); text-decoration:none; }
+.st-ic { width:34px; height:34px; border-radius:9px; background:#475569; color:#fff; display:flex; align-items:center; justify-content:center; }
+.st-top b { font-size:15px; display:block; } .st-top small { font-size:11.5px; color:var(--ptc-text-muted); }
+.layout { max-width:1280px; margin:0 auto; padding:18px 16px 100px; display:grid; grid-template-columns:220px minmax(0,1fr); gap:18px; align-items:start; }
+.side { position:sticky; top:74px; display:flex; flex-direction:column; gap:4px; }
+.side a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; color:var(--ptc-text-2); text-decoration:none; font-size:13.5px; font-weight:600; border:1px solid transparent; white-space:nowrap; }
+.side a i { width:18px; text-align:center; color:var(--ptc-text-muted); }
+.side a.on { background:var(--ptc-surface); border-color:var(--ptc-border); color:var(--ptc-text); box-shadow:inset 3px 0 0 var(--ptc-primary); }
+.side a.on i { color:var(--ptc-primary); }
+.side a .dot { margin-left:auto; width:7px; height:7px; border-radius:50%; background:#d97706; display:none; }
+.side a.dirty .dot { display:block; }
+.side small { font-size:11px; color:var(--ptc-text-muted); padding:10px 12px 0; line-height:1.5; }
+.card { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; }
+.h { font-size:17px; font-weight:800; margin:0; } .s { font-size:12.5px; color:var(--ptc-text-muted); margin:3px 0 0; }
+.anchor { scroll-margin-top:74px; margin-top:28px; } .anchor:first-child { margin-top:0; }
+.seg { display:inline-flex; border:1px solid var(--ptc-border); border-radius:9px; overflow:hidden; margin:14px 0; }
+.seg button { border:0; background:var(--ptc-surface); padding:9px 16px; font:inherit; font-size:13px; font-weight:700; color:var(--ptc-text-2); cursor:pointer; display:flex; gap:8px; align-items:center; }
+.seg button.on { background:var(--ptc-text); color:var(--ptc-surface); }
+.seg .sw { width:10px; height:10px; border-radius:3px; }
+.seg .dd { width:6px; height:6px; border-radius:50%; background:#d97706; }
+.co { display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:16px; align-items:start; }
+.sec { padding:16px 18px; border-bottom:1px solid var(--ptc-border); }
+.sec:last-child { border-bottom:0; }
+.sec h4 { font-size:12px; font-weight:800; color:var(--ptc-text-2); margin:0 0 12px; letter-spacing:.03em; }
+.row { display:flex; gap:14px; align-items:center; }
+.logo { width:96px; height:96px; border-radius:12px; border:1.5px dashed var(--ptc-border); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px; color:var(--ptc-text-muted); font-size:11px; background:var(--ptc-surface-2); flex-shrink:0; overflow:hidden; }
+.logo img { width:100%; height:100%; object-fit:contain; background:#fff; }
+.logo.sm { width:60px; height:60px; }
+.fg { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.f label { display:block; font-size:12px; font-weight:700; color:var(--ptc-text-2); margin-bottom:5px; }
+.f input, .f textarea { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:9px 11px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13.5px; }
+.f textarea { resize:vertical; }
+.f.full { grid-column:1 / -1; }
+.f .hint { font-size:11.5px; color:var(--ptc-text-muted); margin-top:4px; }
+.f .warn { font-size:11.5px; color:#d97706; margin-top:4px; font-weight:600; }
+.f .warn button { border:0; background:none; color:var(--ptc-primary); font:inherit; font-weight:700; cursor:pointer; padding:0; text-decoration:underline; }
+.btn { height:34px; padding:0 12px; border-radius:8px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-weight:700; font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.btn:hover { border-color:var(--ptc-primary); }
+.btn.pri { background:var(--ptc-primary); border-color:var(--ptc-primary); color:#fff; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.qr { width:64px; height:64px; border:1px solid var(--ptc-border); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:28px; color:#06c755; flex-shrink:0; overflow:hidden; background:#fff; }
+.qr img { width:100%; height:100%; object-fit:contain; }
+/* ตัวอย่างหัวใบพิมพ์ — กระดาษสีขาวเสมอ (ของจริงพิมพ์บนกระดาษ) */
+.pv { position:sticky; top:74px; }
+.paper { background:#fff; color:#0f172a; border-radius:6px; box-shadow:0 8px 24px rgba(15,23,42,.14); padding:22px 20px; font-size:9px; min-height:250px; }
+.paper .hd { display:flex; gap:10px; align-items:flex-start; border-bottom:2px solid var(--c); padding-bottom:8px; }
+.paper .lg { width:42px; height:42px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; background:var(--c); flex-shrink:0; overflow:hidden; }
+.paper .lg img { width:100%; height:100%; object-fit:contain; background:#fff; }
+.paper .co-n { min-width:0; } .paper .co-n b { font-size:12px; display:block; } .paper .co-n span { color:#475569; display:block; margin-top:1px; } .paper .co-n small { color:#94a3b8; font-size:8px; display:block; margin-top:2px; overflow-wrap:anywhere; }
+.paper .meta { margin-left:auto; text-align:right; flex-shrink:0; } .paper .meta .id { font-family:Consolas, monospace; font-weight:800; font-size:10.5px; color:var(--c); }
+.paper .ttl { margin-top:10px; background:var(--c); color:#fff; border-radius:4px; padding:6px 10px; font-weight:800; font-size:11px; display:flex; justify-content:space-between; }
+.paper .ln { height:8px; border-radius:2px; background:#f1f5f9; margin-top:7px; }
+.pv-cap { font-size:12px; color:var(--ptc-text-muted); text-align:center; margin-top:10px; }
+.apps { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin-top:12px; }
+.app { padding:14px; display:flex; gap:12px; align-items:center; }
+.app b { display:block; font-size:13.5px; } .app small { color:var(--ptc-text-muted); font-size:11.5px; }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.sticker { width:250px; border:1px solid #e2e8f0; border-radius:8px; padding:10px; display:flex; gap:10px; background:#fff; color:#0f172a; font-size:10px; }
+.sticker .q { width:62px; height:62px; flex-shrink:0; border:1px solid #e2e8f0; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:34px; color:#0f172a; }
+table.iso { width:100%; border-collapse:collapse; font-size:13px; }
+table.iso th { text-align:left; font-size:11.5px; color:var(--ptc-text-muted); padding:9px 10px; border-bottom:1px solid var(--ptc-border); }
+table.iso td { padding:6px 10px; border-bottom:1px solid var(--ptc-border); }
+table.iso tr:last-child td { border-bottom:0; }
+table.iso input { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:6px; padding:6px 8px; font:inherit; font-size:12.5px; background:var(--ptc-surface); color:var(--ptc-text); }
+.tag { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; background:#f0fdf4; color:#16a34a; white-space:nowrap; }
+.tag.no { background:var(--ptc-surface-2); color:var(--ptc-text-muted); }
+html.dark .tag { background:rgba(22,163,74,.14); }
+/* แถบบันทึก — ขึ้นเฉพาะตอนมีการแก้ไข */
+.save { position:fixed; left:50%; bottom:18px; transform:translate(-50%, 140%); background:#0f172a; color:#fff; border-radius:12px; padding:10px 12px 10px 18px; display:flex; gap:12px; align-items:center; box-shadow:0 10px 30px rgba(15,23,42,.3); font-size:13px; z-index:150; transition:transform .2s; max-width:calc(100vw - 24px); }
+.save.show { transform:translate(-50%, 0); }
+html.dark .save { background:#1e293b; border:1px solid #334155; }
+.save .btn.ghost { background:transparent; color:#cbd5e1; border-color:#334155; }
+.save span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media (max-width:1100px) { .co { grid-template-columns:minmax(0,1fr); } .pv { position:static; } }
+@media (max-width:900px) {
+  .layout { grid-template-columns:minmax(0,1fr); padding-top:12px; }
+  .side { position:sticky; top:56px; z-index:50; flex-direction:row; overflow-x:auto; background:var(--ptc-bg); padding:6px 0; scrollbar-width:none; }
+  .side small { display:none; }
+  .fg, .grid3, .apps { grid-template-columns:minmax(0,1fr); }
+  .anchor { scroll-margin-top:110px; }
+}
+@media (max-width:640px) { .st-top small { display:none; } }
 </style>
-    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans ptc-unified-v1" data-page="settings_system">
-    <div class="flex h-screen">
-        <!-- Shared Sidebar -->
-        <aside id="ptc-sidebar"></aside>
+<body data-page="settings_system">
+<header class="st-top">
+    <a href="admin.html" class="st-back" aria-label="กลับ"><i class="fa fa-arrow-left"></i></a>
+    <div class="st-ic"><i class="fa fa-gear"></i></div>
+    <div><b>ตั้งค่าระบบ</b><small>ข้อมูลบริษัท · ทีม IT · QR พัสดุ · เลขเอกสาร</small></div>
+    <div style="flex:1"></div>
+    <div id="nav-user-area"></div>
+</header>
+<div style="display:flex;min-height:calc(100vh - 56px)">
+<aside id="ptc-sidebar"></aside>
+<div style="flex:1;min-width:0">
+<div class="layout">
+    <nav class="side" id="side">
+        <a href="#company" data-g="company"><i class="fa fa-building"></i>ข้อมูลบริษัท<span class="dot"></span></a>
+        <a href="#icons" data-g="icons"><i class="fa fa-mobile-screen"></i>ไอคอนแอป<span class="dot"></span></a>
+        <a href="#it" data-g="it"><i class="fa fa-headset"></i>ทีม IT และเวลาตอบสนอง<span class="dot"></span></a>
+        <a href="#qr" data-g="qr"><i class="fa fa-qrcode"></i>QR สติกเกอร์พัสดุ<span class="dot"></span></a>
+        <a href="#iso" data-g="iso"><i class="fa fa-file-lines"></i>เลขที่เอกสาร (ISO)<span class="dot"></span></a>
+        <small>แก้แล้วแถบบันทึกจะขึ้นด้านล่าง · จุดสีส้ม = หมวดที่ยังไม่บันทึก</small>
+    </nav>
+    <main id="app"><div class="card" style="padding:30px;text-align:center;color:var(--ptc-text-muted)"><i class="fa fa-spinner fa-spin"></i> กำลังโหลด…</div></main>
+</div>
+</div>
+</div>
+<div class="save" id="savebar"><span id="save-msg"></span><button class="btn ghost" onclick="discard()">ยกเลิก</button><button class="btn pri" id="save-btn" onclick="saveAll()"><i class="fa fa-check"></i> บันทึก</button></div>
+<input type="file" id="logo-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none">
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white border-b border-slate-200 h-16 flex items-center px-6 justify-between">
-                <h1 class="text-xl font-bold text-slate-700">ตั้งค่าระบบ IT Support</h1>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <a href="admin.html" class="text-slate-500 hover:text-blue-600 text-sm"><i class="fas fa-arrow-left mr-2"></i>กลับ Admin</a>
-                    <div id="nav-user-area"></div>
-                </div>
-            </header>
+<script>
+const gid = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// สีและชื่อชุดเดียวกับหัวใบพิมพ์ (js/doc-print.js)
+const COS = { PTA: '#059669', PT4: '#dc2626', PTE: '#2563eb' };
+const GROUP_TH = { company: 'ข้อมูลบริษัท', it: 'ทีม IT', qr: 'QR พัสดุ', iso: 'เลขเอกสาร' };
+const CI_KEYS = ['name_th', 'name_en', 'address_th', 'address_en', 'phone', 'fax', 'tax_id'];
 
-            <main class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
-                <div class="max-w-2xl mx-auto space-y-6">
+let saved = null, cur = null, co = 'PTA', logoTs = Date.now();
 
-                    <!-- Contact Info Card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                                <i class="fas fa-headset text-purple-600"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-bold text-slate-800">ข้อมูลติดต่อทีม IT</h2>
-                                <p class="text-xs text-slate-400">แสดงในหน้าแจ้งซ่อม เพื่อให้ user ติดต่อได้</p>
-                            </div>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <label class="lbl"><i class="fas fa-phone text-purple-400 mr-1"></i>เบอร์โทรศัพท์ / ต่อภายใน</label>
-                                <input type="text" id="it-phone" class="frm" placeholder="เช่น ต่อภายใน 1234 หรือ 081-234-5678">
-                            </div>
-                            <div>
-                                <label class="lbl"><i class="fab fa-line text-green-500 mr-1"></i>LINE ID ทีม IT (แสดงเป็นข้อความ)</label>
-                                <input type="text" id="it-line" class="frm" placeholder="เช่น @PTCITSupport">
-                                <p class="text-xs text-slate-400 mt-1">ข้อความ LINE ID แสดงในหน้าแจ้งซ่อม — ไม่ใช่ URL</p>
-                            </div>
-                        </div>
-                    </div>
+async function api(params) { return (await fetch('api.php?' + new URLSearchParams(params), { cache: 'no-store' })).json(); }
+async function post(obj) {
+    const fd = new FormData(); Object.entries(obj).forEach(([k, v]) => fd.append(k, v ?? ''));
+    const j = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+    if (j.status !== 'success') throw new Error(j.message || 'บันทึกไม่สำเร็จ');
+    return j;
+}
+const clone = o => JSON.parse(JSON.stringify(o));
+const extractUrl = raw => { const t = String(raw || '').trim(); const m = t.match(/src=["']([^"']+)["']/i); return m ? m[1].trim() : t; };
 
-                    <!-- SLA Card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                                <i class="fas fa-clock text-green-600"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-bold text-slate-800">เวลาตอบสนอง (SLA)</h2>
-                                <p class="text-xs text-slate-400">แสดงในหน้าแจ้งซ่อม เป็นข้อมูลอ้างอิงสำหรับ user</p>
-                            </div>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div class="grid grid-cols-1 gap-4">
-                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
-                                    <span style="font-size:12.5px;font-weight:600;color:#374151;">ทั่วไป</span>
-                                    <input type="text" id="sla-normal" class="frm" placeholder="เช่น ภายใน 4 ชม. (วันทำการ)">
-                                </div>
-                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
-                                    <span style="font-size:12.5px;font-weight:600;color:#d97706;">เร่งด่วน</span>
-                                    <input type="text" id="sla-urgent" class="frm" placeholder="เช่น ภายใน 2 ชม.">
-                                </div>
-                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
-                                    <span style="font-size:12.5px;font-weight:600;color:#dc2626;">ด่วนที่สุด</span>
-                                    <input type="text" id="sla-critical" class="frm" placeholder="เช่น ภายใน 30 นาที">
-                                </div>
-                                <div style="display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;">
-                                    <span style="font-size:12.5px;font-weight:600;color:#64748b;">เวลาทำการ</span>
-                                    <input type="text" id="sla-hours" class="frm" placeholder="เช่น จ.–ศ. 08:00–17:30">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+async function load() {
+    const [ci, it, sc, df] = await Promise.all([
+        api({ action: 'get_company_info' }).catch(() => ({})),
+        api({ action: 'get_it_support_settings' }).catch(() => ({})),
+        api({ action: 'get_scan_settings' }).catch(() => ({})),
+        api({ action: 'get_doc_forms' }).catch(() => ({})),
+    ]);
+    const company = {};
+    Object.keys(COS).forEach(k => {
+        const d = (ci.data || {})[k] || {};
+        company[k] = Object.fromEntries(CI_KEYS.map(x => [x, d[x] || '']));
+        company[k].line_id = sc['line_id_' + k.toLowerCase()] || '';
+        company[k].line_qr = extractUrl(sc['line_qr_' + k.toLowerCase()] || '');
+    });
+    saved = {
+        company,
+        it: { phone: it.phone || '', line: it.line || '', sla_normal: it.sla_normal || '', sla_urgent: it.sla_urgent || '', sla_critical: it.sla_critical || '', sla_hours: it.sla_hours || '' },
+        qr: { primary_url: sc.primary_url || '', backup_url: sc.backup_url || '', line_group_url: sc.line_group_url || '' },
+        iso: df.forms || {},
+    };
+    cur = clone(saved);
+    render();
+    if (location.hash) setTimeout(() => document.querySelector(location.hash)?.scrollIntoView(), 50);
+}
 
-                    <!-- QR Scan URL Card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
-                                <i class="fas fa-qrcode text-sky-600"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-bold text-slate-800">ตั้งค่า QR Code พัสดุ</h2>
-                                <p class="text-xs text-slate-400">URL ที่ใช้สร้าง QR บนสติ๊กเกอร์พัสดุ — ใช้ 2 URL เผื่อเชื่อมต่อนอก WiFi</p>
-                            </div>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <label class="lbl"><i class="fas fa-wifi text-sky-500 mr-1"></i>URL หลัก (WiFi / ในสำนักงาน)</label>
-                                <input type="text" id="scan-url-primary" class="frm" placeholder="เช่น http://192.168.0.2/PowertechCenter">
-                                <p class="text-xs text-slate-400 mt-1">ใช้เมื่อเชื่อมต่อ WiFi ภายในองค์กร (เร็วกว่า)</p>
-                            </div>
-                            <div>
-                                <label class="lbl"><i class="fas fa-globe text-indigo-500 mr-1"></i>URL สำรอง (อินเทอร์เน็ต)</label>
-                                <input type="text" id="scan-url-backup" class="frm" placeholder="เช่น https://powertecha.myqnapcloud.com:8081/PowertechCenter">
-                                <p class="text-xs text-slate-400 mt-1">ใช้เมื่อสแกนจากนอกสำนักงาน — QR บนสติ๊กเกอร์จะมี 2 QR โดยอัตโนมัติ</p>
-                            </div>
-                            <div>
-                                <label class="lbl"><i class="fab fa-line text-green-500 mr-1"></i>LINE กลุ่ม IT Support (URL สำหรับปุ่มเปิด LINE)</label>
-                                <input type="text" id="scan-line-group" class="frm" placeholder="เช่น https://line.me/ti/g2/xxxxx">
-                                <p class="text-xs text-slate-400 mt-1">URL ที่ใช้เปิดกลุ่ม LINE โดยตรง — แสดงเป็นปุ่ม "เปิด LINE กลุ่ม IT" ในหน้าสแกน QR พัสดุ</p>
-                            </div>
-                            <div class="bg-sky-50 rounded-xl p-3 flex gap-2" style="font-size:12px;color:#0369a1">
-                                <i class="fas fa-circle-info mt-0.5 flex-shrink-0"></i>
-                                <span>ค่าเหล่านี้จะมีผลทันทีกับการพิมพ์ Label ใหม่ และหน้า <b>scan.php</b> ที่ผู้ใช้เปิดจาก QR</span>
-                            </div>
-                        </div>
-                    </div>
+// ── เช็กว่าหมวดไหนแก้ค้าง ──
+function dirtyGroups() {
+    const out = [];
+    if (JSON.stringify(cur.company) !== JSON.stringify(saved.company)) out.push('company');
+    ['it', 'qr', 'iso'].forEach(g => { if (JSON.stringify(cur[g]) !== JSON.stringify(saved[g])) out.push(g); });
+    return out;
+}
+const coDirty = k => JSON.stringify(cur.company[k]) !== JSON.stringify(saved.company[k]);
+function syncDirty() {
+    const d = dirtyGroups();
+    document.querySelectorAll('#side a').forEach(a => a.classList.toggle('dirty', d.includes(a.dataset.g)));
+    document.querySelectorAll('#seg button').forEach(b => { const dd = b.querySelector('.dd'); if (dd) dd.style.display = coDirty(b.dataset.co) ? '' : 'none'; });
+    const coList = Object.keys(COS).filter(coDirty);
+    gid('save-msg').innerHTML = `<i class="fa fa-circle-exclamation" style="color:#fbbf24"></i> ยังไม่บันทึก: ${d.map(g => g === 'company' ? 'ข้อมูลบริษัท ' + coList.join(', ') : GROUP_TH[g]).join(' · ')}`;
+    gid('savebar').classList.toggle('show', d.length > 0);
+}
+window.addEventListener('beforeunload', e => { if (cur && dirtyGroups().length) { e.preventDefault(); e.returnValue = ''; } });
 
-                    <!-- LINE QR Code Card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#dcfce7">
-                                <i class="fab fa-line" style="color:#16a34a;font-size:18px"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-bold text-slate-800">LINE QR Code ประจำบริษัท</h2>
-                                <p class="text-xs text-slate-400">URL ของรูป QR LINE แต่ละบริษัท — ใช้พิมพ์ลงสติ๊กเกอร์พัสดุและหน้าอื่นๆ</p>
-                            </div>
-                        </div>
-                        <div class="p-6 space-y-5">
-                            <!-- PTE -->
-                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
-                                <div class="flex items-center gap-2"><span style="background:#dbeafe;color:#1d4ed8;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PTE</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech Energy</span></div>
-                                <div>
-                                    <label class="lbl">URL รูป QR LINE</label>
-                                    <div class="flex gap-3 items-start">
-                                        <input type="text" id="line-qr-pte" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_BW.png?oat_content=qr" oninput="previewQR('pte',this.value)">
-                                        <div id="preview-pte" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
-                                            <i class="fab fa-line text-slate-300 text-xl"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
-                                    <input type="text" id="line-id-pte" class="frm" placeholder="เช่น @PTCITSupport-PTE">
-                                </div>
-                            </div>
-                            <!-- PT4 -->
-                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
-                                <div class="flex items-center gap-2"><span style="background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PT4</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech 2004</span></div>
-                                <div>
-                                    <label class="lbl">URL รูป QR LINE</label>
-                                    <div class="flex gap-3 items-start">
-                                        <input type="text" id="line-qr-pt4" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_GW.png?oat_content=qr" oninput="previewQR('pt4',this.value)">
-                                        <div id="preview-pt4" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
-                                            <i class="fab fa-line text-slate-300 text-xl"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
-                                    <input type="text" id="line-id-pt4" class="frm" placeholder="เช่น @PTCITSupport-PT4">
-                                </div>
-                            </div>
-                            <!-- PTA -->
-                            <div class="rounded-xl border border-slate-100 p-4 space-y-3" style="background:#f8fafc">
-                                <div class="flex items-center gap-2"><span style="background:#fce7f3;color:#9d174d;font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px">PTA</span><span style="font-size:12px;font-weight:600;color:#374151">PowerTech Assembly</span></div>
-                                <div>
-                                    <label class="lbl">URL รูป QR LINE</label>
-                                    <div class="flex gap-3 items-start">
-                                        <input type="text" id="line-qr-pta" class="frm" placeholder="https://qr-official.line.me/gs/M_xxx_GW.png?oat_content=qr" oninput="previewQR('pta',this.value)">
-                                        <div id="preview-pta" class="flex-shrink-0 w-14 h-14 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden" style="min-width:56px">
-                                            <i class="fab fa-line text-slate-300 text-xl"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="lbl">LINE ID (แสดงบน Label พัสดุ)</label>
-                                    <input type="text" id="line-id-pta" class="frm" placeholder="เช่น @PTCITSupport-PTA">
-                                </div>
-                            </div>
-                            <div class="bg-green-50 rounded-xl p-3 flex gap-2" style="font-size:12px;color:#15803d">
-                                <i class="fab fa-line mt-0.5 flex-shrink-0"></i>
-                                <span>วาง URL จาก LINE Official Account Manager → QR Code → คลิกขวา "Copy image address" แล้ว paste ที่นี่</span>
-                            </div>
-                        </div>
-                    </div>
+// ── วาดหน้า ──
+function render() {
+    const iso = Object.entries(cur.iso);
+    gid('app').innerHTML = `
+    <section id="company" class="anchor"><h2 class="h">ข้อมูลบริษัท</h2><p class="s">ชื่อ โลโก้ ที่อยู่ — ไปโผล่ที่หัวใบพิมพ์ทุกใบ สติกเกอร์พัสดุ และหน้าสแกน QR</p>
+        <div class="seg" id="seg">${Object.keys(COS).map(k => `<button data-co="${k}" class="${k === co ? 'on' : ''}" onclick="pickCo('${k}')"><span class="sw" style="background:${COS[k]}"></span>${k}<span class="dd" style="display:none"></span></button>`).join('')}</div>
+        <div class="co"><div class="card" id="co-form"></div><div class="pv"><div class="paper" id="paper"></div><div class="pv-cap">ตัวอย่างหัวใบพิมพ์ — ใบแจ้งซ่อม ใบติดตั้ง ใบตรวจห้อง ใช้หัวเดียวกันทุกใบ</div></div></div></section>
 
-                    <!-- เลขที่เอกสาร (ISO) -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                                <i class="fas fa-file-shield text-slate-600"></i>
-                            </div>
-                            <div>
-                                <h2 class="font-bold text-slate-800">เลขที่เอกสาร (ISO)</h2>
-                                <p class="text-xs text-slate-400">แสดงที่มุมขวาบนและท้ายใบของใบพิมพ์ทุกใบ — ช่องที่เว้นว่าง ใบนั้นจะไม่แสดงกล่องเลขฟอร์ม</p>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="df-head"><span>เอกสาร</span><span>เลขที่ฟอร์ม</span><span>Rev.</span><span>วันที่มีผล</span></div>
-                            <div id="doc-forms-rows"><div class="text-xs text-slate-400">กำลังโหลด…</div></div>
-                        </div>
-                    </div>
+    <section id="icons" class="anchor"><h2 class="h">ไอคอนแอป</h2><p class="s">ไอคอนตอนติดตั้งเป็นแอปบนมือถือ/คอม และไอคอนบนแท็บเบราว์เซอร์ · เปลี่ยนแล้วมีผลทันที (ไม่ต้องกดบันทึก)</p>
+        <div class="apps">${[['APP', 'แอปหลัก', 'Powertech Center', 'powertech_app_icon.png'], ['DIR', 'Contact List', 'แอปสมุดรายชื่อ', 'directory_app_icon.png']].map(a => `<div class="card app">
+            <div class="logo sm"><img src="uploads/logos/${a[3]}?t=${logoTs}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('i'),{className:'fa fa-image'}))"></div>
+            <div><b>${a[1]}</b><small>${a[2]}</small><br><button class="btn" style="margin-top:6px;height:28px" onclick="pickLogo('${a[0]}')"><i class="fa fa-upload"></i> เปลี่ยนไอคอน</button></div></div>`).join('')}</div>
+        <p class="s" style="margin-top:8px"><i class="fa fa-circle-info"></i> คนที่ติดตั้งแอปไว้แล้ว อาจยังเห็นไอคอนเก่า — ลบแอปแล้วติดตั้งใหม่จากเบราว์เซอร์</p></section>
 
-                    <!-- Save Button -->
-                    <div class="flex justify-end">
-                        <button onclick="saveSettings()" id="save-btn" class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
-                            <i class="fas fa-save"></i> บันทึกการตั้งค่า
-                        </button>
-                    </div>
+    <section id="it" class="anchor"><h2 class="h">ทีม IT และเวลาตอบสนอง</h2><p class="s">โชว์ในหน้าแจ้งซ่อม · เวลารับเรื่องใช้นับถอยหลังบนบอร์ดช่าง แจ้งเตือนงานเกินเวลา และรายงาน IT</p>
+        <div class="card" style="margin-top:12px"><div class="sec"><div class="fg">
+            ${fld('it', 'phone', 'เบอร์โทร / ต่อภายใน', 'เช่น 1234 หรือ 08x-xxx-xxxx')}${fld('it', 'line', 'LINE ทีม IT', 'เช่น @ptcitsupport')}
+            ${fld('it', 'sla_hours', 'เวลาทำการ', 'เช่น จ.–ศ. 08:00–17:30')}<div></div></div></div>
+            <div class="sec"><h4>ต้องรับเรื่องภายใน</h4><div class="grid3">
+                ${fld('it', 'sla_normal', 'ทั่วไป', 'ภายใน 4 ชม.')}${fld('it', 'sla_urgent', '<span style="color:#d97706">ด่วน</span>', 'ภายใน 2 ชม.')}${fld('it', 'sla_critical', '<span style="color:#dc2626">ด่วนที่สุด</span>', 'ภายใน 30 นาที')}</div>
+                <p class="s" style="margin-top:8px" id="sla-read"></p></div></div></section>
 
-                </div>
-            </main>
-        </div>
-    </div>
+    <section id="qr" class="anchor"><h2 class="h">QR สติกเกอร์พัสดุ</h2><p class="s">ลิงก์ที่ฝังใน QR บนสติกเกอร์ — สแกนแล้วต้องล็อกอินก่อนเห็นข้อมูลเครื่อง · มีผลกับสติกเกอร์ที่พิมพ์ใหม่</p>
+        <div class="card" style="margin-top:12px"><div class="sec" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+            <div class="fg" style="flex:1;min-width:260px;grid-template-columns:minmax(0,1fr)">
+                ${fld('qr', 'primary_url', '<i class="fa fa-wifi"></i> ลิงก์หลัก (ในบริษัท)', 'http://192.168.0.2/PowertechCenter', 'ใช้ตอนต่อ WiFi บริษัท (เร็วกว่า)')}
+                ${fld('qr', 'backup_url', '<i class="fa fa-globe"></i> ลิงก์สำรอง (นอกบริษัท)', 'https://….myqnapcloud.com:8081/PowertechCenter', 'ใช้ตอนอยู่นอกบริษัท')}
+                ${fld('qr', 'line_group_url', '<i class="fab fa-line"></i> ลิงก์กลุ่ม LINE IT', 'https://line.me/ti/g2/…', 'ปุ่ม "เปิด LINE กลุ่ม IT" ในหน้าสแกน')}</div>
+            <div><p class="s" style="margin:0 0 6px">ตัวอย่างสติกเกอร์</p><div class="sticker"><div class="q"><i class="fa fa-qrcode"></i></div><div><b style="font-size:11px">PTA-NB-0142</b><br>Dell Latitude 5440<br><span style="color:#64748b">สแกนเพื่อดูข้อมูล / แจ้งซ่อม</span><br><span style="color:#94a3b8;font-size:8.5px;overflow-wrap:anywhere" id="stk-url"></span></div></div></div></div></div></section>
 
-    <script>
-        // เลขที่เอกสาร: แถวละ 1 ใบ (key มาจาก includes/doc_forms.php)
-        let docForms = {};
-        async function loadDocForms() {
-            const box = document.getElementById('doc-forms-rows');
-            try {
-                const j = await (await fetch('api.php?action=get_doc_forms')).json();
-                docForms = j.forms || {};
-                const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
-                box.innerHTML = Object.entries(docForms).map(([k, f]) => `<div class="df-row">
-                    <span class="df-lbl">${esc(f.label)}</span>
-                    <input class="frm" data-k="${k}" data-f="no" value="${esc(f.no)}" placeholder="เช่น IT-FM-001" maxlength="40">
-                    <input class="frm" data-k="${k}" data-f="rev" value="${esc(f.rev)}" placeholder="01" maxlength="10">
-                    <input class="frm" data-k="${k}" data-f="eff" value="${esc(f.eff)}" placeholder="01/01/2569" maxlength="20">
-                </div>`).join('');
-            } catch (e) { box.innerHTML = '<div class="text-xs text-red-500">โหลดไม่สำเร็จ</div>'; }
+    <section id="iso" class="anchor"><h2 class="h">เลขที่เอกสาร (ISO)</h2><p class="s">ขึ้นกล่องเลขฟอร์มมุมขวาบนของใบพิมพ์ · ใบไหนเว้นเลขฟอร์มว่าง จะไม่โชว์กล่อง</p>
+        <div class="card" style="margin-top:12px;overflow-x:auto"><table class="iso"><thead><tr><th>เอกสาร</th><th style="width:160px">เลขฟอร์ม</th><th style="width:76px">Rev.</th><th style="width:124px">วันที่มีผล</th><th style="width:70px"></th></tr></thead><tbody>
+            ${iso.length ? iso.map(([k, f]) => `<tr><td>${esc(f.label)}</td><td><input data-iso="${esc(k)}" data-f="no" value="${esc(f.no)}" placeholder="เช่น IT-FM-001" maxlength="40"></td>
+                <td><input data-iso="${esc(k)}" data-f="rev" value="${esc(f.rev)}" placeholder="01" maxlength="10"></td><td><input data-iso="${esc(k)}" data-f="eff" value="${esc(f.eff)}" placeholder="01/01/2569" maxlength="20"></td>
+                <td><span class="tag ${f.no ? '' : 'no'}" id="iso-tag-${esc(k)}">${f.no ? 'โชว์' : 'ไม่โชว์'}</span></td></tr>`).join('') : '<tr><td colspan="5" style="color:var(--ptc-text-muted)">โหลดรายการไม่สำเร็จ</td></tr>'}
+        </tbody></table></div></section>`;
+    // ช่องกรอกทุกช่องอัปเดต state แล้วเช็กค้าง
+    document.querySelectorAll('[data-g][data-k]').forEach(el => el.addEventListener('input', () => { cur[el.dataset.g][el.dataset.k] = el.value; syncDirty(); if (el.dataset.g === 'it') slaRead(); if (el.dataset.g === 'qr') stk(); }));
+    document.querySelectorAll('[data-iso]').forEach(el => el.addEventListener('input', () => {
+        const f = cur.iso[el.dataset.iso]; f[el.dataset.f] = el.value;
+        const tg = gid('iso-tag-' + el.dataset.iso); tg.className = 'tag ' + (f.no.trim() ? '' : 'no'); tg.textContent = f.no.trim() ? 'โชว์' : 'ไม่โชว์';
+        syncDirty();
+    }));
+    renderCo(); slaRead(); stk(); syncDirty(); spy();
+}
+function fld(g, k, label, ph, hint) {
+    return `<div class="f"><label>${label}</label><input data-g="${g}" data-k="${k}" value="${esc(cur[g][k])}" placeholder="${esc(ph || '')}">${hint ? `<div class="hint">${hint}</div>` : ''}</div>`;
+}
+// อ่านตัวเลขจากข้อความ SLA แบบเดียวกับบอร์ดช่าง — ให้เห็นว่าระบบเข้าใจถูก
+function slaRead() {
+    const p = t => { const m = String(t).match(/(\d+(?:\.\d+)?)\s*(ชม|ชั่วโมง|นาที|วัน)/); return m ? +m[1] * (m[2] === 'นาที' ? 1 : m[2] === 'วัน' ? 1440 : 60) : null; };
+    const show = n => n == null ? '<b style="color:#dc2626">อ่านไม่ออก</b>' : n < 60 ? n + ' นาที' : (n / 60) + ' ชม.';
+    gid('sla-read').innerHTML = `<i class="fa fa-circle-info"></i> ระบบอ่านได้ว่า ทั่วไป ${show(p(cur.it.sla_normal))} · ด่วน ${show(p(cur.it.sla_urgent))} · ด่วนที่สุด ${show(p(cur.it.sla_critical))} — ใส่เป็นตัวเลขตามด้วย "นาที" "ชม." หรือ "วัน"`;
+}
+function stk() { const el = gid('stk-url'); if (el) el.textContent = (cur.qr.primary_url || '…') + '/scan.php?id=PTA-NB-0142'; }
+
+function pickCo(k) { co = k; document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.co === k)); renderCo(); }
+function renderCo() {
+    const c = cur.company[co];
+    const typo = /industrail/i.test(c.address_en);
+    gid('co-form').innerHTML = `
+        <div class="sec"><h4>โลโก้ ${co}</h4><div class="row"><div class="logo" id="co-logo"></div>
+            <div><button class="btn" onclick="pickLogo('${co}')"><i class="fa fa-upload"></i> เปลี่ยนโลโก้</button><p class="s" style="margin-top:6px">PNG พื้นใส · แนะนำ 512×512 · ไม่เกิน 10 MB · อัปโหลดแล้วมีผลทันที</p></div></div></div>
+        <div class="sec"><h4>ชื่อและที่อยู่</h4><div class="fg">
+            ${cf('name_th', 'ชื่อบริษัท (ไทย)')}${cf('name_en', 'ชื่อบริษัท (อังกฤษ) — ตัวใหญ่บนหัวใบพิมพ์')}
+            ${cf('address_th', 'ที่อยู่ (ไทย)', 1)}
+            <div class="f full"><label>ที่อยู่ (อังกฤษ) — บรรทัดเล็กบนหัวใบพิมพ์</label><textarea data-ci="address_en" rows="2">${esc(c.address_en)}</textarea>
+                ${typo ? `<div class="warn"><i class="fa fa-triangle-exclamation"></i> สะกดผิดหรือเปล่า: "Industrail" → "Industrial" <button type="button" onclick="fixTypo()">แก้ให้</button></div>` : ''}</div>
+            ${cf('phone', 'โทรศัพท์')}${cf('fax', 'แฟกซ์')}${cf('tax_id', 'เลขประจำตัวผู้เสียภาษี')}</div></div>
+        <div class="sec"><h4>LINE ประจำบริษัท <span style="font-weight:500;color:var(--ptc-text-muted)">— พิมพ์บนสติกเกอร์พัสดุ</span></h4><div class="row" style="align-items:flex-start">
+            <div class="qr" id="co-qr"></div><div class="fg" style="flex:1">${cf('line_id', 'LINE ID', 0, '@xxxxxxx')}${cf('line_qr', 'ลิงก์รูป QR', 0, 'https://qr-official.line.me/…', 'LINE OA Manager → QR Code → คลิกขวา "Copy image address"')}</div></div></div>`;
+    gid('co-form').querySelectorAll('[data-ci]').forEach(el => el.addEventListener('input', () => {
+        let v = el.value;
+        if (el.dataset.ci === 'line_qr') { const u = extractUrl(v); if (u !== v.trim()) { v = u; el.value = u; } qrPv(); }
+        cur.company[co][el.dataset.ci] = v; syncDirty(); paper();
+        if (el.dataset.ci === 'address_en' && /industrail/i.test(v) !== !!el.parentNode.querySelector('.warn')) { renderCo(); const t = gid('co-form').querySelector('[data-ci="address_en"]'); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+    }));
+    logoPv(); qrPv(); paper();
+}
+function cf(k, label, full, ph, hint) {
+    return `<div class="f ${full ? 'full' : ''}"><label>${label}</label><input data-ci="${k}" value="${esc(cur.company[co][k])}" placeholder="${esc(ph || '')}">${hint ? `<div class="hint">${hint}</div>` : ''}</div>`;
+}
+function fixTypo() { cur.company[co].address_en = cur.company[co].address_en.replace(/Industrail/g, 'Industrial').replace(/industrail/g, 'industrial'); renderCo(); syncDirty(); }
+function logoPv() {
+    const box = gid('co-logo'); if (!box) return;
+    const img = new Image();
+    img.onload = () => { box.innerHTML = ''; box.appendChild(img); paper(); };
+    img.onerror = () => { box.innerHTML = '<i class="fa fa-image" style="font-size:22px"></i>ยังไม่มีโลโก้'; };
+    img.src = `uploads/logos/${co.toLowerCase()}_logo.png?t=${logoTs}`;
+}
+function qrPv() {
+    const box = gid('co-qr'); if (!box) return;
+    const u = cur.company[co].line_qr;
+    if (!u) { box.innerHTML = '<i class="fab fa-line"></i>'; return; }
+    const img = new Image(); img.onload = () => { box.innerHTML = ''; box.appendChild(img); }; img.onerror = () => { box.innerHTML = '<i class="fab fa-line" style="color:#dc2626" title="เปิดรูปไม่ได้"></i>'; }; img.src = u;
+}
+function paper() {
+    const c = cur.company[co], img = gid('co-logo')?.querySelector('img');
+    gid('paper').innerHTML = `<div style="--c:${COS[co]}"><div class="hd"><div class="lg">${img ? `<img src="${img.src}" alt="">` : co}</div>
+        <div class="co-n"><b>${esc(c.name_en || c.name_th || '—')}</b><span>${c.name_en ? esc(c.name_th) + ' · ' : ''}ฝ่ายเทคโนโลยีสารสนเทศ</span><small>${esc(c.address_en || 'ยังไม่ได้ใส่ที่อยู่ภาษาอังกฤษ')}${c.phone ? ' · ' + esc(c.phone) : ''}</small></div>
+        <div class="meta"><div style="color:#64748b">เลขที่</div><div class="id">${co}-MIS261022-05</div>${cur.iso.repair?.no ? `<div style="color:#64748b">${esc(cur.iso.repair.no)}${cur.iso.repair.rev ? ' Rev.' + esc(cur.iso.repair.rev) : ''}</div>` : ''}</div></div>
+        <div class="ttl"><span>ใบแจ้งซ่อม</span><span style="font-weight:600">Service Request</span></div>
+        <div class="ln" style="width:90%"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:82%"></div><div class="ln" style="width:55%"></div><div class="ln" style="width:75%"></div></div>`;
+}
+
+// ── อัปโหลดโลโก้/ไอคอน (มีผลทันที ไม่รวมกับแถบบันทึก) ──
+let logoTarget = null;
+function pickLogo(code) { logoTarget = code; gid('logo-file').value = ''; gid('logo-file').click(); }
+gid('logo-file').addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f || !logoTarget) return;
+    if (f.size > 10 * 1024 * 1024) return ptcAlert('warning', 'ไฟล์ใหญ่เกินไป', 'ใช้ไฟล์ไม่เกิน 10 MB');
+    const label = { APP: 'ไอคอนแอปหลัก', DIR: 'ไอคอน Contact List' }[logoTarget] || 'โลโก้ ' + logoTarget;
+    const prev = URL.createObjectURL(f);
+    const { isConfirmed } = await ptcSwal().fire({ title: `เปลี่ยน${label}?`, html: `<img src="${prev}" style="max-width:160px;max-height:160px;border:1px solid #e2e8f0;border-radius:10px;background:#fff">`, showCancelButton: true, confirmButtonText: 'อัปโหลด', cancelButtonText: 'ยกเลิก' });
+    if (!isConfirmed) return;
+    try {
+        const fd = new FormData(); fd.append('action', 'upload_company_logo'); fd.append('company', logoTarget); fd.append('logoFile', f);
+        const j = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+        if (j.status !== 'success') throw new Error(j.message || 'อัปโหลดไม่สำเร็จ');
+        logoTs = Date.now();
+        ptcToast('success', `อัปเดต${label}แล้ว`, j.needs_repin ? 'คนที่ติดตั้งแอปไว้ อาจต้องติดตั้งใหม่ถึงจะเห็นไอคอนใหม่' : '');
+        const keep = clone(cur); render(); cur = keep; renderCo(); syncDirty();
+    } catch (err) { ptcAlert('error', 'อัปโหลดไม่สำเร็จ', err.message); }
+});
+
+// ── บันทึก / ยกเลิก ──
+async function saveAll() {
+    const d = dirtyGroups(); if (!d.length) return;
+    const btn = gid('save-btn'); btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> กำลังบันทึก';
+    try {
+        const jobs = [];
+        Object.keys(COS).filter(coDirty).forEach(k => jobs.push(post({ action: 'save_company_info', company: k, ...Object.fromEntries(CI_KEYS.map(x => [x, cur.company[k][x].trim()])) })));
+        if (d.includes('it')) jobs.push(post({ action: 'save_it_support_settings', ...Object.fromEntries(Object.entries(cur.it).map(([k, v]) => [k, v.trim()])) }));
+        // ลิงก์ QR + LINE ประจำบริษัทอยู่ในชุดเดียวกัน (save_scan_settings เขียนทับทุกช่อง) — ส่งครบเสมอ
+        if (d.includes('qr') || Object.keys(COS).some(k => cur.company[k].line_id !== saved.company[k].line_id || cur.company[k].line_qr !== saved.company[k].line_qr)) {
+            const p = { action: 'save_scan_settings', primary_url: cur.qr.primary_url.trim(), backup_url: cur.qr.backup_url.trim(), line_group_url: cur.qr.line_group_url.trim() };
+            Object.keys(COS).forEach(k => { p['line_id_' + k.toLowerCase()] = cur.company[k].line_id.trim(); p['line_qr_' + k.toLowerCase()] = cur.company[k].line_qr.trim(); });
+            jobs.push(post(p));
         }
-        function collectDocForms() {
-            const out = {};
-            document.querySelectorAll('#doc-forms-rows input[data-k]').forEach(i => { (out[i.dataset.k] ||= {})[i.dataset.f] = i.value.trim(); });
-            return out;
-        }
+        if (d.includes('iso')) jobs.push(post({ action: 'save_doc_forms', forms: JSON.stringify(Object.fromEntries(Object.entries(cur.iso).map(([k, f]) => [k, { no: f.no.trim(), rev: f.rev.trim(), eff: f.eff.trim() }]))) }));
+        await Promise.all(jobs);
+        saved = clone(cur); syncDirty();
+        ptcToast('success', 'บันทึกแล้ว', d.map(g => GROUP_TH[g]).join(' · '));
+    } catch (e) { ptcAlert('error', 'บันทึกไม่สำเร็จ', e.message); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-check"></i> บันทึก'; }
+}
+function discard() { cur = clone(saved); render(); }
 
-        async function loadSettings() {
-            try {
-                const [r1, r2] = await Promise.all([
-                    fetch('api.php?action=get_it_support_settings'),
-                    fetch('api.php?action=get_scan_settings'),
-                ]);
-                const d1 = await r1.json();
-                const d2 = await r2.json();
-                if (d1.status === 'success') {
-                    document.getElementById('it-phone').value     = d1.phone        || '';
-                    document.getElementById('it-line').value      = d1.line         || '';
-                    document.getElementById('sla-normal').value   = d1.sla_normal   || '';
-                    document.getElementById('sla-urgent').value   = d1.sla_urgent   || '';
-                    document.getElementById('sla-critical').value = d1.sla_critical || '';
-                    document.getElementById('sla-hours').value    = d1.sla_hours    || '';
-                }
-                if (d2.status === 'success') {
-                    document.getElementById('scan-url-primary').value = d2.primary_url    || '';
-                    document.getElementById('scan-url-backup').value  = d2.backup_url     || '';
-                    document.getElementById('scan-line-group').value  = d2.line_group_url || '';
-                    document.getElementById('line-qr-pte').value      = extractUrl(d2.line_qr_pte || '');
-                    document.getElementById('line-qr-pt4').value      = extractUrl(d2.line_qr_pt4 || '');
-                    document.getElementById('line-qr-pta').value      = extractUrl(d2.line_qr_pta || '');
-                    document.getElementById('line-id-pte').value      = d2.line_id_pte    || '';
-                    document.getElementById('line-id-pt4').value      = d2.line_id_pt4    || '';
-                    document.getElementById('line-id-pta').value      = d2.line_id_pta    || '';
-                    previewQR('pte', d2.line_qr_pte || '');
-                    previewQR('pt4', d2.line_qr_pt4 || '');
-                    previewQR('pta', d2.line_qr_pta || '');
-                }
-            } catch(e) { console.error(e); }
-        }
+// ไฮไลต์เมนูซ้ายตามหมวดที่เลื่อนอยู่
+function spy() {
+    const secs = [...document.querySelectorAll('main section')];
+    const on = () => {
+        let id = secs[0]?.id;
+        secs.forEach(s => { if (s.getBoundingClientRect().top < 140) id = s.id; });
+        if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) id = secs[secs.length - 1]?.id;
+        document.querySelectorAll('#side a').forEach(a => a.classList.toggle('on', a.dataset.g === id));
+    };
+    window.removeEventListener('scroll', window._spy || (() => {})); window._spy = on;
+    window.addEventListener('scroll', on, { passive: true }); on();
+}
 
-        async function saveSettings() {
-            const btn = document.getElementById('save-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
-            try {
-                const fd1 = new FormData();
-                fd1.append('action', 'save_it_support_settings');
-                fd1.append('phone',        document.getElementById('it-phone').value.trim());
-                fd1.append('line',         document.getElementById('it-line').value.trim());
-                fd1.append('sla_normal',   document.getElementById('sla-normal').value.trim());
-                fd1.append('sla_urgent',   document.getElementById('sla-urgent').value.trim());
-                fd1.append('sla_critical', document.getElementById('sla-critical').value.trim());
-                fd1.append('sla_hours',    document.getElementById('sla-hours').value.trim());
-
-                const fd2 = new FormData();
-                fd2.append('action', 'save_scan_settings');
-                fd2.append('primary_url',    document.getElementById('scan-url-primary').value.trim());
-                fd2.append('backup_url',     document.getElementById('scan-url-backup').value.trim());
-                fd2.append('line_group_url', document.getElementById('scan-line-group').value.trim());
-                fd2.append('line_qr_pte',    document.getElementById('line-qr-pte').value.trim());
-                fd2.append('line_qr_pt4',    document.getElementById('line-qr-pt4').value.trim());
-                fd2.append('line_qr_pta',    document.getElementById('line-qr-pta').value.trim());
-                fd2.append('line_id_pte',    document.getElementById('line-id-pte').value.trim());
-                fd2.append('line_id_pt4',    document.getElementById('line-id-pt4').value.trim());
-                fd2.append('line_id_pta',    document.getElementById('line-id-pta').value.trim());
-
-                const fd3 = new FormData();
-                fd3.append('action', 'save_doc_forms');
-                fd3.append('forms', JSON.stringify(collectDocForms()));
-
-                const [r1, r2, r3] = await Promise.all([
-                    fetch('api.php', { method: 'POST', body: fd1 }),
-                    fetch('api.php', { method: 'POST', body: fd2 }),
-                    fetch('api.php', { method: 'POST', body: fd3 }),
-                ]);
-                const [d1, d2, d3] = await Promise.all([r1.json(), r2.json(), r3.json()]);
-                if (d1.status === 'success' && d2.status === 'success' && d3.status === 'success') {
-                    Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', timer: 1500, showConfirmButton: false });
-                } else {
-                    throw new Error(d1.message || d2.message || d3.message || 'เกิดข้อผิดพลาด');
-                }
-            } catch(e) {
-                Swal.fire({ icon: 'error', title: 'Error', text: e.message });
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> บันทึกการตั้งค่า';
-            }
-        }
-
-        function extractUrl(raw) {
-            const trimmed = raw.trim();
-            // ถ้าเป็น <img src="..."> หรือ <img src='...'> ให้ดึงแค่ URL
-            const m = trimmed.match(/src=["']([^"']+)["']/i);
-            if (m) return m[1].trim();
-            return trimmed;
-        }
-
-        function previewQR(company, raw) {
-            const box = document.getElementById('preview-' + company);
-            const input = document.getElementById('line-qr-' + company);
-            if (!box) return;
-            const url = extractUrl(raw);
-            // ถ้า input มี tag HTML อยู่ ให้ clean ให้เลย
-            if (input && url !== raw.trim()) input.value = url;
-            if (!url) {
-                box.innerHTML = '<i class="fab fa-line text-slate-300 text-xl"></i>';
-                return;
-            }
-            const img = document.createElement('img');
-            img.style.cssText = 'width:100%;height:100%;object-fit:contain';
-            img.onerror = () => { box.innerHTML = '<i class="fab fa-line text-red-300 text-xl"></i>'; };
-            img.src = url;
-            box.innerHTML = '';
-            box.appendChild(img);
-        }
-
-        loadSettings();
-        loadDocForms();
-    </script>
-<script src="js/sidebar.js?v=20261021d"></script>
+(async function init() {
+    let S = {};
+    try { S = await (await fetch('api.php?action=check_session', { cache: 'no-store' })).json(); } catch (_) {}
+    if (!S.loggedin) { location.href = 'login.html'; return; }
+    const perms = S.effective_permissions || [];
+    if (!(S.role === 'admin' || perms.includes('*') || perms.includes('admin.access_admin'))) { gid('app').innerHTML = '<div class="card" style="padding:30px;text-align:center"><i class="fa fa-lock"></i> หน้านี้สำหรับผู้ดูแลระบบ</div>'; return; }
+    const h = location.hash.replace('#', '');
+    if (['PTA', 'PT4', 'PTE'].includes(new URLSearchParams(location.search).get('co'))) co = new URLSearchParams(location.search).get('co');
+    await load();
+    if (h) document.getElementById(h)?.scrollIntoView();
+})();
+</script>
+<script src="js/sidebar.js?v=20261023"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>
