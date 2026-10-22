@@ -29,15 +29,7 @@ try {
             if ($res = $conn->query($sql)) $repair_count = (int)$res->fetch_assoc()['count'];
         }
 
-        // Booking (การจองรออนุมัติ)
-        $sql = "SELECT COUNT(*) as count FROM bookings b JOIN meeting_rooms r ON b.room_id = r.id WHERE b.status = 'Pending'";
-        if ($role !== 'admin' && !empty($sessionCompany)) {
-            $sql .= " AND r.company = ?";
-            $stmt = $conn->prepare($sql);
-            if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $booking_count = (int)$row['count']; }
-        } else {
-            if ($res = $conn->query($sql)) $booking_count = (int)$res->fetch_assoc()['count'];
-        }
+        // จองห้อง/รถ ย้ายไปใช้ roomsys / carsys แล้ว — booking คงไว้เป็น 0 ให้หน้าที่ยังอ่านค่านี้ไม่พัง
 
         // Stock low (items ที่ balance <= min_stock)
         $stockSql = "SELECT COUNT(*) AS count FROM (
