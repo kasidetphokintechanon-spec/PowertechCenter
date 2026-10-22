@@ -8,7 +8,6 @@
 
     var PAGES = [
         { label: 'Dashboard หน้าแรก',      icon: 'fa-home',             color: '#2563eb', href: 'index.html' },
-        { label: 'Dashboard งานซ่อม',      icon: 'fa-tachometer-alt',   color: '#6366f1', href: 'dashboard.html' },
         { label: 'บันทึกงาน IT',           icon: 'fa-book',             color: '#10b981', href: 'log.html' },
         { label: 'IT Report',               icon: 'fa-chart-bar',        color: '#f59e0b', href: 'it_report.html' },
         { label: 'แจ้ง Ticket ซ่อม',      icon: 'fa-wrench',           color: '#ef4444', href: 'job_ticket.html' },

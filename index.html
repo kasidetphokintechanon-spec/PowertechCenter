@@ -66,13 +66,19 @@
 <div class="ptc-app-shell">
     <aside class="ptc-sidebar" id="sidebar-left">
         <nav class="sidebar-nav-stack">
+            <!-- จัดใหม่ 23 ต.ค. 2026: ของพนักงานทุกคน (ของฉัน / ช่วยเหลือ) · เจ้าหน้าที่เห็นทางเข้าระบบจัดการช่องเดียว (เลิก IT Portal ที่ซ้ำ) -->
             <a href="index.html" class="snav snav-item active" aria-current="page"><span class="snav-icon" style="--icon-bg:#dbeafe;--icon-color:#2563eb"><i class="fa fa-home"></i></span><span class="snav-label">หน้าแรก</span></a>
-            <a href="docs/help.html" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#d1fae5;--icon-color:#059669"><i class="fa fa-circle-question"></i></span><span class="snav-label">ศูนย์ช่วยเหลือ</span></a>
+            <p class="index-sidebar-mgmt-label">ของฉัน</p>
+            <a href="request.html?tab=tickets" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#fee2e2;--icon-color:#dc2626"><i class="fa fa-screwdriver-wrench"></i></span><span class="snav-label">งานแจ้งซ่อมของฉัน</span><span class="snav-badge hidden" id="myTicketBadge"></span></a>
+            <a href="my_borrow_history.html" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#ffedd5;--icon-color:#ea580c"><i class="fa fa-rotate"></i></span><span class="snav-label">ประวัติยืมอุปกรณ์</span></a>
+            <a href="my_stock_history.html" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#dbeafe;--icon-color:#2563eb"><i class="fa fa-boxes-stacked"></i></span><span class="snav-label">ประวัติเบิกของ</span></a>
+            <p class="index-sidebar-mgmt-label">ช่วยเหลือ</p>
+            <a href="kb.html" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#e0f2fe;--icon-color:#0284c7"><i class="fa fa-book-open"></i></span><span class="snav-label">คลังความรู้ / วิธีแก้ปัญหา</span></a>
+            <a href="docs/help.html" class="snav snav-item"><span class="snav-icon" style="--icon-bg:#d1fae5;--icon-color:#059669"><i class="fa fa-circle-question"></i></span><span class="snav-label">คู่มือการใช้งาน</span></a>
 
             <hr class="snav-divider index-sidebar-mgmt-divider hidden" id="sidebarMgmtDivider">
-            <p class="index-sidebar-mgmt-label hidden" id="sidebarMgmtLabel">จัดการ / งานพิเศษ</p>
-            <a href="it_home.html" class="snav snav-item index-sidebar-mgmt-link hidden" id="itHomeLink"><span class="snav-icon" style="--icon-bg:#ede9fe;--icon-color:#7c3aed"><i class="fa fa-th-large"></i></span><span class="snav-label">IT Portal</span></a>
-            <a href="admin.html" class="snav snav-item index-sidebar-mgmt-link index-admin-link-hidden" id="adminLink"><span class="snav-icon" style="--icon-bg:#fee2e2;--icon-color:#dc2626"><i class="fa fa-shield-alt"></i></span><span class="snav-label">Admin</span></a>
+            <p class="index-sidebar-mgmt-label hidden" id="sidebarMgmtLabel">สำหรับเจ้าหน้าที่</p>
+            <a href="admin.html" class="snav snav-item index-sidebar-mgmt-link index-admin-link-hidden" id="adminLink"><span class="snav-icon" style="--icon-bg:#ede9fe;--icon-color:#7c3aed"><i class="fa fa-gauge-high"></i></span><span class="snav-label">ระบบจัดการ</span><span class="snav-badge hidden" id="mgmtBadge"></span></a>
         </nav>
     </aside>
     <main class="ptc-main-scroll" id="main-scroll">
@@ -116,6 +122,6 @@
 </div>
 
 
-<script src="js/index-home.js?v=20261022e" defer></script>
+<script src="js/index-home.js?v=20261023" defer></script>
 </body>
 </html>

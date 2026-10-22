@@ -122,11 +122,6 @@
         isAdmin   = role === 'admin';
         isItStaff = String(session.primary_department || '').toUpperCase() === 'IT';
 
-        const itHomeLink = $('itHomeLink');
-        if (itHomeLink && (isAdmin || isItStaff)) {
-            itHomeLink.classList.remove('hidden');
-        }
-
         const adminLink = $('adminLink');
         const perms = session.effective_permissions || [];
         const hasAll = isAdmin || perms.includes('*');
@@ -145,8 +140,8 @@
             { perm: 'admin.manage_permissions', icon: 'fa-user-shield',        label: 'จัดการสิทธิ์',        href: 'admin.html?tab=permissions',  ib: '#fee2e2', ic: '#dc2626' },
         ];
 
-        if (hasAll) {
-            // Admin: show original Admin link
+        // เข้าระบบจัดการได้ (admin หรือมีสิทธิ์ admin.access_admin) → ทางเข้าช่องเดียว เมนูข้างในจัดหมวดให้แล้ว
+        if (hasAll || session.can_access_admin) {
             if (adminLink) {
                 adminLink.classList.remove('index-admin-link-hidden');
                 adminLink.classList.remove('hidden');
@@ -169,10 +164,16 @@
                         nav.appendChild(a);
                     });
                 }
-            } else if (session.can_access_admin && adminLink) {
-                adminLink.classList.remove('index-admin-link-hidden');
-                adminLink.classList.remove('hidden');
             }
+        }
+
+        // ตัวเลขบน "ระบบจัดการ" = งานค้างรวม (งานซ่อมรอรับ + ยืมรออนุมัติ + ของใกล้หมด)
+        if (adminLink && !adminLink.classList.contains('index-admin-link-hidden')) {
+            fetch('api.php?action=get_pending_counts', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => {
+                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_low || 0);
+                const b = $('mgmtBadge');
+                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ของใกล้หมด ' + (d.stock_low || 0); }
+            }).catch(() => {});
         }
 
         const hasMgmt = Array.from(document.querySelectorAll('.index-sidebar-mgmt-link')).some((el) => {
@@ -235,6 +236,10 @@
 
         const uidMe = String(session.user_id || '');
         const mineReq = ticketList.filter((l) => String(l.requester_id ?? '') === uidMe);
+        // ตัวเลขบนเมนู "งานแจ้งซ่อมของฉัน" = งานที่ยังไม่ปิด
+        const myOpen = mineReq.filter((l) => !['Completed', 'Cancelled', 'Unrepairable'].includes(l.status)).length;
+        const myBadge = $('myTicketBadge');
+        if (myBadge) { myBadge.textContent = myOpen; myBadge.classList.toggle('hidden', !myOpen); }
         const kp = [
             ['รอรับเรื่อง', mineReq.filter((l) => l.status === 'Pending').length, 'var(--ptc-orange, #ea580c)'],
             ['กำลังดำเนินการ', mineReq.filter((l) => l.status !== 'Pending' && l.status !== 'Awaiting Confirmation').length, 'var(--ptc-primary, #2563eb)'],

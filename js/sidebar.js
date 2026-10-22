@@ -11,58 +11,80 @@
     // source of truth: includes/permissions_registry.php → getAdminMenuPermissionMap()
     // จัดกลุ่มตาม "งานที่ทำ" (2026-10-21) — ของใช้ทุกวันอยู่บน, ตั้งค่าพับเก็บไว้ · เมนูเดิมสำรองที่ js/sidebar_BK.js
     // foldable: true = กดหัวกลุ่มเพื่อพับ/กาง (ค่าเริ่มต้นพับ, กางเองถ้าหน้าปัจจุบันอยู่ในกลุ่มนั้น)
+    // จัดใหม่ 23 ต.ค. 2026: เมนูเหลือเฉพาะ "งานที่ทำทุกวัน" + ตัวเลขงานค้าง · ของตั้งค่า 14 รายการย้ายไปหน้า settings.html
+    // also: หน้าอื่นที่ให้เมนูนี้ติดไฮไลต์ ('page' หรือ 'admin:tab')
     const GROUPS = [
         {
-            key: 'overview', label: 'ภาพรวม', color: '#2563eb',
+            key: 'home', label: '', color: '#2563eb',
             items: [
-                { id: 'dashboard',       icon: 'fa-gauge-high',         label: 'Dashboard',            tab: 'dashboard',        page: 'admin',             perm: null },
+                { id: 'dashboard',       icon: 'fa-gauge-high',         label: 'ภาพรวม',               tab: 'dashboard',        page: 'admin',             perm: null },
             ],
         },
         {
-            key: 'daily', label: 'งานประจำวัน', color: '#8b5cf6',
+            key: 'it', label: 'งาน IT', color: '#2563eb',
             items: [
                 { id: 'log',             icon: 'fa-clipboard-list',     label: 'งานช่าง IT',            href: 'log.html',        page: 'log',               perm: 'it_log.access' },
-                { id: 'task_center',     icon: 'fa-list-check',         label: 'Task Center',          href: 'task_center.html',page: 'task_center',       perm: null },
-                { id: 'loan',            icon: 'fa-rotate',             label: 'ยืม-คืนอุปกรณ์',        href: 'borrow_management.html', page: 'loan', perm: 'loan.manage' },
-                { id: 'stock',           icon: 'fa-boxes-stacked',      label: 'สต็อก & เบิกของ',       href: 'stock_management.html', page: 'stock_management', perm: 'stock.manage' },
-                { id: 'server_check_daily', icon: 'fa-server',          label: 'ตรวจห้อง Server',       href: 'server_check.html', page: 'server_check',    perm: 'it_log.access' },
-                { id: 'setup',           icon: 'fa-laptop-medical',     label: 'ติดตั้ง / คืนเครื่อง',   href: 'setup_list.html', page: 'setup_list',        perm: 'it_log.access' },
+                { id: 'server_check_daily', icon: 'fa-server',          label: 'ตรวจห้อง Server',       href: 'server_check.html', page: 'server_check',    perm: 'it_log.access', badgeTone: 'warn', badgeTitle: 'ห้องที่ยังไม่ตรวจวันนี้' },
+                { id: 'setup',           icon: 'fa-laptop-medical',     label: 'ติดตั้ง / คืนเครื่อง',   href: 'setup_list.html', page: 'setup_list',        perm: 'it_log.access', also: ['setup', 'setup_offboard'] },
+                { id: 'it_links',        icon: 'fa-network-wired',      label: 'อุปกรณ์เครือข่าย',       href: 'it_links.html',   page: 'it_links',          perm: 'it_log.access' },
+                { id: 'it_report',       icon: 'fa-chart-pie',          label: 'รายงาน IT',            href: 'it_report.html',  page: 'it_report',         perm: 'it_report.access' },
             ],
         },
         {
-            key: 'master', label: 'ข้อมูลหลัก', color: '#10b981',
+            key: 'office', label: 'งานธุรการ', color: '#8b5cf6',
             items: [
-                { id: 'employees',       icon: 'fa-users',              label: 'พนักงาน',              tab: 'employees',        page: 'admin',             perm: 'employee.manage' },
+                { id: 'stock',           icon: 'fa-boxes-stacked',      label: 'สต็อก & เบิกของ',       href: 'stock_management.html', page: 'stock_management', perm: 'stock.manage', badgeTitle: 'สต็อกใกล้หมด' },
+                { id: 'loan',            icon: 'fa-rotate',             label: 'ยืม-คืนอุปกรณ์',        href: 'borrow_management.html', page: 'loan', perm: 'loan.manage', badgeTitle: 'รออนุมัติยืม' },
+                { id: 'task_center',     icon: 'fa-list-check',         label: 'Task Center',          href: 'task_center.html',page: 'task_center',       perm: null },
+            ],
+        },
+        {
+            key: 'data', label: 'ข้อมูล', color: '#10b981',
+            items: [
                 { id: 'it_assets',       icon: 'fa-laptop',             label: 'ทะเบียนพัสดุ',          tab: 'it_assets',        page: 'admin',             perm: 'asset.manage' },
-                { id: 'kb_articles',     icon: 'fa-book-open',          label: 'คลังความรู้ (KB)',       tab: 'kb_articles',      page: 'admin',             perm: 'kb.manage' },
+                { id: 'employees',       icon: 'fa-users',              label: 'พนักงาน',              tab: 'employees',        page: 'admin',             perm: 'employee.manage' },
+                { id: 'kb_articles',     icon: 'fa-book-open',          label: 'คลังความรู้',           tab: 'kb_articles',      page: 'admin',             perm: 'kb.manage', badgeTone: 'muted', badgeTitle: 'บทความร่างรอตรวจ' },
                 { id: 'directory',       icon: 'fa-address-book',       label: 'Contact List',         href: 'directory.html',  page: 'directory',         perm: null },
             ],
         },
         {
-            key: 'settings', label: 'ตั้งค่า', color: '#f59e0b', foldable: true,
+            key: 'settings', label: '', color: '#2563eb', divider: true,
             items: [
-                { id: 'job_positions',   icon: 'fa-briefcase',          label: 'ตำแหน่งงาน',            tab: 'job_positions',    page: 'admin',             perm: 'employee.manage' },
-                { id: 'departments',     icon: 'fa-building',           label: 'แผนก',                 tab: 'departments',      page: 'admin',             perm: 'employee.manage' },
-                { id: 'asset_categories',icon: 'fa-tags',               label: 'หมวดหมู่อุปกรณ์',        tab: 'asset_categories', page: 'admin',             perm: 'asset.manage' },
-                { id: 'locations',       icon: 'fa-location-dot',       label: 'สถานที่',               tab: 'locations',        page: 'admin',             perm: 'asset.manage' },
-                { id: 'kb_categories',   icon: 'fa-folder-tree',        label: 'หมวดหมู่ KB',           tab: 'kb_categories',    page: 'admin',             perm: 'kb.manage' },
-                { id: 'services',        icon: 'fa-link',               label: 'ลิงก์บริการหน้าแรก',     tab: 'services',         page: 'admin',             perm: 'employee.manage' },
-                { id: 'server_check',    icon: 'fa-door-closed',        label: 'ห้อง Server',           tab: 'server_check',     page: 'admin',             perm: 'admin.manage_permissions' },
-                { id: 'admin_logo',      icon: 'fa-building',           label: 'ข้อมูลบริษัท / โลโก้',   href: 'settings_system.html#company', page: 'admin_logo', perm: 'admin' },
-                { id: 'settings_notify', icon: 'fa-bell',               label: 'การแจ้งเตือน',          href: 'settings_notify.html', page: 'settings_notify', perm: 'settings.notifications' },
-                { id: 'settings_system', icon: 'fa-gear',               label: 'ตั้งค่าระบบ',            href: 'settings_system.html', page: 'settings_system', perm: 'admin' },
-            ],
-        },
-        {
-            key: 'admin', label: 'ดูแลระบบ', color: '#64748b',
-            items: [
-                { id: 'permissions',     icon: 'fa-user-shield',        label: 'สิทธิ์ผู้ใช้',            tab: 'permissions',      page: 'admin',             perm: 'admin.manage_permissions' },
-                { id: 'audit_log',       icon: 'fa-clock-rotate-left',  label: 'ประวัติการใช้งาน',       href: 'audit_log.html',  page: 'audit_log',         perm: 'audit.view' },
-                { id: 'backup',          icon: 'fa-floppy-disk',        label: 'สำรองข้อมูล',           special: 'backup',                                  perm: 'admin.manage_permissions' },
-                { id: 'update_db',       icon: 'fa-database',           label: 'อัปเดตฐานข้อมูล',        href: 'update_db.php',   page: 'update_db',         perm: 'admin.manage_permissions', newTab: true },
+                { id: 'settings',        icon: 'fa-gear',               label: 'ตั้งค่า',               href: 'settings.html',   page: 'settings',          perm: 'any-setting', badgeTone: 'muted', badgeTitle: 'ผู้ใช้รอกำหนดสิทธิ์',
+                  also: ['settings_system', 'settings_notify', 'audit_log', 'admin_logo', 'admin:job_positions', 'admin:departments', 'admin:asset_categories', 'admin:locations', 'admin:kb_categories', 'admin:services', 'admin:server_check', 'admin:permissions'] },
             ],
         },
     ];
+
+    // รายการตั้งค่าทั้งหมด — หน้า settings.html ใช้ชุดนี้วาดการ์ด และช่องค้นหาในเมนูใช้ค้น (แหล่งเดียว ไม่ต้องแก้ 2 ที่)
+    const SETTINGS = [
+        { group: 'องค์กร', gIcon: 'fa-building', gColor: '#2563eb', items: [
+            { id: 'company',          icon: 'fa-building',        title: 'บริษัทและโลโก้',           desc: 'ชื่อ ที่อยู่ โลโก้ หัวใบพิมพ์ LINE ประจำบริษัท', href: 'settings_system.html#company', perm: 'admin', keys: 'logo โลโก้ ที่อยู่ เลขภาษี company' },
+            { id: 'departments',      icon: 'fa-sitemap',         title: 'แผนก',                    desc: 'รายชื่อแผนกของแต่ละบริษัท',                tab: 'departments',      perm: 'employee.manage', keys: 'department ฝ่าย' },
+            { id: 'job_positions',    icon: 'fa-briefcase',       title: 'ตำแหน่งงาน',               desc: 'ตำแหน่งและระดับในผังองค์กร',               tab: 'job_positions',    perm: 'employee.manage', keys: 'position org chart ผังองค์กร' },
+        ] },
+        { group: 'อุปกรณ์และสถานที่', gIcon: 'fa-laptop', gColor: '#0f766e', items: [
+            { id: 'asset_categories', icon: 'fa-tags',            title: 'หมวดหมู่อุปกรณ์',          desc: 'ใช้ในทะเบียนพัสดุ อายุการใช้งาน',          tab: 'asset_categories', perm: 'asset.manage', keys: 'category ประเภท' },
+            { id: 'locations',        icon: 'fa-location-dot',    title: 'สถานที่',                  desc: 'อาคาร ชั้น ห้อง',                          tab: 'locations',        perm: 'asset.manage', keys: 'location อาคาร ห้อง' },
+            { id: 'server_rooms',     icon: 'fa-door-closed',     title: 'ห้อง Server และรายการตรวจ', desc: 'ห้อง หัวข้อตรวจ จำนวนกล้อง',              tab: 'server_check',     perm: 'admin.manage_permissions', keys: 'server cctv กล้อง dvr' },
+            { id: 'asset_qr',         icon: 'fa-qrcode',          title: 'QR สติกเกอร์พัสดุ',         desc: 'ลิงก์ที่ฝังใน QR บนสติกเกอร์',             href: 'settings_system.html#qr', perm: 'admin', keys: 'sticker สติกเกอร์ scan' },
+        ] },
+        { group: 'บริการและการแจ้งเตือน', gIcon: 'fa-headset', gColor: '#7c3aed', items: [
+            { id: 'notify',           icon: 'fa-bell',            title: 'ศูนย์แจ้งเตือน',            desc: 'LINE / Telegram เรื่องไหนเข้ากลุ่มไหน',     href: 'settings_notify.html', perm: 'settings.notifications', keys: 'line telegram แจ้งเตือน token กุญแจ' },
+            { id: 'it_sla',           icon: 'fa-stopwatch',       title: 'ทีม IT และเวลาตอบสนอง',     desc: 'เบอร์ติดต่อ เวลารับเรื่อง (SLA)',           href: 'settings_system.html#it', perm: 'admin', keys: 'sla เบอร์ ติดต่อ เวลาทำการ' },
+            { id: 'services',         icon: 'fa-link',            title: 'ลิงก์บริการหน้าแรก',        desc: 'ปุ่มทางลัดบนหน้าแรกของพนักงาน',           tab: 'services',         perm: 'employee.manage', keys: 'service link หน้าแรก ทางลัด' },
+            { id: 'kb_categories',    icon: 'fa-folder-tree',     title: 'หมวดหมู่คลังความรู้',       desc: 'จัดกลุ่มบทความ KB',                        tab: 'kb_categories',    perm: 'kb.manage', keys: 'kb category คู่มือ' },
+            { id: 'iso',              icon: 'fa-file-lines',      title: 'เลขที่เอกสาร (ISO)',        desc: 'เลขฟอร์มบนหัวใบพิมพ์',                    href: 'settings_system.html#iso', perm: 'admin', keys: 'iso form เลขฟอร์ม เอกสาร' },
+            { id: 'app_icons',        icon: 'fa-mobile-screen',   title: 'ไอคอนแอป',                 desc: 'ไอคอนตอนติดตั้งเป็นแอป และบนแท็บ',        href: 'settings_system.html#icons', perm: 'admin', keys: 'icon pwa favicon' },
+        ] },
+        { group: 'ความปลอดภัยและดูแลระบบ', gIcon: 'fa-shield-halved', gColor: '#475569', items: [
+            { id: 'permissions',      icon: 'fa-user-shield',     title: 'สิทธิ์ผู้ใช้',               desc: 'ใครเข้าหน้าไหนได้ บทบาท',                  tab: 'permissions',      perm: 'admin.manage_permissions', keys: 'role permission บทบาท สิทธิ์', badge: 'users_no_role' },
+            { id: 'audit_log',        icon: 'fa-clock-rotate-left', title: 'ประวัติการใช้งาน',        desc: 'ใครทำอะไร เมื่อไหร่ (TISAX)',               href: 'audit_log.html',  perm: 'audit.view', keys: 'audit log ประวัติ tisax' },
+            { id: 'backup',           icon: 'fa-floppy-disk',     title: 'สำรองข้อมูล',               desc: 'ดาวน์โหลดฐานข้อมูลและไฟล์เป็น .zip',       special: 'backup',        perm: 'admin.manage_permissions', keys: 'backup สำรอง' },
+            { id: 'update_db',        icon: 'fa-database',        title: 'อัปเดตฐานข้อมูล',           desc: 'เครื่องมือขั้นสูง — ใช้ตอนอัปเดตระบบเท่านั้น', href: 'update_db.php', perm: 'admin.manage_permissions', danger: true, newTab: true, keys: 'database migrate' },
+        ] },
+    ];
+    window.PTC_SETTINGS = SETTINGS;
 
     // ── CSS (ใช้ CSS variables รองรับ dark mode) ─────────────────────────
     const CSS = `
@@ -268,6 +290,22 @@
     background: var(--ptc-border, #f1f5f9);
     margin: 6px 12px;
 }
+.psb-search { display:flex; align-items:center; gap:8px; margin:8px 10px 4px; padding:0 9px; height:34px; border:1px solid var(--ptc-border, #e2e8f0); border-radius:8px; color:var(--ptc-text-muted, #94a3b8); font-size:12px; background:var(--ptc-surface, #fff); }
+.psb-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--ptc-text, #0f172a); font:inherit; font-size:12.5px; }
+.psb-search input::-webkit-search-cancel-button { display:none; }
+.psb-search kbd { font-family:inherit; font-size:10px; border:1px solid var(--ptc-border, #e2e8f0); border-radius:4px; padding:0 4px; white-space:nowrap; }
+.psb-search:focus-within { border-color:var(--ptc-primary, #2563eb); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+#ptc-sidebar.collapsed .psb-search { display:none; }
+@media (hover: none) { .psb-search kbd { display:none; } }
+.psb-results { padding:4px 8px; overflow-y:auto; flex:1; }
+.psb-hit { display:flex; gap:10px; align-items:center; padding:7px 9px; border-radius:8px; text-decoration:none; color:var(--ptc-text-2, #334155); }
+.psb-hit i { width:16px; text-align:center; color:var(--ptc-text-muted, #94a3b8); font-size:13px; }
+.psb-hit b { display:block; font-size:12.5px; font-weight:600; } .psb-hit small { display:block; font-size:10.5px; color:var(--ptc-text-muted, #94a3b8); }
+.psb-hit.sel, .psb-hit:hover { background:var(--ptc-primary-light, #eff6ff); }
+.psb-hit.sel b { color:var(--ptc-primary, #2563eb); }
+.psb-nohit { padding:14px 10px; font-size:12px; color:var(--ptc-text-muted, #94a3b8); text-align:center; }
+.psb-badge.warn { background:#d97706 !important; color:#fff !important; }
+.psb-badge.muted { background:var(--ptc-surface-2, #f1f5f9) !important; color:var(--ptc-text-2, #475569) !important; border:1px solid var(--ptc-border, #e2e8f0); }
     `;
 
     // ── CSS variable (lets fixed-layout pages like stock shift themselves) ─
@@ -298,6 +336,7 @@
     }
 
     // ── Permission check ─────────────────────────────────────────────────
+    window.ptcCanSee = (item, session) => canSeeItem(item, session);
     function canSeeItem(item, session) {
         if (!session || !session.role) return false;
         const role = session.role;
@@ -306,6 +345,7 @@
         const hasAll = role === 'admin' || perms.includes('*');
         if (item.perm === 'admin') return hasAll;
         if (item.perm === null) return true;  // visible to all admin/staff
+        if (item.perm === 'any-setting') return SETTINGS.some(g => g.items.some(x => canSeeItem(x, session)));
         return hasAll || perms.includes(item.perm);
     }
 
@@ -322,15 +362,18 @@
         let html = `
         <div class="psb-header">
             <div class="psb-logo">P</div>
-            <span class="psb-title">Admin</span>
+            <span class="psb-title">ระบบจัดการ</span>
             <button class="psb-toggle" id="psb-toggle-btn" title="ย่อ/ขยาย sidebar">
                 <i class="fas fa-bars" style="font-size:13px"></i>
             </button>
         </div>
+        <div class="psb-search"><i class="fas fa-magnifying-glass"></i><input id="psb-q" type="search" placeholder="ค้นหาเมนู / ตั้งค่า…" autocomplete="off">${window.ptcCmd ? '' : '<kbd>Ctrl K</kbd>'}</div>
+        <div class="psb-results" id="psb-results" style="display:none"></div>
         <nav class="psb-nav">`;
 
         const isItemActive = (item) => (item.tab && currentPage === 'admin' && currentTab === item.tab)
-                                    || (item.page && !item.tab && currentPage === item.page);
+                                    || (item.page && !item.tab && currentPage === item.page)
+                                    || (item.also || []).some(a => a === currentPage || a === `${currentPage}:${currentTab}`);
 
         GROUPS.forEach((group) => {
             const visibleItems = group.items.filter(item => canSeeItem(item, session));
@@ -344,7 +387,9 @@
                     <span class="psb-g-dot"></span><span class="psb-g-text">${group.label}</span>
                     <span class="psb-g-count">${visibleItems.length}</span><i class="fas fa-chevron-down psb-g-chev"></i>
                 </button><div class="psb-fold-items${folded ? ' folded' : ''}" data-fold-items="${group.key}"><div class="psb-fold-inner">`;
-            } else {
+            } else if (group.divider) {
+                html += `<div class="psb-divider"></div>`;
+            } else if (group.label) {
                 html += `<div class="psb-group-label" style="--g-color:${group.color}"><span class="psb-g-dot"></span><span class="psb-g-text">${group.label}</span></div>`;
             }
 
@@ -354,8 +399,8 @@
                 const cls = `psb-item${isActive ? ' active' : ''}`;
                 const tooltip = item.label;
                 const badgeId = `psb-badge-${item.id}`;
-                const badge = ['loan','stock','log','permissions','kb_articles'].includes(item.id)
-                    ? `<span class="psb-badge" id="${badgeId}" style="display:none">0</span>` : '';
+                const badge = ['loan','stock','log','server_check_daily','kb_articles','settings'].includes(item.id)
+                    ? `<span class="psb-badge${item.badgeTone ? ' ' + item.badgeTone : ''}" id="${badgeId}" style="display:none"${item.badgeTitle ? ` title="${item.badgeTitle}"` : ''}>0</span>` : '';
 
                 const gStyle = `style="--g-color:${group.color}"`;
                 if (item.special === 'backup') {
@@ -402,7 +447,49 @@
             localStorage.setItem(FOLD_KEY + key, nowFolded ? '1' : '0');
         }));
 
+        setupSearch(el, session);
         if (!isFirstRender) loadBadges(isAdmin, session);
+    }
+
+    // ── ค้นหาเมนู + การตั้งค่าทุกตัว (Ctrl+K) ──
+    function setupSearch(el, session) {
+        const q = el.querySelector('#psb-q'), box = el.querySelector('#psb-results'), nav = el.querySelector('.psb-nav');
+        if (!q) return;
+        const norm = v => String(v || '').toLowerCase();
+        const pool = [];
+        GROUPS.forEach(g => g.items.filter(i => canSeeItem(i, session)).forEach(i => pool.push({ icon: i.icon, title: i.label, sub: g.label || 'เมนู', href: i.href || (i.tab ? `admin.html?tab=${i.tab}` : '#'), keys: '' })));
+        SETTINGS.forEach(g => g.items.filter(i => canSeeItem(i, session) && !i.special).forEach(i => pool.push({ icon: i.icon, title: i.title, sub: 'ตั้งค่า · ' + g.group, href: i.href || `admin.html?tab=${i.tab}`, keys: (i.desc || '') + ' ' + (i.keys || ''), newTab: i.newTab })));
+        let sel = 0, hits = [];
+        const show = () => {
+            const t = norm(q.value.trim());
+            if (!t) { box.style.display = 'none'; nav.style.display = ''; return; }
+            hits = pool.filter(x => norm(x.title + ' ' + x.sub + ' ' + x.keys).includes(t)).slice(0, 12);
+            sel = Math.min(sel, Math.max(0, hits.length - 1));
+            nav.style.display = 'none'; box.style.display = '';
+            box.innerHTML = hits.length ? hits.map((h, i) => `<a class="psb-hit${i === sel ? ' sel' : ''}" href="${h.href}"${h.newTab ? ' target="_blank"' : ''}><i class="fas ${h.icon}"></i><span><b>${h.title}</b><small>${h.sub}</small></span></a>`).join('')
+                : '<div class="psb-nohit">ไม่พบ — ลองคำอื่น</div>';
+        };
+        q.addEventListener('input', () => { sel = 0; show(); });
+        q.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown') { sel = Math.min(sel + 1, hits.length - 1); show(); e.preventDefault(); }
+            else if (e.key === 'ArrowUp') { sel = Math.max(sel - 1, 0); show(); e.preventDefault(); }
+            else if (e.key === 'Enter' && hits[sel]) { e.preventDefault(); hits[sel].newTab ? window.open(hits[sel].href) : (location.href = hits[sel].href); }
+            else if (e.key === 'Escape') { q.value = ''; show(); q.blur(); }
+        });
+        if (!window._psbKeyBound) {
+            window._psbKeyBound = true;
+            document.addEventListener('keydown', e => {
+                // หน้าที่มีเมนูลัดของตัวเอง (admin.html → js/ptc-cmd.js) ให้ตัวนั้นรับ Ctrl+K
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && !window.ptcCmd) {
+                    const inp = document.getElementById('psb-q'); if (!inp) return;
+                    e.preventDefault();
+                    const sb = document.getElementById('ptc-sidebar');
+                    if (sb.classList.contains('collapsed')) { sb.classList.remove('collapsed'); localStorage.setItem(STORAGE_KEY, '0'); _setCssVar(false); }
+                    if (window.innerWidth < 900) document.querySelector('.psb-mobile-btn')?.click();
+                    inp.focus(); inp.select();
+                }
+            });
+        }
     }
 
     // ── Navigation ───────────────────────────────────────────────────────
@@ -446,10 +533,13 @@
             const perms = (session && session.effective_permissions) || [];
             const hasAll = isAdmin || perms.includes('*');
             if (hasAll || perms.includes('loan.manage'))  setBadge('loan',  d.loan_pending      || 0);
-            if (hasAll)                                   setBadge('log',   d.ticket_unassigned || 0);
-            if (hasAll)                                   setBadge('stock', d.stock_low         || 0);
-            if (hasAll || perms.includes('admin.manage_permissions')) setBadge('permissions', d.users_no_role || 0);
+            if (hasAll || perms.includes('it_log.access')) setBadge('log',   d.ticket_unassigned || 0);
+            if (hasAll || perms.includes('it_log.access')) setBadge('server_check_daily', d.server_check_missing || 0);
+            if (hasAll || perms.includes('stock.manage')) setBadge('stock', d.stock_low         || 0);
+            if (hasAll || perms.includes('admin.manage_permissions')) setBadge('settings', d.users_no_role || 0);
             if (hasAll || perms.includes('kb.manage')) setBadge('kb_articles', d.kb_draft_count || 0);
+            window.ptcPendingCounts = d;
+            document.dispatchEvent(new CustomEvent('ptc:pending-counts', { detail: d }));
         } catch {}
     }
 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่า - PowertechCenter</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
+    <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark','dark-theme');})()</script>
+<style>
+/* ════ ตั้งค่า — รวมทุกอย่างที่นาน ๆ เข้าที เป็นการ์ดจัดหมวด (รายการมาจาก js/sidebar.js → window.PTC_SETTINGS) ════ */
+html, body { overflow-y:auto !important; height:auto !important; }
+body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; font-family:Kanit, Inter, sans-serif; }
+.hb-top { position:sticky; top:0; z-index:100; background:var(--ptc-surface); border-bottom:1px solid var(--ptc-border); border-top:3px solid var(--ptc-primary); display:flex; align-items:center; gap:12px; padding:0 16px; height:56px; }
+.hb-back { width:34px; height:34px; border-radius:8px; border:1px solid var(--ptc-border); display:flex; align-items:center; justify-content:center; color:var(--ptc-text-2); text-decoration:none; }
+.hb-ic { width:34px; height:34px; border-radius:9px; background:#475569; color:#fff; display:flex; align-items:center; justify-content:center; }
+.hb-top b { font-size:15px; display:block; } .hb-top small { font-size:11.5px; color:var(--ptc-text-muted); }
+.wrap { max-width:1180px; margin:0 auto; padding:22px 18px 50px; }
+.find { display:flex; align-items:center; gap:10px; background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; padding:0 14px; height:46px; margin-bottom:22px; }
+.find i { color:var(--ptc-text-muted); }
+.find input { flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--ptc-text); font:inherit; font-size:14.5px; }
+.find:focus-within { border-color:var(--ptc-primary); box-shadow:0 0 0 3px var(--ptc-primary-ring, rgba(37,99,235,.15)); }
+.grp { margin-bottom:22px; }
+.grp h2 { font-size:13px; font-weight:800; color:var(--ptc-text-2); margin:0 0 10px; display:flex; gap:9px; align-items:center; letter-spacing:.02em; }
+.grp h2 i { width:26px; height:26px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; color:#fff; }
+.cards { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }
+.c { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; padding:14px; display:flex; gap:12px; align-items:flex-start; text-decoration:none; color:inherit; cursor:pointer; font:inherit; text-align:left; position:relative; transition:border-color .12s, box-shadow .12s; }
+.c:hover { border-color:var(--ptc-primary); box-shadow:0 2px 10px rgba(15,23,42,.06); }
+.c .ic { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:15px; background:color-mix(in srgb, var(--g) 12%, transparent); color:var(--g); }
+.c b { display:block; font-size:14px; } .c small { font-size:12px; color:var(--ptc-text-muted); line-height:1.45; display:block; margin-top:2px; }
+.c .meta { font-size:11.5px; font-weight:700; margin-top:6px; display:flex; align-items:center; gap:6px; }
+.c .meta .d { width:7px; height:7px; border-radius:50%; }
+.c .go { margin-left:auto; color:var(--ptc-text-muted); font-size:12px; align-self:center; }
+.c.danger { border-style:dashed; }
+.c.danger .ic { background:#fef2f2; color:#dc2626; }
+html.dark .c.danger .ic { background:rgba(220,38,38,.14); }
+.empty { padding:40px; text-align:center; color:var(--ptc-text-muted); }
+mark { background:#fef08a; color:inherit; border-radius:2px; padding:0 1px; }
+html.dark mark { background:rgba(250,204,21,.35); }
+@media (max-width:1000px) { .cards { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width:640px) { .cards { grid-template-columns:minmax(0,1fr); } .wrap { padding:14px 10px 30px; } .hb-top small { display:none; } }
+</style>
+</head>
+<body data-page="settings">
+<header class="hb-top">
+    <a href="admin.html" class="hb-back" aria-label="กลับ"><i class="fa fa-arrow-left"></i></a>
+    <div class="hb-ic"><i class="fa fa-gear"></i></div>
+    <div><b>ตั้งค่า</b><small>องค์กร · อุปกรณ์ · การแจ้งเตือน · ความปลอดภัย</small></div>
+    <div style="flex:1"></div>
+    <div id="nav-user-area"></div>
+</header>
+<div style="display:flex;min-height:calc(100vh - 56px)">
+<aside id="ptc-sidebar"></aside>
+<main style="flex:1;min-width:0"><div class="wrap">
+    <label class="find"><i class="fa fa-magnifying-glass"></i><input id="q" type="search" placeholder="ค้นหาการตั้งค่า เช่น แผนก, LINE, โลโก้, SLA…" autocomplete="off"></label>
+    <div id="app"><div class="empty"><i class="fa fa-spinner fa-spin"></i> กำลังโหลด…</div></div>
+</div></main>
+</div>
+<script src="js/sidebar.js?v=20261023b"></script>
+<script>
+const gid = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let S = null, META = {};
+
+// ข้อมูลสดบนการ์ด (มีเฉพาะการ์ดที่บอกอะไรได้จริง)
+async function loadMeta() {
+    document.addEventListener('ptc:pending-counts', e => { META.users_no_role = e.detail.users_no_role; render(); });
+    if (window.ptcPendingCounts) META.users_no_role = window.ptcPendingCounts.users_no_role;
+    if (window.ptcCanSee({ perm: 'settings.notifications' }, S)) {
+        try {
+            const j = await (await fetch('api.php?action=get_notify_overview', { cache: 'no-store' })).json();
+            if (j.status === 'success') {
+                const on = j.channels.filter(c => +c.enabled), bad = on.filter(c => c.last && +c.last.ok === 0);
+                META.notify = bad.length ? { t: `ส่งไม่ออก ${bad.length} กลุ่ม — ตรวจกุญแจ`, c: '#dc2626' } : on.length ? { t: `${on.length} กลุ่มทำงานปกติ`, c: '#16a34a' } : { t: 'ยังไม่มีกลุ่มที่เปิดใช้', c: '#d97706' };
+            }
+        } catch (_) {}
+    }
+    render();
+}
+function metaOf(id) {
+    if (id === 'notify' && META.notify) return META.notify;
+    if (id === 'permissions' && META.users_no_role > 0) return { t: `ผู้ใช้รอกำหนดสิทธิ์ ${META.users_no_role} คน`, c: '#d97706' };
+    return null;
+}
+function hrefOf(i) { return i.href || `admin.html?tab=${i.tab}`; }
+function render() {
+    const t = (gid('q').value || '').trim().toLowerCase();
+    const hl = v => { const s = esc(v); if (!t) return s; const i = s.toLowerCase().indexOf(esc(t).toLowerCase()); return i < 0 ? s : s.slice(0, i) + '<mark>' + s.slice(i, i + esc(t).length) + '</mark>' + s.slice(i + esc(t).length); };
+    const groups = (window.PTC_SETTINGS || []).map(g => ({ ...g, items: g.items.filter(i => window.ptcCanSee(i, S) && (!t || (i.title + ' ' + i.desc + ' ' + (i.keys || '') + ' ' + g.group).toLowerCase().includes(t))) })).filter(g => g.items.length);
+    gid('app').innerHTML = groups.length ? groups.map(g => `<section class="grp"><h2><i class="fa ${g.gIcon}" style="background:${g.gColor}"></i>${esc(g.group)}</h2><div class="cards">
+        ${g.items.map(i => { const m = metaOf(i.id); const inner = `<span class="ic"><i class="fa ${i.icon}"></i></span><span style="min-width:0"><b>${hl(i.title)}</b><small>${hl(i.desc)}</small>${m ? `<span class="meta" style="color:${m.c}"><span class="d" style="background:${m.c}"></span>${esc(m.t)}</span>` : ''}</span><i class="fa fa-chevron-right go"></i>`;
+            return i.special === 'backup' ? `<button type="button" class="c" style="--g:${g.gColor}" onclick="doBackup()">${inner}</button>`
+                : `<a class="c ${i.danger ? 'danger' : ''}" style="--g:${g.gColor}" href="${esc(hrefOf(i))}"${i.newTab ? ' target="_blank"' : ''}${i.danger ? ' onclick="return confirmDanger(event, this)"' : ''}>${inner}</a>`; }).join('')}</div></section>`).join('')
+        : `<div class="empty"><i class="fa fa-magnifying-glass" style="font-size:22px;display:block;margin-bottom:8px"></i>${t ? 'ไม่พบการตั้งค่าที่ตรงกับ "' + esc(t) + '"' : 'บัญชีนี้ไม่มีสิทธิ์ตั้งค่าส่วนไหน'}</div>`;
+}
+// เครื่องมือขั้นสูง — ถามก่อนเปิด กันกดพลาด
+function confirmDanger(e, a) {
+    e.preventDefault();
+    ptcSwal().fire({ title: 'เปิดเครื่องมืออัปเดตฐานข้อมูล?', text: 'ใช้ตอนอัปเดตระบบเท่านั้น — ควรสำรองข้อมูลก่อนทุกครั้ง', icon: 'warning', showCancelButton: true, confirmButtonText: 'เปิด', cancelButtonText: 'ยกเลิก' })
+        .then(r => { if (r.isConfirmed) window.open(a.href, '_blank'); });
+    return false;
+}
+// สำรองข้อมูล — backup.php สร้าง .zip แล้วส่งให้ดาวน์โหลด (admin เท่านั้น)
+function doBackup() {
+    ptcSwal().fire({ title: 'สำรองข้อมูลตอนนี้?', text: 'ได้ไฟล์ .zip (ฐานข้อมูล + ไฟล์ระบบ) เก็บในเครื่องที่ปลอดภัย อย่าวางในโฟลเดอร์เว็บ', icon: 'question', showCancelButton: true, confirmButtonText: 'สำรอง', cancelButtonText: 'ยกเลิก' }).then(r => {
+        if (!r.isConfirmed) return;
+        const f = document.createElement('iframe'); f.style.display = 'none'; f.src = 'backup.php'; document.body.appendChild(f);
+        ptcToast('info', 'กำลังเตรียมไฟล์สำรอง', 'ดาวน์โหลดจะเริ่มเองเมื่อเสร็จ');
+    });
+}
+gid('q').addEventListener('input', render);
+gid('q').addEventListener('keydown', e => { if (e.key === 'Enter') { const a = gid('app').querySelector('.c'); if (a) a.click(); } });
+(async function init() {
+    try { S = await (await fetch('api.php?action=check_session', { cache: 'no-store' })).json(); } catch (_) { S = {}; }
+    if (!S.loggedin) { location.href = 'login.html'; return; }
+    if (!['admin', 'staff'].includes(S.role)) { location.href = 'index.html'; return; }
+    render(); loadMeta();
+    const q = new URLSearchParams(location.search).get('q'); if (q) { gid('q').value = q; render(); }
+})();
+</script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

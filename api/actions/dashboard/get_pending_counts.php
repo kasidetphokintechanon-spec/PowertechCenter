@@ -1,7 +1,7 @@
 <?php
 // api/actions/dashboard/get_pending_counts.php
 
-$loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0;
+$loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
 
 try {
     if (isset($conn) && $conn instanceof mysqli) {
@@ -66,6 +66,15 @@ try {
             }
         }
 
+        // ห้อง Server ที่ยังไม่ตรวจวันนี้ (เฉพาะวันทำงาน) — ตัวเลขบนเมนู "ตรวจห้อง Server"
+        if (!function_exists('_notifyIsWorkday') || _notifyIsWorkday($conn, date('Y-m-d'))) {
+            $today = date('Y-m-d');
+            $st = $conn->prepare("SELECT COUNT(*) FROM sc_rooms r WHERE r.is_active = 1 AND NOT EXISTS (
+                SELECT 1 FROM sc_records c JOIN sc_values v ON v.record_id = c.id
+                WHERE c.room_id = r.id AND c.check_date = ? AND v.val IS NOT NULL AND v.val <> '')");
+            if ($st) { $st->bind_param('s', $today); $st->execute(); $sc_missing = (int)$st->get_result()->fetch_row()[0]; }
+        }
+
         // KB drafts รอตรวจ (สร้างอัตโนมัติจากการปิด ticket — ยังไม่เผยแพร่)
         if ($res = $conn->query("SELECT COUNT(*) AS count FROM kb_articles WHERE is_published = 0")) {
             $kb_draft_count = (int)$res->fetch_assoc()['count'];
@@ -82,6 +91,7 @@ echo json_encode([
     'stock_low'          => $stock_low,
     'users_no_role'      => $users_no_role,
     'kb_draft_count'     => $kb_draft_count,
+    'server_check_missing' => $sc_missing,
     // backward-compat keys
     'loan'               => $loan_count,
     'repair'             => $repair_count,
