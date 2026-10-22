@@ -44,14 +44,16 @@ if ($mode === 'copy_from' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $copy_from)) {
 }
 
 function bulkDefaultVal($item, $copyValues, $mode) {
+    if (in_array($item['input_type'], ['percent', 'days'], true)) return null; // ตัวเลขไม่คัดลอก/ไม่เติม — ต้องดูจริง
     if ($mode === 'copy_from' && isset($copyValues[(int)$item['id']])) {
         return $copyValues[(int)$item['id']];
     }
     switch ($item['input_type']) {
         case 'status':  return '###';
         case 'backup':  return 'O';
-        case 'percent': return '100';
-        case 'days':    return (string)(intval($item['threshold']) ?: 90);
+        // ตัวเลข (กล้องออนไลน์ / วันเก็บภาพ) ต้องมาจากการดูจริง — ไม่เติมให้ (TISAX) ช่างกรอกเอง
+        case 'percent':
+        case 'days':    return null;
     }
     return '###';
 }
@@ -76,28 +78,57 @@ $vstmt = $conn->prepare(
 $filled  = 0;
 $cleaned = 0;
 
+// TISAX/ISO: เติมได้เฉพาะวันที่ผ่านมาแล้วและยังว่าง — ห้ามสร้างผลตรวจล่วงหน้า ห้ามทับ/ลบของที่บันทึกจริง
+$today = date('Y-m-d');
+if ($mode === 'all') $mode = 'missing';
+
+// ── บันทึกย้อนหลัง (TISAX): วันที่เก่ากว่าเมื่อวาน ต้องมีเหตุผล — เก็บใน audit_log (ไม่ต้องแก้โครงสร้างตาราง) ──
+if (!function_exists('scIsBackfill')) {
+    function scIsBackfill(string $date): bool { return $date < date('Y-m-d', strtotime('-1 day')); }
+    function scLogBackfill(mysqli $conn, int $roomId, string $target, string $reason, array $extra = []): void {
+        $uid  = (string)($_SESSION['user_id'] ?? '');
+        $name = (string)($_SESSION['display_name'] ?? $_SESSION['username'] ?? '');
+        $tid  = 'sc:' . $roomId . ':' . $target;
+        $details = json_encode(array_merge(['room_id' => $roomId, 'reason' => $reason], $extra), JSON_UNESCAPED_UNICODE);
+        // บันทึกอัตโนมัติทุกครั้งที่กด → ไม่ลงซ้ำถ้าเหตุผลเดิมของวัน/ห้องเดิม
+        $chk = $conn->prepare("SELECT details FROM audit_log WHERE action='server_check_backfill' AND target_id=? ORDER BY id DESC LIMIT 1");
+        $chk->bind_param('s', $tid);
+        $chk->execute();
+        $last = json_decode((string)($chk->get_result()->fetch_row()[0] ?? ''), true);
+        if (($last['reason'] ?? null) === $reason && empty($extra)) return;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $st = $conn->prepare("INSERT INTO audit_log (user_id, user_name, action, target_id, details, ip_address) VALUES (?, ?, 'server_check_backfill', ?, ?, ?)");
+        $st->bind_param('sssss', $uid, $name, $tid, $details, $ip);
+        $st->execute();
+    }
+}
+$backfillReason = trim(strip_tags($_POST['backfill_reason'] ?? ''));
+// ดูก่อนว่าจะเติมวันเก่ากว่าเมื่อวานไหม — ถ้าใช่ต้องมีเหตุผล
+$needReason = false;
+for ($d = 1; $d <= $days; $d++) {
+    $ds = sprintf('%04d-%02d-%02d', $year, $month, $d);
+    if ($ds > $today) break;
+    $w = (int)date('w', strtotime($ds));
+    if ($w === 0 || $w === 6 || in_array($ds, $holidays) || in_array($ds, $existingDates)) continue;
+    if (scIsBackfill($ds)) { $needReason = true; break; }
+}
+if ($needReason && $backfillReason === '') {
+    echo json_encode(['status'=>'error','code'=>'need_backfill_reason','message'=>'มีวันที่ต้องบันทึกย้อนหลัง ต้องระบุเหตุผล']); exit;
+}
+$filledDates = [];
+
 for ($d = 1; $d <= $days; $d++) {
     $dateStr = sprintf('%04d-%02d-%02d', $year, $month, $d);
+    if ($dateStr > $today) break;
     $dow     = (int)date('w', strtotime($dateStr)); // 0=Sun, 6=Sat
     $isWeekend = ($dow === 0 || $dow === 6);
 
     $isHoliday = in_array($dateStr, $holidays);
 
-    if ($isWeekend || $isHoliday) {
-        // mode=all: ล้างข้อมูลเก่าที่บันทึกผิดในวันหยุด
-        if ($mode === 'all' && $isWeekend) {
-            $oldRec = $conn->query("SELECT id FROM sc_records WHERE room_id=$room_id AND check_date='$dateStr'")->fetch_assoc();
-            if ($oldRec) {
-                $oldId = (int)$oldRec['id'];
-                $conn->query("DELETE FROM sc_values  WHERE record_id=$oldId");
-                $conn->query("DELETE FROM sc_records WHERE id=$oldId");
-                $cleaned++;
-            }
-        }
-        continue;
-    }
+    // วันหยุดไม่เติมให้ (ถ้ามีคนเข้าตรวจจริงวันหยุด ข้อมูลนั้นเก็บไว้ ไม่ลบ)
+    if ($isWeekend || $isHoliday) continue;
 
-    if ($mode === 'missing' && in_array($dateStr, $existingDates)) continue;
+    if (in_array($dateStr, $existingDates)) continue;
 
     $rstmt->bind_param("issss", $room_id, $dateStr, $checked_by, $saved_id, $saved_name);
     if (!$rstmt->execute()) continue;
@@ -111,10 +142,14 @@ for ($d = 1; $d <= $days; $d++) {
     foreach ($items as $item) {
         $iid = (int)$item['id'];
         $val = bulkDefaultVal($item, $copyValues, $mode);
+        if ($val === null) continue;
         $vstmt->bind_param("iis", $record_id, $iid, $val);
         $vstmt->execute();
     }
     $filled++;
+    $filledDates[] = $dateStr;
 }
 
+$oldFilled = array_values(array_filter($filledDates, 'scIsBackfill'));
+if ($oldFilled) scLogBackfill($conn, $room_id, sprintf('%04d-%02d', $year, $month) . ':bulk', $backfillReason, ['mode' => 'bulk_fill', 'dates' => $oldFilled]);
 echo json_encode(['status'=>'success','filled'=>$filled,'cleaned'=>$cleaned]);

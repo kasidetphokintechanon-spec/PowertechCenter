@@ -12,6 +12,33 @@ $values      = json_decode($values_raw, true) ?: [];
 
 if (!$room_id) { echo json_encode(['status'=>'error','message'=>'missing room_id']); exit; }
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $check_date)) { echo json_encode(['status'=>'error','message'=>'invalid date']); exit; }
+// TISAX/ISO: บันทึกผลตรวจล่วงหน้าไม่ได้ — วันที่ยังไม่ถึงไม่มีการตรวจจริง
+if ($check_date > date('Y-m-d')) { echo json_encode(['status'=>'error','message'=>'บันทึกผลตรวจของวันที่ยังไม่ถึงไม่ได้']); exit; }
+
+// ── บันทึกย้อนหลัง (TISAX): วันที่เก่ากว่าเมื่อวาน ต้องมีเหตุผล — เก็บใน audit_log (ไม่ต้องแก้โครงสร้างตาราง) ──
+if (!function_exists('scIsBackfill')) {
+    function scIsBackfill(string $date): bool { return $date < date('Y-m-d', strtotime('-1 day')); }
+    function scLogBackfill(mysqli $conn, int $roomId, string $target, string $reason, array $extra = []): void {
+        $uid  = (string)($_SESSION['user_id'] ?? '');
+        $name = (string)($_SESSION['display_name'] ?? $_SESSION['username'] ?? '');
+        $tid  = 'sc:' . $roomId . ':' . $target;
+        $details = json_encode(array_merge(['room_id' => $roomId, 'reason' => $reason], $extra), JSON_UNESCAPED_UNICODE);
+        // บันทึกอัตโนมัติทุกครั้งที่กด → ไม่ลงซ้ำถ้าเหตุผลเดิมของวัน/ห้องเดิม
+        $chk = $conn->prepare("SELECT details FROM audit_log WHERE action='server_check_backfill' AND target_id=? ORDER BY id DESC LIMIT 1");
+        $chk->bind_param('s', $tid);
+        $chk->execute();
+        $last = json_decode((string)($chk->get_result()->fetch_row()[0] ?? ''), true);
+        if (($last['reason'] ?? null) === $reason && empty($extra)) return;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $st = $conn->prepare("INSERT INTO audit_log (user_id, user_name, action, target_id, details, ip_address) VALUES (?, ?, 'server_check_backfill', ?, ?, ?)");
+        $st->bind_param('sssss', $uid, $name, $tid, $details, $ip);
+        $st->execute();
+    }
+}
+$backfillReason = trim(strip_tags($_POST['backfill_reason'] ?? ''));
+if (scIsBackfill($check_date) && $backfillReason === '') {
+    echo json_encode(['status'=>'error','code'=>'need_backfill_reason','message'=>'บันทึกย้อนหลังเกิน 1 วัน ต้องระบุเหตุผล']); exit;
+}
 
 $saved_id   = trim((string)($_SESSION['user_id'] ?? ''));
 $saved_name = trim((string)($_SESSION['display_name'] ?? $_SESSION['username'] ?? ''));
@@ -35,6 +62,8 @@ $stmt = $conn->prepare(
 );
 $stmt->bind_param("isssss", $room_id, $check_date, $checked_by, $suggestions, $saved_id, $saved_name);
 if (!$stmt->execute()) { echo json_encode(['status'=>'error','message'=>'Save failed: ' . $stmt->error]); exit; }
+
+if (scIsBackfill($check_date)) scLogBackfill($conn, $room_id, $check_date, $backfillReason);
 
 $sel = $conn->prepare("SELECT id FROM sc_records WHERE room_id=? AND check_date=?");
 $sel->bind_param("is", $room_id, $check_date);

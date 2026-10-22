@@ -202,6 +202,48 @@
 
         /* .ptc-input / .ptc-label — defined in enterprise-theme.css, not duplicated here */
         .svc-form-shell { display:flex;flex-direction:column;gap:12px; }
+        /* หน้าบริการ (ปรับ 22 ต.ค. 2026) */
+        .svc-ic { width:36px;height:36px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;background:var(--ic-bg,#f1f5f9);color:var(--ic-fg,#475569);border:1px solid var(--ptc-border);flex-shrink:0; }
+        .svc-ic-lg { width:46px;height:46px;font-size:19px;border-radius:10px;margin-top:18px; }
+        html.dark .svc-ic { background:rgba(148,163,184,.12);color:#e2e8f0; }
+        .svc-meta { display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap; }
+        .svc-meta code { font-size:11px;color:var(--ptc-text-muted); }
+        .svc-grp { font-size:10.5px;font-weight:700;padding:0 6px;border-radius:4px;border:1px solid;white-space:nowrap; }
+        .svc-grp--it { color:#4338ca;background:#eef2ff;border-color:#c7d2fe; }
+        .svc-grp--booking { color:#0f766e;background:#f0fdfa;border-color:#99f6e4; }
+        .svc-grp--stock { color:#b45309;background:#fffbeb;border-color:#fde68a; }
+        .svc-grp--info { color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe; }
+        html.dark .svc-grp { background:rgba(148,163,184,.1);border-color:rgba(148,163,184,.25); }
+        html.dark .svc-grp--it { color:#a5b4fc; } html.dark .svc-grp--booking { color:#5eead4; } html.dark .svc-grp--stock { color:#fcd34d; } html.dark .svc-grp--info { color:#93c5fd; }
+        .svc-url a { color:var(--ptc-primary); }
+        .svc-locked { background:var(--ptc-surface-2) !important;color:var(--ptc-text-muted) !important;cursor:not-allowed; }
+        .svc-icon-pick { display:flex;flex-wrap:wrap;gap:5px; }
+        .svc-icon-pick button { width:34px;height:34px;border-radius:7px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-2);cursor:pointer; }
+        .svc-icon-pick button:hover { border-color:var(--ptc-primary);color:var(--ptc-primary); }
+        /* มือถือ: แถวตารางเป็นการ์ด (เจาะจงกว่า .ptc-table tbody tr ของ design-system) — ไอคอน+ชื่อ บน, สถานะ/ลิงก์/ปุ่ม ล่าง */
+        @media (max-width: 768px) {
+            table.svc-table thead { display:none; }
+            .svc-table, .svc-table tbody { display:block;width:100%; }
+            table.svc-table tbody tr { display:grid;flex-direction:initial;border-width:0 0 1px;border-radius:0;margin:0;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 10px;padding:12px;border-bottom:1px solid var(--ptc-border);align-items:center; }
+            table.svc-table tbody td { display:block;justify-content:initial;padding:0 !important;border:0 !important;text-align:left !important;max-width:none !important;width:auto !important; }
+            table.svc-table tbody td.handle { display:none; }
+            table.svc-table tbody td:nth-child(2) { grid-row:1 / span 2;grid-column:1; }
+            table.svc-table tbody td:nth-child(3), table.svc-table tbody td:nth-child(4) { grid-column:2 / -1; }
+            table.svc-table tbody td:nth-child(5) { grid-column:1 / -1; }
+            table.svc-table tbody td:nth-child(6) { grid-column:1 / 3; }
+            table.svc-table tbody td:nth-child(7) { grid-column:3; }
+            table.svc-table tbody td.svc-url { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+            table.svc-table tbody td.svc-act { display:flex;justify-content:flex-end;gap:6px; }
+            /* ห้อง Server: รหัส+ชื่อ+บริษัท / สถานที่ / จำนวนรายการ+ปุ่ม */
+            table.scr-table thead { display:none; }
+            .scr-table, .scr-table tbody { display:block;width:100%; }
+            table.scr-table tbody tr { display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;padding:12px;border-width:0 0 1px;border-radius:0;margin:0;border-bottom:1px solid var(--ptc-border);align-items:center; }
+            table.scr-table tbody td { display:block;justify-content:initial;padding:0 !important;border:0 !important;text-align:left !important;width:auto !important; }
+            table.scr-table tbody td.handle { display:none; }
+            table.scr-table tbody td:nth-child(5) { grid-column:1 / -1;font-size:12px; }
+            table.scr-table tbody td:nth-child(6) { grid-column:1;grid-row:3;font-size:12px;color:var(--ptc-text-muted);white-space:nowrap; }
+            table.scr-table tbody td:nth-child(7) { grid-column:2 / -1;grid-row:3;display:flex;gap:4px;justify-content:flex-end; }
+        }
         .svc-form-card { border:1px solid var(--ptc-border);border-radius:var(--ptc-radius-md);padding:12px;background:var(--ptc-surface-2); }
         .svc-form-title { font-size:11px;font-weight:700;color:var(--ptc-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px; }
         .svc-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
@@ -497,7 +539,7 @@
             <div>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <h2 id="page-title" style="font-size:18px;font-weight:700;color:var(--ptc-text,#0f172a);margin:0">ภาพรวมระบบ</h2>
-                    <span id="record-count" class="record-badge" style="display:none">0 items</span>
+                    <span id="record-count" class="record-badge" style="display:none">0 รายการ</span>
                 </div>
                 <div id="page-subtitle" style="font-size:11px;color:#94a3b8;margin-top:2px;display:none"></div>
             </div>
@@ -1007,26 +1049,6 @@
                             });
 
                             // save row
-                            row.querySelector('[data-save]')?.addEventListener('click', async () => {
-                                const id = row.getAttribute('data-pos-id');
-                                const name = String(row.querySelector(`[data-name="${id}"]`)?.value||'').trim();
-                                const active = row.querySelector(`[data-active="${id}"]`)?.checked ? '1' : '0';
-                                const currOrder = parseInt(rows.find(r=>String(r.id)===id)?.sort_order||999);
-                                if (!name) return;
-                                const fd = new FormData();
-                                fd.append('action','update_job_position'); fd.append('id',id);
-                                fd.append('name',name); fd.append('sort_order',String(currOrder)); fd.append('is_active',active);
-                                try {
-                                    const rs = await fetch(apiPath,{method:'POST',body:fd});
-                                    const js = await rs.json();
-                                    if (js.status!=='success') throw new Error(js.message||'Error');
-                                    await loadJobPositions();
-                                    const btn = row.querySelector('[data-save]');
-                                    if (btn) { btn.style.background='#d1fae5'; btn.style.color='#065f46'; btn.textContent='✓'; setTimeout(()=>{btn.style.background='#e0f2fe';btn.style.color='#0369a1';btn.textContent='บันทึก';},1200); }
-                                } catch(e) { Toast.fire({icon:'error',title:e.message}); }
-                            });
-
-                            // delete row
                             row.querySelector('[data-del]')?.addEventListener('click', async () => {
                                 const id = row.getAttribute('data-pos-id');
                                 const name = String(row.querySelector(`[data-name="${id}"]`)?.value||'').trim();
@@ -1794,20 +1816,61 @@
         if (/request|log|แจ้งซ่อม|task|ticket|mt/.test(text)) return { soft: '#eef2ff', text: '#4338ca', line: '#6366f1' };
         if (/erp|program|ระบบงาน|เอกสาร|workflow/.test(text)) return { soft: '#faf5ff', text: '#7e22ce', line: '#a855f7' };
         if (/room|car|จองห้อง|จองรถ|booking/.test(text)) return { soft: '#f0fdfa', text: '#0f766e', line: '#14b8a6' };
-        if (/loan|stock|ยืม|คืน|เบิก|คลัง|maid|stationery|asset/.test(text)) return { soft: '#fffbeb', text: '#b45309', line: '#f59e0b' };
-        if (/kb|knowledge|ความรู้|guide|help/.test(text)) return { soft: '#f5f3ff', text: '#6d28d9', line: '#8b5cf6' };
+        if (/kb|knowledge|ความรู้|guide|help/.test(text)) return { soft: '#f5f3ff', text: '#6d28d9', line: '#8b5cf6', grp: 'it' };
+        if (/loan|stock|ยืม|คืน|เบิก|คลัง|maid|stationery|asset/.test(text)) return { soft: '#fffbeb', text: '#b45309', line: '#f59e0b', grp: 'stock' };
         return null;
     }
+    window.svcPickIcon = function(cls) {
+        const f = gid('dynamic-form'); if (!f) return;
+        f.querySelector('[name=icon]').value = cls;
+        svcFormPreview();
+    };
+    window.svcFormPreview = function() {
+        const f = gid('dynamic-form'); if (!f) return;
+        const icon = String(f.querySelector('[name=icon]')?.value || '').trim() || 'fas fa-link';
+        const pv = gid('svc-icon-preview'); if (pv) pv.innerHTML = `<i class="${escapeHtml(icon)}"></i>`;
+        const meta = { title: f.querySelector('[name=title]')?.value, description: f.querySelector('[name=description]')?.value, url_primary: f.querySelector('[name=url_primary]')?.value };
+        const tone = serviceToneByMeta(meta);
+        if (pv) { pv.style.setProperty('--ic-bg', tone ? tone.soft : '#f1f5f9'); pv.style.setProperty('--ic-fg', tone ? tone.text : '#475569'); }
+        const hint = gid('svc-group-hint');
+        if (hint) hint.innerHTML = `จะอยู่หมวด <b>${SVC_HOME_GROUP[serviceHomeGroup(meta)]}</b> บนหน้าแรก (เลือกจากคำในชื่อ/คำอธิบาย)`;
+    };
+    // หมวดที่บริการจะไปอยู่บนหน้าแรก (index) — ให้แอดมินเห็นก่อนบันทึก
+    const SVC_HOME_GROUP = { it: 'แจ้งปัญหา & IT', booking: 'จอง', stock: 'เบิก / ยืม', info: 'ข้อมูล & ระบบงาน' };
+    function serviceHomeGroup(item) {
+        const t = serviceToneByMeta(item);
+        if (!t) return 'info';
+        if (t.grp) return t.grp;
+        if (t.line === '#6366f1') return 'it';
+        if (t.line === '#14b8a6') return 'booking';
+        return 'info';
+    }
+    // ตรวจลิงก์ทุกบริการที่ยังไม่ได้ตรวจ (ผลเก็บไว้ 5 นาที) — แอดมินไม่ต้องกดทีละแถว
+    let _svcProbeRunning = false;
+    async function autoProbeServices() {
+        if (_svcProbeRunning) return;
+        const now = Date.now();
+        const ids = (data.services || []).map(i => String(i.id ?? '').trim())
+            .filter(id => serviceIdIsValid(id) && !(window.serviceHealthCache[id] && now - (window.serviceHealthCache[id].ts || 0) < 300000));
+        if (!ids.length) return;
+        _svcProbeRunning = true;
+        try {
+            const queue = ids.slice();
+            const worker = async () => { while (queue.length && activeTab === 'services') await testServiceHealth(queue.shift(), true); };
+            await Promise.all([worker(), worker(), worker()]);
+        } finally { _svcProbeRunning = false; }
+    }
+
     function serviceHealthBadgeHtml(state) {
         const map = {
-            unknown: { txt: 'Server: ยังไม่ทดสอบ', st: 'background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1' },
-            checking: { txt: 'Server: กำลังทดสอบ...', st: 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe' },
-            primary: { txt: 'Server: Primary OK', st: 'background:#f0fdf4;color:#166534;border:1px solid #bbf7d0' },
-            backup:  { txt: 'Server: Backup OK', st: 'background:#fffbeb;color:#92400e;border:1px solid #fde68a' },
-            down:    { txt: 'Server: Down', st: 'background:#fef2f2;color:#991b1b;border:1px solid #fecaca' }
+            unknown:  { txt: 'ยังไม่ได้ตรวจ', c: 'muted' },
+            checking: { txt: 'กำลังตรวจ…', c: 'info' },
+            primary:  { txt: 'ลิงก์หลักใช้ได้', c: 'success' },
+            backup:   { txt: 'ใช้ลิงก์สำรอง', c: 'orange' },
+            down:     { txt: 'เชื่อมต่อไม่ได้', c: 'danger' }
         };
         const k = map[state] ? state : 'unknown';
-        return `<span style="${map[k].st};display:inline-flex;align-items:center;justify-content:center;min-width:122px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700">${map[k].txt}</span>`;
+        return `<span class="ptc-badge ptc-badge--${map[k].c}" style="min-width:104px;justify-content:center">${map[k].txt}</span>`;
     }
 
     window.updateServiceHealthBadge = function(serviceId, state) {
@@ -1822,7 +1885,10 @@
             if (idx >= 0) el = gid(serviceHealthDomId(serviceId, idx));
         }
         if (!el) return;
-        el.innerHTML = serviceHealthBadgeHtml(state);
+        // คงปุ่มตรวจซ้ำไว้หลังได้ผล (เดิมปุ่มหายหลังตรวจครั้งแรก)
+        const rowKey = el.closest('tr')?.getAttribute('data-id') || '';
+        el.innerHTML = serviceHealthBadgeHtml(state) + (state === 'checking' || !rowKey ? ''
+            : `<button type="button" data-svc-action="probe" data-service-id="${escapeHtml(rowKey)}" class="ptc-btn-ghost ptc-btn-sm" title="ตรวจลิงก์อีกครั้ง"><i class="fa fa-rotate-right"></i></button>`);
     }
 
     window.testServiceHealth = async function(serviceId, silent = false) {
@@ -1831,7 +1897,7 @@
         updateServiceHealthBadge(serviceId, 'checking');
         try {
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 12000);
+            const timer = setTimeout(() => ctrl.abort(), 25000);
             const res = await fetch(`${apiPath}?action=check_service_health&service_id=${encodeURIComponent(serviceId)}&_t=${Date.now()}`, { signal: ctrl.signal });
             clearTimeout(timer);
             const json = await res.json();
@@ -1840,16 +1906,16 @@
             window.serviceHealthCache[serviceId] = { state, data: json, ts: Date.now() };
             updateServiceHealthBadge(serviceId, state);
             if (!silent) {
-                const title = state === 'primary' ? 'Server Probe: Primary พร้อมใช้งาน'
-                    : state === 'backup' ? 'Server Probe: ใช้ Backup ได้'
-                    : 'Server Probe: Primary/Backup ไม่ตอบสนอง';
+                const title = state === 'primary' ? 'ลิงก์หลักใช้งานได้'
+                    : state === 'backup' ? 'ลิงก์หลักไม่ตอบ — ใช้ลิงก์สำรองได้'
+                    : 'ลิงก์หลักและลิงก์สำรองไม่ตอบสนอง';
                 Toast.fire({ icon: state === 'down' ? 'warning' : 'success', title });
             }
             return json;
         } catch (e) {
             window.serviceHealthCache[serviceId] = { state: 'down', error: String(e.message || e) };
             updateServiceHealthBadge(serviceId, 'down');
-            if (!silent) Swal.fire('Health Check Error', e.message || 'ไม่สามารถทดสอบลิงก์ได้', 'error');
+            if (!silent) Swal.fire('ตรวจลิงก์ไม่สำเร็จ', 'เซิร์ฟเวอร์ตอบช้าหรือเครือข่ายขัดข้อง ลองกดตรวจอีกครั้ง', 'warning');
             return null;
         }
     }
@@ -1911,6 +1977,10 @@
             assets.forEach(a => { const s = a['สถานะ']||'?'; statusMap[s]=(statusMap[s]||0)+1; });
             const top = Object.entries(statusMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([s,n])=>`${s} ${n}`).join(' · ');
             text = `${assets.length} รายการ${top?' · '+top:''}`;
+        } else if (activeTab === 'services') {
+            const sv = data.services || [];
+            const live = sv.filter(i => parseInt(i.is_active, 10) !== 0).length;
+            text = `แสดงบนหน้าแรก ${live} · ซ่อน ${sv.length - live}`;
         } else if (activeTab === 'departments') {
             text = `${(data.departments||[]).length} แผนก`;
         } else if (activeTab === 'employees' || activeTab === 'announcements') {
@@ -2572,7 +2642,7 @@
             if (activeTab === 'employees') {
                 const techCount = items.filter(i=>parseInt(i.is_technician||0)===1).length;
                 countBadge.textContent = `${items.length} คน | ช่าง ${techCount} | ไม่ใช่ช่าง ${Math.max(0,items.length-techCount)}`;
-            } else { countBadge.textContent = items.length+' items'; }
+            } else { countBadge.textContent = items.length+' รายการ'; }
             countBadge.style.display = '';
         }
 
@@ -2821,7 +2891,7 @@
         // 5.4 Services
         else if (activeTab === 'services') {
             items.sort((a,b)=>(parseInt(a.sort_order)||0)-(parseInt(b.sort_order)||0));
-            headers = ['<i class="fa fa-arrows-alt"></i>','ไอคอน','ชื่อบริการ','สถานะ','URL หลัก','Server Probe','เรียง'];
+            headers = ['<i class="fa fa-arrows-alt" title="ลากเพื่อเรียงลำดับ"></i>','ไอคอน','ชื่อบริการ','หน้าแรก','ลิงก์หลัก','สถานะลิงก์'];
             rows = items.map((i, rowIndex) => {
                 const encId = encodeServiceRowKey(i, rowIndex);
                 const rowId = serviceIdIsValid(i.id) ? escapeHtml(i.id) : '(ไม่มี ID — กดแก้ไขเพื่อใส่รหัส)';
@@ -2830,38 +2900,37 @@
                 const tone = serviceToneByMeta(i);
                 const iconBg = tone ? tone.soft : (i.color || '#64748b');
                 const iconColor = tone ? tone.text : '#ffffff';
-                const titleDot = tone ? `<span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:${tone.line};margin-right:6px;vertical-align:middle"></span>` : '';
+                const grp = serviceHomeGroup(i);
                 const statusBadge = isLive
-                    ? '<span style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700">พร้อมให้บริการ</span>'
-                    : '<span style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700">Hold · ซ่อนหน้าแรก</span>';
+                    ? '<span class="ptc-badge ptc-badge--success">แสดงบนหน้าแรก</span>'
+                    : '<span class="ptc-badge ptc-badge--muted">ซ่อนอยู่</span>';
                 return `<tr data-id="${encId}">
                     <td class="ptc-table-td handle" style="text-align:center;cursor:move;width:32px"><i class="fa fa-bars" style="color:#94a3b8"></i></td>
                     <td class="ptc-table-td" style="text-align:center;width:48px">
-                        <div style="width:36px;height:36px;border-radius:8px;background:${iconBg};display:inline-flex;align-items:center;justify-content:center;color:${iconColor};font-size:16px;border:1px solid #e2e8f0">
+                        <div class="svc-ic" style="--ic-bg:${iconBg};--ic-fg:${iconColor}">
                             <i class="${escapeHtml(i.icon||'fas fa-circle')}"></i>
                         </div>
                     </td>
                     <td class="ptc-table-td">
-                        <div style="font-weight:600;font-size:13px">${titleDot}${escapeHtml(i.title||'-')}${idWarn}</div>
-                        <div style="font-size:11px;color:#94a3b8;font-family:monospace">${rowId}</div>
+                        <div style="font-weight:600;font-size:13px">${escapeHtml(i.title||'-')}${idWarn}</div>
+                        <div class="svc-meta"><span class="svc-grp svc-grp--${grp}" title="หมวดที่บริการนี้จะอยู่บนหน้าแรก">${SVC_HOME_GROUP[grp]}</span><code>${rowId}</code></div>
                         <div style="font-size:11px;color:#94a3b8;margin-top:2px">${escapeHtml(i.description||'')}</div>
                     </td>
                     <td class="ptc-table-td" style="text-align:center">${statusBadge}</td>
-                    <td class="ptc-table-td" style="font-family:monospace;font-size:12px;color:#2563eb;max-width:220px;overflow:hidden;text-overflow:ellipsis">
+                    <td class="ptc-table-td svc-url" style="font-family:monospace;font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis">
                         <a href="javascript:void(0)" data-svc-action="open-url" data-service-id="${encId}" data-primary="${escapeHtml(i.url_primary||'')}" data-backup="${escapeHtml(i.url_fallback||'')}" style="text-decoration:none;color:inherit" title="${escapeHtml(i.url_primary||'')}">${escapeHtml(i.url_primary||'-')}</a>
-                        ${i.url_fallback ? '<div style="font-size:10px;color:#94a3b8;margin-top:3px"><i class="fa fa-shield-alt"></i> ' + escapeHtml(i.url_fallback) + '</div>' : ''}
+                        ${i.url_fallback ? '<div style="font-size:10px;color:var(--ptc-text-muted);margin-top:3px" title="ลิงก์สำรอง"><i class="fa fa-shield-alt"></i> ' + escapeHtml(i.url_fallback) + '</div>' : ''}
                     </td>
                     <td class="ptc-table-td" style="text-align:center">
                         <div id="${serviceHealthDomId(i.id, rowIndex)}" style="display:inline-flex;align-items:center;gap:6px">
                             ${serviceHealthBadgeHtml((window.serviceHealthCache[i.id]||{}).state||'unknown')}
-                            <button type="button" data-svc-action="probe" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" title="ทดสอบลิงก์"><i class="fa fa-heartbeat"></i></button>
+                            <button type="button" data-svc-action="probe" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" title="ตรวจลิงก์"><i class="fa fa-rotate-right"></i></button>
                         </div>
                     </td>
-                    <td class="ptc-table-td" style="text-align:center;font-size:12px;color:#94a3b8">${i.sort_order||'-'}</td>
-                    <td class="ptc-table-td" style="text-align:right;white-space:nowrap">
-                        <button type="button" data-svc-action="toggle" data-service-id="${encId}" data-svc-next-active="${isLive ? 0 : 1}" class="ptc-btn-ghost ptc-btn-sm" title="${isLive ? 'Hold (ซ่อนจากหน้าแรก)' : 'เปิดแสดงบนหน้าแรก'}"><i class="fa ${isLive ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
-                        <button type="button" data-svc-action="edit" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" style="color:#2563eb"><i class="fa fa-edit"></i></button>
-                        <button type="button" data-svc-action="delete" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" style="color:#ef4444"><i class="fa fa-trash"></i></button>
+                    <td class="ptc-table-td svc-act" style="text-align:right;white-space:nowrap">
+                        <button type="button" data-svc-action="toggle" data-service-id="${encId}" data-svc-next-active="${isLive ? 0 : 1}" class="ptc-btn-ghost ptc-btn-sm" title="${isLive ? 'ซ่อนจากหน้าแรก' : 'แสดงบนหน้าแรก'}"><i class="fa ${isLive ? 'fa-eye-slash' : 'fa-eye'}"></i></button>
+                        <button type="button" data-svc-action="edit" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" style="color:var(--ptc-primary)" title="แก้ไข"><i class="fa fa-edit"></i></button>
+                        <button type="button" data-svc-action="delete" data-service-id="${encId}" class="ptc-btn-ghost ptc-btn-sm" style="color:var(--ptc-danger)" title="ลบ"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>`;
             }).join('');
@@ -3018,6 +3087,8 @@
 
         if (activeTab==='services') {
             const tbody = container.querySelector('tbody');
+            container.querySelector('table')?.classList.add('svc-table', 'no-collapse');
+            autoProbeServices();
             bindServiceTableActions();
             initAdminRowSortable(tbody, () => {
                 const newOrder = Array.from(tbody.querySelectorAll('tr')).map(tr => {
@@ -3042,6 +3113,7 @@
             });
         }
         if (activeTab==='server_check') {
+            container.querySelector('table')?.classList.add('scr-table', 'no-collapse');
             const tbody = container.querySelector('tbody');
             initAdminRowSortable(tbody, () => {
                 const newOrder = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.dataset.id);
@@ -3998,71 +4070,64 @@
             </div></form>`;
         }
         else if (activeTab === 'services') {
+            const e = v => escapeHtml(String(v ?? ''));
+            const isEditSvc = !!item.id;
+            const nextSort = Math.max(0, ...(data.services || []).map(x => parseInt(x.sort_order, 10) || 0)) + 1;
+            const ICONS = ['fa-gear','fa-screwdriver-wrench','fa-headset','fa-book-open','fa-clipboard-list','fa-car','fa-calendar-check','fa-right-left','fa-broom','fa-pen','fa-box','fa-address-book','fa-warehouse','fa-file-lines','fa-chart-line','fa-server','fa-globe','fa-link'];
             return `<form id="dynamic-form" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" name="_previous_id" value="${escapeHtml(String(item.id ?? ''))}">
-                <input type="hidden" name="_fallback_url" value="${escapeHtml(String(item.url_primary ?? ''))}">
+                <input type="hidden" name="_previous_id" value="${e(item.id)}">
+                <input type="hidden" name="_fallback_url" value="${e(item.url_primary)}">
+                <input type="hidden" name="color" value="${e(item.color || '#3b82f6')}">
+                <input type="hidden" name="sort_order" value="${e(item.sort_order || nextSort)}">
                 <div class="svc-form-shell">
                     <div class="svc-form-card">
-                        <div class="svc-form-title">Service Identity</div>
-                        ${serviceIdIsValid(item.id) ? '' : '<p style="margin:0 0 10px;padding:8px 10px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:12px;color:#b91c1c">รายการนี้ไม่มีรหัสในระบบ — กรุณาใส่ Service ID แล้วบันทึก</p>'}
-                        <div class="svc-grid-2">
-                            <div>
-                                <label class="${lbl}">Service ID</label>
-                                <input type="text" name="id" value="${item.id||''}" ${item.id?'readonly':''} class="${inp}" required pattern="[a-zA-Z0-9-_]+" placeholder="เช่น erp-system">
-                                <div class="svc-help">ใช้ a-z, 0-9, - และ _</div>
-                            </div>
-                            <div>
-                                <label class="${lbl}">Icon (Font Awesome)</label>
-                                <input type="text" name="icon" value="${item.icon||'fas fa-circle'}" class="${inp}" placeholder="เช่น fas fa-cog">
+                        <div class="svc-form-title">ข้อมูลบริการ</div>
+                        ${serviceIdIsValid(item.id) || !isEditSvc ? '' : '<p style="margin:0 0 10px;padding:8px 10px;background:var(--ptc-danger-bg);border:1px solid rgba(220,38,38,.25);border-radius:8px;font-size:12px;color:var(--ptc-danger)">รายการนี้ไม่มีรหัสในระบบ — กรุณาใส่รหัสบริการแล้วบันทึก</p>'}
+                        <div style="display:flex;gap:12px;align-items:flex-start">
+                            <div class="svc-ic svc-ic-lg" id="svc-icon-preview"><i class="${e(item.icon || 'fas fa-link')}"></i></div>
+                            <div style="flex:1;min-width:0">
+                                <label class="${lbl}">ชื่อบริการ <span style="color:var(--ptc-danger)">*</span></label>
+                                <input type="text" name="title" value="${e(item.title)}" class="${inp}" required placeholder="เช่น ระบบจองรถ" oninput="svcFormPreview()">
                             </div>
                         </div>
                         <div style="margin-top:10px">
-                            <label class="${lbl}">Title</label>
-                            <input type="text" name="title" value="${item.title||''}" class="${inp}" required>
+                            <label class="${lbl}">คำอธิบายสั้น ๆ</label>
+                            <textarea name="description" class="${inp}" rows="2" placeholder="บรรทัดเดียว เช่น จองรถส่วนกลาง (CARSYS)" oninput="svcFormPreview()">${e(item.description)}</textarea>
+                            <div class="svc-help" id="svc-group-hint"></div>
                         </div>
                         <div style="margin-top:10px">
-                            <label class="${lbl}">Description</label>
-                            <textarea name="description" class="${inp}" rows="2">${item.description||''}</textarea>
+                            <label class="${lbl}">ไอคอน</label>
+                            <div class="svc-icon-pick">${ICONS.map(ic => `<button type="button" title="${ic}" onclick="svcPickIcon('fas ${ic}')"><i class="fas ${ic}"></i></button>`).join('')}</div>
+                            <input type="text" name="icon" value="${e(item.icon || 'fas fa-link')}" class="${inp}" style="margin-top:6px;font-family:monospace;font-size:12px" placeholder="หรือพิมพ์ชื่อไอคอน Font Awesome เช่น fas fa-cog" oninput="svcFormPreview()">
+                        </div>
+                        <div style="margin-top:10px">
+                            <label class="${lbl}">รหัสบริการ${isEditSvc ? ' (ตั้งได้ครั้งเดียว)' : ' <span style="color:var(--ptc-danger)">*</span>'}</label>
+                            <input type="text" name="id" value="${e(item.id)}" ${isEditSvc ? 'readonly' : ''} class="${inp}${isEditSvc ? ' svc-locked' : ''}" required pattern="[a-zA-Z0-9-_]+" placeholder="เช่น service-car">
+                            <div class="svc-help">${isEditSvc ? '<i class="fa fa-lock"></i> ระบบอื่นอ้างอิงรหัสนี้ (เช่น ปุ่มลัดหน้าแรก) จึงแก้ไม่ได้' : 'ภาษาอังกฤษ ตัวเลข - และ _ · ตั้งแล้วแก้ไม่ได้'}</div>
                         </div>
                     </div>
 
                     <div class="svc-form-card">
-                        <div class="svc-form-title">Routing</div>
+                        <div class="svc-form-title">ลิงก์</div>
                         <div class="svc-grid-2">
                             <div>
-                                <label class="${lbl}">Primary URL</label>
-                                <input type="text" name="url_primary" value="${item.url_primary||''}" class="${inp}" required>
+                                <label class="${lbl}">ลิงก์หลัก <span style="color:var(--ptc-danger)">*</span></label>
+                                <input type="text" name="url_primary" value="${e(item.url_primary)}" class="${inp}" required placeholder="เช่น loan.html หรือ http://192.168.0.13/carsys/">
                             </div>
                             <div>
-                                <label class="${lbl}">Backup URL</label>
-                                <input type="text" name="url_fallback" value="${item.url_fallback||''}" class="${inp}">
+                                <label class="${lbl}">ลิงก์สำรอง</label>
+                                <input type="text" name="url_fallback" value="${e(item.url_fallback)}" class="${inp}" placeholder="ใช้เมื่อลิงก์หลักเข้าไม่ได้ (เช่น IP ภายนอก)">
                             </div>
                         </div>
                     </div>
 
                     <div class="svc-form-card">
-                        <div class="svc-form-title">Visual & Sort</div>
-                        <div class="svc-grid-2">
-                            <div>
-                                <label class="${lbl}">Color</label>
-                                <div class="svc-color-wrap">
-                                    <input type="color" name="color" value="${item.color||'#3b82f6'}" class="svc-color-input">
-                                    <div class="svc-tone-preview"><span class="svc-tone-dot"></span>โทนการ์ดบริการ</div>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="${lbl}">Sort Order</label>
-                                <input type="number" name="sort_order" value="${item.sort_order||'99'}" class="${inp}">
-                            </div>
-                        </div>
-                        <div style="margin-top:10px">
-                            <label class="${lbl}">สถานะบนหน้าแรก (index)</label>
-                            <select name="is_active" class="${inp}">
-                                <option value="1" ${parseInt(item.is_active,10)!==0?'selected':''}>พร้อมให้บริการ — แสดงการ์ดบน index</option>
-                                <option value="0" ${parseInt(item.is_active,10)===0?'selected':''}>Hold — ซ่อนจาก index (ยังแก้ไขใน Admin ได้)</option>
-                            </select>
-                            <div class="svc-help">Hold ใช้ตอนระบบยังไม่พร้อม หรือปิดชั่วคราว</div>
-                        </div>
+                        <div class="svc-form-title">การแสดงผล</div>
+                        <select name="is_active" class="${inp}">
+                            <option value="1" ${parseInt(item.is_active,10)!==0?'selected':''}>แสดงบนหน้าแรก</option>
+                            <option value="0" ${parseInt(item.is_active,10)===0?'selected':''}>ซ่อนจากหน้าแรก (ยังแก้ไขที่นี่ได้)</option>
+                        </select>
+                        <div class="svc-help">ซ่อนไว้ตอนระบบยังไม่พร้อมหรือปิดปรับปรุง · ลำดับการแสดงใช้วิธีลากในตาราง</div>
                     </div>
                 </div>
             </form>`;
@@ -4492,10 +4557,11 @@
                 gid('modal-title').textContent = isEdit ? 'แก้ไขทะเบียนพัสดุภัณฑ์' : 'เพิ่มพัสดุใหม่';
             }
         } else {
-            gid('modal-title').textContent = `${isEdit?'Edit':'Add'} ${keyTitles[activeTab]}`;
+            gid('modal-title').textContent = `${isEdit?'แก้ไข':'เพิ่ม'} ${keyTitles[activeTab]}`;
         }
         window._modalDirty = false;
         gid('modal-body').innerHTML = getFormHtml(item);
+        if (activeTab === 'services') svcFormPreview();
         const dlg = gid('main-modal-dialog');
         if (dlg) {
             dlg.classList.toggle('ptc-modal-dialog--asset', activeTab === 'it_assets');
@@ -5394,7 +5460,22 @@
     }
 
     // --- Server Check: Items manager (per room) ---
-    const SC_TYPE_LABELS = { status:'สถานะ (✓/✗)', backup:'Backup (✓/✗)', percent:'เปอร์เซ็นต์ (%)', days:'จำนวนวัน' };
+    const SC_TYPE_LABELS = { status:'ปกติ / มีปัญหา', backup:'สำรองข้อมูล (ปกติ / มีปัญหา)', percent:'เปอร์เซ็นต์ (เช่น กล้องออนไลน์)', days:'จำนวนวัน (เช่น เก็บภาพย้อนหลัง)' };
+    // ช่องเกณฑ์/จำนวนทั้งหมด แสดงตามชนิดรายการ
+    function scExtraFields(prefix, r) {
+        const t = r.input_type || 'status';
+        const st = 'padding:5px 8px;border-radius:6px;border:1px solid var(--ptc-border);font-size:11.5px;font-family:inherit;background:var(--ptc-surface);color:var(--ptc-text)';
+        return `<span data-x="thr" style="display:${t==='days'||t==='percent'?'inline-flex':'none'};align-items:center;gap:4px;font-size:11px;color:var(--ptc-text-muted)">ผ่านเมื่อ ≥
+                <input ${prefix}-threshold type="number" min="0" value="${r.threshold ?? ''}" placeholder="90" style="width:62px;${st}"><span data-x="unit">${t==='percent'?'%':'วัน'}</span></span>
+            <span data-x="tot" style="display:${t==='percent'?'inline-flex':'none'};align-items:center;gap:4px;font-size:11px;color:var(--ptc-text-muted)">ทั้งหมด
+                <input ${prefix}-total type="number" min="0" value="${r.total_count ?? ''}" placeholder="—" style="width:58px;${st}" title="ใส่จำนวนกล้อง/อุปกรณ์ทั้งหมด ถ้าอยากให้ผู้ตรวจกรอกเป็นจำนวนที่ออนไลน์">ตัว</span>`;
+    }
+    function scToggleExtra(box, t) {
+        if (box.hasAttribute('data-extra')) box.style.display = (t==='percent'||t==='days') ? 'flex' : 'none';
+        box.querySelector('[data-x=thr]').style.display = (t==='days'||t==='percent') ? 'inline-flex' : 'none';
+        box.querySelector('[data-x=tot]').style.display = t==='percent' ? 'inline-flex' : 'none';
+        box.querySelector('[data-x=unit]').textContent = t==='percent' ? '%' : 'วัน';
+    }
     window.openServerCheckItemsManager = async function(roomId, roomLabel) {
         const typeOptions = (sel) => Object.entries(SC_TYPE_LABELS)
             .map(([v,l]) => `<option value="${v}" ${sel===v?'selected':''}>${l}</option>`).join('');
@@ -5404,7 +5485,7 @@
             <div style="display:flex;gap:8px;margin-bottom:14px;align-items:flex-start;flex-wrap:wrap">
                 <input id="scim-new-label" type="text" placeholder="ชื่อรายการตรวจใหม่..." style="flex:2;min-width:160px;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;font-family:inherit">
                 <select id="scim-new-type" style="padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-family:inherit">${typeOptions('status')}</select>
-                <input id="scim-new-threshold" type="number" min="0" placeholder="เกณฑ์ (วัน)" style="width:100px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-family:inherit;display:none">
+                <div id="scim-new-extra" style="display:flex;gap:8px;align-items:center;width:100%">${scExtraFields('id="scim-new', { input_type: 'status' }).replace(/id="scim-new-threshold/, 'id="scim-new-threshold"').replace(/id="scim-new-total/, 'id="scim-new-total"')}</div>
                 <button id="scim-add-btn" type="button" style="padding:8px 16px;border-radius:8px;background:#2563eb;color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px"><i class="fa fa-plus"></i>เพิ่ม</button>
             </div>
             <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:6px">
@@ -5419,12 +5500,9 @@
                 const addBtn        = document.getElementById('scim-add-btn');
                 const newLabelEl    = document.getElementById('scim-new-label');
                 const newTypeEl     = document.getElementById('scim-new-type');
-                const newThreshEl   = document.getElementById('scim-new-threshold');
                 let dragSrc = null;
 
-                newTypeEl?.addEventListener('change', () => {
-                    newThreshEl.style.display = newTypeEl.value === 'days' ? '' : 'none';
-                });
+                newTypeEl?.addEventListener('change', () => scToggleExtra(document.getElementById('scim-new-extra'), newTypeEl.value));
 
                 const saveOrder = async () => {
                     const rows = [...listEl.querySelectorAll('[data-item-id]')];
@@ -5454,10 +5532,8 @@
                                     style="flex:2;min-width:140px;border:1px solid transparent;outline:none;font-size:13px;font-family:inherit;background:transparent;color:#0f172a"
                                     onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='transparent'">
                                 <select data-type="${r.id}" style="padding:5px 8px;border-radius:6px;border:1px solid #e2e8f0;font-size:11px;font-family:inherit">${typeOptions(r.input_type)}</select>
-                                <input data-threshold="${r.id}" type="number" min="0" value="${r.threshold ?? ''}" placeholder="เกณฑ์(วัน)"
-                                    style="width:90px;padding:5px 8px;border-radius:6px;border:1px solid #e2e8f0;font-size:11px;font-family:inherit;display:${r.input_type==='days'?'':'none'}">
-                                <button data-save="${r.id}" type="button"
-                                    style="padding:5px 10px;border-radius:6px;background:#e0f2fe;color:#0369a1;border:none;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">บันทึก</button>
+                                <span data-saved="${r.id}" style="font-size:11px;color:#16a34a;min-width:52px;flex-shrink:0"></span>
+                                <div data-extra="${r.id}" style="display:${r.input_type==='percent'||r.input_type==='days'?'flex':'none'};order:9;gap:10px;align-items:center;width:100%;padding-left:26px">${scExtraFields(`data-th="${r.id}" data`, r)}</div>
                                 <button data-del="${r.id}" type="button"
                                     style="padding:5px 8px;border-radius:6px;background:#fee2e2;color:#b91c1c;border:none;font-size:11px;cursor:pointer;flex-shrink:0" title="ลบ">
                                     <i class="fa fa-trash"></i>
@@ -5467,10 +5543,32 @@
                         listEl.querySelectorAll('[data-item-id]').forEach(row => {
                             const id = row.getAttribute('data-item-id');
                             const typeSel = row.querySelector(`[data-type="${id}"]`);
-                            const threshInp = row.querySelector(`[data-threshold="${id}"]`);
-                            typeSel?.addEventListener('change', () => {
-                                threshInp.style.display = typeSel.value === 'days' ? '' : 'none';
-                            });
+                            const extra = row.querySelector(`[data-extra="${id}"]`);
+                            const threshInp = extra?.querySelector('[data-threshold]');
+                            const totalInp = extra?.querySelector('[data-total]');
+                            const savedEl = row.querySelector(`[data-saved="${id}"]`);
+                            // แก้ช่องไหนก็บันทึกเอง (หน่วง 0.6 วิ) — ไม่ต้องกดบันทึกทีละแถว
+                            let saveTimer = null;
+                            const autoSave = () => { clearTimeout(saveTimer); if (savedEl) savedEl.textContent = '…'; saveTimer = setTimeout(saveRow, 600); };
+                            const saveRow = async () => {
+                                const label = String(row.querySelector(`[data-name="${id}"]`)?.value||'').trim();
+                                const type  = typeSel?.value || 'status';
+                                if (!label) { if (savedEl) savedEl.textContent = ''; return; }
+                                const fd = new FormData();
+                                fd.append('action','save_item_sc'); fd.append('id',id); fd.append('room_id',roomId);
+                                fd.append('label',label); fd.append('input_type',type);
+                                fd.append('threshold', (type==='days'||type==='percent') ? (threshInp?.value || '') : '');
+                                fd.append('total_count', type==='percent' ? (totalInp?.value || '') : '');
+                                try {
+                                    const js = await (await fetch(apiPath,{method:'POST',body:fd})).json();
+                                    if (js.status!=='success') throw new Error(js.message||'Error');
+                                    if (savedEl) { savedEl.style.color = '#16a34a'; savedEl.textContent = '✓ บันทึกแล้ว'; }
+                                } catch(e) { if (savedEl) { savedEl.style.color = '#dc2626'; savedEl.textContent = 'ไม่สำเร็จ'; } Toast.fire({icon:'error',title:e.message}); }
+                            };
+                            typeSel?.addEventListener('change', () => { scToggleExtra(extra, typeSel.value); autoSave(); });
+                            row.querySelector(`[data-name="${id}"]`)?.addEventListener('input', autoSave);
+                            threshInp?.addEventListener('input', autoSave);
+                            totalInp?.addEventListener('input', autoSave);
 
                             row.addEventListener('dragstart', e => { dragSrc = row; row.style.opacity = '.4'; e.dataTransfer.effectAllowed = 'move'; });
                             row.addEventListener('dragend', async () => { row.style.opacity = '1'; dragSrc = null; await saveOrder(); });
@@ -5525,17 +5623,19 @@
                 const doAdd = async () => {
                     const label = String(newLabelEl?.value||'').trim();
                     const type  = newTypeEl?.value || 'status';
-                    const thresh = type === 'days' ? (newThreshEl?.value || '') : '';
+                    const thresh = (type === 'days' || type === 'percent') ? (document.getElementById('scim-new-threshold')?.value || '') : '';
+                    const total = type === 'percent' ? (document.getElementById('scim-new-total')?.value || '') : '';
                     if (!label) { newLabelEl?.focus(); return; }
                     const fd = new FormData();
                     fd.append('action','save_item_sc'); fd.append('room_id',roomId);
-                    fd.append('label',label); fd.append('input_type',type); fd.append('threshold',thresh);
+                    fd.append('label',label); fd.append('input_type',type); fd.append('threshold',thresh); fd.append('total_count',total);
                     try {
                         const res = await fetch(apiPath,{method:'POST',body:fd});
                         const json = await res.json();
                         if (json.status!=='success') throw new Error(json.message||'Error');
                         if (newLabelEl) newLabelEl.value='';
-                        if (newThreshEl) newThreshEl.value='';
+                        const _nt = document.getElementById('scim-new-threshold'), _nc = document.getElementById('scim-new-total');
+                        if (_nt) _nt.value=''; if (_nc) _nc.value='';
                         await render();
                         await loadAllData(); renderContent();
                         Toast.fire({icon:'success',title:'เพิ่มรายการแล้ว'});

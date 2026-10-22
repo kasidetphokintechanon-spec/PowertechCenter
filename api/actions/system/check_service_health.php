@@ -11,6 +11,9 @@ if ($role !== 'admin' && !hasPermission($conn, 'admin.manage_permissions')) {
     exit;
 }
 
+// ตรวจลิงก์ใช้เวลาหลายวินาที — ปล่อยล็อกเซสชันก่อน ไม่ให้คำขออื่นของผู้ใช้ (เช่น บันทึก) ต้องรอ
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+
 $serviceId = trim((string)($_REQUEST['service_id'] ?? ''));
 if ($serviceId === '') {
     echo json_encode(['status' => 'error', 'message' => 'Missing service_id']);

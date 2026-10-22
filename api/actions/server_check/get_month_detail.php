@@ -11,7 +11,7 @@ $to   = date('Y-m-t', strtotime($from));
 $days = (int)date('t', strtotime($from));
 
 $rooms    = $conn->query("SELECT id, code, name, location, company FROM sc_rooms WHERE is_active = 1 ORDER BY sort_order")->fetch_all(MYSQLI_ASSOC);
-$allItems = $conn->query("SELECT id, room_id, item_no, label, input_type, threshold FROM sc_items WHERE is_active = 1 ORDER BY room_id, sort_order")->fetch_all(MYSQLI_ASSOC);
+$allItems = $conn->query("SELECT id, room_id, item_no, label, input_type, threshold, total_count FROM sc_items WHERE is_active = 1 ORDER BY room_id, sort_order")->fetch_all(MYSQLI_ASSOC);
 
 $itemsByRoom = [];
 foreach ($allItems as $item) {
@@ -21,7 +21,7 @@ foreach ($allItems as $item) {
 }
 
 // All records + values for the month
-$sql = "SELECT r.room_id, r.check_date, r.checked_by, r.suggestions, v.item_id, v.val
+$sql = "SELECT r.room_id, r.check_date, r.checked_by, r.suggestions, r.created_at, v.item_id, v.val
         FROM sc_records r
         LEFT JOIN sc_values v ON v.record_id = r.id
         WHERE r.check_date BETWEEN '$from' AND '$to'";
@@ -31,6 +31,7 @@ $rows = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 $vals     = []; // vals[rid][date][iid] = val
 $checkers = []; // checkers[rid][date]  = checked_by name
 $sugg     = []; // sugg[rid][date]      = suggestions text
+$late     = []; // late[rid][date]      = วันที่บันทึกจริง (บันทึกย้อนหลัง)
 
 foreach ($rows as $row) {
     $rid  = (int)$row['room_id'];
@@ -40,6 +41,7 @@ foreach ($rows as $row) {
     if (!isset($checkers[$rid][$date])) {
         $checkers[$rid][$date] = $row['checked_by'] ?? '';
         $sugg[$rid][$date]     = $row['suggestions'] ?? '';
+        if (!empty($row['created_at']) && substr($row['created_at'], 0, 10) >= date('Y-m-d', strtotime($date . ' +2 day'))) $late[$rid][$date] = substr($row['created_at'], 0, 10);
     }
     if ($iid !== null) {
         $vals[$rid][$date][$iid] = $row['val'] ?? '';
@@ -53,6 +55,7 @@ echo json_encode([
     'vals'        => $vals,
     'checkers'    => $checkers,
     'sugg'        => $sugg,
+    'late'        => $late,
     'days'        => $days,
     'month'       => $month,
     'year'        => $year,

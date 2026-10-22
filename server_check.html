@@ -156,6 +156,13 @@ html.dark .chk-popup textarea{background:#0f172a;border-color:#334155;color:#e2e
 .leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748b;}
 html.dark .leg-item{color:#94a3b8;}
 .leg-dot{width:12px;height:12px;border-radius:3px;}
+.leg-dot.v-ok,.leg-dot.v-good{background:#bbf7d0;}.leg-dot.v-issue,.leg-dot.v-bad{background:#fecaca;}.leg-dot.v-backup{background:#bfdbfe;}
+/* วันที่ยังไม่ถึง: กดไม่ได้ (บันทึกล่วงหน้าไม่ได้ — TISAX) */
+.cv.fut{cursor:not-allowed;background:transparent;border:1px dashed #e2e8f0;}
+.cv.fut:hover{transform:none;}
+html.dark .cv.fut{border-color:#334155;}
+.day-hd.late sup{color:#d97706;font-weight:800;}
+html.dark .ptc-btn-ghost{background:#1e293b !important;border-color:#334155 !important;color:#e2e8f0;}
 
 /* ══════════════════════════════════════════════════════════════
    TV MODE — wall-monitor view (same control-room language as
@@ -334,6 +341,85 @@ html.dark .hd-head .ic{background:rgba(234,88,12,.12);border-color:rgba(234,88,1
 .hd-empty{text-align:center;padding:30px;color:var(--ptc-text-faint);font-size:13px;}
 .hd-msg{min-height:16px;font-size:12px;color:var(--ptc-danger);margin:-4px 0 8px;}
 @media(max-width:720px){.hd-body{grid-template-columns:1fr;}.hd-side{border-right:0;border-bottom:1px solid var(--ptc-border);}.hd-backdrop{padding:0;}.hd-modal{max-height:none;height:100%;border-radius:0;}}
+
+/* ════ โหมด "ตรวจวันนี้" (22 ต.ค. 2026): ภาพรวมทุกห้อง + ตรวจทีละห้อง ปุ่มใหญ่ ════ */
+.sc-view-tabs{display:inline-flex;border:1px solid var(--ptc-border);border-radius:8px;overflow:hidden;}
+.sc-view-tabs button{height:30px;padding:0 14px;border:0;background:var(--ptc-surface);color:var(--ptc-text-2);font:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+.sc-view-tabs button.on{background:var(--ptc-text);color:var(--ptc-surface);}
+body.view-today .sc-month-nav, body.view-today .sc-today-btn, body.view-today .sc-badge, body.view-today .sc-autosave-hint{display:none !important;}
+.td-wrap{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;padding:16px;align-items:start;max-width:1400px;margin:0 auto;}
+.td-panel{background:var(--ptc-surface);border:1px solid var(--ptc-border);border-radius:10px;overflow:hidden;}
+.td-ov{position:sticky;top:12px;}
+.td-ov-h{padding:14px;border-bottom:1px solid var(--ptc-border);}
+.td-ov-h h2{font-size:15px;font-weight:800;margin:0;color:var(--ptc-text);}
+.td-ov-h p{font-size:12px;color:var(--ptc-text-muted);margin:2px 0 0;}
+.td-prog{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--ptc-border);margin:10px 0 6px;}
+.td-prog i{display:block;}
+.td-k{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ptc-text-2);}
+.td-k b{font-weight:800;}
+.td-go{margin-top:12px;width:100%;height:40px;border:0;border-radius:8px;background:var(--ptc-primary);color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer;}
+.td-go:disabled{background:#16a34a;cursor:default;}
+.td-co{padding:8px 14px 2px;font-size:11px;font-weight:800;color:var(--ptc-text-muted);letter-spacing:.05em;}
+.td-rm{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;}
+.td-rm:hover{background:var(--ptc-surface-2);}
+.td-rm.cur{background:var(--ptc-primary-light);border-left-color:var(--ptc-primary);}
+.td-rm .code{font-weight:800;font-size:13px;min-width:56px;color:var(--ptc-text);}
+.td-rm .nm{flex:1;min-width:0;font-size:12px;color:var(--ptc-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.td-st{font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap;}
+.td-st.ok{color:#15803d;background:#f0fdf4;} .td-st.bad{color:#b91c1c;background:#fef2f2;} .td-st.part{color:#b45309;background:#fffbeb;} .td-st.no{color:var(--ptc-text-muted);background:var(--ptc-surface-2);border:1px solid var(--ptc-border);}
+html.dark .td-st.ok{background:rgba(22,163,74,.15);color:#4ade80;} html.dark .td-st.bad{background:rgba(220,38,38,.15);color:#f87171;} html.dark .td-st.part{background:rgba(217,119,6,.15);color:#fbbf24;}
+.td-ck-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ptc-border);flex-wrap:wrap;}
+.td-ck-h .code{font-size:20px;font-weight:800;color:var(--ptc-text);}
+.td-ck-h .meta{font-size:12px;color:var(--ptc-text-muted);}
+.td-allok{margin-left:auto;height:34px;padding:0 12px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;border-radius:8px;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+html.dark .td-allok{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:#4ade80;}
+.td-hol{margin:10px 16px 0;padding:8px 12px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;font-size:12.5px;}
+html.dark .td-hol{background:rgba(234,88,12,.12);border-color:rgba(234,88,12,.35);color:#fdba74;}
+.td-it{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ptc-border);}
+.td-it.bad{background:#fef2f2;} html.dark .td-it.bad{background:rgba(220,38,38,.1);}
+.td-it .n{width:22px;color:var(--ptc-text-muted);font-size:12px;text-align:right;flex-shrink:0;}
+.td-it .t{flex:1;min-width:0;}
+.td-it .t b{display:block;font-size:13.5px;font-weight:600;color:var(--ptc-text);}
+.td-it .t span{font-size:11.5px;color:var(--ptc-text-muted);}
+.td-seg{display:flex;border:1px solid var(--ptc-border);border-radius:8px;overflow:hidden;flex-shrink:0;}
+.td-seg button{height:36px;padding:0 14px;border:0;background:var(--ptc-surface);color:var(--ptc-text-2);font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+.td-seg button+button{border-left:1px solid var(--ptc-border);}
+.td-seg button.ok.on{background:#16a34a;color:#fff;} .td-seg button.bad.on{background:#dc2626;color:#fff;}
+.td-num{display:flex;align-items:center;gap:6px;flex-shrink:0;color:var(--ptc-text-2);font-size:13px;}
+.td-num input{width:72px;height:36px;border:1px solid var(--ptc-border);border-radius:8px;text-align:center;font:inherit;font-weight:700;font-size:14px;background:var(--ptc-surface);color:var(--ptc-text);}
+.td-num .r{font-size:12px;font-weight:700;min-width:52px;}
+.td-f{padding:14px 16px;display:grid;gap:10px;background:var(--ptc-surface-2);}
+.td-f label{font-size:12px;font-weight:700;color:var(--ptc-text-2);display:block;margin-bottom:4px;}
+.td-f textarea,.td-f input{width:100%;border:1px solid var(--ptc-border);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;background:var(--ptc-surface);color:var(--ptc-text);box-sizing:border-box;}
+.td-f textarea.req{border-color:#dc2626;}
+.td-req{color:#dc2626;font-size:11.5px;font-weight:600;}
+.td-save{display:flex;gap:8px;}
+.td-save button{height:44px;border-radius:8px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;}
+.td-save .sec{padding:0 14px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text-2);}
+.td-save .pri{flex:1;border:0;background:var(--ptc-primary);color:#fff;}
+.td-save button:disabled{opacity:.45;cursor:not-allowed;}
+.td-hint{font-size:11.5px;color:var(--ptc-text-muted);text-align:center;}
+.td-back{display:none;}
+@media(max-width:900px){
+  .td-wrap{grid-template-columns:1fr;padding:10px;gap:10px;}
+  .td-ov{position:static;}
+  .td-wrap:not(.in-room) .td-ck{display:none;}
+  .td-wrap.in-room .td-ov{display:none;}
+  .td-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ptc-primary);font-weight:700;cursor:pointer;padding:12px 14px 0;background:none;border:0;font-family:inherit;}
+  .td-it{flex-wrap:wrap;padding:10px 12px;}
+  .td-it .t{flex-basis:calc(100% - 34px);}
+  .td-seg,.td-num{margin-left:34px;width:calc(100% - 34px);}
+  .td-seg button{flex:1;height:44px;}
+  .td-num input{flex:1;max-width:120px;height:42px;}
+  .td-allok{margin-left:0;width:100%;height:40px;}
+  /* แถบบน: แท็บเต็มแถว · ตัวกรองบริษัท + ไอคอนวันหยุด/TV แถวเดียว */
+  .sc-topbar{gap:6px !important;padding:8px 10px !important;}
+  .sc-view-tabs{flex:1 1 100%;}
+  .sc-view-tabs button{flex:1;height:36px;}
+  .sc-co-filter{flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap !important;}
+  .sc-topbar > button.ptc-btn-ghost{font-size:0 !important;width:34px;padding:0 !important;justify-content:center;}
+  .sc-topbar > button.ptc-btn-ghost i{font-size:14px;}
+}
 </style>
 </head>
 <body>
@@ -344,7 +430,7 @@ html.dark .hd-head .ic{background:rgba(234,88,12,.12);border-color:rgba(234,88,1
         <div class="ptc-nav-icon" style="background:#0f766e"><i class="fa fa-server"></i></div>
         <div>
             <div class="ptc-nav-title">Server Room Check</div>
-            <div class="ptc-nav-sub">Monthly Check Sheet</div>
+            <div class="ptc-nav-sub">ตรวจห้อง Server ประจำวัน</div>
         </div>
     </div>
     <div style="flex:1"></div>
@@ -353,6 +439,7 @@ html.dark .hd-head .ic{background:rgba(234,88,12,.12);border-color:rgba(234,88,1
 </nav>
 
 <div class="sc-topbar">
+    <div class="sc-view-tabs"><button data-v="today" onclick="setView('today')"><i class="fa fa-list-check"></i> ตรวจวันนี้</button><button data-v="month" onclick="setView('month')"><i class="fa fa-table-cells"></i> รายเดือน</button></div>
     <div class="sc-month-nav">
         <button onclick="prevMonth()"><i class="fa fa-chevron-left"></i></button>
         <span class="sc-month-label" id="month-label">...</span>
@@ -361,10 +448,10 @@ html.dark .hd-head .ic{background:rgba(234,88,12,.12);border-color:rgba(234,88,1
     <button class="sc-today-btn" onclick="goThisMonth()">วันนี้</button>
     <div class="sc-badge" id="overall-badge"><i class="fa fa-circle-half-stroke"></i><span id="overall-text">...</span></div>
     <div class="sc-co-filter" id="sc-co-filter"></div>
-    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;color:#ea580c;border-color:#fed7aa;" onclick="openHolidays()" title="จัดการวันหยุดบริษัท (วันที่ไม่ต้องตรวจ)">
+    <button class="ptc-btn-ghost ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;color:#ea580c;border:1px solid #fed7aa;" onclick="openHolidays()" title="จัดการวันหยุดบริษัท (วันที่ไม่ต้องตรวจ)">
         <i class="fa fa-calendar-xmark"></i> วันหยุด
     </button>
-    <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;" onclick="enterTvMode()" title="โหมดจอมอนิเตอร์ (สำหรับขึ้นจอ TV)">
+    <button class="ptc-btn-ghost ptc-btn-sm" style="font-size:11px;height:28px;padding:0 10px;border:1px solid var(--ptc-border);" onclick="enterTvMode()" title="โหมดจอมอนิเตอร์ (สำหรับขึ้นจอ TV)">
         <i class="fa fa-tv"></i> TV Mode
     </button>
     <span class="sc-autosave-hint"><i class="fa fa-cloud-arrow-up"></i> บันทึกอัตโนมัติ</span>
@@ -422,7 +509,9 @@ let monthDays    = 30;
 let holidayMap   = {}; // date string → holiday name
 
 // Data state (all mutable)
-let rooms = [], itemsByRoom = {}, vals = {}, checkers = {}, sugg = {};
+let rooms = [], itemsByRoom = {}, vals = {}, checkers = {}, sugg = {}, late = {};
+const backfillReason = {}; // rid → เหตุผลบันทึกย้อนหลัง (ถามครั้งเดียวต่อห้องต่อการเปิดหน้า)
+const _bfPending = {};
 let dirty = {};       // `${rid}:${date}` → true
 let saveTimers = {};  // debounce per rid:date
 let openRooms  = new Set();
@@ -457,6 +546,7 @@ function stripTitle(n) {
 }
 
 function pad2(n) { return String(n).padStart(2,'0'); }
+function localToday() { const n = new Date(); return `${n.getFullYear()}-${pad2(n.getMonth()+1)}-${pad2(n.getDate())}`; }
 function ds(d)   { return `${currentYear}-${pad2(currentMonth)}-${pad2(d)}`; }
 function isWE(dateStr) { const dow=new Date(dateStr+'T00:00:00').getDay(); return dow===0||dow===6; }
 function isPH(dateStr) { return !!holidayMap[dateStr]; } // public/company holiday
@@ -487,6 +577,7 @@ async function load() {
         vals        = data.vals     || {};
         checkers    = data.checkers || {};
         sugg        = data.sugg     || {};
+        late        = data.late     || {};
         monthDays   = data.days;
         holidayMap  = hdata.map || {};
         renderCompanyFilter();
@@ -497,7 +588,8 @@ async function load() {
 
 // ── Render accordion ───────────────────────────────────────────
 function render() {
-    const today = new Date().toISOString().slice(0,10);
+    if (scView === 'today') return renderToday();
+    const today = localToday();
     let html = '<div class="sc-wrap">';
     const roomsShown = visibleRooms();
 
@@ -520,10 +612,10 @@ function render() {
             <span class="acc-name">${esc(room.name)}</span>
             <span class="acc-stat ${statCls}">${statLbl}</span>
             <div class="acc-actions" onclick="event.stopPropagation()">
-                <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:10px;height:26px;padding:0 8px;color:#7c3aed;border-color:#c4b5fd" onclick="bulkRoom(${rid})">
-                    <i class="fa fa-calendar-check"></i> All OK
+                <button class="ptc-btn-ghost ptc-btn-sm" style="font-size:10.5px;height:26px;padding:0 8px;color:#15803d;border:1px solid #bbf7d0" onclick="bulkRoom(${rid})" title="ติ๊กปกติให้วันทำงานที่ผ่านมาแล้วและยังว่าง (ไม่ทับของเดิม ไม่เติมวันข้างหน้า)">
+                    <i class="fa fa-check-double"></i> ปกติวันที่ว่าง
                 </button>
-                <button class="ptc-btn ptc-btn-secondary ptc-btn-sm" style="font-size:10px;height:26px;padding:0 8px;" onclick="printRoom(${rid})">
+                <button class="ptc-btn-ghost ptc-btn-sm" style="font-size:10px;height:26px;padding:0 8px;border:1px solid var(--ptc-border)" onclick="printRoom(${rid})" title="พิมพ์ใบตรวจรายเดือน">
                     <i class="fa fa-print"></i>
                 </button>
             </div>
@@ -566,7 +658,7 @@ function buildTable(rid, items, today) {
     for (let d = 1; d <= monthDays; d++) {
         const date = ds(d);
         const dow  = new Date(date + 'T00:00:00').getDay();
-        dayInfo.push({ d, date, dow, we: dow===0||dow===6, ph: isPH(date), tod: date===today });
+        dayInfo.push({ d, date, dow, we: dow===0||dow===6, ph: isPH(date), tod: date===today, fut: date > today });
     }
 
     // Header
@@ -574,7 +666,8 @@ function buildTable(rid, items, today) {
     for (const {d, date, dow, we, ph, tod} of dayInfo) {
         const cls   = ph ? 'ph' : we ? 'we' : '';
         const title = ph ? `title="${holidayMap[date]}"` : '';
-        thead += `<th class="day-hd${cls?' '+cls:''}${tod?' tod':''}" ${title}>${d}<span class="dow">${thDows[dow]}</span></th>`;
+        const lt = late[rid]?.[date];
+        thead += `<th class="day-hd${cls?' '+cls:''}${tod?' tod':''}${lt?' late':''}" ${lt ? `title="บันทึกย้อนหลัง (ลงระบบ ${lt})"` : title}>${d}${lt ? '<sup>*</sup>' : ''}<span class="dow">${thDows[dow]}</span></th>`;
     }
     thead += `</tr>`;
 
@@ -583,9 +676,11 @@ function buildTable(rid, items, today) {
     items.forEach(item => {
         const iid = item.id;
         tbody += `<tr><td class="item-lbl">${esc(item.item_no)}. ${esc(item.label)}</td>`;
-        for (const {date, we, ph, tod} of dayInfo) {
+        for (const {date, we, ph, tod, fut} of dayInfo) {
             const v = vals[rid]?.[date]?.[iid] ?? '';
-            if (we) {
+            if (fut && !v) {
+                tbody += `<td class="cv fut" title="ยังไม่ถึงวันที่ ${date}"></td>`;
+            } else if (we) {
                 tbody += `<td class="cv we${tod?' tod':''}">—</td>`;
             } else if (ph) {
                 tbody += `<td class="cv ph${tod?' tod':''}" title="${esc(holidayMap[date])}">—</td>`;
@@ -705,7 +800,7 @@ function setVal(rid, iid, date, val, el, type, threshold) {
     vals[rid][date][iid] = val;
 
     const {cls, txt} = cellDisplay(val, type, threshold);
-    el.className = `cv ${cls}${date === new Date().toISOString().slice(0,10) ? ' tod' : ''}`;
+    el.className = `cv ${cls}${date === localToday() ? ' tod' : ''}`;
     el.textContent = txt;
 
     markDirty(rid, date);
@@ -867,6 +962,8 @@ function applyCheckerAll(rid) {
         const dow  = new Date(date + 'T00:00:00').getDay();
         if (dow === 0 || dow === 6) continue; // skip weekends
         if (isPH(date)) continue;             // skip holidays
+        // ใส่ชื่อเฉพาะวันที่มีผลตรวจแล้ว — ไม่สร้างบันทึกเปล่าหรือวันข้างหน้า
+        if (date > localToday() || !Object.values(vals[rid]?.[date] || {}).some(v => v !== '')) continue;
         checkers[rid][date] = name;
 
         // update cell in DOM if rendered
@@ -881,8 +978,30 @@ function applyCheckerAll(rid) {
     inp.value = name;
 }
 
+// ── บันทึกย้อนหลัง (TISAX) ─────────────────────────────────────
+function yesterdayStr() { const y = new Date(); y.setDate(y.getDate() - 1); return `${y.getFullYear()}-${pad2(y.getMonth()+1)}-${pad2(y.getDate())}`; }
+function isBackfillDate(date) { return date < yesterdayStr(); }
+function askBackfillReason(rid) {
+    if (backfillReason[rid]) return Promise.resolve(true);
+    if (_bfPending[rid]) return _bfPending[rid];
+    const room = rooms.find(r => r.id == rid);
+    const msg = `บันทึกย้อนหลัง — ${room?.code || ''}\n\nวันที่เก่ากว่าเมื่อวาน ต้องระบุเหตุผล (เก็บเป็นหลักฐานตรวจสอบ)\nเช่น "ตรวจแล้วแต่ลงระบบช้า"`;
+    _bfPending[rid] = Promise.resolve(window.prompt(msg, '')).then(v => {
+        delete _bfPending[rid];
+        const r = String(v || '').trim();
+        if (r) backfillReason[rid] = r;
+        return !!r;
+    });
+    return _bfPending[rid];
+}
+
 // ── Dirty / save ───────────────────────────────────────────────
 function markDirty(rid, date) {
+    // วันเก่ากว่าเมื่อวาน: ขอเหตุผลก่อน ถ้ายกเลิก → โหลดค่าเดิมกลับ
+    if (isBackfillDate(date) && !backfillReason[rid]) {
+        askBackfillReason(rid).then(ok => { if (ok) markDirty(rid, date); else reloadRoom(rid); });
+        return;
+    }
     const k = `${rid}:${date}`;
     dirty[k] = true;
     clearTimeout(saveTimers[k]);
@@ -901,18 +1020,21 @@ async function saveCell(rid, date) {
     fd.append('checked_by',  checkers[rid]?.[date] ?? '');
     fd.append('suggestions', sugg[rid]?.[date] ?? '');
     fd.append('values',      JSON.stringify(vals[rid]?.[date] ?? {}));
+    if (isBackfillDate(date)) fd.append('backfill_reason', backfillReason[rid] || '');
 
     try {
         const res  = await fetch(API, { method:'POST', body:fd });
         const data = await res.json();
         if (data.status !== 'success') dirty[k] = true; // retry on next change
+        else if (isBackfillDate(date)) { if (!late[rid]) late[rid] = {}; late[rid][date] = localToday(); }
     } catch(e) { dirty[k] = true; }
 }
 
 // ── Bulk fill room ─────────────────────────────────────────────
 async function bulkRoom(rid) {
     const room = rooms.find(r => r.id == rid);
-    if (!confirm(`All OK ทั้งเดือน: ${room?.code} — ${thMSh[currentMonth]} ${currentYear+543}\n\nจะ mark ✓ ทุกรายการ ทุกวันจันทร์–ศุกร์\nลบข้อมูลวันเสาร์–อาทิตย์อัตโนมัติ\n\nยืนยัน?`)) return;
+    if (!confirm(`ติ๊กปกติวันที่ว่าง: ${room?.code} — ${thMSh[currentMonth]} ${currentYear+543}\n\nจะติ๊ก ✓ ให้ข้อปกติ/มีปัญหา ในวันทำงานที่ผ่านมาแล้วและยังไม่ได้บันทึก
+• ช่องตัวเลข (กล้องออนไลน์ / วันเก็บภาพ) เว้นไว้ — กรอกตามที่ดูจริง\n• ไม่ทับวันที่บันทึกไว้แล้ว\n• ไม่เติมวันข้างหน้า\n\nยืนยันว่าได้ตรวจจริงตามวันดังกล่าว?`)) return;
 
     const fd = new FormData();
     fd.append('action',  'bulk_fill');
@@ -920,6 +1042,12 @@ async function bulkRoom(rid) {
     fd.append('month',   currentMonth);
     fd.append('year',    currentYear);
     fd.append('mode',    'all');
+    const ys = yesterdayStr();
+    const needOld = Array.from({ length: monthDays }, (_, i) => ds(i + 1)).some(d => d < ys && !isWE(d) && !isPH(d) && !Object.keys(vals[rid]?.[d] || {}).length);
+    if (needOld) {
+        if (!(await askBackfillReason(rid))) return;
+        fd.append('backfill_reason', backfillReason[rid]);
+    }
 
     try {
         const res  = await fetch(API, { method:'POST', body:fd });
@@ -944,12 +1072,209 @@ async function reloadRoom(rid) {
     // Re-render room body
     const room  = rooms.find(r => r.id == rid);
     const items = itemsByRoom[rid] || [];
-    const today = new Date().toISOString().slice(0,10);
+    const today = localToday();
     const bodyEl = document.querySelector(`#acc-${rid} .mtbl-wrap`);
     if (bodyEl) bodyEl.innerHTML = buildTable(rid, items, today);
     updateRoomStat(rid);
     updateBadge();
 }
+
+
+// ════ โหมด "ตรวจวันนี้": ภาพรวมทุกห้อง → ตรวจทีละห้อง → บันทึกแล้วไปห้องถัดไป ════
+let scView = localStorage.getItem('sc_view') || 'today';
+let tdRoom = null;        // ห้องที่กำลังตรวจ
+let tdInRoom = false;     // มือถือ: อยู่หน้าตรวจห้อง (ไม่ใช่ภาพรวม)
+let tdUnsaved = false;
+
+function setView(v) {
+    if (v === scView) return;
+    if (scView === 'today' && tdUnsaved && !confirm('ผลตรวจห้องนี้ยังไม่ได้บันทึก — ออกโดยไม่บันทึก?')) return;
+    tdUnsaved = false;
+    scView = v;
+    localStorage.setItem('sc_view', v);
+    applyViewTabs();
+    const n = new Date();
+    // โหมดวันนี้ต้องดูเดือนปัจจุบันเสมอ
+    if (v === 'today' && (currentMonth !== n.getMonth() + 1 || currentYear !== n.getFullYear())) { goThisMonth(); return; }
+    render();
+}
+function applyViewTabs() {
+    document.body.classList.toggle('view-today', scView === 'today');
+    document.querySelectorAll('.sc-view-tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === scView));
+}
+
+// ค่าที่ "ไม่ผ่าน" ของแต่ละแบบรายการ (ใช้นับปัญหาและบังคับหมายเหตุ)
+function tdFail(item, v) {
+    if (v === '' || v == null) return false;
+    if (v === '✖') return true;
+    const thr = parseFloat(item.threshold) || 90;
+    if (item.input_type === 'percent' || item.input_type === 'days') { const n = parseFloat(v); return !isNaN(n) && n < thr; }
+    return false;
+}
+function tdRoomState(rid) {
+    const today = localToday();
+    const items = itemsByRoom[rid] || [];
+    const dv = vals[rid]?.[today] || {};
+    const done = items.filter(i => (dv[i.id] ?? '') !== '').length;
+    const bad = items.filter(i => tdFail(i, dv[i.id])).length;
+    const cls = !items.length ? 'no' : bad ? 'bad' : done === 0 ? 'no' : done < items.length ? 'part' : 'ok';
+    const lbl = !items.length ? 'ไม่มีรายการ' : bad ? `มีปัญหา ${bad}` : done === 0 ? 'ยังไม่ตรวจ' : done < items.length ? `${done}/${items.length}` : 'ปกติ';
+    return { cls, lbl, done, bad, total: items.length };
+}
+function tdNextRoom(afterRid) {
+    const list = visibleRooms();
+    const idx = list.findIndex(r => r.id == afterRid);
+    const pending = r => { const s = tdRoomState(r.id); return s.total && (s.cls === 'no' || s.cls === 'part'); };
+    return list.slice(idx + 1).find(pending) || list.slice(0, Math.max(0, idx)).find(pending) || null;
+}
+
+function renderToday() {
+    const today = localToday();
+    const list = visibleRooms();
+    if (!list.length) { document.getElementById('sc-page').innerHTML = '<div class="sc-loading">ไม่มีห้องของบริษัทนี้</div>'; return; }
+    if (!tdRoom || !list.some(r => r.id == tdRoom)) tdRoom = (tdNextRoom(-1) || list[0]).id;
+    const states = Object.fromEntries(list.map(r => [r.id, tdRoomState(r.id)]));
+    const n = list.length, ok = list.filter(r => states[r.id].cls === 'ok').length, bad = list.filter(r => states[r.id].cls === 'bad').length,
+          part = list.filter(r => states[r.id].cls === 'part').length, none = n - ok - bad - part;
+    const d = new Date();
+    const dateTh = d.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const cos = [...new Set(list.map(r => r.company || '-'))];
+    const next = tdNextRoom(-1);
+
+    const ov = `<div class="td-panel td-ov"><div class="td-ov-h"><h2>วันนี้ · ${esc(dateTh)}</h2><p>ตรวจแล้ว ${ok + bad}/${n} ห้อง</p>
+        <div class="td-prog"><i style="width:${ok/n*100}%;background:#16a34a"></i><i style="width:${bad/n*100}%;background:#dc2626"></i><i style="width:${part/n*100}%;background:#d97706"></i></div>
+        <div class="td-k"><span><b style="color:#16a34a">${ok}</b> ปกติ</span><span><b style="color:#dc2626">${bad}</b> มีปัญหา</span><span><b style="color:#d97706">${part}</b> ตรวจไม่ครบ</span><span><b>${none}</b> ยังไม่ตรวจ</span></div>
+        <button class="td-go" ${next ? `onclick="tdOpen(${next.id})"` : 'disabled'}>${next ? `<i class="fa fa-play"></i> เริ่มตรวจ — ${esc(next.code)}` : '<i class="fa fa-circle-check"></i> ตรวจครบทุกห้องแล้ว'}</button></div>
+        ${cos.map(co => `<div class="td-co">${esc(co)}</div>` + list.filter(r => (r.company || '-') === co).map(r =>
+            `<div class="td-rm ${r.id == tdRoom ? 'cur' : ''}" onclick="tdOpen(${r.id})"><span class="code">${esc(r.code)}</span><span class="nm">${esc(r.name)}</span><span class="td-st ${states[r.id].cls}">${states[r.id].lbl}</span></div>`).join('')).join('')}
+        <div style="height:8px"></div></div>`;
+
+    const room = rooms.find(r => r.id == tdRoom);
+    const items = itemsByRoom[tdRoom] || [];
+    const dv = vals[tdRoom]?.[today] || {};
+    const st = states[tdRoom] || tdRoomState(tdRoom);
+    const nextAfter = tdNextRoom(tdRoom);
+    const note = sugg[tdRoom]?.[today] ?? '';
+    const checker = checkers[tdRoom]?.[today] || myName;
+    const holiday = holidayMap[today] ? `วันหยุดบริษัท (${esc(holidayMap[today])})` : isWE(today) ? 'วันเสาร์–อาทิตย์' : '';
+    const rows = items.map((it, i) => {
+        const v = dv[it.id] ?? '';
+        const thr = parseFloat(it.threshold) || 90;
+        let ctl, sub;
+        if (it.input_type === 'status' || it.input_type === 'backup') {
+            const okV = it.input_type === 'backup' ? 'O' : '###';
+            sub = it.input_type === 'backup' ? 'สำรองข้อมูล' : 'สถานะอุปกรณ์';
+            ctl = `<div class="td-seg"><button class="ok ${v === okV ? 'on' : ''}" onclick="tdSet(${it.id},'${okV}')"><i class="fa fa-check"></i> ปกติ</button><button class="bad ${v === '✖' ? 'on' : ''}" onclick="tdSet(${it.id},'✖')"><i class="fa fa-xmark"></i> มีปัญหา</button></div>`;
+        } else if (it.input_type === 'percent' && parseInt(it.total_count, 10) > 0) {
+            // กล้อง: กรอกจำนวนที่ออนไลน์ ระบบคิด % ให้
+            const tot = parseInt(it.total_count, 10);
+            const cnt = v === '' ? '' : Math.round(parseFloat(v) / 100 * tot);
+            const maxOff = Math.floor(tot * (1 - thr / 100) + 1e-9);
+            sub = `ผ่าน ≥ ${thr}% (ดับได้ไม่เกิน ${maxOff} ตัว)`;
+            ctl = `<div class="td-num"><input type="number" inputmode="numeric" min="0" max="${tot}" value="${cnt}" placeholder="${tot}" onchange="tdSetCount(${it.id},this.value,${tot})"><span>/ ${tot} ตัว</span><span class="r" style="color:${v === '' ? 'var(--ptc-text-muted)' : tdFail(it, v) ? '#dc2626' : '#16a34a'}">${v === '' ? '' : v + '%'}</span></div>`;
+        } else {
+            const unit = it.input_type === 'percent' ? '%' : 'วัน';
+            sub = it.input_type === 'percent' ? `ผ่าน ≥ ${thr}%` : `เก็บย้อนหลัง · ผ่าน ≥ ${thr} วัน`;
+            ctl = `<div class="td-num"><input type="number" inputmode="decimal" min="0" value="${esc(v)}" placeholder="${unit}" onchange="tdSet(${it.id},this.value)"><span>${unit}</span><span class="r" style="color:${tdFail(it, v) ? '#dc2626' : '#16a34a'}">${v === '' ? '' : tdFail(it, v) ? 'ไม่ผ่าน' : 'ผ่าน'}</span></div>`;
+        }
+        return `<div class="td-it ${tdFail(it, v) ? 'bad' : ''}"><span class="n">${i + 1}</span><div class="t"><b>${esc(it.label)}</b><span>${sub}</span></div>${ctl}</div>`;
+    }).join('');
+    const needNote = st.bad > 0 && !String(note).trim();
+    const ck = `<div class="td-panel td-ck"><button class="td-back" onclick="tdBack()"><i class="fa fa-arrow-left"></i> ภาพรวมวันนี้</button>
+        <div class="td-ck-h"><div><div class="code">${esc(room?.code || '')}</div><div class="meta">${esc(room?.name || '')} · ${esc(room?.company || '')} · ตรวจแล้ว ${st.done}/${st.total}</div></div>
+            <button class="td-allok" onclick="tdAllOk()" title="ติ๊กปกติให้รายการแบบปกติ/มีปัญหา เฉพาะวันนี้ (ช่องตัวเลขต้องกรอกตามจริง)"><i class="fa fa-check-double"></i> ปกติทุกข้อ (เฉพาะวันนี้)</button></div>
+        ${holiday ? `<div class="td-hol"><i class="fa fa-calendar-xmark"></i> วันนี้เป็น${holiday} — ไม่บังคับตรวจ ถ้าเข้าห้องจริงบันทึกได้ตามปกติ</div>` : ''}
+        ${rows || '<div class="sc-loading">ห้องนี้ยังไม่มีรายการตรวจ — เพิ่มได้ที่ Admin → Server Check</div>'}
+        <div class="td-f">
+            <div><label>หมายเหตุ / การแก้ไข ${st.bad ? `<span class="td-req">* ต้องกรอก เพราะมีข้อที่ไม่ผ่าน ${st.bad} ข้อ</span>` : '(ถ้ามี)'}</label>
+                <textarea id="td-note" rows="2" class="${needNote ? 'req' : ''}" placeholder="${st.bad ? 'เช่น UPS แจ้งเตือนแบตเสื่อม แจ้งช่างแล้ว' : ''}" oninput="tdNote(this.value)">${esc(note)}</textarea></div>
+            <div><label>ผู้ตรวจ</label><input id="td-checker" value="${esc(checker)}" oninput="tdUnsaved=true"></div>
+            <div class="td-save">
+                <button class="sec" id="td-save-only" onclick="tdSave(false)" ${needNote ? 'disabled' : ''}>บันทึก</button>
+                <button class="pri" id="td-save-next" onclick="tdSave(true)" ${st.done < st.total || needNote ? 'disabled' : ''}>${nextAfter ? `บันทึก แล้วไปห้อง ${esc(nextAfter.code)} <i class="fa fa-arrow-right"></i>` : 'บันทึก — ห้องสุดท้ายแล้ว <i class="fa fa-flag-checkered"></i>'}</button>
+            </div>
+            <div class="td-hint" id="td-hint">${st.bad ? 'ข้อที่มีปัญหาจะแจ้ง LINE/Telegram ทันทีที่บันทึก' : st.done < st.total ? `เหลืออีก ${st.total - st.done} ข้อ` : 'ตรวจครบแล้ว'} · ดู/แก้ไขย้อนหลังที่แท็บ "รายเดือน"</div>
+        </div></div>`;
+
+    document.getElementById('sc-page').innerHTML = `<div class="td-wrap${tdInRoom ? ' in-room' : ''}">${ov}${ck}</div>`;
+}
+
+function tdOpen(rid) {
+    if (rid != tdRoom && tdUnsaved && !confirm('ผลตรวจห้องนี้ยังไม่ได้บันทึก — เปลี่ยนห้องโดยไม่บันทึก?')) return;
+    if (rid != tdRoom) tdUnsaved = false;
+    tdRoom = rid; tdInRoom = true;
+    renderToday();
+    window.scrollTo({ top: 0 });
+}
+function tdBack() { tdInRoom = false; renderToday(); window.scrollTo({ top: 0 }); }
+function tdSet(iid, v) {
+    const today = localToday();
+    if (!vals[tdRoom]) vals[tdRoom] = {};
+    if (!vals[tdRoom][today]) vals[tdRoom][today] = {};
+    const cur = vals[tdRoom][today][iid] ?? '';
+    vals[tdRoom][today][iid] = (v === cur && (v === '###' || v === 'O' || v === '✖')) ? '' : String(v).trim();
+    tdUnsaved = true;
+    renderToday();
+}
+function tdSetCount(iid, cnt, tot) {
+    if (cnt === '') return tdSet(iid, '');
+    const c = Math.max(0, Math.min(tot, parseInt(cnt, 10) || 0));
+    tdSet(iid, String(Math.round(c / tot * 1000) / 10));
+}
+function tdAllOk() {
+    const today = localToday();
+    if (!vals[tdRoom]) vals[tdRoom] = {};
+    if (!vals[tdRoom][today]) vals[tdRoom][today] = {};
+    (itemsByRoom[tdRoom] || []).forEach(it => {
+        if (it.input_type === 'status') vals[tdRoom][today][it.id] = '###';
+        if (it.input_type === 'backup') vals[tdRoom][today][it.id] = 'O';
+    });
+    tdUnsaved = true;
+    renderToday();
+}
+function tdNote(v) {
+    const today = localToday();
+    if (!sugg[tdRoom]) sugg[tdRoom] = {};
+    sugg[tdRoom][today] = v;
+    tdUnsaved = true;
+    // อัปเดตแค่ปุ่ม/กรอบ ไม่วาดใหม่ทั้งหน้า (ไม่ให้เคอร์เซอร์หลุดระหว่างพิมพ์)
+    const st = tdRoomState(tdRoom), need = st.bad > 0 && !v.trim();
+    document.getElementById('td-note')?.classList.toggle('req', need);
+    const a = document.getElementById('td-save-only'), b = document.getElementById('td-save-next');
+    if (a) a.disabled = need;
+    if (b) b.disabled = need || st.done < st.total;
+}
+async function tdSave(goNext) {
+    const today = localToday();
+    const rid = tdRoom;
+    if (!checkers[rid]) checkers[rid] = {};
+    checkers[rid][today] = (document.getElementById('td-checker')?.value || myName).trim();
+    const fd = new FormData();
+    fd.append('action', 'save_check');
+    fd.append('room_id', rid);
+    fd.append('check_date', today);
+    fd.append('checked_by', checkers[rid][today]);
+    fd.append('suggestions', sugg[rid]?.[today] ?? '');
+    fd.append('values', JSON.stringify(vals[rid]?.[today] ?? {}));
+    const btns = [document.getElementById('td-save-only'), document.getElementById('td-save-next')];
+    btns.forEach(b => b && (b.disabled = true));
+    try {
+        const data = await (await fetch(API, { method: 'POST', body: fd })).json();
+        if (data.status !== 'success') throw new Error(data.message || 'บันทึกไม่สำเร็จ');
+        tdUnsaved = false;
+        const room = rooms.find(r => r.id == rid);
+        if (typeof showToast === 'function') showToast(`บันทึก ${room?.code || ''} แล้ว`);
+        updateBadge();
+        const nx = goNext ? tdNextRoom(rid) : null;
+        if (nx) { tdRoom = nx.id; tdInRoom = true; window.scrollTo({ top: 0 }); }
+        else if (goNext) tdInRoom = false;
+        renderToday();
+    } catch (e) {
+        alert('บันทึกไม่สำเร็จ: ' + e.message);
+        btns.forEach(b => b && (b.disabled = false));
+    }
+}
+window.addEventListener('beforeunload', e => { if (tdUnsaved) { e.preventDefault(); e.returnValue = ''; } });
 
 // ── Print ──────────────────────────────────────────────────────
 function printRoom(rid) {
@@ -992,7 +1317,7 @@ function updateRoomStat(rid) {
 }
 
 function updateBadge() {
-    const today = new Date().toISOString().slice(0,10);
+    const today = localToday();
     const el = document.getElementById('overall-badge');
     const txt = document.getElementById('overall-text');
     if (!el) return;
@@ -1074,7 +1399,7 @@ function tickTvClock(){
 function roomTodayStat(rid) {
     const items = itemsByRoom[rid] || [];
     const total = items.length;
-    const today = new Date().toISOString().slice(0,10);
+    const today = localToday();
     const closed = isWE(today) || isPH(today);
     const dayVals = vals[rid]?.[today] || {};
     const filled = Object.values(dayVals).filter(v => v !== '' && v != null).length;
@@ -1209,6 +1534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     updateMonthLabel();
+    applyViewTabs();
     await load();
 
     if (p.get('tv') === '1') enterTvMode(p.get('company'));
