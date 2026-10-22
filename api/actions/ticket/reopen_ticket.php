@@ -72,7 +72,7 @@ $msg = "<b>🔄 Ticket Reopened ↩️</b>\n" .
        "<b>❗ เหตุผล:</b> {$reason}\n" .
        "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
        "\n#Reopened #UserFeedback";
-sendTelegramNotification($conn, $msg, 'repair');
+sendNotify($conn, $msg, 'it_user_reply', $row['company'] ?? null);
 
 echo json_encode(['status' => 'success', 'message' => 'Ticket reopened successfully.']);
 ?>

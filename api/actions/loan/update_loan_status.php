@@ -30,7 +30,7 @@ if ($new_status === 'Active') {
             logAssetHistory($conn, $loan_id, 'LOAN_APPROVED', "Loan approved for " . ($asset['borrower'] ?? 'user') . " by " . $user_name);
             
             $msg = "<b>✅ Loan Approved</b>\n<b>🏢 Company:</b> " . ($asset['company']??'-') . "\n<b>Asset:</b> {$asset['name']} ({$asset['equipment_id']})\n<b>Borrower:</b> {$asset['borrower']}\n<b>Approved By:</b> {$user_name}";
-            sendTelegramNotification($conn, $msg, 'loan');
+            sendNotify($conn, $msg, 'loan_approve', $asset['company'] ?? null);
         }
         echo json_encode(['status' => 'success']);
     } else throw new Exception("Execute failed (Approve Loan): " . $stmt->error);
@@ -59,7 +59,7 @@ if ($new_status === 'Active') {
         
         if ($asset_data) {
             $msg = "<b>🔄 Asset Returned</b>\n<b>🏢 Company:</b> " . ($asset_data['company']??'-') . "\n<b>Asset:</b> {$asset_data['name']} ({$equipment_id})\n<b>Returned By:</b> {$asset_data['borrower']}\n<b>Receiver:</b> {$user_name}\n<b>Condition:</b> {$return_condition}";
-            sendTelegramNotification($conn, $msg, 'loan');
+            sendNotify($conn, $msg, 'loan_return', $asset_data['company'] ?? null);
         }
         
         echo json_encode(['status' => 'success']);

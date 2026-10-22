@@ -15,6 +15,13 @@
  *   loan_approve  อนุมัติยืม
  *   loan_reject   ปฏิเสธยืม
  *   server_check_issue  เช็คห้อง Server พบรายการมีปัญหา (✗)
+ *   loan_return   คืนอุปกรณ์ที่ยืม
+ *   it_user_reply ผู้แจ้งตอบกลับช่าง / กด "ยังไม่หาย"
+ *   it_overdue    งานซ่อมเกินเวลา (ยังไม่มีใครรับ / ซ่อมนานเกิน) — ตัวเช็กตามเวลา
+ *   it_daily_summary    สรุปเช้าให้ทีม IT 08:00 วันทำงาน — ตัวเช็กตามเวลา
+ *   server_check_missing ยังไม่ได้ตรวจห้อง Server วันนี้ (15:00 วันทำงาน) — ตัวเช็กตามเวลา
+ *
+ * ทุกการส่งถูกจดใน notify_log (หน้า "ศูนย์แจ้งเตือน" ใช้โชว์ไฟเขียว/แดง และ "ส่งไปล่าสุด")
  */
 
 // ── TABLE INIT ────────────────────────────────────────────────────────
@@ -55,6 +62,46 @@ function _initNotifyChannelsTable($conn) {
     $done = true;
 }
 
+// ประวัติการส่ง — ok: 1 สำเร็จ / 0 ล้มเหลว / 2 ไม่มีกลุ่มรับ · ref ใช้กันส่งซ้ำของตัวเช็กตามเวลา
+function _initNotifyLogTable($conn) {
+    static $done = false;
+    if ($done) return;
+    $conn->query("CREATE TABLE IF NOT EXISTS notify_log (
+        id           INT AUTO_INCREMENT PRIMARY KEY,
+        created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        event        VARCHAR(40)  NOT NULL,
+        ref          VARCHAR(80)  DEFAULT NULL,
+        title        VARCHAR(200) DEFAULT NULL,
+        channel_id   INT          DEFAULT NULL,
+        channel_name VARCHAR(100) DEFAULT NULL,
+        ok           TINYINT(1)   NOT NULL DEFAULT 1,
+        detail       VARCHAR(255) DEFAULT NULL,
+        INDEX idx_nl_created (created_at),
+        INDEX idx_nl_event_ref (event, ref),
+        INDEX idx_nl_channel (channel_id, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $done = true;
+}
+
+function _notifyLog($conn, $event, $ref, $title, $chId, $chName, $ok, $detail = null) {
+    _initNotifyLogTable($conn);
+    $st = $conn->prepare("INSERT INTO notify_log (event, ref, title, channel_id, channel_name, ok, detail) VALUES (?,?,?,?,?,?,?)");
+    if (!$st) return;
+    $title  = mb_substr((string)$title, 0, 200);
+    $detail = $detail === null ? null : mb_substr((string)$detail, 0, 255);
+    $st->bind_param('sssisis', $event, $ref, $title, $chId, $chName, $ok, $detail);
+    $st->execute();
+}
+
+// เคยส่งเรื่องนี้ไปแล้วหรือยัง (ตัวเช็กตามเวลาส่งแค่ครั้งเดียวต่อเรื่อง)
+function notifyAlreadySent($conn, $event, $ref) {
+    _initNotifyLogTable($conn);
+    $st = $conn->prepare("SELECT 1 FROM notify_log WHERE event = ? AND ref = ? LIMIT 1");
+    $st->bind_param('ss', $event, $ref);
+    $st->execute();
+    return (bool)$st->get_result()->fetch_row();
+}
+
 // ── MAIN ENTRY POINT ──────────────────────────────────────────────────
 /**
  * ส่งการแจ้งเตือนไปยังทุก channel ที่ match กับ event + company
@@ -64,15 +111,18 @@ function _initNotifyChannelsTable($conn) {
  * @param string      $event     e.g. 'stock_new', 'it_repair'
  * @param string|null $company   'PTA'|'PT4'|'PTE'|null
  */
-function sendNotify($conn, $message, $event, $company = null) {
+function sendNotify($conn, $message, $event, $company = null, $ref = null) {
     _initNotifyChannelsTable($conn);
+    preg_match('/<b>(.*?)<\/b>/', $message, $_tm);
+    $title = trim(strip_tags($_tm[1] ?? $event));
 
     $res = $conn->query("SELECT * FROM notify_channels WHERE enabled = 1 ORDER BY sort_order ASC, id ASC");
     $channels = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 
+    // ไม่มีกลุ่มเปิดอยู่ = ไม่ส่ง · เดิมหันไปใช้กุญแจเก่าใน system_settings ซึ่งยกเลิกแล้ว (หลุด 22 ต.ค. 2026)
     if (empty($channels)) {
-        error_log("[Notify] No channels configured — using legacy fallback (event={$event})");
-        _notifyFallbackLegacy($conn, $message, $event);
+        error_log("[Notify] No enabled channels — not sent (event={$event})");
+        _notifyLog($conn, $event, $ref, $title, null, null, 2, 'ไม่มีกลุ่มที่เปิดใช้งาน');
         return;
     }
 
@@ -93,15 +143,18 @@ function sendNotify($conn, $message, $event, $company = null) {
 
         error_log("[Notify] SEND '{$ch['name']}' via {$ch['channel_type']} (event={$event}, company=" . ($company ?: 'any') . ")");
         $matchCount++;
+        $r = [false, 'ประเภทกลุ่มไม่รู้จัก'];
         if ($ch['channel_type'] === 'telegram') {
-            _notifySendTelegram($ch['token'], $ch['dest_id'], $message);
+            $r = _notifySendTelegram($ch['token'], $ch['dest_id'], $message);
         } elseif ($ch['channel_type'] === 'line') {
-            _notifySendLine($ch['token'], $ch['dest_id'], $message, $event);
+            $r = _notifySendLine($ch['token'], $ch['dest_id'], $message, $event);
         }
+        _notifyLog($conn, $event, $ref, $title, (int)$ch['id'], $ch['name'], $r[0] ? 1 : 0, $r[0] ? null : $r[1]);
     }
 
     if ($matchCount === 0) {
         error_log("[Notify] NO MATCH for event='{$event}' company='" . ($company ?: 'any') . "' — notification not sent");
+        _notifyLog($conn, $event, $ref, $title, null, null, 2, 'ไม่มีกลุ่มรับเรื่องนี้');
     }
 }
 
@@ -120,8 +173,13 @@ function _notifySendTelegram($token, $chat_id, $message) {
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     $result = curl_exec($ch);
-    if ($result === false) error_log("[Notify] Telegram curl error: " . curl_error($ch));
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = $result === false ? curl_error($ch) : '';
+    if ($result === false) error_log("[Notify] Telegram curl error: " . $err);
     curl_close($ch);
+    if ($result === false) return [false, 'ต่อ Telegram ไม่ได้: ' . $err];
+    if ($httpCode !== 200) return [false, $httpCode === 401 ? 'กุญแจ (Token) ไม่ถูกต้อง' : "Telegram ตอบ HTTP {$httpCode}"];
+    return [true, ''];
 }
 
 // ── SEND VIA LINE MESSAGING API ───────────────────────────────────────
@@ -141,6 +199,11 @@ function _notifySendLine($token, $dest_id, $message, $event = 'general') {
         'loan_approve'  => '#16A34A',
         'loan_reject'   => '#DC2626',
         'server_check_issue' => '#B91C1C',
+        'server_check_missing' => '#B45309',
+        'loan_return'   => '#0891B2',
+        'it_user_reply' => '#7C3AED',
+        'it_overdue'    => '#DC2626',
+        'it_daily_summary' => '#0F172A',
     ];
     $color = $colorMap[$event] ?? '#1DB446';
 
@@ -272,38 +335,13 @@ function _notifySendLine($token, $dest_id, $message, $event = 'general') {
     } else {
         error_log("[Notify] LINE sent OK to dest={$dest_id} event={$event}");
     }
+    $err = $result === false ? curl_error($ch) : '';
     curl_close($ch);
-}
-
-// ── LEGACY FALLBACK ───────────────────────────────────────────────────
-// ใช้เมื่อ notify_channels ว่างอยู่ (ยังไม่ตั้งค่า) → ส่งผ่าน system_settings เดิม
-function _notifyFallbackLegacy($conn, $message, $event) {
-    $settings = [];
-    $res = $conn->query("SELECT setting_key, setting_value FROM system_settings
-        WHERE setting_key IN ('telegram_active','telegram_token','telegram_chat_id',
-                              'line_active','line_channel_token','line_dest_id',
-                              'notify_repair','notify_loan')");
-    if ($res) {
-        while ($row = $res->fetch_assoc()) {
-            $settings[$row['setting_key']] = $row['setting_value'];
-        }
-    }
-
-    // Toggle checks (legacy)
-    if (in_array($event, ['it_repair','it_cancel','it_approve']) && (($settings['notify_repair'] ?? '1') === '0')) return;
-    if (in_array($event, ['loan_new','loan_approve','loan_reject'])  && (($settings['notify_loan']   ?? '1') === '0')) return;
-
-    // Telegram
-    if (!empty($settings['telegram_active']) && $settings['telegram_active'] === '1'
-        && !empty($settings['telegram_token']) && !empty($settings['telegram_chat_id'])) {
-        _notifySendTelegram($settings['telegram_token'], $settings['telegram_chat_id'], $message);
-    }
-
-    // LINE
-    if (!empty($settings['line_active']) && $settings['line_active'] === '1'
-        && !empty($settings['line_channel_token']) && !empty($settings['line_dest_id'])) {
-        _notifySendLine($settings['line_channel_token'], $settings['line_dest_id'], $message, $event);
-    }
+    if ($result === false) return [false, 'ต่อ LINE ไม่ได้: ' . $err];
+    if ($httpCode === 401) return [false, 'กุญแจ (Token) ไม่ถูกต้อง หรือถูกยกเลิกแล้ว'];
+    if ($httpCode === 429) return [false, 'ส่งเกินโควตาข้อความของ LINE เดือนนี้'];
+    if ($httpCode !== 200) return [false, "LINE ตอบ HTTP {$httpCode}"];
+    return [true, ''];
 }
 
 // ── STOCK SUMMARY BUILDER ─────────────────────────────────────────────

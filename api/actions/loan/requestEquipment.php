@@ -70,7 +70,7 @@ try {
                 "<b>Dept:</b> {$dept}\n" .
                 '<b>Return:</b> ' . ($rDate ? date('d/m/Y', strtotime($rDate)) : 'ไม่มีกำหนดคืน') . "\n" .
                 "<b>Purpose:</b> {$purpose}";
-            sendTelegramNotification($conn, $msg, 'loan');
+            sendNotify($conn, $msg, 'loan_new', $row['company'] ?? null);
         }
     }
 

@@ -31,6 +31,9 @@ while ($row = $res->fetch_assoc()) {
     if ($row['setting_key'] === 'line_channel_token') $channelToken = $row['setting_value'];
     if ($row['setting_key'] === 'line_channel_secret') $channelSecret = $row['setting_value'];
 }
+// กุญแจจริงอยู่ในกลุ่ม LINE (หน้า "ศูนย์แจ้งเตือน") — บอทเดียวกันทุกกลุ่ม ใช้ตัวแรกที่เปิดอยู่
+$chRes = $conn->query("SELECT token FROM notify_channels WHERE channel_type = 'line' AND enabled = 1 ORDER BY sort_order, id LIMIT 1");
+if ($chRes && ($chRow = $chRes->fetch_assoc())) $channelToken = $chRow['token'];
 
 // 4. รับข้อมูลและตรวจสอบ LINE Signature
 $content = file_get_contents('php://input');

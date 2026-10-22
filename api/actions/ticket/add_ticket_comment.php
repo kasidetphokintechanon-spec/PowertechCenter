@@ -117,6 +117,20 @@ if ($newStatus && $prevStatus && $newStatus !== $prevStatus) {
 }
 
 
+// ผู้แจ้งตอบกลับ → เด้งบอกช่าง ไม่ต้องคอยเปิดหน้าเว็บดู
+if ($userRole === 'user') {
+    $tk = $conn->prepare("SELECT company, servicedBy FROM it_logs WHERE id = ? LIMIT 1");
+    if ($tk) {
+        $tk->bind_param('s', $ticketId); $tk->execute();
+        $tRow = $tk->get_result()->fetch_assoc() ?: [];
+        $nMsg = "<b>💬 ผู้แจ้งตอบกลับ — {$ticketId}</b>\n"
+              . "<b>จาก:</b> {$userName}\n"
+              . "<b>ข้อความ:</b> " . ($snippet !== '' ? $snippet : '(แนบไฟล์)') . $fileNote . "\n"
+              . "<b>ช่าง:</b> " . (($tRow['servicedBy'] ?? '') ?: 'ยังไม่มี');
+        sendNotify($conn, $nMsg, 'it_user_reply', $tRow['company'] ?? null);
+    }
+}
+
 $resp = [
     'status'    => 'success',
     'comment_id' => $newId,

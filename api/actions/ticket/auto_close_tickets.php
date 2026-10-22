@@ -64,7 +64,7 @@ foreach ($rows as $row) {
                "<b>📝 Reason:</b> ผู้แจ้งไม่ยืนยันภายใน " . AUTO_CLOSE_DAYS . " วัน\n" .
                "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
                "\n#AutoClosed #System";
-        sendTelegramNotification($conn, $msg, 'repair');
+        sendNotify($conn, $msg, 'it_approve', $row['company'] ?? null);
     }
 }
 

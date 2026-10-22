@@ -120,8 +120,6 @@ function getPowertechAdminMenuMap(): array
         'menu-announcements' => ['employee.manage'],
         'menu-holidays' => ['employee.manage'],
         'menu-services' => ['employee.manage'],
-        'menu-settings_line' => ['settings.notifications'],
-        'menu-settings_telegram' => ['settings.notifications'],
         'menu-admin_logo' => ['settings.notifications'],
         'menu-audit_log' => ['audit.view'],
         'menu-update_db' => ['admin.manage_permissions'],

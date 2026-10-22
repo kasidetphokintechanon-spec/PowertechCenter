@@ -48,206 +48,15 @@ function logAssetHistory($conn, $assetDbId, $eventType, $details, $userName = 'S
 
 // Helper Function: ส่งแจ้งเตือน Telegram
 function sendTelegramNotification($conn, $message, $type = 'general') {
-        $settings = [];
-        $res = $conn->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('telegram_active', 'telegram_token', 'telegram_chat_id', 'notify_repair', 'notify_booking', 'notify_loan', 'line_active', 'line_channel_token', 'line_dest_id')");
-        while ($row = $res->fetch_assoc()) {
-            $settings[$row['setting_key']] = $row['setting_value'];
-        }
-
-        // Check specific notification type settings (Default to 1/On if not set)
-        // Note: These settings apply to both Telegram and LINE
-        if ($type === 'repair' && (isset($settings['notify_repair']) && $settings['notify_repair'] === '0')) return;
-        if ($type === 'loan' && (isset($settings['notify_loan']) && $settings['notify_loan'] === '0')) return;
-
-        // 1. Send Telegram
-        if (!empty($settings['telegram_active']) && $settings['telegram_active'] === '1' && !empty($settings['telegram_token']) && !empty($settings['telegram_chat_id'])) {
-            $url = "https://api.telegram.org/bot" . $settings['telegram_token'] . "/sendMessage";
-            $data = ['chat_id' => $settings['telegram_chat_id'], 'text' => $message, 'parse_mode' => 'HTML'];
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            $result = curl_exec($ch);
-            if ($result === false) {
-                error_log("Telegram Curl Error: " . curl_error($ch));
-            }
-            curl_close($ch);
-        }
-
-        // 2. Send LINE Messaging API (Replacement for LINE Notify)
-        if (!empty($settings['line_active']) && $settings['line_active'] === '1' && !empty($settings['line_channel_token']) && !empty($settings['line_dest_id'])) {
-            $lineUrl = "https://api.line.me/v2/bot/message/push";
-            
-            // Parse message to extract data for Flex Message
-            // Assuming message format is consistent with what we generate in other files
-            // Example: "<b>Header</b>\n...\n<b>Key:</b> Value..."
-            
-            // Default fallback to text if parsing fails or type is unknown
-            $flexMessage = null;
-            
-            // Extract Title/Header
-            preg_match('/<b>(.*?)<\/b>/', $message, $titleMatch);
-            $title = $titleMatch[1] ?? 'Notification';
-            
-            // Extract Key-Value pairs
-            preg_match_all('/<b>(.*?):<\/b>\s*(.*?)(?=\n|$)/u', $message, $matches, PREG_SET_ORDER);
-            $details = [];
-            foreach ($matches as $m) {
-                $details[] = ['key' => trim($m[1]), 'value' => trim($m[2])];
-            }
-
-            // Determine Color based on Type
-            $headerColor = '#1DB446'; // Default LINE Green
-            if ($type === 'repair') $headerColor = '#EF454D'; // Red
-            elseif ($type === 'loan') $headerColor = '#FF9500'; // Orange
-
-            // Construct Flex Bubble
-            $contents = [];
-            
-            // Header
-            $contents[] = [
-                'type' => 'text',
-                'text' => strip_tags($title),
-                'weight' => 'bold',
-                'size' => 'xl',
-                'color' => $headerColor
-            ];
-            
-            // Separator
-            $contents[] = ['type' => 'separator', 'margin' => 'md'];
-
-            // Details Body
-            $bodyContents = [];
-            foreach ($details as $detail) {
-                $bodyContents[] = [
-                    'type' => 'box',
-                    'layout' => 'baseline',
-                    'spacing' => 'sm',
-                    'contents' => [
-                        [
-                            'type' => 'text',
-                            'text' => $detail['key'],
-                            'color' => '#aaaaaa',
-                            'size' => 'sm',
-                            'flex' => 2
-                        ],
-                        [
-                            'type' => 'text',
-                            'text' => strip_tags($detail['value']), // Remove HTML tags from value
-                            'wrap' => true,
-                            'color' => '#666666',
-                            'size' => 'sm',
-                            'flex' => 4
-                        ]
-                    ]
-                ];
-            }
-            
-            if (!empty($bodyContents)) {
-                $contents[] = [
-                    'type' => 'box',
-                    'layout' => 'vertical',
-                    'margin' => 'lg',
-                    'spacing' => 'sm',
-                    'contents' => $bodyContents
-                ];
-            }
-
-            // Footer (Timestamp)
-            $contents[] = ['type' => 'separator', 'margin' => 'xl'];
-            $contents[] = [
-                'type' => 'text',
-                'text' => date('d/m/Y H:i'),
-                'size' => 'xs',
-                'color' => '#aaaaaa',
-                'align' => 'end',
-                'margin' => 'md'
-            ];
-            
-            // Action Buttons
-            $actionUrl = '';
-            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-            $host = $_SERVER['HTTP_HOST'];
-            $baseUrl = "$protocol://$host" . dirname($_SERVER['PHP_SELF']);
-            
-            if ($type === 'repair') $actionUrl = $baseUrl . '/log.html';
-            elseif ($type === 'loan') $actionUrl = $baseUrl . '/log.html';
-            
-            if ($actionUrl) {
-                $contents[] = [
-                    'type' => 'box',
-                    'layout' => 'vertical',
-                    'margin' => 'md',
-                    'contents' => [
-                        [
-                            'type' => 'button',
-                            'action' => [
-                                'type' => 'uri',
-                                'label' => 'View Details',
-                                'uri' => $actionUrl
-                            ],
-                            'style' => 'secondary',
-                            'height' => 'sm'
-                        ]
-                    ]
-                ];
-            }
-            
-            $flexContainer = [
-                'type' => 'bubble',
-                'body' => [
-                    'type' => 'box',
-                    'layout' => 'vertical',
-                    'contents' => $contents
-                ]
-            ];
-
-            $lineData = [
-                'to' => $settings['line_dest_id'],
-                'messages' => [
-                    [
-                        'type' => 'flex',
-                        'altText' => strip_tags($title), // Text shown in chat list
-                        'contents' => $flexContainer
-                    ]
-                ]
-            ];
-            
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $lineUrl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($lineData));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $settings['line_channel_token']
-            ]);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            $result = curl_exec($ch);
-            if ($result === false) {
-                error_log("LINE Curl Error: " . curl_error($ch));
-            }
-            
-            // Log error if LINE API fails (ช่วยดูว่าเน็ตออกได้ไหม)
-            if (curl_errno($ch)) {
-                error_log("LINE API Error: " . curl_error($ch));
-            }
-            
-            curl_close($ch);
-        }
-    }
+    // ของเก่า — เดิมดึงกุญแจจาก system_settings (ยกเลิกแล้ว 22 ต.ค. 2026 เพราะกุญแจหลุด)
+    // ตอนนี้ส่งผ่านระบบกลุ่ม (notify_channels) แทน · โค้ดใหม่ให้เรียก sendNotify() ตรงพร้อม event ที่ชัดเจน
+    $map = ['repair' => 'it_repair', 'loan' => 'loan_new', 'booking' => 'booking'];
+    sendNotify($conn, $message, $map[$type] ?? $type);
+}
 
 require_once __DIR__ . '/includes/permissions_registry.php';
 require_once __DIR__ . '/includes/notify_helper.php';
+require_once __DIR__ . '/includes/notify_cron.php';
 
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
@@ -463,6 +272,8 @@ try {
 
     // Lazy cron: ส่ง Stock Summary อัตโนมัติถ้าถึงเวลาที่ตั้งไว้
     _checkStockSummaryCron($conn);
+    // แจ้งเตือนตามเวลา: งานซ่อมเกินเวลา / ยังไม่ตรวจห้อง Server / สรุปเช้า
+    _checkNotifyCrons($conn);
 
     $action = $_REQUEST['action'] ?? '';
 
@@ -499,12 +310,10 @@ try {
         'create_repair' => ['asset.manage', 'it_log.access'],
         'export_employees' => ['employee.manage'], 'update_department_phone' => ['employee.manage'],
         'get_audit_logs' => ['audit.view'], 'export_audit_logs' => ['audit.view'],
-        'get_telegram_settings' => ['settings.notifications'], 'save_telegram_settings' => ['settings.notifications'],
-        'get_line_settings' => ['settings.notifications'], 'save_line_settings' => ['settings.notifications'],
-        'test_telegram' => ['settings.notifications'], 'test_line' => ['settings.notifications'],
         'save_notify_channel' => ['settings.notifications'], 'delete_notify_channel' => ['settings.notifications'],
         'test_notify_channel' => ['settings.notifications'], 'test_notify_routing' => ['settings.notifications'],
         'get_notify_log' => ['settings.notifications'],
+        'get_notify_overview' => ['settings.notifications'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
         'save_it_support_settings' => ['admin.access_admin'], 'save_doc_forms' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],
         'reorder_services' => ['admin.access_admin'], 'probe_host' => ['admin.access_admin', 'it_log.access'],

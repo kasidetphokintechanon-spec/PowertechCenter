@@ -22,7 +22,7 @@ if ($stmt->execute()) {
 
     $reasonLine = $deny_reason ? "\n<b>Reason:</b> {$deny_reason}" : '';
     $msg = "<b>🚫 Loan Request Denied</b>\n<b>🏢 Company:</b> " . ($asset['company']??'-') . "\n<b>Asset:</b> {$asset['name']} ({$asset['equipment_id']})\n<b>User:</b> " . ($asset['borrower'] ?? 'Unknown') . $reasonLine;
-    sendTelegramNotification($conn, $msg, 'loan');
+    sendNotify($conn, $msg, 'loan_reject', $asset['company'] ?? null);
 
     echo json_encode(['status' => 'success']);
 } else {

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตั้งค่าการแจ้งเตือน - PowertechCenter</title>
+    <link rel="icon" href="favicon.ico">
+    <script src="js/favicon-version.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
+    <script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');})()</script>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { overflow-y: auto !important; height: auto !important; }
+        body { font-family: 'Kanit', 'Inter', sans-serif; background: #f1f5f9; margin: 0; color: #0f172a; min-height: 100vh; }
+        html.dark body { background: #0a0f1e; color: #f1f5f9; }
+
+        /* TOPBAR */
+        .sn-topbar { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid #e2e8f0; border-top: 3px solid #2563eb; display: flex; align-items: center; gap: 12px; padding: 0 20px; height: 56px; }
+        html.dark .sn-topbar { background: #0f172a; border-color: #1e293b; }
+        .sn-back { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #475569; text-decoration: none; font-size: 14px; }
+        html.dark .sn-back { background: #1e293b; border-color: #334155; color: #94a3b8; }
+        .sn-topbar-icon { width: 30px; height: 30px; border-radius: 8px; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 14px; }
+        .sn-topbar-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+        html.dark .sn-topbar-title { color: #f1f5f9; }
+        .sn-topbar-sub { font-size: 11px; color: #64748b; }
+        .sn-spacer { flex: 1; }
+
+        /* MAIN */
+        .sn-main { max-width: 900px; margin: 24px auto; padding: 0 16px 60px; }
+
+        /* INFO BOX */
+        .sn-info { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; gap: 10px; }
+        .sn-info-icon { color: #2563eb; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+        .sn-info-body { font-size: 12px; color: #1e40af; line-height: 1.7; }
+        .sn-info-body strong { color: #1d4ed8; }
+
+        /* EVENTS LEGEND */
+        .sn-events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; margin-bottom: 20px; }
+        .sn-event-tag { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 5px 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; }
+        html.dark .sn-event-tag { background: #1e293b; border-color: #334155; color: #94a3b8; }
+        .sn-event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* SECTION HEADER */
+        .sn-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .sn-section-title { font-size: 14px; font-weight: 700; color: #0f172a; }
+        html.dark .sn-section-title { color: #f1f5f9; }
+
+        /* CHANNEL CARDS */
+        .sn-channel-list { display: flex; flex-direction: column; gap: 10px; }
+        .sn-channel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 14px; }
+        html.dark .sn-channel-card { background: #1e293b; border-color: #334155; }
+        .sn-ch-type-badge { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .sn-ch-type-badge.telegram { background: #eff6ff; }
+        .sn-ch-type-badge.line     { background: #f0fdf4; }
+        .sn-ch-body { flex: 1; min-width: 0; }
+        .sn-ch-name { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+        html.dark .sn-ch-name { color: #f1f5f9; }
+        .sn-ch-meta { font-size: 11px; color: #64748b; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+        .sn-ch-events { display: flex; flex-wrap: wrap; gap: 4px; }
+        .sn-ev-chip { font-size: 10px; padding: 2px 8px; border-radius: 20px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; }
+        html.dark .sn-ev-chip { background: #0f172a; border-color: #334155; color: #94a3b8; }
+        .sn-ev-chip.all { border-color: #bfdbfe; background: #eff6ff; color: #2563eb; font-weight: 700; }
+        .sn-ch-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+        .sn-toggle { position: relative; width: 36px; height: 20px; }
+        .sn-toggle input { opacity: 0; width: 0; height: 0; }
+        .sn-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; border-radius: 20px; transition: 0.2s; }
+        .sn-toggle-slider:before { content:''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+        .sn-toggle input:checked + .sn-toggle-slider { background: #2563eb; }
+        .sn-toggle input:checked + .sn-toggle-slider:before { transform: translateX(16px); }
+        .sn-ch-status { font-size: 10px; font-weight: 600; }
+        .sn-ch-status.on  { color: #16a34a; }
+        .sn-ch-status.off { color: #94a3b8; }
+        .sn-btn-icon { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #475569; }
+        html.dark .sn-btn-icon { background: #0f172a; border-color: #334155; color: #94a3b8; }
+        .sn-btn-icon:hover { background: #f1f5f9; }
+        .sn-btn-icon.danger:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+        .sn-btn-icon.success:hover { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+
+        /* EMPTY STATE */
+        .sn-empty { text-align: center; padding: 48px 24px; color: #94a3b8; }
+        .sn-empty-icon { font-size: 36px; margin-bottom: 12px; }
+        .sn-empty-title { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+        html.dark .sn-empty-title { color: #94a3b8; }
+
+        /* BTN */
+        .sn-btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .sn-btn-primary:hover { background: #1d4ed8; }
+
+        /* MODAL */
+        .sn-modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+        .sn-modal { background: #fff; border-radius: 16px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        html.dark .sn-modal { background: #1e293b; }
+        .sn-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; }
+        html.dark .sn-modal-head { border-color: #334155; }
+        .sn-modal-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+        html.dark .sn-modal-title { color: #f1f5f9; }
+        .sn-modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: #94a3b8; padding: 4px; }
+        .sn-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+        .sn-modal-foot { padding: 14px 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; justify-content: flex-end; }
+        html.dark .sn-modal-foot { border-color: #334155; }
+
+        /* FORM */
+        .sn-field { display: flex; flex-direction: column; gap: 5px; }
+        .sn-label { font-size: 12px; font-weight: 600; color: #475569; }
+        html.dark .sn-label { color: #94a3b8; }
+        .sn-input { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 13px; color: #0f172a; background: #fff; width: 100%; }
+        html.dark .sn-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+        .sn-input:focus { outline: none; border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .sn-input-hint { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .sn-type-toggle { display: flex; gap: 8px; }
+        .sn-type-btn { flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+        .sn-type-btn.active { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
+        html.dark .sn-type-btn { background: #0f172a; border-color: #334155; color: #64748b; }
+        html.dark .sn-type-btn.active { border-color: #2563eb; background: #1e3a5f; color: #60a5fa; }
+
+        /* EVENT CHECKBOXES */
+        .sn-events-check { display: flex; flex-direction: column; gap: 4px; }
+        .sn-ev-group { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 8px; margin-bottom: 2px; padding-left: 2px; }
+        .sn-ev-group:first-child { margin-top: 0; }
+        .sn-ev-group-items { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .sn-ev-check-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 12px; color: #475569; }
+        html.dark .sn-ev-check-item { border-color: #334155; color: #94a3b8; }
+        .sn-ev-check-item input { accent-color: #2563eb; }
+        .sn-ev-check-item.checked { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+        html.dark .sn-ev-check-item.checked { border-color: #1e40af; background: #1e3a5f; color: #60a5fa; }
+        .sn-btn-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+        html.dark .sn-btn-ghost { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    </style>
+</head>
+<body data-page="settings_notify">
+
+<!-- TOPBAR -->
+<header class="sn-topbar">
+    <a href="admin.html" class="sn-back" aria-label="กลับ"><i class="fas fa-arrow-left"></i></a>
+    <div class="sn-topbar-icon"><i class="fas fa-bell-on"></i></div>
+    <div>
+        <div class="sn-topbar-title">ตั้งค่าการแจ้งเตือน</div>
+        <div class="sn-topbar-sub">Notification Routing — LINE / Telegram</div>
+    </div>
+    <div class="sn-spacer"></div>
+    <div id="nav-user-area"></div>
+</header>
+
+<!-- SIDEBAR + MAIN WRAPPER -->
+<div style="display:flex;height:calc(100vh - 56px);overflow:hidden;">
+<aside id="ptc-sidebar"></aside>
+
+<!-- MAIN -->
+<main class="sn-main" style="flex:1;overflow-y:auto;">
+
+    <!-- TOKEN QUICK ACCESS -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <a href="settings_line.html" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#15803d;transition:background .12s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+            <i class="fab fa-line" style="font-size:16px;"></i> ตั้งค่า LINE Token
+        </a>
+        <a href="settings_telegram.html" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:#1d4ed8;transition:background .12s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+            <i class="fab fa-telegram" style="font-size:16px;"></i> ตั้งค่า Telegram Token
+        </a>
+    </div>
+
+    <!-- INFO -->
+    <div class="sn-info">
+        <i class="fas fa-circle-info sn-info-icon"></i>
+        <div class="sn-info-body">
+            <strong>ระบบ Routing แจ้งเตือน</strong> — กำหนดว่า event ไหนจะส่งไปยัง Channel ไหน<br>
+            เพิ่มหลาย Channel ได้ เช่น IT Group (Telegram), Stock Admin (LINE), แม่บ้านGAใช้ (LINE อีกกลุ่ม)<br>
+            <strong>ถ้ายังไม่มี Channel</strong> ระบบจะใช้การตั้งค่าเดิมจากหน้า LINE / Telegram Settings โดยอัตโนมัติ
+        </div>
+    </div>
+
+    <!-- HOW-TO GUIDE -->
+    <details class="sn-howto" style="margin-bottom:20px;">
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:#2563eb;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;">
+            <i class="fas fa-circle-question"></i> วิธีตั้งค่า LINE / Telegram ใหม่แต่ละ Group <span style="font-size:11px;color:#94a3b8;font-weight:400;">(คลิกเพื่อดู)</span>
+        </summary>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+            <!-- LINE GUIDE -->
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+                <div style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                    <i class="fab fa-line"></i> LINE — วิธีเพิ่ม Group ใหม่
+                </div>
+                <ol style="font-size:11.5px;color:#166534;line-height:2;margin:0;padding-left:16px;">
+                    <li>สร้าง Group ใหม่ใน LINE App</li>
+                    <li>เพิ่ม Bot เข้า Group (Bot อยู่ใน <a href="settings_line.html" style="color:#15803d;font-weight:700;">settings_line.html</a>)</li>
+                    <li>เพิ่ม <strong>@getidsbot</strong> เข้า Group → มันส่ง Group ID มาให้ → kick ออกได้</li>
+                    <li>Copy <strong>Token</strong> จาก <a href="settings_line.html" style="color:#15803d;font-weight:700;">settings_line.html</a></li>
+                    <li>กด <strong>"เพิ่ม Channel"</strong> → เลือก LINE → วาง Token + Group ID → เลือก Events → บันทึก</li>
+                </ol>
+                <div style="margin-top:10px;background:#dcfce7;border-radius:6px;padding:8px 10px;font-size:11px;color:#166534;">
+                    💡 <strong>Token เดียว</strong> ใช้ได้ทุก Group ไม่ต้องสร้าง Bot ใหม่
+                </div>
+            </div>
+
+            <!-- TELEGRAM GUIDE -->
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
+                <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                    <i class="fab fa-telegram"></i> Telegram — วิธีเพิ่ม Group ใหม่
+                </div>
+                <ol style="font-size:11.5px;color:#1e40af;line-height:2;margin:0;padding-left:16px;">
+                    <li>สร้าง Group ใหม่ใน Telegram</li>
+                    <li>เพิ่ม Bot เข้า Group (Bot Token อยู่ใน <a href="settings_telegram.html" style="color:#1d4ed8;font-weight:700;">settings_telegram.html</a>)</li>
+                    <li>เพิ่ม <strong>@userinfobot</strong> หรือ <strong>@getmyid_bot</strong> เข้า Group → ได้ Chat ID (ติดลบ เช่น -1001234567)</li>
+                    <li>Copy <strong>Bot Token</strong> จาก <a href="settings_telegram.html" style="color:#1d4ed8;font-weight:700;">settings_telegram.html</a></li>
+                    <li>กด <strong>"เพิ่ม Channel"</strong> → เลือก Telegram → วาง Token + Chat ID → เลือก Events → บันทึก</li>
+                </ol>
+                <div style="margin-top:10px;background:#dbeafe;border-radius:6px;padding:8px 10px;font-size:11px;color:#1e40af;">
+                    💡 <strong>Bot Token เดียว</strong> ใช้ได้ทุก Group เช่นกัน
+                </div>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- EVENT LEGEND -->
+    <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Event Types</div>
+    <div class="sn-events-grid" style="margin-bottom:24px;">
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#EF454D;"></span>it_repair — งานซ่อม IT ใหม่</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#FF9500;"></span>it_cancel — ยกเลิกงาน IT</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#1DB446;"></span>it_approve — ปิด/อนุมัติงาน IT</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#2563EB;"></span>stock_new — เบิกของใหม่</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#16A34A;"></span>stock_approve — อนุมัติเบิก</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#DC2626;"></span>stock_reject — ปฏิเสธเบิก</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#FF9500;"></span>stock_cancel — ยกเลิกคำขอเบิก</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#D97706;"></span>stock_low — สต็อกใกล้หมด</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#0F172A;"></span>stock_summary — สรุปสต็อกประจำวัน</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#7C3AED;"></span>loan_new / loan_approve / loan_reject</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#B91C1C;"></span>server_check_issue — เช็คห้อง Server พบปัญหา</div>
+        <div class="sn-event-tag"><span class="sn-event-dot" style="background:#BE123C;"></span>employee_offboard — พนักงานลาออก</div>
+    </div>
+
+    <!-- CHANNEL LIST -->
+    <div class="sn-section-head">
+        <div class="sn-section-title">🔔 Channels ที่ตั้งค่าไว้</div>
+        <button class="sn-btn-primary" onclick="openModal()"><i class="fas fa-plus"></i>เพิ่ม Channel</button>
+    </div>
+
+    <div id="loading-state" style="text-align:center;padding:40px;color:#94a3b8;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:20px;"></i>
+        <div style="margin-top:8px;font-size:12px;">กำลังโหลด...</div>
+    </div>
+    <div id="channel-list" class="sn-channel-list" style="display:none;"></div>
+    <div id="empty-state" class="sn-empty" style="display:none;">
+        <div class="sn-empty-icon">🔕</div>
+        <div class="sn-empty-title">ยังไม่มี Channel</div>
+        <div style="font-size:12px;margin-bottom:16px;">กด "เพิ่ม Channel" เพื่อเริ่มตั้งค่า LINE หรือ Telegram</div>
+        <button class="sn-btn-primary" onclick="openModal()"><i class="fas fa-plus"></i>เพิ่ม Channel แรก</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         STOCK SUMMARY SECTION
+    ══════════════════════════════════════════════════ -->
+    <div style="margin-top:32px;border-top:2px solid #e2e8f0;padding-top:24px;">
+        <div class="sn-section-head" style="margin-bottom:14px;">
+            <div class="sn-section-title">📦 ส่งสรุป Stock ไป LINE/Telegram</div>
+        </div>
+
+        <!-- MANUAL SEND -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:2px;">🖐️ ส่งสรุปตอนนี้</div>
+                    <div style="font-size:11px;color:#64748b;">กดเพื่อส่งสรุป Stock ทั้งหมดไปยังทุก Channel ทันที</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <select id="manual-company" class="sn-input" style="width:110px;padding:6px 10px;font-size:12px;">
+                        <option value="">ทุกบริษัท</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                    <select id="manual-stock-type" class="sn-input" style="width:130px;padding:6px 10px;font-size:12px;">
+                        <option value="">ทุกประเภท</option>
+                        <option value="stationery">📎 เครื่องเขียน</option>
+                        <option value="maid">🧹 แม่บ้าน</option>
+                    </select>
+                    <button class="sn-btn-primary" id="manual-send-btn" onclick="sendSummaryNow()" style="white-space:nowrap;">
+                        <i class="fas fa-paper-plane"></i>ส่งสรุปตอนนี้
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEDULE LIST -->
+        <div>
+            <div class="sn-section-head" style="margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">⏰ ตั้งเวลาส่งอัตโนมัติ</div>
+                <button class="sn-btn-primary" onclick="openSchedModal()"><i class="fas fa-plus"></i>เพิ่ม Schedule</button>
+            </div>
+            <div id="sched-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div id="sched-empty" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:12px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;">
+                ยังไม่มี Schedule — กด "เพิ่ม Schedule" เพื่อตั้งเวลาส่งอัตโนมัติ
+            </div>
+            <div style="margin-top:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:11px;color:#92400e;">
+                💡 <strong>Lazy Cron</strong> — ระบบจะส่งเมื่อมีการใช้งานระบบภายใน 10 นาทีหลังเวลาที่ตั้ง
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         NOTIFY LOG SECTION
+    ══════════════════════════════════════════════════ -->
+    <div style="margin-top:32px;border-top:2px solid #e2e8f0;padding-top:24px;">
+        <div class="sn-section-head" style="margin-bottom:14px;">
+            <div class="sn-section-title">🪵 Log การแจ้งเตือนล่าสุด</div>
+            <button class="sn-btn-primary" onclick="loadNotifyLog()" id="log-refresh-btn" style="background:#475569;">
+                <i class="fas fa-sync-alt"></i>โหลด Log
+            </button>
+        </div>
+        <div id="notify-log-panel" style="background:#0f172a;border-radius:12px;padding:16px;font-family:'Courier New',monospace;font-size:11px;color:#94a3b8;min-height:80px;max-height:320px;overflow-y:auto;display:none;">
+            <div id="notify-log-content" style="white-space:pre-wrap;"></div>
+        </div>
+        <div id="notify-log-empty" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:#94a3b8;font-size:12px;">
+            กด "โหลด Log" เพื่อดู log การส่งแจ้งเตือนล่าสุด
+        </div>
+    </div>
+
+</main>
+
+<!-- MODAL -->
+<div id="channel-modal" class="sn-modal-overlay" style="display:none;" onclick="onOverlayClick(event)">
+    <div class="sn-modal" onclick="event.stopPropagation()">
+        <div class="sn-modal-head">
+            <div class="sn-modal-title" id="modal-title">เพิ่ม Channel ใหม่</div>
+            <button class="sn-modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sn-modal-body">
+
+            <!-- TYPE TOGGLE -->
+            <div class="sn-field">
+                <div class="sn-label">ประเภท Channel</div>
+                <div class="sn-type-toggle">
+                    <button type="button" class="sn-type-btn active" id="btn-telegram" onclick="setType('telegram')">
+                        <i class="fab fa-telegram" style="color:#229ED9;font-size:16px;"></i>Telegram
+                    </button>
+                    <button type="button" class="sn-type-btn" id="btn-line" onclick="setType('line')">
+                        <i class="fab fa-line" style="color:#06C755;font-size:16px;"></i>LINE
+                    </button>
+                </div>
+            </div>
+
+            <!-- NAME -->
+            <div class="sn-field">
+                <label class="sn-label" for="ch-name">ชื่อ Channel <span style="color:#dc2626;">*</span></label>
+                <input class="sn-input" id="ch-name" placeholder="เช่น IT Group, Stock Admin, แม่บ้าน GA">
+            </div>
+
+            <!-- TOKEN -->
+            <div class="sn-field">
+                <label class="sn-label" for="ch-token"><span id="token-label">Bot Token</span> <span style="color:#dc2626;">*</span></label>
+                <input class="sn-input" id="ch-token" placeholder="Bot Token หรือ Channel Access Token" autocomplete="off">
+                <div class="sn-input-hint" id="token-hint">Telegram: ขอได้จาก @BotFather</div>
+            </div>
+
+            <!-- DEST ID -->
+            <div class="sn-field">
+                <label class="sn-label" for="ch-dest"><span id="dest-label">Chat ID / Group ID</span> <span style="color:#dc2626;">*</span></label>
+                <input class="sn-input" id="ch-dest" placeholder="-1001234567890">
+                <div class="sn-input-hint" id="dest-hint">Telegram: ส่ง /id ใน group หรือใช้ @userinfobot</div>
+            </div>
+
+            <!-- COMPANY FILTER -->
+            <div class="sn-field">
+                <label class="sn-label" for="ch-company">กรอง บริษัท (ไม่บังคับ)</label>
+                <select class="sn-input" id="ch-company">
+                    <option value="">ทุกบริษัท</option>
+                    <option value="PTA">PTA</option>
+                    <option value="PT4">PT4</option>
+                    <option value="PTE">PTE</option>
+                </select>
+                <div class="sn-input-hint">ถ้าเลือก จะส่งเฉพาะ event จากบริษัทนั้น</div>
+            </div>
+
+            <!-- EVENTS -->
+            <div class="sn-field">
+                <div class="sn-label">Events ที่จะแจ้งเตือน</div>
+                <label class="sn-ev-check-item checked" id="ev-all-wrap">
+                    <input type="checkbox" id="ev-all" checked onchange="onEvAllChange()">
+                    <i class="fas fa-asterisk" style="color:#2563eb;font-size:10px;"></i>ทุก Event (*)
+                </label>
+                <div class="sn-events-check" id="ev-specific" style="display:none;">
+                    <div class="sn-ev-group">🔧 IT / งานซ่อม</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="it_repair"> 🔴 it_repair — แจ้งซ่อมใหม่</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="it_cancel"> 🟠 it_cancel — ยกเลิกงาน</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="it_approve"> 🟢 it_approve — ปิด/อนุมัติงาน</label>
+                    </div>
+                    <div class="sn-ev-group">📦 Stock / เบิกของ</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_new"> 🔵 stock_new — เบิกของใหม่</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_approve"> 🟢 stock_approve — อนุมัติเบิก</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_reject"> 🔴 stock_reject — ปฏิเสธเบิก</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_cancel"> 🟠 stock_cancel — ยกเลิกเบิก</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_low"> 🟡 stock_low — สต็อกใกล้หมด</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="stock_summary"> ⚫ stock_summary — สรุปประจำวัน</label>
+                    </div>
+                    <div class="sn-ev-group">🤝 การยืมอุปกรณ์</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="loan_new"> 🟣 loan_new — ยืมใหม่</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="loan_approve"> 🟢 loan_approve — อนุมัติยืม</label>
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="loan_reject"> 🔴 loan_reject — ปฏิเสธยืม</label>
+                    </div>
+                    <div class="sn-ev-group">🖥️ Server Check</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="server_check_issue"> 🔴 server_check_issue — พบปัญหาในการเช็คห้อง Server</label>
+                    </div>
+                    <div class="sn-ev-group">👤 พนักงาน</div>
+                    <div class="sn-ev-group-items">
+                        <label class="sn-ev-check-item" onclick="this.classList.toggle('checked')"><input type="checkbox" value="employee_offboard"> 🔴 employee_offboard — พนักงานลาออก (IT ต้องปิดสิทธิ์)</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="sn-modal-foot">
+            <button class="sn-btn-ghost" onclick="closeModal()">ยกเลิก</button>
+            <button class="sn-btn-primary" onclick="testChannel()" id="test-btn" style="background:#475569;">
+                <i class="fas fa-paper-plane"></i>ทดสอบตรง
+            </button>
+            <button class="sn-btn-primary" onclick="testRouting()" id="route-btn" style="background:#0369a1;" title="ทดสอบผ่าน event filter จริง (it_repair)">
+                <i class="fas fa-route"></i>ทดสอบ Routing
+            </button>
+            <button class="sn-btn-primary" onclick="saveChannel()" id="save-btn">
+                <i class="fas fa-save"></i>บันทึก
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let CHANNELS = [];
+let EDIT_ID  = 0;
+let CH_TYPE  = 'telegram';
+
+const EVENT_COLORS = {
+    it_repair:'#EF454D', it_cancel:'#FF9500', it_approve:'#1DB446',
+    stock_new:'#2563EB', stock_approve:'#16A34A', stock_reject:'#DC2626', stock_cancel:'#FF9500', stock_low:'#D97706', stock_summary:'#0F172A',
+    loan_new:'#7C3AED', loan_approve:'#16A34A', loan_reject:'#DC2626',
+    server_check_issue:'#B91C1C',
+    employee_offboard:'#BE123C'
+};
+
+// ── INIT ────────────────────────────────────────────────────
+window.toggleDark = function() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const sess = await (await fetch('api.php?action=check_session')).json();
+        const perms = sess.effective_permissions || [];
+        const canAccess = sess.role === 'admin' || perms.includes('*') || perms.includes('settings.notifications');
+        if (!sess.loggedin || !canAccess) {
+            window.location.href = 'index.html';
+            return;
+        }
+    } catch { window.location.href = 'index.html'; return; }
+    loadChannels();
+    loadSchedules();
+});
+
+// ── LOAD ─────────────────────────────────────────────────────
+async function loadChannels() {
+    document.getElementById('loading-state').style.display = '';
+    document.getElementById('channel-list').style.display  = 'none';
+    document.getElementById('empty-state').style.display   = 'none';
+    try {
+        const res  = await fetch('api.php?action=get_notify_channels');
+        const data = await res.json();
+        CHANNELS = data.channels || [];
+        renderChannels();
+    } catch(e) {
+        Swal.fire('Error', 'ไม่สามารถโหลดข้อมูลได้', 'error');
+    }
+    document.getElementById('loading-state').style.display = 'none';
+}
+
+function renderChannels() {
+    const list = document.getElementById('channel-list');
+    list.innerHTML = '';
+    if (!CHANNELS.length) {
+        document.getElementById('empty-state').style.display = '';
+        return;
+    }
+    document.getElementById('channel-list').style.display = '';
+
+    CHANNELS.forEach(ch => {
+        const isTg   = ch.channel_type === 'telegram';
+        const events = Array.isArray(ch.events) ? ch.events : ['*'];
+        const isAll  = events.includes('*');
+
+        const evChips = isAll
+            ? `<span class="sn-ev-chip all">✦ ทุก Event</span>`
+            : events.map(e => `<span class="sn-ev-chip">${e}</span>`).join('');
+
+        const card = document.createElement('div');
+        card.className = 'sn-channel-card';
+        card.innerHTML = `
+            <div class="sn-ch-type-badge ${ch.channel_type}">${isTg ? '✈️' : '💬'}</div>
+            <div class="sn-ch-body">
+                <div class="sn-ch-name">${esc(ch.name)}</div>
+                <div class="sn-ch-meta">
+                    <span><i class="fas fa-${isTg ? 'paper-plane' : 'comment-dots'}" style="color:${isTg ? '#229ED9' : '#1DB446'};margin-right:3px;"></i>${isTg ? 'Telegram' : 'LINE Messaging API'}</span>
+                    <span style="font-family:monospace;background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:10px;">${esc(ch.token_preview)}</span>
+                    ${ch.company ? `<span style="background:#fef9c3;color:#854d0e;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;">${esc(ch.company)}</span>` : ''}
+                </div>
+                <div class="sn-ch-events">${evChips}</div>
+            </div>
+            <div class="sn-ch-actions">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <label class="sn-toggle" title="${ch.enabled ? 'เปิดอยู่' : 'ปิดอยู่'}">
+                        <input type="checkbox" ${ch.enabled ? 'checked' : ''} onchange="toggleEnabled(${ch.id}, this.checked)">
+                        <span class="sn-toggle-slider"></span>
+                    </label>
+                    <span class="sn-ch-status ${ch.enabled ? 'on' : 'off'}">${ch.enabled ? 'เปิด' : 'ปิด'}</span>
+                </div>
+                <button class="sn-btn-icon success" title="ทดสอบส่ง" onclick="quickTest(${ch.id})"><i class="fas fa-paper-plane"></i></button>
+                <button class="sn-btn-icon" title="แก้ไข" onclick="openEditModal(${ch.id})"><i class="fas fa-pen"></i></button>
+                <button class="sn-btn-icon danger" title="ลบ" onclick="deleteChannel(${ch.id}, '${esc(ch.name)}')"><i class="fas fa-trash"></i></button>
+            </div>`;
+        list.appendChild(card);
+    });
+}
+
+// ── TOGGLE ENABLED ────────────────────────────────────────────
+async function toggleEnabled(id, enabled) {
+    const ch = CHANNELS.find(c => c.id == id);
+    if (!ch) return;
+    const fd = new FormData();
+    fd.append('action', 'save_notify_channel');
+    fd.append('id', id);
+    fd.append('name', ch.name);
+    fd.append('channel_type', ch.channel_type);
+    fd.append('token', '...');  // sentinel — backend skips token update when this value is sent
+    fd.append('dest_id', ch.dest_id);
+    fd.append('events', JSON.stringify(ch.events));
+    fd.append('company', ch.company || '');
+    fd.append('enabled', enabled ? 1 : 0);
+    fd.append('sort_order', ch.sort_order || 0);
+    await fetch('api.php', { method: 'POST', body: fd });
+    ch.enabled = enabled ? 1 : 0;
+    renderChannels();
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+function openModal() {
+    EDIT_ID = 0;
+    document.getElementById('modal-title').textContent = 'เพิ่ม Channel ใหม่';
+    document.getElementById('ch-name').value    = '';
+    document.getElementById('ch-token').value   = '';
+    document.getElementById('ch-dest').value    = '';
+    document.getElementById('ch-company').value = '';
+    document.getElementById('ev-all').checked   = true;
+    document.getElementById('token-hint').innerHTML = 'Telegram: ขอได้จาก @BotFather';
+    onEvAllChange();
+    setType('telegram');
+    // reset event checks
+    document.querySelectorAll('#ev-specific input[type=checkbox]').forEach(cb => {
+        cb.checked = false;
+        cb.closest('label').classList.remove('checked');
+    });
+    document.getElementById('channel-modal').style.display = 'flex';
+}
+
+function openEditModal(id) {
+    const ch = CHANNELS.find(c => c.id == id);
+    if (!ch) return;
+    EDIT_ID = id;
+    document.getElementById('modal-title').textContent = 'แก้ไข Channel';
+    document.getElementById('ch-name').value    = ch.name;
+    document.getElementById('ch-token').value   = ch.token_preview || ''; // show preview only
+    document.getElementById('ch-dest').value    = ch.dest_id;
+    document.getElementById('ch-company').value = ch.company || '';
+    // show hint that token is already saved
+    document.getElementById('token-hint').innerHTML =
+        `<span style="color:#16a34a;"><i class="fas fa-lock"></i> Token บันทึกไว้แล้ว (<code>${esc(ch.token_preview||'')}</code>) — ถ้าไม่เปลี่ยนปล่อยไว้ได้เลย</span>`;
+    setType(ch.channel_type);
+
+    const events = Array.isArray(ch.events) ? ch.events : ['*'];
+    const isAll  = events.includes('*');
+    document.getElementById('ev-all').checked = isAll;
+    onEvAllChange();
+    if (!isAll) {
+        document.querySelectorAll('#ev-specific input[type=checkbox]').forEach(cb => {
+            const on = events.includes(cb.value);
+            cb.checked = on;
+            cb.closest('label').classList.toggle('checked', on);
+        });
+    }
+    document.getElementById('channel-modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('channel-modal').style.display = 'none';
+    EDIT_ID = 0;
+}
+
+function onOverlayClick(e) {
+    if (e.target === document.getElementById('channel-modal')) closeModal();
+}
+
+function setType(type) {
+    CH_TYPE = type;
+    document.getElementById('btn-telegram').classList.toggle('active', type === 'telegram');
+    document.getElementById('btn-line').classList.toggle('active', type === 'line');
+    if (type === 'telegram') {
+        document.getElementById('token-label').textContent = 'Bot Token';
+        document.getElementById('dest-label').textContent  = 'Chat ID / Group ID';
+        document.getElementById('token-hint').textContent  = 'Telegram: ขอได้จาก @BotFather';
+        document.getElementById('dest-hint').textContent   = 'Telegram: ส่ง /id ใน group หรือใช้ @userinfobot';
+    } else {
+        document.getElementById('token-label').textContent = 'Channel Access Token';
+        document.getElementById('dest-label').textContent  = 'User ID / Group ID';
+        document.getElementById('token-hint').textContent  = 'LINE Developers Console → Messaging API → Channel access token';
+        document.getElementById('dest-hint').textContent   = 'LINE Group ID หรือ User ID ที่ต้องการส่งถึง';
+    }
+}
+
+function onEvAllChange() {
+    const all = document.getElementById('ev-all').checked;
+    document.getElementById('ev-all-wrap').classList.toggle('checked', all);
+    document.getElementById('ev-specific').style.display = all ? 'none' : '';
+}
+
+function getSelectedEvents() {
+    if (document.getElementById('ev-all').checked) return ['*'];
+    const checked = [];
+    document.querySelectorAll('#ev-specific input[type=checkbox]:checked').forEach(cb => checked.push(cb.value));
+    return checked.length ? checked : ['*'];
+}
+
+// ── SAVE ───────────────────────────────────────────────────────
+async function saveChannel() {
+    const name    = document.getElementById('ch-name').value.trim();
+    const token   = document.getElementById('ch-token').value.trim();
+    const dest_id = document.getElementById('ch-dest').value.trim();
+    const company = document.getElementById('ch-company').value;
+    const events  = getSelectedEvents();
+
+    if (!name)    { Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อ Channel', 'warning'); return; }
+    if (!dest_id) { Swal.fire('แจ้งเตือน', 'กรุณาระบุ Destination ID', 'warning'); return; }
+    if (!EDIT_ID && !token) { Swal.fire('แจ้งเตือน', 'กรุณาระบุ Token', 'warning'); return; }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> บันทึก...';
+
+    const fd = new FormData();
+    fd.append('action', 'save_notify_channel');
+    if (EDIT_ID) fd.append('id', EDIT_ID);
+    fd.append('name', name);
+    fd.append('channel_type', CH_TYPE);
+    fd.append('token', token || '...');
+    fd.append('dest_id', dest_id);
+    fd.append('events', JSON.stringify(events));
+    fd.append('company', company);
+    fd.append('enabled', 1);
+
+    try {
+        const res  = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+        if (res.status === 'success') {
+            closeModal();
+            Swal.fire({ title: 'บันทึกแล้ว ✅', icon: 'success', timer: 1200, showConfirmButton: false });
+            loadChannels();
+        } else throw new Error(res.message);
+    } catch(e) {
+        Swal.fire('Error', e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i>บันทึก';
+    }
+}
+
+// ── TEST ────────────────────────────────────────────────────────
+async function testChannel() {
+    const token   = document.getElementById('ch-token').value.trim();
+    const dest_id = document.getElementById('ch-dest').value.trim();
+    if (!dest_id) { Swal.fire('แจ้งเตือน', 'กรุณาระบุ Destination ID ก่อน', 'warning'); return; }
+    if (!token && !EDIT_ID) { Swal.fire('แจ้งเตือน', 'กรุณาระบุ Token ก่อน', 'warning'); return; }
+
+    const btn = document.getElementById('test-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> ส่งทดสอบ...';
+
+    const fd = new FormData();
+    fd.append('action', 'test_notify_channel');
+    fd.append('channel_type', CH_TYPE);
+    fd.append('token', token || '...');
+    fd.append('dest_id', dest_id);
+    if (EDIT_ID) fd.append('id', EDIT_ID);
+
+    try {
+        const res = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+        if (res.status === 'success') {
+            Swal.fire({ title: 'ส่งสำเร็จ! 📨', text: res.message, icon: 'success', timer: 2000, showConfirmButton: false });
+        } else throw new Error(res.message);
+    } catch(e) {
+        Swal.fire('ส่งไม่สำเร็จ ❌', e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>ทดสอบ';
+    }
+}
+
+async function testRouting() {
+    const company = document.getElementById('ch-company').value || '';
+    const btn = document.getElementById('route-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> ทดสอบ...';
+    try {
+        const fd = new FormData();
+        fd.append('action', 'test_notify_routing');
+        fd.append('event', 'it_repair');
+        fd.append('company', company);
+        const res = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+        const matchedHtml = res.matched?.length
+            ? `<div style="color:#166534;margin-top:8px"><b>✅ ส่งถึง:</b> ${res.matched.join(', ')}</div>` : '';
+        const skippedHtml = res.skipped?.length
+            ? `<div style="color:#92400e;margin-top:6px"><b>⏭ ข้าม:</b><ul style="text-align:left;margin:4px 0 0 16px">${res.skipped.map(s=>`<li><b>${s.name}</b> — ${s.reason}</li>`).join('')}</ul></div>` : '';
+        Swal.fire({
+            icon: res.status === 'success' ? 'success' : 'warning',
+            title: res.status === 'success' ? 'Routing ทำงานถูกต้อง' : 'ไม่มี channel รับ event นี้',
+            html: `<div style="font-size:13px;text-align:center">${matchedHtml}${skippedHtml}</div>`,
+        });
+    } catch(e) { Swal.fire('Error', e.message, 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-route"></i>ทดสอบ Routing'; }
+}
+
+async function quickTest(id) {
+    const fd = new FormData();
+    fd.append('action', 'test_notify_channel');
+    fd.append('id', id);
+    fd.append('token', '...');
+    const ch = CHANNELS.find(c => c.id == id);
+    if (!ch) return;
+    fd.append('channel_type', ch.channel_type);
+    fd.append('dest_id', ch.dest_id);
+
+    Swal.fire({ title: 'กำลังส่ง...', allowOutsideClick: false, showConfirmButton: false,
+        didOpen: () => Swal.showLoading() });
+
+    try {
+        const res = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+        if (res.status === 'success') {
+            Swal.fire({ title: 'ส่งสำเร็จ! 📨', text: res.message, icon: 'success', timer: 2000, showConfirmButton: false });
+        } else throw new Error(res.message);
+    } catch(e) {
+        Swal.fire('ส่งไม่สำเร็จ ❌', e.message, 'error');
+    }
+}
+
+// ── DELETE ──────────────────────────────────────────────────────
+async function deleteChannel(id, name) {
+    const conf = await Swal.fire({
+        title: `ลบ "${name}"?`,
+        text: 'Channel นี้จะหยุดรับการแจ้งเตือนทันที',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonText: 'ลบ', cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626'
+    });
+    if (!conf.isConfirmed) return;
+    const fd = new FormData();
+    fd.append('action', 'delete_notify_channel');
+    fd.append('id', id);
+    const res = await (await fetch('api.php', { method: 'POST', body: fd })).json();
+    if (res.status === 'success') {
+        Swal.fire({ title: 'ลบแล้ว', icon: 'success', timer: 1000, showConfirmButton: false });
+        loadChannels();
+    } else {
+        Swal.fire('Error', res.message, 'error');
+    }
+}
+
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ── STOCK SUMMARY ──────────────────────────────────────────────────────
+
+async function sendSummaryNow() {
+    const btn       = document.getElementById('manual-send-btn');
+    const company   = document.getElementById('manual-company').value;
+    const stockType = document.getElementById('manual-stock-type').value;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> กำลังส่ง...';
+    try {
+        const fd = new FormData();
+        fd.append('action', 'sendStockSummary');
+        if (company)   fd.append('company', company);
+        if (stockType) fd.append('stock_type', stockType);
+        const res = await (await fetch('api.php', { method:'POST', body:fd })).json();
+        if (res.status === 'success') {
+            Swal.fire({ title:'ส่งสรุปแล้ว! 📦', text: res.message, icon:'success', timer:2000, showConfirmButton:false });
+            loadSchedules();
+        } else throw new Error(res.message);
+    } catch(e) {
+        Swal.fire('ส่งไม่สำเร็จ', e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>ส่งสรุปตอนนี้';
+    }
+}
+
+// ── SCHEDULE MANAGEMENT ───────────────────────────────────────────────
+const FREQ_LABEL = { daily:'ทุกวัน', weekly:'ทุกสัปดาห์', monthly:'ทุกเดือน' };
+const DAY_NAMES  = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const TYPE_LABEL = { stationery:'📎 เครื่องเขียน', maid:'🧹 แม่บ้าน' };
+let SCHEDS = [], SCHED_EDIT_ID = 0;
+
+async function loadSchedules() {
+    const res  = await fetch('api.php?action=getStockSummarySchedules');
+    const data = await res.json();
+    SCHEDS = data.schedules || [];
+    renderSchedules();
+}
+
+function renderSchedules() {
+    const list  = document.getElementById('sched-list');
+    const empty = document.getElementById('sched-empty');
+    list.innerHTML = '';
+    if (!SCHEDS.length) { empty.style.display=''; return; }
+    empty.style.display = 'none';
+
+    SCHEDS.forEach(s => {
+        let freqDetail = FREQ_LABEL[s.frequency] || s.frequency;
+        if (s.frequency === 'weekly')  freqDetail += ' วัน' + (DAY_NAMES[s.day_of_week] || '');
+        if (s.frequency === 'monthly') freqDetail += ' วันที่ ' + s.day_of_month;
+
+        const typeLabel = TYPE_LABEL[s.stock_type] || 'ทุกประเภท';
+        const compLabel = s.company || 'ทุกบริษัท';
+        const lastSent  = s.last_sent ? `ส่งล่าสุด: ${s.last_sent}` : 'ยังไม่เคยส่ง';
+
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;';
+        card.innerHTML = `
+            <div style="width:38px;height:38px;border-radius:10px;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⏰</div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">${esc(s.name || 'Schedule #'+s.id)}</div>
+                <div style="font-size:11px;color:#64748b;display:flex;gap:10px;flex-wrap:wrap;margin-top:2px;">
+                    <span>🏢 ${compLabel}</span>
+                    <span>${typeLabel}</span>
+                    <span>🕐 ${s.send_time} · ${freqDetail}</span>
+                    <span style="color:#94a3b8;">${lastSent}</span>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <label class="sn-toggle">
+                        <input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSched(${s.id},this.checked)">
+                        <span class="sn-toggle-slider"></span>
+                    </label>
+                    <span class="sn-ch-status ${s.enabled?'on':'off'}">${s.enabled?'เปิด':'ปิด'}</span>
+                </div>
+                <button class="sn-btn-icon" onclick="openSchedModal(${s.id})" title="แก้ไข"><i class="fas fa-pen"></i></button>
+                <button class="sn-btn-icon danger" onclick="deleteSched(${s.id},'${esc(s.name||'Schedule #'+s.id)}')" title="ลบ"><i class="fas fa-trash"></i></button>
+            </div>`;
+        list.appendChild(card);
+    });
+}
+
+function openSchedModal(id = 0) {
+    SCHED_EDIT_ID = id;
+    const s = id ? SCHEDS.find(x => x.id == id) : null;
+    document.getElementById('sm-title').textContent  = id ? 'แก้ไข Schedule' : 'เพิ่ม Schedule';
+    document.getElementById('sm-name').value         = s?.name        || '';
+    document.getElementById('sm-company').value      = s?.company     || '';
+    document.getElementById('sm-stock-type').value   = s?.stock_type  || '';
+    document.getElementById('sm-frequency').value    = s?.frequency   || 'daily';
+    document.getElementById('sm-time').value         = s?.send_time   || '08:00';
+    document.getElementById('sm-dow').value          = s?.day_of_week  ?? 1;
+    document.getElementById('sm-dom').value          = s?.day_of_month ?? 1;
+    onFreqChange();
+    document.getElementById('sched-modal').style.display = 'flex';
+}
+
+function closeSchedModal() { document.getElementById('sched-modal').style.display = 'none'; }
+
+function onFreqChange() {
+    const f = document.getElementById('sm-frequency').value;
+    document.getElementById('sm-dow-wrap').style.display = f === 'weekly'  ? '' : 'none';
+    document.getElementById('sm-dom-wrap').style.display = f === 'monthly' ? '' : 'none';
+}
+
+async function saveSched() {
+    const fd = new FormData();
+    fd.append('action',      'saveStockSummarySchedule');
+    if (SCHED_EDIT_ID) fd.append('id', SCHED_EDIT_ID);
+    fd.append('name',        document.getElementById('sm-name').value);
+    fd.append('company',     document.getElementById('sm-company').value);
+    fd.append('stock_type',  document.getElementById('sm-stock-type').value);
+    fd.append('frequency',   document.getElementById('sm-frequency').value);
+    fd.append('send_time',   document.getElementById('sm-time').value);
+    fd.append('day_of_week', document.getElementById('sm-dow').value);
+    fd.append('day_of_month',document.getElementById('sm-dom').value);
+    fd.append('enabled',     '1');
+    const res = await (await fetch('api.php',{method:'POST',body:fd})).json();
+    if (res.status === 'success') {
+        closeSchedModal();
+        Swal.fire({title:'บันทึกแล้ว ✅',icon:'success',timer:1200,showConfirmButton:false});
+        loadSchedules();
+    } else Swal.fire('Error', res.message, 'error');
+}
+
+async function toggleSched(id, enabled) {
+    const s = SCHEDS.find(x => x.id == id); if (!s) return;
+    const fd = new FormData();
+    fd.append('action','saveStockSummarySchedule'); fd.append('id',id);
+    fd.append('name',s.name||''); fd.append('company',s.company||'');
+    fd.append('stock_type',s.stock_type||''); fd.append('frequency',s.frequency);
+    fd.append('send_time',s.send_time); fd.append('day_of_week',s.day_of_week??1);
+    fd.append('day_of_month',s.day_of_month??1); fd.append('enabled',enabled?'1':'0');
+    await fetch('api.php',{method:'POST',body:fd});
+    s.enabled = enabled?1:0; renderSchedules();
+}
+
+async function deleteSched(id, name) {
+    const c = await Swal.fire({title:`ลบ "${name}"?`,icon:'warning',showCancelButton:true,
+        confirmButtonText:'ลบ',cancelButtonText:'ยกเลิก',confirmButtonColor:'#dc2626'});
+    if (!c.isConfirmed) return;
+    const fd = new FormData();
+    fd.append('action','deleteStockSummarySchedule'); fd.append('id',id);
+    const res = await (await fetch('api.php',{method:'POST',body:fd})).json();
+    if (res.status==='success') { Swal.fire({title:'ลบแล้ว',icon:'success',timer:1000,showConfirmButton:false}); loadSchedules(); }
+}
+
+async function loadNotifyLog() {
+    const btn = document.getElementById('log-refresh-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> กำลังโหลด...';
+    try {
+        const res = await (await fetch('api.php?action=get_notify_log&limit=60')).json();
+        const panel = document.getElementById('notify-log-panel');
+        const content = document.getElementById('notify-log-content');
+        const empty = document.getElementById('notify-log-empty');
+
+        if (!res.lines || res.lines.length === 0) {
+            content.textContent = res.message || 'ยังไม่มี log หรือไม่พบไฟล์ log\nPath: ' + (res.log_path || 'ไม่ทราบ');
+        } else {
+            const colored = res.lines.map(line => {
+                if (line.includes('SEND ')) return `<span style="color:#86efac">${escHtml(line)}</span>`;
+                if (line.includes('SKIP ')) return `<span style="color:#fbbf24">${escHtml(line)}</span>`;
+                if (line.includes('NO MATCH')) return `<span style="color:#f87171">${escHtml(line)}</span>`;
+                if (line.includes('sent OK')) return `<span style="color:#34d399">${escHtml(line)}</span>`;
+                if (line.includes('error')) return `<span style="color:#f87171">${escHtml(line)}</span>`;
+                return `<span style="color:#94a3b8">${escHtml(line)}</span>`;
+            }).join('\n');
+            content.innerHTML = colored;
+        }
+        panel.style.display = '';
+        empty.style.display = 'none';
+        panel.scrollTop = panel.scrollHeight;
+    } catch(e) {
+        document.getElementById('notify-log-content').textContent = 'Error: ' + e.message;
+        document.getElementById('notify-log-panel').style.display = '';
+        document.getElementById('notify-log-empty').style.display = 'none';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync-alt"></i>โหลด Log';
+    }
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+
+<!-- SCHEDULE MODAL -->
+<div id="sched-modal" class="sn-modal-overlay" style="display:none;" onclick="if(event.target===this)closeSchedModal()">
+    <div class="sn-modal" onclick="event.stopPropagation()">
+        <div class="sn-modal-head">
+            <div class="sn-modal-title" id="sm-title">เพิ่ม Schedule</div>
+            <button class="sn-modal-close" onclick="closeSchedModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sn-modal-body">
+            <div class="sn-field">
+                <label class="sn-label">ชื่อ Schedule</label>
+                <input class="sn-input" id="sm-name" placeholder="เช่น PTA เครื่องเขียน รายวัน">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="sn-field">
+                    <label class="sn-label">บริษัท</label>
+                    <select class="sn-input" id="sm-company">
+                        <option value="">ทุกบริษัท</option>
+                        <option value="PTA">PTA</option>
+                        <option value="PT4">PT4</option>
+                        <option value="PTE">PTE</option>
+                    </select>
+                </div>
+                <div class="sn-field">
+                    <label class="sn-label">ประเภท Stock</label>
+                    <select class="sn-input" id="sm-stock-type">
+                        <option value="">ทุกประเภท</option>
+                        <option value="stationery">📎 เครื่องเขียน</option>
+                        <option value="maid">🧹 แม่บ้าน</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="sn-field">
+                    <label class="sn-label">ความถี่</label>
+                    <select class="sn-input" id="sm-frequency" onchange="onFreqChange()">
+                        <option value="daily">ทุกวัน</option>
+                        <option value="weekly">ทุกสัปดาห์</option>
+                        <option value="monthly">ทุกเดือน</option>
+                    </select>
+                </div>
+                <div class="sn-field">
+                    <label class="sn-label">เวลาที่ส่ง</label>
+                    <input type="time" class="sn-input" id="sm-time" value="08:00">
+                </div>
+            </div>
+            <div id="sm-dow-wrap" class="sn-field" style="display:none;">
+                <label class="sn-label">วันในสัปดาห์</label>
+                <select class="sn-input" id="sm-dow">
+                    <option value="0">อาทิตย์</option>
+                    <option value="1" selected>จันทร์</option>
+                    <option value="2">อังคาร</option>
+                    <option value="3">พุธ</option>
+                    <option value="4">พฤหัสบดี</option>
+                    <option value="5">ศุกร์</option>
+                    <option value="6">เสาร์</option>
+                </select>
+            </div>
+            <div id="sm-dom-wrap" class="sn-field" style="display:none;">
+                <label class="sn-label">วันที่ในเดือน</label>
+                <select class="sn-input" id="sm-dom">
+                    ${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+        <div class="sn-modal-foot">
+            <button class="sn-btn-ghost" onclick="closeSchedModal()">ยกเลิก</button>
+            <button class="sn-btn-primary" onclick="saveSched()"><i class="fas fa-save"></i>บันทึก</button>
+        </div>
+    </div>
+</div>
+</main></div>
+<script src="js/sidebar.js?v=20261021d"></script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>
