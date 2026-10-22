@@ -10,3 +10,16 @@
         Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
 </IfModule>
+
+# TISAX: ของที่ไม่ใช่ส่วนของระบบ (ไฟล์สำรอง ฐานข้อมูล log สคริปต์ โค้ดพร้อมประวัติ) ห้ามเปิดผ่านเว็บ
+# เคยหลุดอยู่บนเครื่องจริงจริง ๆ (DB dump, .git, backup zip) — กันไว้ทั้งระดับไฟล์และโฟลเดอร์
+<IfModule mod_alias.c>
+    RedirectMatch 403 ^/PowertechCenter/(\.git|\.claude|\.qodo|\.vscode|\.cursor|DB|database|tools|bin|node_modules|docs|src|orchestration|ตัวอย่างพัฒนา)(/|$)
+    RedirectMatch 403 ^/PowertechCenter/([^/]+\.(txt|md|log|bat|ps1|py|sh|lock)|package(-lock)?\.json)$
+    RedirectMatch 403 \.(sql|zip|7z|rar|bak|jsonl|env)$
+    # ไฟล์ action/helper ถูก api.php include เท่านั้น — เรียกตรงจะข้ามด่านล็อกอินกลาง
+    RedirectMatch 403 ^/PowertechCenter/(api/actions|includes)/
+    # สคริปต์ติดตั้ง/ใส่ข้อมูลครั้งเดียว และ endpoint เก่าก่อนมี api.php (migrate.php บอกรหัสผ่านตัวเองใน error)
+    RedirectMatch 403 ^/PowertechCenter/(migrate|seed_[^/]*|populate_kb|create_hash|add_item|delete_item|update_item|setup_server_check|tmp_query|auto_login_test)\.php$
+    RedirectMatch 403 /\.(?!well-known)
+</IfModule>
