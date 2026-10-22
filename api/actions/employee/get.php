@@ -224,6 +224,26 @@ if ($file === 'employees') {
                 $_GET['paginate'] = '1';
             }
 
+            // log.html บอร์ดคิวงาน — งานที่ยังไม่ปิดทั้งหมด + ที่ปิดวันนี้ (นับ KPI)
+            // it_logs เก็บแค่วันที่ → เวลาแจ้ง/รับเรื่องดึงจากประวัติเหตุการณ์ ใช้นับถอยหลังเวลาที่ต้องรับเรื่อง
+            if (($_GET['scope'] ?? '') === 'board') {
+                if (!hasPermission($conn, 'it_log.access')) { echo json_encode(['status' => 'error', 'message' => 'Access Denied']); exit; }
+                $bw = ["(status NOT IN ('Completed','Cancelled','Unrepairable') OR DATE(COALESCE(closed_date, completed_date)) = CURDATE())"];
+                $bp = []; $bt = '';
+                if ($role !== 'admin' && $sessionCompany) { $bw[] = 'company = ?'; $bp[] = $sessionCompany; $bt .= 's'; }
+                $bsql = "SELECT id, date, company, requester, department, asset_id, requester_id, servicedBy, servicedById, problem, contact, status, type, urgency,
+                        appointment_date, closed_date, completed_date, awaiting_confirmation_at, repair_cost, pr_no, po_no, vendor_name, eta_date, rating,
+                        (SELECT MIN(e.created_at) FROM mt_ticket_events e WHERE e.log_id COLLATE utf8mb4_unicode_ci = it_logs.id COLLATE utf8mb4_unicode_ci AND e.event_type = 'CREATE') AS created_at,
+                        (SELECT MIN(e.created_at) FROM mt_ticket_events e WHERE e.log_id COLLATE utf8mb4_unicode_ci = it_logs.id COLLATE utf8mb4_unicode_ci AND e.event_type = 'ACCEPT') AS accepted_at,
+                        (SELECT COUNT(*) FROM ticket_comments c WHERE c.ticket_id COLLATE utf8mb4_unicode_ci = it_logs.id COLLATE utf8mb4_unicode_ci) AS comment_count
+                        FROM it_logs WHERE " . implode(' AND ', $bw) . " ORDER BY date DESC, id DESC LIMIT 500";
+                $bs = $conn->prepare($bsql);
+                if ($bt !== '') $bs->bind_param($bt, ...$bp);
+                $bs->execute();
+                echo json_encode(['status' => 'success', 'data' => $bs->get_result()->fetch_all(MYSQLI_ASSOC), 'now' => date('Y-m-d H:i:s')]);
+                exit;
+            }
+
             // Server-side filters from query string
             $filterId        = trim($_GET['id'] ?? '');
             $filterCompany   = trim($_GET['filter_company']   ?? '');

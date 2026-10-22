@@ -498,6 +498,24 @@
         }
     </script>
 <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+<style>
+    /* ฟอร์มงาน: ส่วนที่ใช้เฉพาะบางงาน พับไว้ */
+    .lf-fold { border: 1px solid var(--ptc-border, #e2e8f0); border-radius: 12px; }
+    .lf-fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--ptc-text, #0f172a); }
+    .lf-fold > summary::-webkit-details-marker { display: none; }
+    .lf-fold > summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; margin-left: auto; color: #94a3b8; transition: transform .2s; }
+    .lf-fold[open] > summary::after { transform: rotate(180deg); }
+    .lf-fold > summary i { color: #64748b; width: 16px; text-align: center; }
+    .lf-fold > summary small { font-weight: 400; color: #94a3b8; font-size: 12px; }
+    .lf-fold-body { padding: 4px 14px 14px; }
+    /* มือถือ: ปุ่มบนหัวหน้าเยอะจนจอกว้างเกิน (เดิม 658px) — ซ่อนตัวที่ใช้ไม่บ่อย */
+    @media (max-width: 640px) {
+        #export-btn, #refresh-btn, .log-nav-link, .log-nav-divider, .log-nav-count { display: none !important; }
+        .log-nav-actions { gap: 4px; }
+        #nav-user-area #navUserChip > :not(#navUserAvatar) { display: none !important; }
+        .nav-search-wrap:not(.\!flex) { display: none !important; }
+    }
+</style>
 </head>
 <body class="antialiased log-page-root log-unified-v1 ptc-unified-v1" data-page="log">
 
@@ -515,7 +533,7 @@
     <div class="nav-search-wrap hidden sm:flex">
         <div class="nav-search">
             <i class="fas fa-search nav-search-icon"></i>
-            <input id="search-input" type="search" placeholder="ค้นหา ticket, requester, doc no..." class="nav-search-input">
+            <input id="search-input" type="search" placeholder="ค้นหาเลขที่ / ผู้แจ้ง / ปัญหา…" class="nav-search-input">
             <span class="nav-search-kbd hidden lg:block">/</span>
         </div>
     </div>
@@ -539,7 +557,7 @@
             <span class="hidden sm:inline">งานใหม่</span>
         </button>
         <div class="log-nav-divider hidden sm:block"></div>
-        <button id="export-btn" class="ptc-ghost hidden md:inline-flex" title="Export CSV" aria-label="Export CSV">
+        <button id="export-btn" class="ptc-ghost hidden md:inline-flex" title="ส่งออก CSV" aria-label="ส่งออก CSV">
             <i class="fas fa-download"></i>
         </button>
         <button id="refresh-btn" class="ptc-ghost hidden md:inline-flex" title="รีเฟรช" aria-label="รีเฟรช">
@@ -555,45 +573,45 @@
 
     <!-- ── Sidebar (desktop only) ── -->
     <aside id="sidebar-left" class="hidden lg:flex">
-        <div class="snav-sec">Views</div>
+        <div class="snav-sec">มุมมอง</div>
         <button class="snav stat-pill active" data-filter-value="">
             <span class="snav-icon"><i class="fas fa-layer-group"></i></span>
-            All Tickets
+            งานทั้งหมด
             <span class="snav-badge" id="cnt-all">0</span>
         </button>
         <button class="snav date-preset-btn" data-preset="today">
             <span class="snav-icon"><i class="fas fa-calendar-day"></i></span>
-            Today
+            วันนี้
         </button>
         <button class="snav date-preset-btn" data-preset="week">
             <span class="snav-icon"><i class="fas fa-calendar-week"></i></span>
-            This Week
+            สัปดาห์นี้
         </button>
 
-        <div class="snav-sec">Active</div>
+        <div class="snav-sec">กำลังดำเนินการ</div>
         <button class="snav stat-pill" data-filter-value="Pending">
             <span class="snav-icon" style="background:#dbeafe;color:#2563eb"><i class="fas fa-clock"></i></span>
-            Pending
+            รอรับเรื่อง
             <span class="snav-badge" id="cnt-Pending">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="In Progress">
             <span class="snav-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-spinner"></i></span>
-            In Progress
+            กำลังซ่อม
             <span class="snav-badge" id="cnt-In Progress">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="Awaiting Confirmation">
             <span class="snav-icon" style="background:#fef3c7;color:#d97706"><i class="fas fa-user-check"></i></span>
-            Awaiting
+            รอผู้แจ้งยืนยัน
             <span class="snav-badge" id="cnt-Awaiting Confirmation">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="Temporary Fix">
             <span class="snav-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-wrench"></i></span>
-            Temp Fix
+            แก้ชั่วคราว
             <span class="snav-badge" id="cnt-Temporary Fix">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="Waiting for User">
             <span class="snav-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-comment-dots"></i></span>
-            รอผู้ใช้ตอบ
+            รอผู้แจ้งตอบ
             <span class="snav-badge" id="cnt-Waiting for User">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="Sent to Vendor">
@@ -602,42 +620,42 @@
             <span class="snav-badge" id="cnt-Sent to Vendor">0</span>
         </button>
 
-        <div class="snav-sec">Procurement</div>
+        <div class="snav-sec">จัดซื้ออะไหล่</div>
         <button class="snav stat-pill" data-filter-value="PR Submitted">
             <span class="snav-icon" style="background:#e0f2fe;color:#0284c7"><i class="fas fa-file-invoice"></i></span>
-            PR Submitted
+            ขอซื้อ (PR)
             <span class="snav-badge" id="cnt-PR Submitted">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="PO Issued">
             <span class="snav-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-file-contract"></i></span>
-            PO Issued
+            สั่งซื้อแล้ว (PO)
             <span class="snav-badge" id="cnt-PO Issued">0</span>
         </button>
 
-        <div class="snav-sec">Closed</div>
+        <div class="snav-sec">ปิดแล้ว</div>
         <button class="snav stat-pill" data-filter-value="Completed">
             <span class="snav-icon" style="background:#d1fae5;color:#059669"><i class="fas fa-check-circle"></i></span>
-            Completed
+            เสร็จสิ้น
             <span class="snav-badge" id="cnt-Completed">0</span>
         </button>
         <button class="snav stat-pill" data-filter-value="Unrepairable">
             <span class="snav-icon" style="background:#ffe4e6;color:#e11d48"><i class="fas fa-ban"></i></span>
-            Unrepairable
+            ซ่อมไม่ได้
             <span class="snav-badge" id="cnt-Unrepairable">0</span>
         </button>
 
-        <div class="snav-sec">Type</div>
+        <div class="snav-sec">ประเภทงาน</div>
         <button class="snav type-pill" data-ftype="Hardware" onclick="setTypeFilter(this)">
             <span class="snav-icon"><i class="fas fa-desktop"></i></span>
-            Hardware
+            ฮาร์ดแวร์
         </button>
         <button class="snav type-pill" data-ftype="Software" onclick="setTypeFilter(this)">
             <span class="snav-icon"><i class="fas fa-code"></i></span>
-            Software
+            ซอฟต์แวร์
         </button>
         <button class="snav type-pill" data-ftype="Network" onclick="setTypeFilter(this)">
             <span class="snav-icon"><i class="fas fa-network-wired"></i></span>
-            Network
+            เครือข่าย
         </button>
         <button class="snav type-pill" data-ftype="Scheduled" onclick="setTypeFilter(this)">
             <span class="snav-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-calendar-check"></i></span>
@@ -655,12 +673,12 @@
         <hr class="snav-divider">
         <button class="snav" onclick="location.href='it_report.html'">
             <span class="snav-icon"><i class="fas fa-chart-bar"></i></span>
-            IT Report
+            รายงานงาน IT
         </button>
 
         <button class="snav" onclick="location.href='audit_log.html'">
             <span class="snav-icon"><i class="fas fa-history"></i></span>
-            Audit Log
+            ประวัติการใช้งาน
         </button>
     </aside>
 
@@ -670,16 +688,16 @@
         <!-- Mobile pill strip (status quick-filter) -->
         <div class="lg:hidden no-print">
             <div class="pill-strip">
-                <button class="stat-pill active" data-filter-value=""><i class="fas fa-layer-group"></i> All</button>
-                <button class="stat-pill" data-filter-value="Pending"><i class="fas fa-clock"></i> Pending</button>
-                <button class="stat-pill" data-filter-value="In Progress"><i class="fas fa-spinner"></i> In Progress</button>
-                <button class="stat-pill" data-filter-value="Awaiting Confirmation"><i class="fas fa-user-check"></i> Awaiting</button>
-                <button class="stat-pill" data-filter-value="Temporary Fix"><i class="fas fa-wrench"></i> Temp Fix</button>
+                <button class="stat-pill active" data-filter-value=""><i class="fas fa-layer-group"></i> ทั้งหมด</button>
+                <button class="stat-pill" data-filter-value="Pending"><i class="fas fa-clock"></i> รอรับเรื่อง</button>
+                <button class="stat-pill" data-filter-value="In Progress"><i class="fas fa-spinner"></i> กำลังซ่อม</button>
+                <button class="stat-pill" data-filter-value="Awaiting Confirmation"><i class="fas fa-user-check"></i> รอยืนยัน</button>
+                <button class="stat-pill" data-filter-value="Temporary Fix"><i class="fas fa-wrench"></i> แก้ชั่วคราว</button>
 
-                <button class="stat-pill" data-filter-value="Completed"><i class="fas fa-check-circle"></i> Completed</button>
+                <button class="stat-pill" data-filter-value="Completed"><i class="fas fa-check-circle"></i> เสร็จสิ้น</button>
                 <button class="stat-pill" data-filter-value="PR Submitted"><i class="fas fa-file-invoice"></i> PR</button>
-                <button class="stat-pill" data-filter-value="Unrepairable"><i class="fas fa-ban"></i> Unrepairable</button>
-                <button class="date-preset-btn stat-pill" data-preset="today"><i class="fas fa-calendar-day"></i> Today</button>
+                <button class="stat-pill" data-filter-value="Unrepairable"><i class="fas fa-ban"></i> ซ่อมไม่ได้</button>
+                <button class="date-preset-btn stat-pill" data-preset="today"><i class="fas fa-calendar-day"></i> วันนี้</button>
             </div>
         </div>
 
@@ -689,35 +707,35 @@
                 <div class="kpi-icon" style="background:#eff6ff"><i class="fas fa-layer-group" style="color:#2563eb;font-size:13px"></i></div>
                 <div>
                     <div class="kpi-val" id="kpi-total">—</div>
-                    <div class="kpi-lbl">Total</div>
+                    <div class="kpi-lbl">ทั้งหมด</div>
                 </div>
             </div>
             <div class="kpi-card" style="cursor:pointer" onclick="document.querySelector('.snav.stat-pill[data-filter-value=\'Pending\']')?.click()">
                 <div class="kpi-icon" style="background:#dbeafe"><i class="fas fa-clock" style="color:#2563eb;font-size:13px"></i></div>
                 <div>
                     <div class="kpi-val" style="color:#2563eb" id="kpi-pending">—</div>
-                    <div class="kpi-lbl">Pending</div>
+                    <div class="kpi-lbl">รอรับเรื่อง</div>
                 </div>
             </div>
             <div class="kpi-card" style="cursor:pointer" onclick="document.querySelector('.snav.stat-pill[data-filter-value=\'In Progress\']')?.click()">
                 <div class="kpi-icon" style="background:#fef3c7"><i class="fas fa-bolt" style="color:#d97706;font-size:13px"></i></div>
                 <div>
                     <div class="kpi-val" style="color:#d97706" id="kpi-active">—</div>
-                    <div class="kpi-lbl">Active</div>
+                    <div class="kpi-lbl">กำลังทำ</div>
                 </div>
             </div>
             <div class="kpi-card" style="cursor:pointer" onclick="document.querySelector('.snav.stat-pill[data-filter-value=\'Awaiting Confirmation\']')?.click()">
                 <div class="kpi-icon" style="background:#fef3c7"><i class="fas fa-user-check" style="color:#d97706;font-size:13px"></i></div>
                 <div>
                     <div class="kpi-val" style="color:#d97706" id="kpi-awaiting">—</div>
-                    <div class="kpi-lbl">Awaiting</div>
+                    <div class="kpi-lbl">รอยืนยัน</div>
                 </div>
             </div>
             <div class="kpi-card" style="cursor:pointer" onclick="document.querySelector('.snav.stat-pill[data-filter-value=\'Completed\']')?.click()">
                 <div class="kpi-icon" style="background:#d1fae5"><i class="fas fa-check-circle" style="color:#059669;font-size:13px"></i></div>
                 <div>
                     <div class="kpi-val" style="color:#059669" id="kpi-completed">—</div>
-                    <div class="kpi-lbl">Completed</div>
+                    <div class="kpi-lbl">เสร็จสิ้น</div>
                 </div>
             </div>
         </div>
@@ -726,12 +744,12 @@
         <div class="flex items-center gap-1.5 px-3 py-2 border-b border-slate-100 no-print" id="filter-bar" style="min-height:44px">
             <div class="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto" style="-ms-overflow-style:none;scrollbar-width:none">
                 <select id="company-filter" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:138px">
-                    <option value="">All Companies</option>
+                    <option value="">ทุกบริษัท</option>
                 </select>
                 <input type="date" id="date-start" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:128px">
                 <span class="text-slate-300 flex-shrink-0" style="font-size:13px">–</span>
                 <input type="date" id="date-end" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:128px">
-                <button id="clear-filters-btn" class="ptc-ghost flex-shrink-0" style="font-size:12px;padding:5px 9px" title="Reset all filters">
+                <button id="clear-filters-btn" class="ptc-ghost flex-shrink-0" style="font-size:12px;padding:5px 9px" title="ล้างตัวกรองทั้งหมด">
                     <i class="fas fa-undo" style="color:#94a3b8"></i>
                 </button>
                 <!-- Search mobile -->
@@ -743,15 +761,15 @@
             <div class="flex-shrink-0 hidden sm:block" style="width:1px;height:20px;background:#e2e8f0;margin:0 2px"></div>
             <div class="flex items-center gap-1.5 flex-shrink-0">
                 <select id="per-page-select" class="ptc-input per-page-select" style="font-size:12px;padding:5px 8px;width:76px">
-                    <option value="25">25 / pg</option>
-                    <option value="50">50 / pg</option>
-                    <option value="100">100 / pg</option>
-                    <option value="200">200 / pg</option>
+                    <option value="25">25 / หน้า</option>
+                    <option value="50">50 / หน้า</option>
+                    <option value="100">100 / หน้า</option>
+                    <option value="200">200 / หน้า</option>
                 </select>
-                <button id="filter-toggle-btn" class="ptc-ghost" style="font-size:12px;padding:5px 9px" title="Toggle extra filters">
+                <button id="filter-toggle-btn" class="ptc-ghost" style="font-size:12px;padding:5px 9px" title="ตัวกรองเพิ่มเติม">
                     <i class="fas fa-sliders-h" id="filter-toggle-icon"></i>
                 </button>
-                <button id="chart-toggle-btn" class="ptc-ghost" style="font-size:12px;padding:5px 9px" title="Toggle charts" onclick="toggleChart()">
+                <button id="chart-toggle-btn" class="ptc-ghost" style="font-size:12px;padding:5px 9px" title="แสดงกราฟ" onclick="toggleChart()">
                     <i class="fas fa-chart-pie" id="chart-toggle-icon"></i>
                 </button>
                 <!-- col-vis-btn injected by initColumnVisibility() JS -->
@@ -762,18 +780,18 @@
         <div id="filter-extra" class="collapsed no-print" style="overflow:hidden;transition:max-height .2s ease">
             <div class="flex flex-wrap items-center gap-1.5 px-3 py-2 border-b border-slate-100" style="background:#fafbfc">
                 <select id="urgency-filter" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:136px">
-                    <option value="">All Urgency</option>
+                    <option value="">ทุกความเร่งด่วน</option>
                     <option value="ด่วนที่สุด">ด่วนที่สุด</option>
                     <option value="ด่วน">ด่วน</option>
                     <option value="ปกติ">ปกติ</option>
                 </select>
                 <select id="dept-filter" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:170px">
-                    <option value="">All Departments</option>
+                    <option value="">ทุกแผนก</option>
                 </select>
                 <select id="tech-filter" class="ptc-input flex-shrink-0" style="font-size:12px;padding:5px 8px;width:150px">
-                    <option value="">All Technicians</option>
+                    <option value="">ช่างทุกคน</option>
                 </select>
-                <button id="clear-extra-btn" class="ptc-ghost flex-shrink-0" style="font-size:12px;padding:5px 9px" title="ล้าง extra filters">
+                <button id="clear-extra-btn" class="ptc-ghost flex-shrink-0" style="font-size:12px;padding:5px 9px" title="ล้างตัวกรองเพิ่มเติม">
                     <i class="fas fa-undo" style="color:#94a3b8"></i> ล้าง
                 </button>
             </div>
@@ -786,15 +804,15 @@
         <!-- ── Charts (hidden by default) ── -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 px-3 pb-3 pt-2 no-print hidden" id="chart-section">
             <div class="ptc-card p-4">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">By Status</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">ตามสถานะ</div>
                 <div style="height:220px;position:relative"><canvas id="statusPieChart"></canvas></div>
             </div>
             <div class="ptc-card p-4">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">By Type</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">ตามประเภท</div>
                 <div style="height:220px;position:relative"><canvas id="type-chart-canvas"></canvas></div>
             </div>
             <div class="ptc-card p-4">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">By Department</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">ตามแผนก</div>
                 <div style="height:220px;position:relative"><canvas id="tech-chart-canvas"></canvas></div>
             </div>
         </div>
@@ -806,19 +824,19 @@
                     <thead>
                         <tr>
                             <th class="no-print hidden sm:table-cell col-bulk" style="width:36px"></th>
-                            <th class="col-ticket" style="min-width:120px">Doc No.</th>
-                            <th class="col-requester" style="min-width:130px">Requester</th>
-                            <th class="hidden sm:table-cell col-issue" style="min-width:180px">Problem</th>
-                            <th class="col-status" style="min-width:140px">Status</th>
-                            <th class="hidden md:table-cell col-assignee" style="min-width:90px">Tech</th>
-                            <th class="no-print col-actions" style="width:1px;white-space:nowrap">Actions</th>
+                            <th class="col-ticket" style="min-width:120px">เลขที่</th>
+                            <th class="col-requester" style="min-width:130px">ผู้แจ้ง</th>
+                            <th class="hidden sm:table-cell col-issue" style="min-width:180px">ปัญหา</th>
+                            <th class="col-status" style="min-width:140px">สถานะ</th>
+                            <th class="hidden md:table-cell col-assignee" style="min-width:90px">ช่าง</th>
+                            <th class="no-print col-actions" style="width:1px;white-space:nowrap"></th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
                         <tr>
                             <td colspan="7" class="text-center py-12 text-slate-400">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-3 block"></i>
-                                Loading tickets...
+                                กำลังโหลดงาน…
                             </td>
                         </tr>
                     </tbody>
@@ -826,7 +844,7 @@
                         <tr id="no-results" class="hidden">
                             <td colspan="7" class="text-center py-12 text-slate-400">
                                 <i class="fas fa-search text-2xl mb-3 block"></i>
-                                No tickets match the current filters.
+                                ไม่พบงานตามตัวกรองที่เลือก
                             </td>
                         </tr>
                     </tfoot>
@@ -839,8 +857,8 @@
             <!-- Pagination -->
             <div class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700 no-print" id="pagination-bar">
                 <div class="text-xs text-slate-500">
-                    <span id="page-start">0</span>–<span id="page-end">0</span> of <span id="page-total">0</span>
-                    (<span id="page-total-pages">1</span> pages)
+                    <span id="page-start">0</span>–<span id="page-end">0</span> จาก <span id="page-total">0</span>
+                    (<span id="page-total-pages">1</span> หน้า)
                 </div>
                 <div class="flex items-center gap-1" id="pagination-controls">
                     <button id="btn-prev" onclick="changePage(-1)" class="ptc-ghost" style="padding:4px 9px;font-size:12px">
@@ -850,7 +868,7 @@
                     <button id="btn-next" onclick="changePage(1)" class="ptc-ghost" style="padding:4px 9px;font-size:12px">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <input type="number" min="1" class="ptc-input jump-page-input" id="jump-page-input" placeholder="Go" style="width:54px;font-size:12px;padding:4px 8px;text-align:center">
+                    <input type="number" min="1" class="ptc-input jump-page-input" id="jump-page-input" placeholder="ไป" style="width:54px;font-size:12px;padding:4px 8px;text-align:center">
                 </div>
             </div>
         </div>
@@ -903,7 +921,7 @@
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-sm dark:shadow-sm-dark transition-all sm:my-8 w-full max-w-4xl flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
-                    <h3 class="text-base font-semibold text-gray-800 dark:text-white" id="modal-title">New Ticket</h3>
+                    <h3 class="text-base font-semibold text-gray-800 dark:text-white" id="modal-title">สร้างงานใหม่</h3>
                     <button onclick="closeModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
                         <i class="fas fa-times"></i>
                     </button>
@@ -917,100 +935,108 @@
                             <div class="flex gap-6 mb-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="requester-mode" value="auto" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500/50">
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Employee</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">พนักงาน</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="requester-mode" value="manual" class="w-4 h-4 text-blue-600 focus:ring-blue-500/50">
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Department/Other</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">แผนก / งานอื่น</span>
                                 </label>
                             </div>
                             
                             <div id="requester-auto-container">
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Requester</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ผู้แจ้ง</label>
                                 <select class="input-ent w-full text-sm" id="form-requester-select" required>
-                                    <option value="">-- Select Requester --</option>
+                                    <option value="">— เลือกผู้แจ้ง —</option>
                                 </select>
                             </div>
 
                             <div id="requester-manual-container" class="hidden grid-cols-1 md:grid-cols-3 gap-4">
-                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Company</label><select id="form-company" class="input-ent w-full text-sm"><option value="">Select</option><option value="PTA">PTA</option><option value="PT4">PT4</option><option value="PTE">PTE</option></select></div>
-                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Department</label><select id="form-department" class="input-ent w-full text-sm" disabled><option value="">-</option></select></div>
-                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Job Name (Optional)</label><input type="text" id="form-job-name-manual" class="input-ent w-full text-sm" placeholder="e.g. Server Check"></div>
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">บริษัท</label><select id="form-company" class="input-ent w-full text-sm"><option value="">เลือก</option><option value="PTA">PTA</option><option value="PT4">PT4</option><option value="PTE">PTE</option></select></div>
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">แผนก</label><select id="form-department" class="input-ent w-full text-sm" disabled><option value="">-</option></select></div>
+                                <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ชื่องาน (ถ้ามี)</label><input type="text" id="form-job-name-manual" class="input-ent w-full text-sm" placeholder="เช่น ตรวจห้อง Server"></div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Assignee</label>
-                                <select id="form-servicedBy" class="input-ent w-full text-sm"><option value="">Select</option></select>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ช่างผู้รับผิดชอบ</label>
+                                <select id="form-servicedBy" class="input-ent w-full text-sm"><option value="">เลือก</option></select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Asset No.</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">เครื่อง / รหัสพัสดุ</label>
                                 <div class="asset-search-wrapper relative">
-                                    <input type="text" id="form-asset" placeholder="Search asset..." class="input-ent w-full text-sm">
+                                    <input type="text" id="form-asset" placeholder="ค้นหารหัส / S/N…" class="input-ent w-full text-sm">
                                     <div id="asset-results" class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm max-h-48 overflow-y-auto"></div>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Contact</label>
-                                <input type="text" id="form-contact" class="input-ent w-full text-sm" placeholder="Phone">
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">เบอร์ติดต่อ</label>
+                                <input type="text" id="form-contact" class="input-ent w-full text-sm" placeholder="เบอร์โทร / ต่อภายใน">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Problem / Issue</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ปัญหา / อาการ</label>
                             <textarea id="form-problem" rows="3" class="input-ent w-full text-sm" required></textarea>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Solution</label>
-                            <textarea id="form-solution" rows="3" class="input-ent w-full text-sm"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Root Cause (สาเหตุที่แท้จริง)</label>
-                            <textarea id="form-root_cause" rows="2" class="input-ent w-full text-sm" placeholder="วิเคราะห์สาเหตุที่แท้จริงของปัญหา..."></textarea>
-                        </div>
+                        <details class="lf-fold" id="lf-fix">
+                            <summary><i class="fas fa-screwdriver-wrench"></i> การแก้ไข <small>วิธีแก้ · สาเหตุ — กรอกเมื่อซ่อมเสร็จ</small></summary>
+                            <div class="lf-fold-body space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">วิธีแก้ไข</label>
+                                    <textarea id="form-solution" rows="3" class="input-ent w-full text-sm"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">สาเหตุที่แท้จริง</label>
+                                    <textarea id="form-root_cause" rows="2" class="input-ent w-full text-sm" placeholder="วิเคราะห์สาเหตุที่แท้จริงของปัญหา..."></textarea>
+                                </div>
+                            </div>
+                        </details>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type</label><select id="form-type" class="input-ent w-full text-sm" required><option value="">Select</option><option value="Hardware">Hardware</option><option value="Software">Software</option><option value="Network">Network</option><option value="System">System</option><option value="Programmer">Programmer</option><option value="Other">อื่นๆ</option></select></div>
-                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label><select id="form-status" class="input-ent w-full text-sm" required><option value="Pending">Pending (รอรับเรื่อง)</option><option value="Received">Received (รับเรื่องแล้ว)</option><option value="PR Submitted">PR Submitted (ส่ง PR แล้ว)</option><option value="PO Issued">PO Issued (ออก PO แล้ว)</option><option value="Parts Received">Parts Received (ได้รับอะไหล่แล้ว)</option><option value="In Progress">In Progress (กำลังซ่อม)</option><option value="Waiting for Parts">Waiting for Parts (รออะไหล่)</option><option value="Waiting for User">Waiting for User (รอผู้ใช้ตอบกลับ)</option><option value="Sent to Vendor">Sent to Vendor (ส่งซ่อมภายนอก)</option><option value="Temporary Fix">Temporary Fix (แก้ชั่วคราว)</option><option value="Unrepairable">Unrepairable (ซ่อมไม่ได้ แนะนำเปลี่ยน)</option><option value="Awaiting Confirmation">Awaiting Confirmation (รอยืนยันจากผู้ใช้)</option><option value="Completed">Completed (เสร็จสิ้น)</option></select></div>
-                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Urgency</label><select id="form-urgency" class="input-ent w-full text-sm" required><option value="ปกติ">Normal</option><option value="ด่วน">Urgent</option><option value="ด่วนที่สุด">Critical</option></select></div>
-                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Date</label><input type="date" id="form-date" class="input-ent w-full text-sm" required></div>
-                            <div class="md:col-span-4"><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Appointment</label><input type="datetime-local" id="form-appointment_date" class="input-ent w-full text-sm"></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ประเภทงาน</label><select id="form-type" class="input-ent w-full text-sm" required><option value="">เลือก</option><option value="Hardware">ฮาร์ดแวร์</option><option value="Software">ซอฟต์แวร์</option><option value="Network">เครือข่าย</option><option value="System">ระบบ</option><option value="Programmer">โปรแกรมเมอร์</option><option value="Other">อื่นๆ</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">สถานะ</label><select id="form-status" class="input-ent w-full text-sm" required><option value="Pending">รอรับเรื่อง</option><option value="Received">รับเรื่องแล้ว</option><option value="In Progress">กำลังซ่อม</option><option value="Waiting for Parts">รออะไหล่</option><option value="Waiting for User">รอผู้แจ้งตอบกลับ</option><option value="Sent to Vendor">ส่งซ่อมภายนอก</option><option value="Temporary Fix">แก้ชั่วคราว</option><option value="PR Submitted">ขอซื้อ (PR)</option><option value="PO Issued">สั่งซื้อแล้ว (PO)</option><option value="Parts Received">ได้อะไหล่แล้ว</option><option value="Awaiting Confirmation">รอผู้แจ้งยืนยัน</option><option value="Completed">เสร็จสิ้น</option><option value="Unrepairable">ซ่อมไม่ได้ (แนะนำเปลี่ยน)</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ความเร่งด่วน</label><select id="form-urgency" class="input-ent w-full text-sm" required><option value="ปกติ">ปกติ</option><option value="ด่วน">ด่วน</option><option value="ด่วนที่สุด">ด่วนที่สุด</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">วันที่แจ้ง</label><input type="date" id="form-date" class="input-ent w-full text-sm" required></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">นัดหมาย (ถ้ามี)</label><input type="datetime-local" id="form-appointment_date" class="input-ent w-full text-sm"></div>
                         </div>
 
                         <div id="repair-cost-wrapper" class="hidden">
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Cost (THB)</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ค่าใช้จ่าย (บาท)</label>
                             <input type="number" step="0.01" id="form-repair_cost" class="input-ent w-full text-sm" placeholder="0.00">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <details class="lf-fold" id="lf-proc">
+                            <summary><i class="fas fa-file-invoice"></i> จัดซื้ออะไหล่ <small>PR · PO · ผู้ขาย · วันที่คาดว่าได้ของ</small></summary>
+                        <div class="lf-fold-body grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PR No.</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">เลขที่ PR</label>
                                 <input type="text" id="form-pr_no" class="input-ent w-full text-sm" placeholder="PR-XXXX">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PO No.</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">เลขที่ PO</label>
                                 <input type="text" id="form-po_no" class="input-ent w-full text-sm" placeholder="PO-XXXX">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Vendor</label>
-                                <input type="text" id="form-vendor_name" class="input-ent w-full text-sm" placeholder="Vendor name">
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ผู้ขาย / ร้านซ่อม</label>
+                                <input type="text" id="form-vendor_name" class="input-ent w-full text-sm" placeholder="ชื่อร้าน">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ETA Date</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">คาดว่าได้ของ</label>
                                 <input type="date" id="form-eta_date" class="input-ent w-full text-sm">
                             </div>
                         </div>
+                        </details>
 
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Attachments</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">รูป / ไฟล์แนบ</label>
                             <input type="file" id="form-attachments" multiple class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-600/20 transition">
                             <div id="attachment-list" class="mt-2 grid grid-cols-2 gap-2 text-xs"></div>
                         </div>
 
                     </div>
                     <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
-                        <button type="button" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl text-sm font-medium transition" onclick="closeModal()">Cancel</button>
-                        <button type="submit" class="btn-ent px-6 py-2 text-white rounded-xl text-sm font-medium">บันทึก Ticket</button>
+                        <button type="button" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl text-sm font-medium transition" onclick="closeModal()">ยกเลิก</button>
+                        <button type="submit" class="btn-ent px-6 py-2 text-white rounded-xl text-sm font-medium">บันทึกงาน</button>
                     </div>
                 </form>
             </div>
@@ -1029,6 +1055,8 @@
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
     <script src="js/vendor/simplelightbox.min.js"></script>
     <script src="js/vendor/qrcode.min.js"></script>
+    <script src="js/doc-print.js?v=20261022b"></script>
+    <script src="js/ticket-print.js?v=20261022b"></script>
 
     <script>
         // --- 1. Init & Global Variables ---
@@ -1443,7 +1471,7 @@
             if (!sel) return;
             const current = sel.value;
             const depts = [...new Set(allLogs.map(l => l.department).filter(Boolean))].sort((a,b) => a.localeCompare(b,'th-TH'));
-            sel.innerHTML = '<option value="">All Departments</option>' + depts.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+            sel.innerHTML = '<option value="">ทุกแผนก</option>' + depts.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
             if ([...sel.options].some(o => o.value === current)) sel.value = current;
         }
 
@@ -1452,7 +1480,7 @@
             if (!sel) return;
             const current = sel.value;
             const techs = [...new Set(allLogs.map(l => l.servicedBy).filter(Boolean))].sort((a,b) => a.localeCompare(b,'th-TH'));
-            sel.innerHTML = '<option value="">All Technicians</option>' + techs.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+            sel.innerHTML = '<option value="">ช่างทุกคน</option>' + techs.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
             if ([...sel.options].some(o => o.value === current)) sel.value = current;
         }
 
@@ -1691,7 +1719,7 @@
                 row.className = 'flex flex-wrap items-center gap-2';
                 const main = document.createElement('span');
                 main.className = 'font-semibold text-gray-700 dark:text-gray-200';
-                main.textContent = `${totalItems} tickets found`;
+                main.textContent = `พบ ${totalItems} งาน`;
                 row.appendChild(main);
 
                 const chips = [];
@@ -1736,27 +1764,27 @@
                 let subStatus = '';
                 let activeColor = 'blue';
                 let isCancelled = log.status === 'Cancelled';
-                let step2Label = 'Working';
+                let step2Label = 'กำลังซ่อม';
 
                 if (log.status === 'Pending') currentIdx = 0;
                 else if (['Received', 'In Progress', 'Waiting for User', 'Sent to Vendor', 'Temporary Fix', 'PR Submitted', 'PO Issued'].includes(log.status)) {
                     currentIdx = 1;
-                    if (log.status === 'Received') { subStatus = 'Received'; activeColor = 'orange'; step2Label = 'Received'; }
-                    else if (log.status === 'PR Submitted') { subStatus = 'PR Submitted'; activeColor = 'sky'; step2Label = 'PR'; }
-                    else if (log.status === 'PO Issued') { subStatus = 'PO Issued'; activeColor = 'teal'; step2Label = 'PO'; }
+                    if (log.status === 'Received') { subStatus = 'รับเรื่องแล้ว'; activeColor = 'orange'; step2Label = 'รับเรื่อง'; }
+                    else if (log.status === 'PR Submitted') { subStatus = 'ขอซื้อ (PR)'; activeColor = 'sky'; step2Label = 'PR'; }
+                    else if (log.status === 'PO Issued') { subStatus = 'สั่งซื้อ (PO)'; activeColor = 'teal'; step2Label = 'PO'; }
                     else if (log.status === 'Waiting for User') { subStatus = 'รอผู้ใช้'; activeColor = 'purple'; step2Label = 'รอผู้ใช้'; }
                     else if (log.status === 'Sent to Vendor') { subStatus = 'ส่งซ่อมนอก'; activeColor = 'teal'; step2Label = 'ส่งซ่อมนอก'; }
-                    else if (log.status === 'Temporary Fix') { subStatus = 'Temp Fix'; activeColor = 'purple'; step2Label = 'Temp Fix'; }
-                    else { subStatus = 'Working'; activeColor = 'blue'; step2Label = 'Working'; }
+                    else if (log.status === 'Temporary Fix') { subStatus = 'แก้ชั่วคราว'; activeColor = 'purple'; step2Label = 'แก้ชั่วคราว'; }
+                    else { subStatus = 'กำลังซ่อม'; activeColor = 'blue'; step2Label = 'กำลังซ่อม'; }
                 }
                 else if (log.status === 'Awaiting Confirmation') { currentIdx = 2; activeColor = 'orange'; }
                 else if (log.status === 'Unrepairable') { currentIdx = 2; activeColor = 'red'; }
                 else if (log.status === 'Completed') { currentIdx = 2; activeColor = 'green'; }
 
-                const step3Label = log.status === 'Awaiting Confirmation' ? 'Awaiting' : 'Done';
+                const step3Label = log.status === 'Awaiting Confirmation' ? 'รอยืนยัน' : 'เสร็จ';
                 const step3Icon  = log.status === 'Awaiting Confirmation' ? 'fa-user-clock' : 'fa-check';
                 const steps = [
-                    { label: 'Open', icon: 'fa-file-import' },
+                    { label: 'แจ้งเรื่อง', icon: 'fa-file-import' },
                     { label: step2Label, icon: 'fa-tools' },
                     { label: step3Label, icon: step3Icon }
                 ];
@@ -1776,7 +1804,7 @@
                 if (isCancelled) {
                     const statusDuration = getCurrentStatusDuration(log);
                     timelineHtml = `<div class="w-full min-w-[160px] flex flex-col items-center justify-center text-gray-400 font-medium text-[10px]">
-                        <div class="pb-1"><i class="fas fa-ban mr-1 text-red-500"></i> Cancelled</div>
+                        <div class="pb-1"><i class="fas fa-ban mr-1 text-red-500"></i> ยกเลิก</div>
                         <div class="text-[9px] font-normal opacity-70">${statusDuration}</div>
                     </div>`;
                 } else {
@@ -1871,10 +1899,11 @@
 
                 let servicedByAvatarHtml = '';
                 if (tech && tech.image) {
-                    servicedByAvatarHtml = `<img src="uploads/employees/${tech.image}" alt="${tech.name}" title="${tech.name}" class="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm">`;
+                    const ini = escapeHtml(getInitials(tech.name || log.servicedBy || ''));
+                    servicedByAvatarHtml = `<img src="uploads/employees/${encodeURIComponent(tech.image)}" alt="" title="${escapeHtml(tech.name)}" class="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm" onerror="this.outerHTML='<div class=&quot;w-7 h-7 rounded-full flex items-center justify-center bg-blue-600 text-white text-[10px] font-semibold&quot; title=&quot;${escapeHtml(tech.name)}&quot;>${ini}</div>'">`;
                 } else {
                     const initials = getInitials(log.servicedBy || '');
-                    servicedByAvatarHtml = `<div class="w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-violet-600 text-white text-[10px] font-semibold shadow-sm" title="${log.servicedBy || '-'}">${initials}</div>`;
+                    servicedByAvatarHtml = log.servicedBy ? `<div class="w-7 h-7 rounded-full flex items-center justify-center bg-blue-600 text-white text-[10px] font-semibold" title="${escapeHtml(log.servicedBy)}">${escapeHtml(initials)}</div>` : '<span class="text-[11px] text-slate-400">ยังไม่มีช่าง</span>';
                 }
 
                 // Mobile Status Dot
@@ -1902,7 +1931,7 @@
                 const statusDur = getCurrentStatusDuration(log);
                 const statusBadgeHtml = `
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap ${statusBadgeClass}">
-                        ${statusIcon}${log.status}
+                        ${statusIcon}${escapeHtml(LOG_STATUS_TH[log.status] || log.status)}
                     </span>
                     ${statusDur ? `<div class="text-[10px] text-gray-400 mt-1">${statusDur}</div>` : ''}
                     ${slaBadge}`;
@@ -2127,14 +2156,14 @@
             const urgencyCls = log.urgency === 'ด่วนที่สุด' ? ' style="color:#dc2626"' : (log.urgency === 'ด่วน' ? ' style="color:#d97706"' : '');
             const metaRows = [
                 detailField('วันที่', detailTxt(new Date(log.date).toLocaleDateString('th-TH'))),
-                detailField('สถานะ', `<span class="${getStatusClass(log.status)} inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold">${detailTxt(log.status)}${getPrPoStatusIcon(log)}</span>`),
+                detailField('สถานะ', `<span class="${getStatusClass(log.status)} inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold">${detailTxt(LOG_STATUS_TH[log.status] || log.status)}${getPrPoStatusIcon(log)}</span>`),
                 detailField('ผู้แจ้ง', detailTxt(log.requester)),
                 detailField('แผนก', detailTxt(log.department)),
                 detailField('ประเภท', detailTxt(formatTypeLabel(log.type))),
                 detailField('ความเร่งด่วน', `<span${urgencyCls}>${detailTxt(log.urgency)}</span>`),
             ];
             if (log.contact) metaRows.push(detailField('ติดต่อ', detailTxt(log.contact)));
-            if (log.asset_id || log.asset) metaRows.push(detailField('Asset', `<span class="font-mono text-[#2563eb]">${detailTxt(log.asset_id || log.asset)}</span>`, true));
+            if (log.asset_id || log.asset) metaRows.push(detailField('เครื่อง / รหัสพัสดุ', `<span class="font-mono text-[#2563eb]">${detailTxt(log.asset_id || log.asset)}</span>`, true));
             if (log.servicedBy) metaRows.push(detailField('ผู้รับผิดชอบ', detailTxt(log.servicedBy), true));
             if (log.pr_no) metaRows.push(detailField('PR', detailTxt(log.pr_no)));
             if (log.po_no) metaRows.push(detailField('PO', detailTxt(log.po_no)));
@@ -2245,449 +2274,10 @@
             });
         }
 
+        // ใบงานซ่อมทุกแบบพิมพ์จาก js/ticket-print.js ตัวเดียว (A4 แผ่นเดียว ใช้ร่วมกับหน้าผู้ใช้)
         async function printSingleTicket(log, includeImages = true, previewOnly = false) {
-            const pc = document.querySelector('.print-container');
-            if (!pc) throw new Error('ไม่พบพื้นที่สำหรับพิมพ์');
-
-            const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            const txt = t => esc(t) || '-';
-            const companyInfo = getCompanyPrintInfo(log.company);
-            const ticketUrl = `${window.location.origin}${window.location.pathname}?ticket_id=${log.id}`;
-            const duration = log.completed_date ? formatDuration(log.date, log.completed_date) : '-';
-
-            // Fetch live company info (logo, address, phone) from DB
-            const _allCoInfo = await fetchCoInfo();
-            const _coData = _allCoInfo[String(log.company||'').toUpperCase()] || {};
-            const _addrLine = (_coData.address_th || _coData.address_en || '');
-            const _phoneLine = (_coData.phone || '');
-
-            // ── Adaptive document type ──────────────────────────────────────
-            const WORK_ST = ['Received','In Progress','Waiting for User','Sent to Vendor','Temporary Fix','PR Submitted','PO Issued'];
-            const docType = log.status === 'Pending'    ? 'request'
-                          : log.status === 'Cancelled'  ? 'cancelled'
-                          : WORK_ST.includes(log.status)? 'workorder'
-                          : 'completion';
-            const docMeta = {
-                request:    { label:'ใบแจ้งซ่อม',  en:'Service Request',           color:'#2563eb', sigCols:1 },
-                workorder:  { label:'ใบงานซ่อม',    en:'Work Order',                color:'#d97706', sigCols:2 },
-                completion: { label:'ใบปิดงาน',     en:'Job Completion Certificate',color:'#059669', sigCols:3 },
-                cancelled:  { label:'ใบยกเลิก',     en:'Cancellation Notice',       color:'#94a3b8', sigCols:1 },
-            }[docType];
-            const showSolution  = ['completion','cancelled','workorder'].includes(docType);
-            const showRootCause = docType === 'completion';
-            const showWorkBox   = docType === 'workorder';
-
-            // Filter internal IT notes from solution
-            const formattedSolution = (() => {
-                const raw = String(log.solution || '');
-                if (!raw.trim()) return '';
-                return raw.split('\n').map(l => l.trim()).filter(line => {
-                    if (!line) return false;
-                    if (/^Paused\s*\(/i.test(line)) return false;
-                    if (/^Reassigned:/i.test(line)) return false;
-                    if (/^\[.*\]\s*(Reassigned|Paused|Reopen\s+by|Auto-closed)/i.test(line)) return false;
-                    return true;
-                }).join('\n');
-            })();
-
-            const existing = document.getElementById('print-orientation');
-            if (existing) existing.remove();
-            const os = document.createElement('style');
-            os.id = 'print-orientation';
-            os.innerHTML = '@page{size:auto;margin:1cm}body{background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{*{color:#000!important;border-color:#555!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}}';
-            document.head.appendChild(os);
-
-            // Fetch attachments
-            let attachmentsHtml = '';
-            if (includeImages) {
-                try {
-                    const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${encodeURIComponent(log.id)}&v=${Date.now()}`);
-                    const files = await res.json();
-                    if (Array.isArray(files) && files.length > 0) {
-                        const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
-                        if (imgs.length > 0) {
-                            attachmentsHtml = `
-                            <div style="break-before:page;page-break-before:always;padding:20px 14px 8px;">
-                                <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#94a3b8;letter-spacing:.06em;margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid #e2e8f0;">รูปภาพแนบ / Attachments (${imgs.length} รูป)</div>
-                                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-                                    ${imgs.map(f => `<div style="break-inside:avoid;page-break-inside:avoid;aspect-ratio:1;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;background:#f8fafc;">
-                                        <img src="uploads/attachments/${esc(f.stored_filename)}" style="width:100%;height:100%;object-fit:cover;" alt="">
-                                    </div>`).join('')}
-                                </div>
-                            </div>`;
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            const _logBase = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
-            const logoMap = {PTA:_logBase+'/uploads/logos/pta_logo.png',PT4:_logBase+'/uploads/logos/pt4_logo.png',PTE:_logBase+'/uploads/logos/pte_logo.png'};
-            const logoSrc = logoMap[String(log.company||'').toUpperCase()]||'';
-            const logoHtml = logoSrc
-                ? `<img src="${logoSrc}" alt="${companyInfo.code}" style="height:44px;width:auto;object-fit:contain;">`
-                : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#475569;">${companyInfo.code}</div>`;
-
-            const statusLabel = {'Pending':'รอรับเรื่อง','Received':'รับเรื่องแล้ว','In Progress':'กำลังดำเนินการ','Waiting for Parts':'รออะไหล่','Temporary Fix':'แก้ชั่วคราว','PR Submitted':'ส่ง PR','PO Issued':'ออก PO','Parts Received':'ได้อะไหล่','Awaiting Confirmation':'รอยืนยัน','Completed':'เสร็จสิ้น','Cancelled':'ยกเลิก','Unrepairable':'ซ่อมไม่ได้'};
-            const sLabel = statusLabel[log.status] || log.status;
-
-            const closedDateStr = (log.closed_date || log.completed_date)
-                ? new Date(log.closed_date || log.completed_date).toLocaleDateString('th-TH') : '-';
-            const confirmedStr = log.user_confirmed && log.user_confirmed_at
-                ? new Date(log.user_confirmed_at).toLocaleDateString('th-TH') : '';
-
-            const infoRows = [
-                ['ผู้แจ้ง / Requester', txt(log.requester), 'แผนก / Department', txt(log.department)],
-                ['ช่างผู้รับผิดชอบ / Technician', docType==='request'?'-':txt(log.servicedBy), 'ประเภทงาน / Type', txt(formatTypeLabel(log.type))],
-                ['Asset ID', txt(log.asset_id||log.asset), 'ความเร่งด่วน', txt(log.urgency)||'ทั่วไป'],
-                ['วันที่แจ้ง / Open Date', new Date(log.date).toLocaleDateString('th-TH'),
-                 docType==='completion'?'วันที่ปิดงาน / Closed':'เบอร์ติดต่อ / Contact',
-                 docType==='completion'?closedDateStr:txt(log.contact)],
-                ['ระยะเวลา / Duration', duration, 'ค่าใช้จ่าย / Cost', log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH',{minimumFractionDigits:2})+' ฿' : '-'],
-            ];
-            if (log.pr_no || log.po_no) infoRows.push(['PR No.', txt(log.pr_no), 'PO No.', txt(log.po_no)]);
-            if (log.vendor_name || log.eta_date) infoRows.push(['Vendor', txt(log.vendor_name), 'ETA', log.eta_date ? new Date(log.eta_date).toLocaleDateString('th-TH') : '-']);
-
-            // Signature section builder
-            const _sigBox = (label, contentHtml, dateStr) => `
-            <div style="text-align:center;">
-              <div style="min-height:56px;border-bottom:1px solid #334155;margin-bottom:5px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;">
-                ${contentHtml}
-              </div>
-              <div style="font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;">${label}</div>
-              <div style="font-size:8px;color:#94a3b8;margin-top:3px;">วันที่: ${dateStr || '__________'}</div>
-            </div>`;
-            const digitalStamp = log.user_confirmed
-                ? `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:4px;padding:5px 8px;text-align:center;width:100%;">
-                    <div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:2px;">✅ ยืนยันผ่านระบบดิจิทัล</div>
-                    <div style="font-size:9px;color:#166534;font-weight:600;">${esc(log.user_confirmed_by||log.requester||'')}</div>
-                   </div>`
-                : '';
-            const sigHtml = (() => {
-                if (docMeta.sigCols === 1) return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr;gap:20px;">${_sigBox('ผู้แจ้ง / Requester','','')}</div>`;
-                if (docMeta.sigCols === 2) return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-                    ${_sigBox('ผู้แจ้ง / Requester','','')}
-                    ${_sigBox('ช่างผู้รับผิดชอบ / Technician',log.servicedBy?`<span style="font-size:10px;color:#475569;">${esc(log.servicedBy)}</span>`:'',closedDateStr!=='-'?closedDateStr:'')}
-                </div>`;
-                return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
-                    ${_sigBox('ผู้แจ้ง / Requester', digitalStamp, confirmedStr)}
-                    ${_sigBox('ช่างผู้ปฏิบัติงาน / Technician',log.servicedBy?`<span style="font-size:10px;color:#475569;">${esc(log.servicedBy)}</span>`:'',closedDateStr!=='-'?closedDateStr:'')}
-                    ${_sigBox('หัวหน้าแผนก / Head of Department','','')}
-                </div>`;
-            })();
-
-            // Pre-render QR to canvas data URL
-            return new Promise((resolve, reject) => {
-            const qrDiv = document.createElement('div');
-            qrDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:80px;height:80px;';
-            document.body.appendChild(qrDiv);
-            try {
-                new QRCode(qrDiv, {text:ticketUrl, width:80, height:80, correctLevel:QRCode.CorrectLevel.M});
-            } catch (qrErr) {
-                document.body.removeChild(qrDiv);
-                reject(qrErr);
-                return;
-            }
-
-            setTimeout(() => {
-                const qrCanvas = qrDiv.querySelector('canvas');
-                const qrDataUrl = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
-                if (qrDiv.parentNode) document.body.removeChild(qrDiv);
-
-                // ── Mockup-style palette ──────────────────────────────────────
-                const coPalette = {
-                    PTA:{accent:'#059669',grad:'linear-gradient(135deg,#065f46,#059669)'},
-                    PT4:{accent:'#dc2626',grad:'linear-gradient(135deg,#991b1b,#dc2626)'},
-                    PTE:{accent:'#2563eb',grad:'linear-gradient(135deg,#1d4ed8,#2563eb)'},
-                }[String(log.company||'').toUpperCase()]||{accent:'#2563eb',grad:'linear-gradient(135deg,#1d4ed8,#2563eb)'};
-                const coNameTh = {
-                    PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด',
-                    PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด',
-                    PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด',
-                }[String(log.company||'').toUpperCase()]||'Powertech Group';
-                const statusBadgeStyle = ['Completed','Awaiting Confirmation'].includes(log.status)
-                    ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;'
-                    : log.status==='Cancelled'?'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;'
-                    :'background:#fef9c3;color:#a16207;border:1px solid #fde68a;';
-                const printDateStr = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-
-                // Info grid cells (mockup style)
-                const infoRowsHtml = infoRows.map(([l1,v1,l2,v2],i,a)=>{
-                    const bl = i<a.length-1?'border-bottom:1px solid #e2e8f0;':'';
-                    const cell = (l,v,right) => `<div style="display:flex;align-items:center;padding:6px 10px;${bl}${right?'border-right:1px solid #e2e8f0;':''}gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">${l}</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${v}</span></div>`;
-                    return cell(l1,v1,true)+cell(l2,v2,false);
-                }).join('');
-
-                // Signature boxes (mockup style)
-                const _sigM = (title,name,date) => { const [th,en] = title.split(' / '); return `<div style="border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;background:#fff;display:flex;flex-direction:column;"><div style="padding:5px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:baseline;gap:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:.7rem;font-weight:700;color:#1e293b;">${th||title}</span><span style="font-size:.58rem;color:#64748b;">${en||''}</span></div><div style="padding:6px 16px 8px;display:flex;flex-direction:column;gap:4px;flex:1;"><div style="flex:1;min-height:28px;"></div><div style="text-align:center;"><div style="border-bottom:1px solid #94a3b8;margin:0 8px 2px;"></div><div style="font-size:.5rem;color:#94a3b8;letter-spacing:.03em;">ลงชื่อ / Signature</div></div><div style="font-size:.58rem;color:#334155;text-align:center;">(${name||'..........................................'})</div><div style="font-size:.55rem;color:#475569;text-align:center;margin-top:2px;">วันที่ &nbsp;${date||'......... / ......... / ............'}</div></div></div>`; };
-                const sigCols = docMeta.sigCols;
-                const sigBoxHtml = sigCols===1
-                    ? _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),'')
-                    : sigCols===2
-                    ? _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),'')+_sigM('ช่างผู้ซ่อม / Technician',esc(log.servicedBy||''),closedDateStr!=='-'?closedDateStr:'')
-                    : _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),confirmedStr)+_sigM('ช่างผู้ปฏิบัติงาน / Technician',esc(log.servicedBy||''),closedDateStr!=='-'?closedDateStr:'')+_sigM('หัวหน้าแผนก / Head of Department','','');
-
-                const html = `<div style="font-family:'Sarabun',sans-serif;color:#1e293b;background:#fff;padding:28px 36px 32px;font-size:12.5px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh;">
-
-  <!-- HEADER -->
-  <div style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${coPalette.accent};padding-bottom:12px;margin-bottom:10px;">
-    <div style="display:flex;align-items:center;gap:10px;border-left:4px solid ${coPalette.accent};padding-left:12px;">
-      ${logoHtml}
-      <div>
-        <div style="font-size:1.05rem;font-weight:800;color:#1e293b;letter-spacing:-.01em;">${esc(companyInfo.name)}</div>
-        <div style="font-size:.72rem;color:#475569;margin-top:2px;font-weight:500;">${esc(coNameTh)}</div>
-        ${_addrLine ? `<div style="font-size:.63rem;color:#64748b;margin-top:2px;">${esc(_addrLine)}</div>` : `<div style="font-size:.65rem;color:#94a3b8;margin-top:2px;">IT Support &amp; Maintenance Dept.</div>`}
-        ${_phoneLine ? `<div style="font-size:.63rem;color:#64748b;">${esc(_phoneLine)}</div>` : ''}
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
-        <div style="font-size:.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;">เลขที่ใบแจ้งซ่อม / Ticket ID</div>
-        <div style="font-size:.9375rem;font-weight:700;color:${coPalette.accent};">${txt(log.id)}</div>
-        <div style="font-size:.68rem;color:#64748b;">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</div>
-        <span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:.62rem;font-weight:700;${statusBadgeStyle}">${esc(sLabel)}</span>
-      </div>
-      <table style="border:1px solid #e2e8f0;border-radius:5px;font-size:.6rem;border-collapse:collapse;">
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Form No.</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">FM-IT-001</td></tr>
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Revision</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#dc2626;font-weight:600;">Rev. 03</td></tr>
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Eff. Date</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">01/01/2569</td></tr>
-      </table>
-      ${qrDataUrl ? `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;"><img src="${qrDataUrl}" style="width:60px;height:60px;border:1px solid #e2e8f0;border-radius:4px;padding:2px;"><span style="font-size:.55rem;color:#94a3b8;">Scan เพื่อดูสถานะ</span></div>` : ''}
-    </div>
-  </div>
-
-  <!-- TITLE BAR -->
-  <div style="background:${coPalette.grad};color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-    <div style="font-size:.9375rem;font-weight:700;letter-spacing:.02em;">${esc(docMeta.label)} / ${esc(docMeta.en)}</div>
-    <div style="font-size:.67rem;opacity:.85;margin-top:1px;">IT Support &amp; Maintenance Dept. | FM-IT-001 Rev.03</div>
-  </div>
-
-  <!-- INFO GRID -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
-    ${infoRowsHtml}
-  </div>
-
-  <!-- PROBLEM DESCRIPTION -->
-  <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">
-    <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">รายละเอียดปัญหา / Problem Description</div>
-    <div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;min-height:52px;">${txt(log.problem)}</div>
-  </div>
-
-  ${showWorkBox ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">บันทึกการซ่อม / Work Notes <em style="font-weight:400;">(กรอกระหว่างปฏิบัติงาน)</em></div><div style="font-size:.775rem;line-height:2;white-space:pre-wrap;min-height:64px;">${formattedSolution?esc(formattedSolution):''}</div></div>` : ''}
-
-  ${showSolution&&!showWorkBox&&formattedSolution ? `<div style="border:1px solid #a7f3d0;border-left:3px solid #059669;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#f0fdf4;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">วิธีการแก้ไข / Solution &amp; Action Taken</div><div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;">${esc(formattedSolution)}</div></div>` : ''}
-
-  ${showRootCause&&log.root_cause ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">สาเหตุที่แท้จริง / Root Cause Analysis</div><div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;">${esc(log.root_cause)}</div></div>` : ''}
-
-  ${docType==='completion'&&log.rating ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:6px 10px;margin-bottom:10px;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:2px;">ความพึงพอใจ / User Satisfaction</div><div style="font-size:11px;font-weight:700;color:#f59e0b;">${'★'.repeat(Number(log.rating))}${'☆'.repeat(5-Number(log.rating))} ${log.rating}/5</div></div>` : ''}
-
-  <!-- SIGNATURES -->
-  <div style="display:grid;grid-template-columns:${sigCols===1?'1fr':sigCols===2?'1fr 1fr':'1fr 1fr 1fr'};gap:10px;margin-top:auto;break-inside:avoid;page-break-inside:avoid;">
-    ${sigBoxHtml}
-  </div>
-
-  ${attachmentsHtml}
-
-  <!-- FOOTER -->
-  <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="font-size:.6rem;color:#94a3b8;">ออกโดยระบบ Powertech System Center · พิมพ์: ${printDateStr}</div>
-    <div style="font-size:.6rem;color:#94a3b8;text-align:right;">FM-IT-001 Rev.03 · หน้า 1/${attachmentsHtml ? '2' : '1'} · ${txt(log.id)}</div>
-  </div>
-
-</div>`;
-
-                if (previewOnly) {
-                    const previewWin = window.open('', '_blank');
-                    if (previewWin) {
-                        previewWin.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(log.id)}</title>`);
-                        previewWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">');
-                        previewWin.document.write(`<style>@page{size:auto;margin:1cm}*{box-sizing:border-box}body{margin:0;padding:24px;background:#111827;display:flex;justify-content:center;font-family:'Sarabun',sans-serif;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.wrap{max-width:794px;width:100%;box-shadow:0 18px 45px rgba(15,23,42,.75);border-radius:4px;overflow:hidden;background:#fff}@media print{body{background:#fff;padding:0}.wrap{box-shadow:none}}</style>`);
-                        previewWin.document.write(`</head><body><div class="wrap">${html}</div></body></html>`);
-                        previewWin.document.close();
-                    }
-                    resolve();
-                    return;
-                }
-
-                pc.innerHTML = html;
-                document.body.classList.add('printing-ticket');
-                setTimeout(() => {
-                    try {
-                        window.print();
-                    } finally {
-                        document.body.classList.remove('printing-ticket');
-                        pc.innerHTML = '';
-                        const styleNode = document.getElementById('print-orientation');
-                        if (styleNode) styleNode.remove();
-                        resolve();
-                    }
-                }, 300);
-            }, 300);
-            });
-        }
-
-        async function previewTicketBrowser(log, includeImages = true) {
-            const txt = (t) => t || '-';
-            const companyInfo = getCompanyPrintInfo(log.company);
-            // Fetch live company info (logo, address, phone) from DB
-            const _allCoInfo = await fetchCoInfo();
-            const _coData = _allCoInfo[String(log.company||'').toUpperCase()] || {};
-            const _addrLine = (_coData.address_th || _coData.address_en || companyInfo.address || '');
-            const _phoneLine = (_coData.phone || companyInfo.phone || '');
-            const _pvBase = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
-            const _pvLogoMap = {PTA:_pvBase+'/uploads/logos/pta_logo.png',PT4:_pvBase+'/uploads/logos/pt4_logo.png',PTE:_pvBase+'/uploads/logos/pte_logo.png'};
-            const _pvLogoSrc = _pvLogoMap[String(log.company||'').toUpperCase()] || '';
-            const ticketUrl = `${window.location.origin}${window.location.pathname}?ticket_id=${log.id}`;
-            const duration = log.completed_date ? formatDuration(log.date, log.completed_date) : '-';
-            let attachmentsSection = '';
-            if (includeImages) {
-                try {
-                    const res = await fetch(`api.php?action=get&file=it_log_attachments&log_id=${encodeURIComponent(log.id)}&v=${Date.now()}`);
-                    const files = await res.json();
-                    if (Array.isArray(files) && files.length > 0) {
-                        const imgs = files.filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.stored_filename));
-                        if (imgs.length > 0) {
-                            attachmentsSection = `
-                            <div class="mt-4 pt-4 border-t border-slate-200 attachments">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รูปภาพแนบ (Attachments)</p>
-                                <div class="grid grid-cols-4 gap-2 attach-grid">
-                                    ${imgs.map(f => `
-                                        <div class="w-full aspect-square rounded border border-slate-200 overflow-hidden bg-slate-100 attach-item">
-                                            <img src="uploads/attachments/${f.stored_filename}" class="w-full h-full object-cover" alt="${f.original_filename || ''}" style="max-height: 70mm; width: auto; height: auto;">
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>`;
-                        }
-                    }
-                } catch (e) {}
-            }
-            const footerHtml = `
-                <footer class="mt-4 pt-3 border-t border-slate-200 text-[9px] text-slate-400 flex justify-between">
-                    <div>FM-IT-001 : ใบรายงานงานซ่อมระบบสารสนเทศ / IT Service Job Report</div>
-                    <div>Revision 01 | Effective 01/01/2024</div>
-                    <div>Printed by ${currentUserName || 'N/A'} on ${new Date().toLocaleString('th-TH')}</div>
-                </footer>
-            `;
-            const ticketHtml = `
-                <div class="print-doc">
-<div class="print-ticket-wrap">
-                    <section class="print-page font-sans text-slate-800" style="position:relative;min-height:277mm;">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-start gap-3">
-                                ${_pvLogoSrc
-                                    ? `<img src="${_pvLogoSrc}" alt="${companyInfo.code}" style="height:44px;width:auto;object-fit:contain;" onerror="this.style.display='none'">`
-                                    : `<div class="w-12 h-12 rounded-full border border-slate-400 flex items-center justify-center text-xs font-bold tracking-wider">${companyInfo.code}</div>`}
-                                <div class="space-y-0.5">
-                                    <p class="text-sm font-semibold text-slate-900">${companyInfo.name}</p>
-                                    ${_addrLine ? `<p class="text-[10px] text-slate-600">${_addrLine}</p>` : ''}
-                                    ${_phoneLine ? `<p class="text-[10px] text-slate-600">${_phoneLine}</p>` : ''}
-                                </div>
-                            </div>
-                            <div class="text-right text-[10px] leading-snug">
-                                <p class="font-semibold">แบบฟอร์ม FM-IT-001</p>
-                                <p>Revision 01</p>
-                                <p>Effective Date: 01/01/2024</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-end border-b-2 border-slate-800 pb-3 mb-6">
-                            <div>
-                                <h1 class="text-lg font-bold text-slate-900 tracking-wide">ใบรายงานงานซ่อมระบบสารสนเทศ</h1>
-                                <p class="text-xs text-slate-500">IT Service Job Report</p>
-                            </div>
-                            <div class="flex items-end gap-3">
-                                <div class="text-right text-xs space-y-0.5">
-                                    <p class="font-mono font-bold text-slate-700">Case ID: ${log.id}</p>
-                                    <p class="text-slate-500">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</p>
-                                    <p class="text-slate-500">บริษัท: ${companyInfo.name}</p>
-                                </div>
-                                <div id="ticket-qrcode" class="w-16 h-16"></div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-8 mb-5">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ผู้แจ้ง / Requester</p>
-                                <p class="font-bold text-lg text-slate-800">${txt(log.requester)}</p>
-                                <p class="text-sm text-slate-600">${txt(log.department)} <span class="text-xs bg-slate-100 px-1 rounded">${txt(log.company)}</span></p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">รายละเอียดงาน / Job Details</p>
-                                <div class="text-sm space-y-1">
-                                    <p><span class="font-semibold w-24 inline-block">ประเภทงาน:</span> ${txt(formatTypeLabel(log.type))}</p>
-                                    <p><span class="font-semibold w-24 inline-block">ความเร่งด่วน:</span> ${txt(log.urgency)}</p>
-                                    <p><span class="font-semibold w-24 inline-block">ทรัพย์สิน:</span> ${txt(log.asset_id || log.asset)}</p>
-                                    <p><span class="font-semibold w-24 inline-block">ค่าใช้จ่าย:</span> ${log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH', {minimumFractionDigits: 2}) + ' ฿' : '-'}</p>
-                                    ${log.appointment_date ? `<p><span class="font-semibold w-24 inline-block">วันนัดหมาย:</span> ${new Date(log.appointment_date).toLocaleString('th-TH')}</p>` : ''}
-                                    ${log.pr_no ? `<p><span class="font-semibold w-24 inline-block">PR No.:</span> ${txt(log.pr_no)}</p>` : ''}
-                                    ${log.po_no ? `<p><span class="font-semibold w-24 inline-block">PO No.:</span> ${txt(log.po_no)}</p>` : ''}
-                                    ${log.vendor_name ? `<p><span class="font-semibold w-24 inline-block">Vendor:</span> ${txt(log.vendor_name)}</p>` : ''}
-                                    ${log.eta_date ? `<p><span class="font-semibold w-24 inline-block">ETA:</span> ${new Date(log.eta_date).toLocaleDateString('th-TH')}</p>` : ''}
-                                    <p><span class="font-semibold w-24 inline-block">วันที่เสร็จ:</span> ${log.completed_date ? new Date(log.completed_date).toLocaleString('th-TH') : '-'}</p>
-                                    <p><span class="font-semibold w-24 inline-block">ระยะเวลาดำเนินการ:</span> ${duration}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-6 mb-5">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">รายละเอียดปัญหา (Problem / Issue)</p>
-                                <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm leading-relaxed whitespace-pre-wrap min-h-[80px]">${txt(log.problem)}</div>
-                            </div>
-                            <div>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">วิธีการแก้ไข (Solution / Action Taken)</p>
-                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] leading-relaxed whitespace-pre-wrap min-h-[70px]">${txt(formatSolutionText(log.solution))}</div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-6 mb-4">
-                            <div>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">อะไหล่ / วัสดุที่ใช้ (Parts / Materials Used)</p>
-                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] text-slate-500 italic">
-                                    ${[log.repair_cost ? 'Cost: ' + Number(log.repair_cost).toLocaleString('th-TH') + ' THB' : '', log.pr_no ? 'PR: ' + txt(log.pr_no) : '', log.po_no ? 'PO: ' + txt(log.po_no) : '', log.vendor_name ? 'Vendor: ' + txt(log.vendor_name) : '', log.eta_date ? 'ETA: ' + new Date(log.eta_date).toLocaleDateString('th-TH') : ''].filter(Boolean).join(' | ') || '-'}
-                                </div>
-                            </div>
-                            <div>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">ความพึงพอใจผู้ใช้ (User Satisfaction)</p>
-                                <div class="bg-slate-50 p-3 rounded border border-slate-200 text-[12px] min-h-[40px] flex items-center gap-2">
-                                    <span class="font-bold">Rating:</span> 
-                                    ${log.rating ? `<span class="text-base font-bold text-slate-800">${log.rating}/5</span>` : '<span class="text-slate-400 italic">Not rated</span>'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="print-sig" style="position:absolute;bottom:0;left:0;right:0;">
-                            <div class="grid grid-cols-3 gap-6 pt-4 border-t border-slate-200 mb-2">
-                                <div class="text-center">
-                                    <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
-                                    <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้แจ้ง / Requester</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="h-16 border-b border-dotted border-slate-300 mb-2"></div>
-                                    <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้อนุมัติ / Approver</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="h-16 border-b border-dotted border-slate-300 mb-2 flex items-end justify-center pb-1">
-                                        <span class="font-script text-xl text-slate-600">${txt(log.servicedBy)}</span>
-                                    </div>
-                                    <p class="text-xs font-bold text-slate-500 uppercase">ลายเซ็นผู้ปฏิบัติงาน / Technician</p>
-                                </div>
-                            </div>
-                            ${footerHtml}
-                        </div>
-                    </section>
-                    </div>
-                </div>
-            `;
-            const w = window.open('', '_blank');
-            if (!w) return;
-            const style = '@page { size: A4 portrait; margin: 1cm; } body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .attachments, .attach-grid, .grid-2 { page-break-inside: avoid; } .print-ticket-wrap { margin: 0 auto; } @media print { * { color: #000 !important; border-color: #555 !important; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; } }';
-            w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print Preview</title>');
-            w.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
-            w.document.write('<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">');
-            w.document.write(`<style>${style} @media print { #preview-toolbar{display:none} } #preview-toolbar{position:fixed;top:0;left:0;right:0;padding:8px 12px;display:flex;gap:8px;justify-content:flex-end;background:#ffffff;border-bottom:1px solid #e2e8f0;z-index:9999} #preview-toolbar button{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid #e2e8f0} #preview-toolbar .primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}<\/style>`);
-            w.document.write('</head><body>');
-            w.document.write('<div id="preview-toolbar"><button class="primary" onclick="window.print()">Print</button><button onclick="window.close()">Close</button></div>');
-            w.document.write(ticketHtml);
-            w.document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
-            w.document.write(`<script>window.addEventListener('load',function(){var el=document.getElementById('ticket-qrcode');if(el){new QRCode(el,{text:'${ticketUrl}',width:80,height:80});}});<\/script>`);
-            w.document.write('</body></html>');
-            w.document.close();
+            if (!window.TicketPrint) throw new Error('โหลดตัวพิมพ์ไม่สำเร็จ ลองรีเฟรชหน้า');
+            return previewOnly ? TicketPrint.preview(log, { includeImages }) : TicketPrint.print(log, { includeImages });
         }
 
         function updateStatistics() {
@@ -2758,14 +2348,14 @@
 
             // ── Status donut ────────────────────────────────────────
             const statusEntries = [
-                {label:'Pending',         val:counts['Pending'],            color:themeColors.blue},
-                {label:'In Progress',     val:counts['In Progress'],        color:themeColors.orange},
-                {label:'Awaiting',        val:counts['Awaiting Confirmation'],color:'#d97706'},
-                {label:'Temp Fix',        val:counts['Temporary Fix'],      color:themeColors.purple},
+                {label:'รอรับเรื่อง',      val:counts['Pending'],            color:themeColors.blue},
+                {label:'กำลังซ่อม',        val:counts['In Progress'],        color:themeColors.orange},
+                {label:'รอยืนยัน',         val:counts['Awaiting Confirmation'],color:'#d97706'},
+                {label:'แก้ชั่วคราว',       val:counts['Temporary Fix'],      color:themeColors.purple},
                 {label:'PR Submitted',    val:counts['PR Submitted'],       color:'#0EA5E9'},
                 {label:'PO Issued',       val:counts['PO Issued'],          color:'#14B8A6'},
-                {label:'Unrepairable',    val:counts['Unrepairable'],       color:'#F43F5E'},
-                {label:'Completed',       val:counts['Completed'],          color:themeColors.green},
+                {label:'ซ่อมไม่ได้',        val:counts['Unrepairable'],       color:'#F43F5E'},
+                {label:'เสร็จสิ้น',         val:counts['Completed'],          color:themeColors.green},
             ].filter(e => e.val > 0);
 
             if(statusChartInstance) statusChartInstance.destroy();
@@ -2832,7 +2422,7 @@
             currentEditId = logId;
             gid('log-form').reset();
             gid('attachment-list').innerHTML = '';
-            gid('modal-title').textContent = logId ? `แก้ไข Ticket ${logId}` : 'แจ้งปัญหา (New Ticket)';
+            gid('modal-title').textContent = logId ? `แก้ไขงาน ${logId}` : 'สร้างงานใหม่';
             
             document.querySelector('input[name="requester-mode"][value="auto"]').checked = true;
             toggleRequesterMode();
@@ -2895,6 +2485,7 @@
                     if(emp) gid('form-requester-select').value = emp.name;
                 }
             }
+            syncLogFormFolds();
             gid('log-modal').classList.remove('hidden');
         }
 
@@ -3733,6 +3324,15 @@
             }
         }
 
+        function syncLogFormFolds() {
+            const has = ids => ids.some(id => (document.getElementById(id)?.value || '').trim());
+            const fix = document.getElementById('lf-fix'), proc = document.getElementById('lf-proc');
+            const st = document.getElementById('form-status')?.value || '';
+            if (fix) fix.open = has(['form-solution', 'form-root_cause']) || ['Awaiting Confirmation', 'Completed', 'Unrepairable', 'Temporary Fix'].includes(st);
+            if (proc) proc.open = has(['form-pr_no', 'form-po_no', 'form-vendor_name', 'form-eta_date']) || ['PR Submitted', 'PO Issued', 'Parts Received', 'Waiting for Parts', 'Sent to Vendor'].includes(st);
+        }
+        document.addEventListener('change', e => { if (e.target.id === 'form-status') syncLogFormFolds(); });
+
         function closeModal() { gid('log-modal').classList.add('hidden'); }
 
         function setupPrinting() {
@@ -4245,14 +3845,14 @@
         // #2  COLUMN VISIBILITY  – dropdown + localStorage
         // ════════════════════════════════════════════════════════════════════
         const COLUMN_DEFS = [
-            { key: 'attach',   label: 'Attachment',  thIdx: 0, selector: '.col-attach',   default: true },
-            { key: 'ticket',   label: 'Ticket ID',   thIdx: 1, selector: '.col-ticket',   default: true },
-            { key: 'requester',label: 'Requester',   thIdx: 2, selector: '.col-requester', default: true },
-            { key: 'issue',    label: 'Issue',       thIdx: 3, selector: '.col-issue',     default: true },
-            { key: 'assignee', label: 'Assignee',    thIdx: 4, selector: '.col-assignee',  default: true },
-            { key: 'status',   label: 'Status',      thIdx: 5, selector: '.col-status',    default: true },
-            { key: 'closed',   label: 'Closed Date', thIdx: 6, selector: '.col-closed',    default: true },
-            { key: 'actions',  label: 'Actions',     thIdx: 7, selector: '.col-actions',   default: true },
+            { key: 'attach',   label: 'ไฟล์แนบ',  thIdx: 0, selector: '.col-attach',   default: true },
+            { key: 'ticket',   label: 'เลขที่',   thIdx: 1, selector: '.col-ticket',   default: true },
+            { key: 'requester',label: 'ผู้แจ้ง',   thIdx: 2, selector: '.col-requester', default: true },
+            { key: 'issue',    label: 'ปัญหา',       thIdx: 3, selector: '.col-issue',     default: true },
+            { key: 'assignee', label: 'ช่าง',    thIdx: 4, selector: '.col-assignee',  default: true },
+            { key: 'status',   label: 'สถานะ',      thIdx: 5, selector: '.col-status',    default: true },
+            { key: 'closed',   label: 'วันที่ปิด', thIdx: 6, selector: '.col-closed',    default: true },
+            { key: 'actions',  label: 'ปุ่มจัดการ',     thIdx: 7, selector: '.col-actions',   default: true },
         ];
 
         function initColumnVisibility() {
@@ -4559,6 +4159,16 @@
         // ════════════════════════════════════════════════════════════════════
         const SLA_HOURS = { 'ด่วนที่สุด': 4, 'ด่วน': 24, 'ปกติ': 72 };
 
+        const LOG_STATUS_TH = {'Pending':'รอรับเรื่อง','Received':'รับเรื่องแล้ว','In Progress':'กำลังซ่อม','Waiting for Parts':'รออะไหล่','Waiting Parts':'รออะไหล่','Parts Received':'ได้อะไหล่แล้ว','Waiting for User':'รอผู้แจ้งตอบ','Sent to Vendor':'ส่งซ่อมภายนอก','Temporary Fix':'แก้ชั่วคราว','PR Submitted':'ขอซื้อ (PR)','PO Issued':'สั่งซื้อ (PO)','Awaiting Confirmation':'รอผู้แจ้งยืนยัน','Completed':'เสร็จสิ้น','Unrepairable':'ซ่อมไม่ได้','Cancelled':'ยกเลิก'};
+        window.LOG_STATUS_TH = LOG_STATUS_TH;
+        // ชั่วโมงเป็นภาษาคน: 2536 → "105 วัน", 30 → "1 วัน 6 ชม.", 5 → "5 ชม."
+        function fmtHoursTh(h) {
+            h = Math.max(0, Math.round(h));
+            if (h < 24) return h + ' ชม.';
+            const d = Math.floor(h / 24), r = h % 24;
+            return d + ' วัน' + (d < 7 && r ? ' ' + r + ' ชม.' : '');
+        }
+
         function getSLAStatus(log) {
             if (!log || ['Completed','Unrepairable','Cancelled'].includes(log.status)) return null;
             const slaH = SLA_HOURS[log.urgency];
@@ -4581,10 +4191,10 @@
             const elapsedH = (new Date() - created) / 3600000;
             const overH = Math.round(elapsedH - slaH);
             if (s === 'breached') {
-                return `<span class="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" title="SLA breached by ${overH}h"><i class="fas fa-fire-alt"></i> +${overH}h</span>`;
+                return `<span class="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" title="เกินเวลา SLA มา ${fmtHoursTh(overH)}"><i class="fas fa-fire-alt"></i> เกิน ${fmtHoursTh(overH)}</span>`;
             }
             const remain = Math.round(slaH - elapsedH);
-            return `<span class="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" title="SLA due in ${remain}h"><i class="fas fa-clock"></i> ${remain}h</span>`;
+            return `<span class="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" title="เหลือเวลาตาม SLA ${fmtHoursTh(remain)}"><i class="fas fa-clock"></i> เหลือ ${fmtHoursTh(remain)}</span>`;
         }
 
         // ── Ticket Comment System ──────────────────────────────────────────────

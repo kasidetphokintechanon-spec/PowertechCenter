@@ -9,6 +9,7 @@
  *     images:[url...], sigs:[{ role, name, date, stamp }], qr:'url', size:'a4'|'a5l'|'land', fit:true,
  *     flow:true = เอกสารยาวหลายหน้า (ใบตรวจนับ) — ไม่ย่อให้พอดีแผ่น เลขหน้าพิมพ์ที่ขอบกระดาษ,
  *     barHtml = ปุ่ม/ตัวเลือกเพิ่มในแถบเครื่องมือ (ใช้คู่ toolbar:true)
+ *     printLog = { url, data:{...}, next } นับการพิมพ์จริง (ตอนกดพิมพ์/Ctrl+P ไม่ใช่ตอนเปิดดู) · ใบที่ 2 ขึ้นไปขึ้น "สำเนา"
  *   }
  *   ตัวช่วยสร้างกล่อง: DocPrint.section(title, body, { cls, clamp, html, lined, height })
  */
@@ -83,7 +84,7 @@
 
         return `<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>${esc(s.title.th)} ${esc(s.docNo || '')}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${b}css/doc-print.css?v=20261022">${pageCss ? `<style>${pageCss}</style>` : ''}
+<link rel="stylesheet" href="${b}css/doc-print.css?v=20261022b">${pageCss ? `<style>${pageCss}</style>` : ''}
 </head><body>
 ${s.toolbar ? `<div class="dp-bar">${s.barHtml || ''}<button class="pri" onclick="window.print()">พิมพ์ / บันทึก PDF</button><button onclick="window.close()">ปิด</button></div>` : ''}
 <div class="dp-page${sizeCls}" style="--acc:${acc};--doc:${s.title.color || acc}"><div class="dp-fit" id="dp-fit">
@@ -91,7 +92,7 @@ ${s.toolbar ? `<div class="dp-bar">${s.barHtml || ''}<button class="pri" onclick
     ${LOGO[co] ? `<img class="dp-logo" src="${esc(b + 'uploads/logos/' + LOGO[co])}" alt="" onerror="this.remove()">` : ''}
     <div class="dp-co"><b>${esc(nameEn || nameTh)}</b><span>${nameEn ? esc(nameTh) + ' · ' : ''}ฝ่ายเทคโนโลยีสารสนเทศ</span>${addr ? `<small>${esc(addr)}</small>` : ''}</div>
     <div class="dp-meta"><div>${s.classified ? '<div class="dp-class">ข้อมูลภายใน · INTERNAL</div>' : ''}${s.docNo ? `<div class="t">เลขที่</div><div class="id">${esc(s.docNo)}</div>` : ''}
-      ${s.dateText ? `<div class="t">${esc(s.dateText)}</div>` : ''}${s.statusText ? `<div class="st">${esc(s.statusText)}</div>` : ''}${formBox}</div>
+      ${s.dateText ? `<div class="t">${esc(s.dateText)}</div>` : ''}${s.statusText ? `<div class="st">${esc(s.statusText)}</div>` : ''}${s.printLog ? '<div class="dp-copy" id="dp-copy"></div>' : ''}${formBox}</div>
       ${qr ? `<img class="dp-qr" src="${qr}" alt="">` : ''}</div>
   </div>
   <div class="dp-title"><b>${esc(s.title.th)}</b><span>${esc(s.title.en || '')}</span></div>
@@ -103,7 +104,13 @@ ${s.toolbar ? `<div class="dp-bar">${s.barHtml || ''}<button class="pri" onclick
   <div class="dp-ft"><span>ออกโดยระบบ Powertech Center · พิมพ์ ${thDate(new Date(), true)}</span><span>${form.no ? esc(form.no) + (form.rev ? ' Rev.' + esc(form.rev) : '') + ' · ' : ''}${esc(s.docNo || '')}${s.flow ? '' : (s.docNo ? ' · ' : '') + 'หน้า 1/1'}</span></div>
 </div></div>
 <script>
-// ยังล้นหน้า → ย่อทั้งใบให้พอดีแผ่นเดียว
+${s.printLog ? `// ป้ายต้นฉบับ/สำเนา — อัปเดตก่อนพิมพ์ทุกครั้ง แล้วส่งบันทึกไปเซิร์ฟเวอร์ (keepalive: ปิดหน้าทันทีก็ยังส่งถึง)
+var PL=${JSON.stringify(s.printLog).replace(/</g, '\\u003c')};
+function dpCopy(){ var e=document.getElementById('dp-copy'); if(!e) return; var c=PL.next>1; e.textContent=c?'สำเนา · ครั้งที่ '+PL.next:'ต้นฉบับ'; e.className='dp-copy'+(c?' is-copy':''); }
+dpCopy();
+window.addEventListener('beforeprint',function(){ dpCopy(); try{ var fd=new FormData(); for(var k in PL.data) fd.append(k,PL.data[k]); fetch(PL.url,{method:'POST',body:fd,credentials:'same-origin',keepalive:true}); }catch(e){} });
+window.addEventListener('afterprint',function(){ PL.next++; dpCopy(); });
+` : ''}// ยังล้นหน้า → ย่อทั้งใบให้พอดีแผ่นเดียว
 function dpFit(){ ${s.fit ? '' : 'return;'} var f=document.getElementById('dp-fit'); f.style.transform=''; f.style.width='';
   var p=f.parentNode, cs=getComputedStyle(p), avail=p.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
   var h=f.scrollHeight; if(h>avail+1){ var k=Math.max(.7,avail/h); f.style.transform='scale('+k+')'; f.style.width=(100/k)+'%'; } }

@@ -27,6 +27,9 @@ body { font-family: 'Sarabun', Tahoma, sans-serif; color: #0f172a; font-size: 9.
 .dp-qr { width: 19mm; height: 19mm; }
 .dp-fm { border-collapse: collapse; font-size: 7pt; margin-top: 3px; margin-left: auto; }
 .dp-fm td { border: 1px solid #cbd5e1; padding: 1px 5px; } .dp-fm td:first-child { background: #f1f5f9; color: #64748b; }
+/* ต้นฉบับ/สำเนา — ใบที่พิมพ์ซ้ำต้องดูออกทันที */
+.dp-copy { margin-top: 3px; font-size: 7.5pt; font-weight: 700; color: #64748b; }
+.dp-copy.is-copy { display: inline-block; border: 1.5px solid #b91c1c; color: #b91c1c; border-radius: 3px; padding: 0 6px; font-weight: 800; }
 .dp-class { display: inline-block; border: 1px solid #b91c1c; color: #b91c1c; border-radius: 3px; padding: 0 5px; font-size: 7pt; font-weight: 800; letter-spacing: .03em; }
 
 /* แถบชื่อเอกสาร */

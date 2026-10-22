@@ -18,6 +18,8 @@
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
     <script src="js/vendor/qrcode.min.js"></script>
+    <script src="js/doc-print.js?v=20261022"></script>
+    <script src="js/ticket-print.js?v=20261022"></script>
     <!-- html5-qrcode lazy-loaded on demand (375KB) -->
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
@@ -467,6 +469,40 @@
         .rtc-date-badge{font-size:10px;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:99px;border:1px solid #e2e8f0}
         html.dark .rtc-date-badge{background:#0f172a;border-color:#334155}
 
+        .ptc-log-detail-meta > :last-child:nth-child(odd){grid-column:1 / -1}
+        .rtc-title{padding:4px 14px 0;font-size:14.5px;font-weight:700;color:#0f172a;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+        html.dark .rtc-title{color:#f1f5f9}
+        .rtc-place{font-size:12px;font-weight:500;color:#64748b;display:inline-flex;align-items:center;gap:4px}
+        .rtc-place i{font-size:10px;color:#94a3b8}
+        .rq-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:4px 14px 8px;max-width:340px}
+        .rq-bar span{height:4px;border-radius:99px;background:#e2e8f0}
+        html.dark .rq-bar span{background:#334155}
+        .rq-bar span.on{background:var(--card-accent,#2563eb)}
+        .rq-bar.bad span.on{background:#e11d48}
+        .rq-steps{display:flex;justify-content:space-between;position:relative;margin:2px 0 14px;padding:0 4px}
+        .rq-steps::before{content:'';position:absolute;left:22px;right:22px;top:13px;height:2px;background:#e2e8f0}
+        html.dark .rq-steps::before{background:#334155}
+        .rq-step{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:0}
+        .rq-step .d{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:#fff;border:2px solid #cbd5e1;color:#94a3b8}
+        html.dark .rq-step .d{background:#0f172a;border-color:#475569}
+        .rq-step.done .d{background:#16a34a;border-color:#16a34a;color:#fff}
+        .rq-step.cur .d{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+        .rq-steps.bad .rq-step.cur .d{background:#e11d48;border-color:#e11d48}
+        .rq-step .t{font-size:11px;font-weight:600;color:#94a3b8;text-align:center;line-height:1.25}
+        .rq-step.done .t,.rq-step.cur .t{color:#0f172a}
+        html.dark .rq-step.done .t,html.dark .rq-step.cur .t{color:#e2e8f0}
+        .rq-steps-cancel{padding:9px 12px;border-radius:8px;background:#f1f5f9;color:#475569;font-size:13px;font-weight:600;margin-bottom:12px}
+        .rq-ask{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:13px;margin-bottom:12px}
+        .rq-ask i{margin-top:2px}
+        html.dark .rq-ask{background:rgba(6,95,70,.25);border-color:#065f46;color:#a7f3d0}
+        .rq-sol{text-align:left;font-size:13px;line-height:1.55;padding:9px 12px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d;margin-bottom:12px;white-space:pre-line}
+        .rq-sol .h{font-size:11px;font-weight:700;color:#16a34a;margin-bottom:2px}
+        .rq-rate-h{font-size:12.5px;font-weight:700;color:#475569}
+        .rq-rate{display:flex;justify-content:center;gap:6px;margin-top:6px}
+        .rq-rate button{border:0;background:none;font-size:28px;color:#e2e8f0;cursor:pointer;padding:2px;transition:transform .1s,color .1s}
+        .rq-rate button.on{color:#f59e0b}
+        .rq-rate button:hover{transform:scale(1.12)}
+        .rq-rate-lbl{font-size:12px;color:#64748b;margin-top:2px}
         .rtc-problem{padding:2px 14px 6px;font-size:13px;color:#1e293b;font-weight:500;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
         html.dark .rtc-problem{color:#e2e8f0}
 
@@ -641,7 +677,7 @@
         <a href="index.html" class="nav-back" aria-label="กลับหน้าหลัก"><i class="fa fa-arrow-left"></i></a>
         <div class="ptc-nav-brand">
             <div id="logo-bg" class="ptc-nav-icon"><i id="logo-icon" class="fa fa-bolt"></i></div>
-            <img id="dashboard-logo-img" src="" alt="Logo" class="hidden" style="height:28px;width:auto;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;padding:2px;background:#fff">
+            <img id="dashboard-logo-img" src="" alt="" class="hidden" onerror="this.classList.add('hidden');document.getElementById('logo-bg')?.classList.remove('hidden')" style="height:28px;width:auto;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;padding:2px;background:#fff">
             <div id="logo-text" class="ptc-nav-title">แจ้งซ่อม IT</div>
         </div>
         <div class="req-nav-spacer" style="flex:1"></div>
@@ -666,7 +702,7 @@
                     </button>
                 </div>
                 <div class="req-quick-links">
-                    <a href="log.html" class="req-quick-link" title="งานช่าง IT"><i class="fas fa-clipboard-list"></i><span>งานช่าง</span></a>
+                    <a href="log.html" id="req-tech-link" class="req-quick-link" title="งานช่าง IT" style="display:none"><i class="fas fa-clipboard-list"></i><span>งานช่าง</span></a>
                 </div>
                 <div style="flex:1"></div>
                 <!-- Form Actions -->
@@ -687,7 +723,7 @@
                         <i class="fas fa-plus"></i><span class="hidden sm:inline">แจ้งใหม่</span>
                     </button>
                     <button type="button" onclick="exportTickets()" class="ptc-btn" style="padding:5px 12px;font-size:12px;background:#10b981">
-                        <i class="fas fa-file-excel"></i><span class="hidden sm:inline">Export</span>
+                        <i class="fas fa-file-excel"></i><span class="hidden sm:inline">ส่งออก Excel</span>
                     </button>
                 </div>
             </div>
@@ -1605,7 +1641,12 @@
             const pill = gid('req-user-pill');
             const name = sessionData.display_name || 'Guest';
             const dept = sessionData.primary_department || '';
-            if (pill) pill.textContent = dept ? (name + ' · ' + dept) : name;
+            // ชื่อผู้ใช้อยู่ในปุ่มโปรไฟล์มุมขวาแล้ว — ไม่ต้องซ้ำ
+            if (pill) pill.style.display = 'none';
+            // ลิงก์ "งานช่าง" สำหรับคนที่มีสิทธิ์งานช่าง IT เท่านั้น
+            const perms = sessionData.effective_permissions || [];
+            const techLink = gid('req-tech-link');
+            if (techLink) techLink.style.display = (sessionData.role === 'admin' || perms.includes('*') || perms.includes('it_log.access')) ? '' : 'none';
             const logoPaths = { PT4:'uploads/logos/pt4_logo.png', PTA:'uploads/logos/pta_logo.png', PTE:'uploads/logos/pte_logo.png' };
             const logoImg = gid('dashboard-logo-img'); const logoBg = gid('logo-bg');
             const co = sessionData.company;
@@ -2417,7 +2458,7 @@
                 const isUnrepairable = l.status === 'Unrepairable';
 
                 let actionBtn = '';
-                if(l.status==='Awaiting Confirmation') actionBtn=`<div style="display:flex;gap:6px"><button onclick="event.stopPropagation();confirmResolution('${l.id}')" class="ticket-action-btn ok"><i class="fas fa-check-circle mr-1"></i>ยืนยัน</button><button onclick="event.stopPropagation();reopenTicket('${l.id}')" class="ticket-action-btn danger"><i class="fas fa-rotate-left mr-1"></i>ยังไม่ได้</button></div>`;
+                if(l.status==='Awaiting Confirmation') actionBtn=`<div style="display:flex;gap:6px"><button onclick="event.stopPropagation();confirmResolution('${escapeJsString(l.id)}')" class="ticket-action-btn ok"><i class="fas fa-check-circle mr-1"></i>ใช้ได้แล้ว ปิดงาน</button><button onclick="event.stopPropagation();reopenTicket('${escapeJsString(l.id)}')" class="ticket-action-btn danger"><i class="fas fa-rotate-left mr-1"></i>ยังไม่หาย</button></div>`;
                 else if(l.status==='Pending') actionBtn=`<button onclick="event.stopPropagation();cancelTicket('${l.id}')" class="ticket-action-btn danger"><i class="fas fa-times-circle mr-1"></i>ยกเลิก</button>`;
                 else if(['Completed','Unrepairable'].includes(l.status)){
                     if(l.rating){actionBtn='<div class="ticket-rating-stars">';for(let r=1;r<=5;r++)actionBtn+=r<=l.rating?'<i class="fas fa-star"></i>':'<i class="far fa-star" style="color:#e2e8f0"></i>';actionBtn+='</div>';}
@@ -2426,21 +2467,22 @@
                 else if(isCancelled) actionBtn='';
                 else actionBtn='';
 
-                return `<div style="--card-accent:${ss.row}" class="req-ticket-card${isSelected?' is-selected':''}" onclick="handleTicketClick('${l.id}')">
+                return `<div style="--card-accent:${ss.row}" class="req-ticket-card${isSelected?' is-selected':''}" onclick="handleTicketClick('${escapeJsString(l.id)}')">
                     <div class="rtc-top">
                         <div class="rtc-id-row">
                             <div class="${typeBadgeClass}"><i class="${typeIconClass}"></i></div>
-                            <span class="rtc-id" style="${idColorStyle}">${l.id}</span>
+                            <span class="rtc-id" style="${idColorStyle}">${escapeHtml(l.id)}</span>
                             <span class="rtc-date-badge">${new Date(l.date).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}</span>
                             ${jobBadge}
                         </div>
                         <div style="flex-shrink:0">${statusBadge}</div>
                     </div>
-                    <div class="rtc-problem">${l.problem||'-'}</div>
+                    ${(() => { const sm = reqSummary(l); return `<div class="rtc-title">${escapeHtml(sm.title)}${sm.place ? `<span class="rtc-place"><i class="fas fa-location-dot"></i>${escapeHtml(sm.place)}</span>` : ''}</div>${sm.sub ? `<div class="rtc-problem">${escapeHtml(sm.sub)}</div>` : ''}`; })()}
+                    ${reqStepper(l, false)}
                     <div class="rtc-chips">
-                        <span class="rtc-chip">${formatTypeLabel(l.type)}</span>
-                        ${l.asset_id||l.asset?`<span class="rtc-chip asset"><i class="fas fa-desktop" style="font-size:9px;opacity:.7;margin-right:2px"></i>${l.asset_id||l.asset}</span>`:''}
-                        ${l.servicedBy?`<span class="rtc-chip" style="color:#64748b"><i class="fas fa-user-gear" style="font-size:9px;opacity:.7;margin-right:2px"></i>${l.servicedBy}</span>`:''}
+                        <span class="rtc-chip">${escapeHtml(formatTypeLabel(l.type))}</span>
+                        ${l.asset_id||l.asset?`<span class="rtc-chip asset"><i class="fas fa-desktop" style="font-size:9px;opacity:.7;margin-right:2px"></i>${escapeHtml(l.asset_id||l.asset)}</span>`:''}
+                        ${l.servicedBy?`<span class="rtc-chip" style="color:#64748b"><i class="fas fa-user-gear" style="font-size:9px;opacity:.7;margin-right:2px"></i>ช่าง ${escapeHtml(l.servicedBy)}</span>`:''}
                     </div>
                     ${actionBtn?`<div class="rtc-footer" onclick="event.stopPropagation()"><div class="rtc-actions">${actionBtn}</div></div>`:''}
                 </div>`;
@@ -2527,6 +2569,40 @@
                     ...(opts || {})
                 });
             };
+        }
+
+        // ข้อความแจ้งเก็บเป็น "อุปกรณ์: … ตำแหน่ง: … อาการที่พบ: …" — ดึงหัวข้อสั้นๆ มาโชว์ในรายการ
+        const REQ_STATUS_TH = {'Pending':'รอรับเรื่อง','Received':'รับเรื่องแล้ว','In Progress':'กำลังซ่อม','Waiting for Parts':'รออะไหล่','Waiting Parts':'รออะไหล่','Parts Received':'ได้อะไหล่แล้ว','Waiting for User':'รอคุณตอบกลับ','Sent to Vendor':'ส่งซ่อมภายนอก','Temporary Fix':'แก้ชั่วคราว','PR Submitted':'ขอซื้อ (PR)','PO Issued':'สั่งซื้อแล้ว (PO)','Awaiting Confirmation':'รอคุณยืนยัน','Completed':'เสร็จสิ้น','Unrepairable':'ซ่อมไม่ได้','Cancelled':'ยกเลิก'};
+        const REQ_FIELDS = ['อุปกรณ์', 'ตำแหน่ง', 'อาการที่พบ', 'เริ่มเกิดตั้งแต่', 'วันที่ต้องการ', 'ความต้องการ'];
+        function reqSummary(log) {
+            const raw = String(log.problem || '').replace(/^\s*\[[^\]]*\]\s*/, '');
+            const pick = key => {
+                const m = raw.match(new RegExp(key + ':\\s*([\\s\\S]*?)(?=\\s*(?:' + REQ_FIELDS.join('|') + '):|$)'));
+                return m ? m[1].trim() : '';
+            };
+            const device = pick('อุปกรณ์'), symptom = pick('อาการที่พบ'), place = pick('ตำแหน่ง');
+            const title = device || formatTypeLabel(log.type) || 'แจ้งปัญหา';
+            const sub = symptom || (device ? '' : raw);
+            return { title, sub, place };
+        }
+        const REQ_STEPS = ['แจ้งเรื่อง', 'รับเรื่อง', 'กำลังซ่อม', 'รอคุณยืนยัน', 'เสร็จสิ้น'];
+        function reqStepIndex(status) {
+            if (status === 'Pending') return 0;
+            if (status === 'Received') return 1;
+            if (status === 'Awaiting Confirmation') return 3;
+            if (status === 'Completed') return 5;   // ครบทุกขั้น (ติ๊กถูกหมด)
+            if (status === 'Unrepairable') return 4;
+            return 2; // กำลังซ่อม / รออะไหล่ / ส่งซ่อมนอก / PR / PO / แก้ชั่วคราว / รอผู้ใช้
+        }
+        // แบบย่อ (ในการ์ด) = แถบ 5 ช่อง · แบบเต็ม (ในรายละเอียด) = จุด + ชื่อขั้น
+        function reqStepper(log, full) {
+            if (log.status === 'Cancelled') return full ? '<div class="rq-steps-cancel"><i class="fas fa-ban"></i> งานนี้ถูกยกเลิก</div>' : '';
+            const idx = reqStepIndex(log.status);
+            const bad = log.status === 'Unrepairable';
+            if (!full) return `<div class="rq-bar${bad ? ' bad' : ''}" title="${escapeHtml(REQ_STEPS[Math.min(idx, 4)])}">${REQ_STEPS.map((_, i) => `<span class="${i <= idx ? 'on' : ''}"></span>`).join('')}</div>`;
+            const labels = REQ_STEPS.slice();
+            if (bad) labels[4] = 'ซ่อมไม่ได้';
+            return `<div class="rq-steps${bad ? ' bad' : ''}">${labels.map((t, i) => `<div class="rq-step${i < idx ? ' done' : ''}${i === idx ? ' cur' : ''}"><span class="d">${i < idx ? '<i class="fas fa-check"></i>' : i + 1}</span><span class="t">${escapeHtml(t)}</span></div>`).join('')}</div>`;
         }
 
         function buildReqStatusProgress(log) {
@@ -2622,7 +2698,8 @@
 
             const actionBtns = [];
             if (log.status === 'Awaiting Confirmation') {
-                actionBtns.push(reqAct(`confirmResolution('${escapeJsString(log.id)}')`, 'primary', 'fas fa-check-circle', 'ยืนยันปิดงาน'));
+                actionBtns.push(reqAct(`confirmResolution('${escapeJsString(log.id)}')`, 'primary', 'fas fa-check-circle', 'ใช้ได้แล้ว ปิดงาน'));
+                actionBtns.push(reqAct(`reopenTicket('${escapeJsString(log.id)}')`, 'danger', 'fas fa-rotate-left', 'ยังไม่หาย'));
             } else if (log.status === 'Pending') {
                 actionBtns.push(reqAct(`cancelTicket('${escapeJsString(log.id)}')`, 'danger', 'fas fa-times-circle', 'ยกเลิกงาน'));
             } else if (['Completed', 'Unrepairable'].includes(log.status) && !log.rating) {
@@ -2632,18 +2709,18 @@
             const urgencyCls = log.urgency === 'ด่วนที่สุด' ? ' style="color:#dc2626"' : (log.urgency === 'ด่วน' ? ' style="color:#d97706"' : '');
             const metaRows = [
                 detailField('วันที่', detailTxt(new Date(log.date).toLocaleDateString('th-TH'))),
-                detailField('สถานะ', `<span class="${statusClass(log.status)} inline-flex px-2 py-0.5 rounded text-[11px] font-semibold">${detailTxt(log.status)}</span>`),
+                detailField('สถานะ', `<span class="${statusClass(log.status)} inline-flex px-2 py-0.5 rounded text-[11px] font-semibold">${detailTxt(REQ_STATUS_TH[log.status] || log.status)}</span>`),
                 detailField('ผู้แจ้ง', detailTxt(log.requester)),
                 detailField('แผนก', detailTxt(log.department)),
                 detailField('ประเภท', detailTxt(formatTypeLabel(log.type))),
                 detailField('ความเร่งด่วน', `<span${urgencyCls}>${detailTxt(log.urgency)}</span>`),
             ];
-            if (log.contact) metaRows.push(detailField('ติดต่อ', detailTxt(log.contact)));
-            if (log.asset_id || log.asset) metaRows.push(detailField('Asset', `<span class="font-mono text-[#2563eb]">${detailTxt(log.asset_id || log.asset)}</span>`, true));
-            if (log.servicedBy) metaRows.push(detailField('ผู้รับผิดชอบ', detailTxt(log.servicedBy), true));
+            if (log.contact) metaRows.push(detailField('เบอร์ติดต่อ', detailTxt(log.contact), true));
+            if (log.asset_id || log.asset) metaRows.push(detailField('เครื่อง', `<span class="font-mono text-[#2563eb]">${detailTxt(log.asset_id || log.asset)}</span>`, true));
+            if (log.servicedBy) metaRows.push(detailField('ช่างผู้รับผิดชอบ', detailTxt(log.servicedBy), true));
             if (log.pr_no) metaRows.push(detailField('PR', detailTxt(log.pr_no)));
             if (log.po_no) metaRows.push(detailField('PO', detailTxt(log.po_no)));
-            if (log.eta_date) metaRows.push(detailField('ETA', detailTxt(new Date(log.eta_date).toLocaleDateString('th-TH'))));
+            if (log.eta_date) metaRows.push(detailField('คาดว่าเสร็จ', detailTxt(new Date(log.eta_date).toLocaleDateString('th-TH'))));
             if (log.appointment_date) metaRows.push(detailField('นัดหมาย', detailTxt(new Date(log.appointment_date).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })), true));
 
             const canPrintDoc = ['Completed', 'Cancelled', 'Unrepairable'].includes(log.status);
@@ -2688,7 +2765,7 @@
             const _tlBadge = (s) => {
                 const c = _statusColor[s] || '#94a3b8';
                 const ic = _statusIcon[s] || 'fa-circle';
-                return `<span class="tk-tl-badge" style="color:${c};border-color:${c}20;background:${c}10"><i class="fas ${ic}" style="font-size:9px"></i>${escapeHtml(s)}</span>`;
+                return `<span class="tk-tl-badge" style="color:${c};border-color:${c}20;background:${c}10"><i class="fas ${ic}" style="font-size:9px"></i>${escapeHtml(REQ_STATUS_TH[s] || s)}</span>`;
             };
             let timelineHtml = '';
             if (ticketEvents.length > 0) {
@@ -2700,12 +2777,14 @@
                     const dt = ev.created_at ? new Date(ev.created_at) : null;
                     const dtStr = dt ? dt.toLocaleString('th-TH', {day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
                     let actionText = '';
-                    if (ev.event_type === 'ACCEPT') actionText = 'รับเรื่องแล้ว';
+                    if (ev.event_type === 'CREATE') actionText = 'แจ้งเรื่อง';
+                    else if (ev.event_type === 'COMMENT') actionText = 'ส่งข้อความ';
+                    else if (ev.event_type === 'ACCEPT') actionText = 'รับเรื่องแล้ว';
                     else if (ev.event_type === 'ASSIGN') actionText = `มอบหมายให้ ${escapeHtml(ev.assigned_to_name || '')}`;
                     else if (ev.event_type === 'CLOSE' || ev.to_status === 'Completed') actionText = 'ปิดงานเรียบร้อย';
                     else if (ev.event_type === 'CANCEL') actionText = 'ยกเลิกงาน';
                     else if (ev.from_status && ev.to_status) actionText = `เปลี่ยนสถานะ`;
-                    else actionText = ev.event_type || 'อัปเดต';
+                    else actionText = ({ REOPEN: 'เปิดงานใหม่', CONFIRM: 'ผู้แจ้งยืนยันแล้ว', RATE: 'ให้คะแนน' })[ev.event_type] || 'อัปเดต';
                     const statusChange = (ev.from_status && ev.to_status && ev.from_status !== ev.to_status)
                         ? `${_tlBadge(ev.from_status)} <span class="tk-tl-arrow"><i class="fas fa-arrow-right"></i></span> ${_tlBadge(ev.to_status)}`
                         : (ev.to_status ? _tlBadge(ev.to_status) : '');
@@ -2752,6 +2831,8 @@
                             <div style="font-size:12px;color:#7f1d1d;line-height:1.5">${detailTxt(cancelReason)}</div>
                         </div>
                     </div>` : ''}
+                    ${reqStepper(log, true)}
+                    ${log.status === 'Awaiting Confirmation' ? `<div class="rq-ask"><i class="fas fa-circle-question"></i><div><b>ช่างแก้ไขเสร็จแล้ว — ใช้งานได้ปกติหรือยัง?</b><br>กด "ใช้ได้แล้ว ปิดงาน" หรือ "ยังไม่หาย" ด้านล่าง</div></div>` : ''}
                     <dl class="ptc-log-detail-meta">${metaRows.join('')}</dl>
                     <div class="ptc-log-detail-section">
                         <div class="ptc-log-detail-section-title"><i class="fas fa-circle-exclamation"></i> ปัญหา / อาการ</div>
@@ -2907,10 +2988,31 @@
         };
 
         window.confirmResolution = async function(id) {
-            const { isConfirmed } = await ptcWorkflow({
-                html: ptcWorkflowHead({ step: 'ยืนยัน', title: 'ยืนยันการแก้ไขปัญหา?', ticketId: id, icon: 'fa-check-circle', tone: 'emerald' }) +
-                    `<p class="swal-note-muted">โดยการยืนยัน คุณรับรองว่างานได้รับการแก้ไขเรียบร้อยแล้ว<br>ระบบจะบันทึกชื่อและเวลายืนยันโดยอัตโนมัติ</p>`,
-                confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> ยืนยัน — ปิดงาน'
+            let tk = (allMyLogs || []).find(l => String(l?.id || '') === String(id)) || {};
+            // รายการโหลดแบบย่อ (ไม่มีวิธีแก้) → ดึงตัวเต็มมาโชว์ว่าช่างแก้อะไรไป
+            if (tk.solution === undefined) {
+                try {
+                    const p = new URLSearchParams({ action: 'get', file: 'it_logs', id: String(id), scope: 'my_tickets', paginate: '1', page: '1', per_page: '1', v: Date.now() });
+                    const j = await (await fetch(`api.php?${p}`, { cache: 'no-store', credentials: 'same-origin' })).json();
+                    if (Array.isArray(j?.data) && j.data[0]?.id === id) tk = j.data[0];
+                } catch (_) {}
+            }
+            const sol = tk.solution ? formatSolutionText(String(tk.solution)) : '';
+            const { isConfirmed, value: stars } = await ptcWorkflow({
+                html: ptcWorkflowHead({ step: 'ยืนยัน', title: 'ใช้งานได้ปกติแล้ว — ปิดงาน', ticketId: id, icon: 'fa-check-circle', tone: 'emerald' }) +
+                    `${sol ? `<div class="rq-sol"><div class="h">ช่างแก้ไขโดย</div>${escapeHtml(sol)}</div>` : ''}
+                    <div class="rq-rate-h">ให้คะแนนการบริการ</div>
+                    <div class="rq-rate" id="rq-rate">${[1,2,3,4,5].map(n => `<button type="button" data-s="${n}"><i class="fas fa-star"></i></button>`).join('')}</div>
+                    <div class="rq-rate-lbl" id="rq-rate-lbl">ดีมาก</div>
+                    <p class="swal-note-muted" style="margin-top:10px">ระบบจะบันทึกชื่อและเวลาที่คุณยืนยันไว้เป็นหลักฐาน</p>`,
+                confirmButtonText: '<i class="fas fa-check-circle mr-1"></i> ยืนยัน ปิดงาน',
+                didOpen: () => {
+                    const box = document.getElementById('rq-rate');
+                    const set = v => { box.dataset.v = v; box.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.s <= v)); document.getElementById('rq-rate-lbl').textContent = ({1:'แย่มาก',2:'พอใช้',3:'ปานกลาง',4:'ดี',5:'ดีมาก'})[v]; };
+                    box.addEventListener('click', e => { const b = e.target.closest('button'); if (b) set(+b.dataset.s); });
+                    set(5);
+                },
+                preConfirm: () => +document.getElementById('rq-rate').dataset.v || 0
             });
             if (!isConfirmed) return;
             const fd = new FormData();
@@ -2918,11 +3020,16 @@
             try {
                 const res = await (await fetch('api.php',{method:'POST',body:fd})).json();
                 if(res.status!=='success') throw new Error(res.message);
+                if (stars) {
+                    const rf = new FormData();
+                    rf.append('action','rate_ticket'); rf.append('id',id); rf.append('rating',stars);
+                    try { await fetch('api.php',{method:'POST',body:rf}); } catch(_) {}
+                }
                 await loadMyLogs();
                 const viewSel = document.getElementById('status-view');
                 if (viewSel && viewSel.value === 'active') viewSel.value = 'all';
                 renderTickets();
-                ptcSwal().fire({icon:'success',title:'ปิดงานเรียบร้อย!',text:'งานถูกยืนยันและปิดเป็น Completed แล้ว',timer:3000,showConfirmButton:false});
+                ptcSwal().fire({icon:'success',title:'ปิดงานเรียบร้อย ขอบคุณครับ',text:stars ? `บันทึกคะแนน ${stars} ดาวแล้ว` : '',timer:2600,showConfirmButton:false});
             } catch(err){ ptcAlert('error','Error',err.message); }
         };
 
@@ -2955,239 +3062,20 @@
             } catch (err) { ptcAlert('error', 'Error', err.message); }
         };
 
+        // พิมพ์ใบงาน — ตัวเดียวกับหน้าช่าง (js/ticket-print.js) บังคับ A4 แผ่นเดียว
         window.printTicket = async function(id) {
-            const log = allMyLogs.find(l => l.id === id); if (!log) return;
-            const pc = document.querySelector('.print-container'); if (!pc) return;
-            const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            const txt = t => esc(t) || '-';
-            // Use log.html URL so QR code links to IT admin view
-            const ticketUrl = `${window.location.origin}${window.location.pathname.replace('request.html','log.html')}?ticket_id=${log.id}`;
-            // formatDuration helper (not in request.html)
-            const _fmtDuration = (start, end) => {
-                if (!start || !end) return '-';
-                const ms = new Date(end) - new Date(start); if (ms <= 0) return '-';
-                let s = Math.floor(ms/1000);
-                const d = Math.floor(s/86400); s -= d*86400;
-                const h = Math.floor(s/3600); s -= h*3600;
-                const m = Math.floor(s/60);
-                const p = []; if (d>0) p.push(d+' วัน'); if (h>0) p.push(h+' ชม.'); if (m>0&&d===0) p.push(m+' นาที');
-                return p.length ? p.join(' ') : '< 1 นาที';
-            };
-            const companyInfo = getCompanyPrintInfo(log.company);
-            // Fetch live company info (logo, address, phone) from DB
-            let _reqCoCache = window._coInfoCache || null;
-            if (!_reqCoCache) {
+            let log = allMyLogs.find(l => l.id === id);
+            if (!log) return;
+            if (log.solution === undefined) {
                 try {
-                    const _rr = await fetch('api.php?action=get_company_info');
-                    const _rj = await _rr.json();
-                    if (_rj.status === 'success') { window._coInfoCache = _rj.data; _reqCoCache = _rj.data; }
-                } catch(e) {}
+                    const p = new URLSearchParams({ action: 'get', file: 'it_logs', id: String(id), scope: 'my_tickets', paginate: '1', page: '1', per_page: '1', v: Date.now() });
+                    const j = await (await fetch(`api.php?${p}`, { cache: 'no-store', credentials: 'same-origin' })).json();
+                    if (Array.isArray(j?.data) && j.data[0]?.id === id) log = j.data[0];
+                } catch (_) {}
             }
-            const _coData = (_reqCoCache || {})[String(log.company||'').toUpperCase()] || {};
-            const _addrLine = (_coData.address_th || _coData.address_en || '');
-            const _phoneLine = (_coData.phone || '');
-            const duration = _fmtDuration(log.date, log.completed_date);
-            const WORK_ST = ['Received','In Progress','Waiting for User','Sent to Vendor','Temporary Fix','PR Submitted','PO Issued'];
-            const docType = log.status === 'Pending'    ? 'request'
-                          : log.status === 'Cancelled'  ? 'cancelled'
-                          : WORK_ST.includes(log.status)? 'workorder'
-                          : 'completion';
-            const docMeta = {
-                request:    { label:'ใบแจ้งซ่อม',  en:'Service Request',           color:'#2563eb', sigCols:1 },
-                workorder:  { label:'ใบงานซ่อม',    en:'Work Order',                color:'#d97706', sigCols:2 },
-                completion: { label:'ใบปิดงาน',     en:'Job Completion Certificate',color:'#059669', sigCols:3 },
-                cancelled:  { label:'ใบยกเลิก',     en:'Cancellation Notice',       color:'#94a3b8', sigCols:1 },
-            }[docType];
-            const showSolution  = ['completion','cancelled','workorder'].includes(docType);
-            const showRootCause = docType === 'completion';
-            const showWorkBox   = docType === 'workorder';
-            const formattedSolution = (() => {
-                const raw = String(log.solution || '');
-                if (!raw.trim()) return '';
-                return raw.split('\n').map(l => l.trim()).filter(line => {
-                    if (!line) return false;
-                    if (/^Paused\s*\(/i.test(line)) return false;
-                    if (/^Reassigned:/i.test(line)) return false;
-                    if (/^\[.*\]\s*(Reassigned|Paused|Reopen\s+by|Auto-closed)/i.test(line)) return false;
-                    return true;
-                }).join('\n');
-            })();
-            const existing = document.getElementById('print-orientation');
-            if (existing) existing.remove();
-            const os = document.createElement('style');
-            os.id = 'print-orientation';
-            os.innerHTML = '@page{size:A4 portrait;margin:1cm}body{background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}@media print{*{color:#000!important;border-color:#555!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}}';
-            document.head.appendChild(os);
-            // Use absolute URL so logo resolves correctly during print
-            const _base = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
-            const logoMap = {PTA:_base+'/uploads/logos/pta_logo.png',PT4:_base+'/uploads/logos/pt4_logo.png',PTE:_base+'/uploads/logos/pte_logo.png'};
-            const logoSrc = logoMap[String(log.company||'').toUpperCase()]||'';
-            const logoHtml = logoSrc
-                ? `<img src="${logoSrc}" alt="${companyInfo.code}" style="height:44px;width:auto;object-fit:contain;">`
-                : `<div style="width:44px;height:44px;border-radius:50%;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#475569;">${companyInfo.code}</div>`;
-            const statusLabel = {'Pending':'รอรับเรื่อง','Received':'รับเรื่องแล้ว','In Progress':'กำลังดำเนินการ','Waiting for Parts':'รออะไหล่','Temporary Fix':'แก้ชั่วคราว','PR Submitted':'ส่ง PR','PO Issued':'ออก PO','Parts Received':'ได้อะไหล่','Awaiting Confirmation':'รอยืนยัน','Completed':'เสร็จสิ้น','Cancelled':'ยกเลิก','Unrepairable':'ซ่อมไม่ได้'};
-            const sLabel = statusLabel[log.status] || log.status;
-            const closedDateStr = (log.closed_date || log.completed_date)
-                ? new Date(log.closed_date || log.completed_date).toLocaleDateString('th-TH') : '-';
-            const confirmedStr = log.user_confirmed && log.user_confirmed_at
-                ? new Date(log.user_confirmed_at).toLocaleDateString('th-TH') : '';
-            const infoRows = [
-                ['ผู้แจ้ง / Requester', txt(log.requester), 'แผนก / Department', txt(log.department)],
-                ['ช่างผู้รับผิดชอบ / Technician', docType==='request'?'-':txt(log.servicedBy), 'ประเภทงาน / Type', txt(formatTypeLabel(log.type))],
-                ['Asset ID', txt(log.asset_id||log.asset), 'ความเร่งด่วน', txt(log.urgency)||'ทั่วไป'],
-                ['วันที่แจ้ง / Open Date', new Date(log.date).toLocaleDateString('th-TH'),
-                 docType==='completion'?'วันที่ปิดงาน / Closed':'เบอร์ติดต่อ / Contact',
-                 docType==='completion'?closedDateStr:txt(log.contact)],
-                ['ระยะเวลา / Duration', duration, 'ค่าใช้จ่าย / Cost', log.repair_cost ? Number(log.repair_cost).toLocaleString('th-TH',{minimumFractionDigits:2})+' ฿' : '-'],
-            ];
-            if (log.pr_no || log.po_no) infoRows.push(['PR No.', txt(log.pr_no), 'PO No.', txt(log.po_no)]);
-            if (log.vendor_name || log.eta_date) infoRows.push(['Vendor', txt(log.vendor_name), 'ETA', log.eta_date ? new Date(log.eta_date).toLocaleDateString('th-TH') : '-']);
-            const _sigBox = (label, contentHtml, dateStr) => `
-            <div style="text-align:center;">
-              <div style="min-height:56px;border-bottom:1px solid #334155;margin-bottom:5px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;">
-                ${contentHtml}
-              </div>
-              <div style="font-size:8px;font-weight:700;color:#64748b;text-transform:uppercase;">${label}</div>
-              <div style="font-size:8px;color:#94a3b8;margin-top:3px;">วันที่: ${dateStr || '__________'}</div>
-            </div>`;
-            const digitalStamp = log.user_confirmed
-                ? `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:4px;padding:5px 8px;text-align:center;width:100%;">
-                    <div style="font-size:10px;font-weight:800;color:#059669;margin-bottom:2px;">✅ ยืนยันผ่านระบบดิจิทัล</div>
-                    <div style="font-size:9px;color:#166534;font-weight:600;">${esc(log.user_confirmed_by||log.requester||'')}</div>
-                   </div>`
-                : '';
-            const sigHtml = (() => {
-                if (docMeta.sigCols === 1) return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr;gap:20px;">${_sigBox('ผู้แจ้ง / Requester','','')}</div>`;
-                if (docMeta.sigCols === 2) return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-                    ${_sigBox('ผู้แจ้ง / Requester','','')}
-                    ${_sigBox('ช่างผู้รับผิดชอบ / Technician',log.servicedBy?`<span style="font-size:10px;color:#475569;">${esc(log.servicedBy)}</span>`:'',closedDateStr!=='-'?closedDateStr:'')}
-                </div>`;
-                return `<div style="padding:12px 14px 10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
-                    ${_sigBox('ผู้แจ้ง / Requester', digitalStamp, confirmedStr)}
-                    ${_sigBox('ช่างผู้ปฏิบัติงาน / Technician',log.servicedBy?`<span style="font-size:10px;color:#475569;">${esc(log.servicedBy)}</span>`:'',closedDateStr!=='-'?closedDateStr:'')}
-                    ${_sigBox('หัวหน้าแผนก / Head of Department','','')}
-                </div>`;
-            })();
-            const qrDiv = document.createElement('div');
-            qrDiv.id = 'print-qr-tmp';
-            qrDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:80px;height:80px;';
-            document.body.appendChild(qrDiv);
-            new QRCode(qrDiv, {text:ticketUrl, width:80, height:80, correctLevel:QRCode.CorrectLevel.M});
-            setTimeout(() => {
-                const qrCanvas = qrDiv.querySelector('canvas');
-                const qrDataUrl = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
-                if (qrDiv.parentNode) document.body.removeChild(qrDiv);
-
-                // ── Mockup-style palette ──────────────────────────────────────
-                const coPalette = {
-                    PTA:{accent:'#059669',grad:'linear-gradient(135deg,#065f46,#059669)'},
-                    PT4:{accent:'#dc2626',grad:'linear-gradient(135deg,#991b1b,#dc2626)'},
-                    PTE:{accent:'#2563eb',grad:'linear-gradient(135deg,#1d4ed8,#2563eb)'},
-                }[String(log.company||'').toUpperCase()]||{accent:'#2563eb',grad:'linear-gradient(135deg,#1d4ed8,#2563eb)'};
-                const coNameTh = {
-                    PTA:'บริษัท พาวเวอร์เทค เอนจิ้น แอสเซมบลี จำกัด',
-                    PT4:'บริษัท พาวเวอร์เทค 2004 จำกัด',
-                    PTE:'บริษัท พาวเวอร์เทค เอนเนอร์ยี โซลูชั่นส์ จำกัด',
-                }[String(log.company||'').toUpperCase()]||'Powertech Group';
-                const statusBadgeStyle = ['Completed','Awaiting Confirmation'].includes(log.status)
-                    ? 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;'
-                    : log.status==='Cancelled'?'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;'
-                    :'background:#fef9c3;color:#a16207;border:1px solid #fde68a;';
-                const printDateStr = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-
-                // Info grid cells (mockup style)
-                const infoRowsHtml = infoRows.map(([l1,v1,l2,v2],i,a)=>{
-                    const bl = i<a.length-1?'border-bottom:1px solid #e2e8f0;':'';
-                    const cell = (l,v,right) => `<div style="display:flex;align-items:center;padding:6px 10px;${bl}${right?'border-right:1px solid #e2e8f0;':''}gap:7px;"><span style="font-size:.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;min-width:82px;">${l}</span><span style="font-size:.775rem;color:#1e293b;border-bottom:1px dashed #cbd5e1;flex:1;min-height:17px;">${v}</span></div>`;
-                    return cell(l1,v1,true)+cell(l2,v2,false);
-                }).join('');
-
-                // Signature boxes (mockup style)
-                const _sigM = (title,name,date) => { const [th,en] = title.split(' / '); return `<div style="border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;background:#fff;display:flex;flex-direction:column;"><div style="padding:5px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:baseline;gap:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span style="font-size:.7rem;font-weight:700;color:#1e293b;">${th||title}</span><span style="font-size:.58rem;color:#64748b;">${en||''}</span></div><div style="padding:6px 16px 8px;display:flex;flex-direction:column;gap:4px;flex:1;"><div style="flex:1;min-height:28px;"></div><div style="text-align:center;"><div style="border-bottom:1px solid #94a3b8;margin:0 8px 2px;"></div><div style="font-size:.5rem;color:#94a3b8;letter-spacing:.03em;">ลงชื่อ / Signature</div></div><div style="font-size:.58rem;color:#334155;text-align:center;">(${name||'..........................................'})</div><div style="font-size:.55rem;color:#475569;text-align:center;margin-top:2px;">วันที่ &nbsp;${date||'......... / ......... / ............'}</div></div></div>`; };
-                const sigCols = docMeta.sigCols;
-                const sigBoxHtml = sigCols===1
-                    ? _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),'')
-                    : sigCols===2
-                    ? _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),'')+_sigM('ช่างผู้ซ่อม / Technician',esc(log.servicedBy||''),closedDateStr!=='-'?closedDateStr:'')
-                    : _sigM('ผู้แจ้ง / Requester',esc(log.requester||''),confirmedStr)+_sigM('ช่างผู้ปฏิบัติงาน / Technician',esc(log.servicedBy||''),closedDateStr!=='-'?closedDateStr:'')+_sigM('หัวหน้าแผนก / Head of Department','','');
-
-                const html = `<div style="font-family:'Sarabun',sans-serif;color:#1e293b;background:#fff;padding:28px 36px 32px;font-size:12.5px;line-height:1.5;display:flex;flex-direction:column;min-height:277mm;box-sizing:border-box;">
-
-  <!-- HEADER -->
-  <div style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;border-bottom:2.5px solid ${coPalette.accent};padding-bottom:12px;margin-bottom:10px;">
-    <div style="display:flex;align-items:center;gap:10px;border-left:4px solid ${coPalette.accent};padding-left:12px;">
-      ${logoHtml}
-      <div>
-        <div style="font-size:1.05rem;font-weight:800;color:#1e293b;letter-spacing:-.01em;">${esc(companyInfo.name)}</div>
-        <div style="font-size:.72rem;color:#475569;margin-top:2px;font-weight:500;">${esc(coNameTh)}</div>
-        ${_addrLine ? `<div style="font-size:.63rem;color:#64748b;margin-top:2px;">${esc(_addrLine)}</div>` : `<div style="font-size:.65rem;color:#94a3b8;margin-top:2px;">IT Support &amp; Maintenance Dept.</div>`}
-        ${_phoneLine ? `<div style="font-size:.63rem;color:#64748b;">${esc(_phoneLine)}</div>` : ''}
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
-        <div style="font-size:.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;">เลขที่ใบแจ้งซ่อม / Ticket ID</div>
-        <div style="font-size:.9375rem;font-weight:700;color:${coPalette.accent};">${txt(log.id)}</div>
-        <div style="font-size:.68rem;color:#64748b;">วันที่แจ้ง: ${new Date(log.date).toLocaleDateString('th-TH')}</div>
-        <span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:.62rem;font-weight:700;${statusBadgeStyle}">${esc(sLabel)}</span>
-      </div>
-      <table style="border:1px solid #e2e8f0;border-radius:5px;font-size:.6rem;border-collapse:collapse;">
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Form No.</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">FM-IT-001</td></tr>
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Revision</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#dc2626;font-weight:600;">Rev. 03</td></tr>
-        <tr><td style="padding:2px 7px;background:#f1f5f9;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;border:1px solid #e2e8f0;">Eff. Date</td><td style="padding:2px 7px;border:1px solid #e2e8f0;color:#334155;font-weight:600;">01/01/2569</td></tr>
-      </table>
-      ${qrDataUrl ? `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;"><img src="${qrDataUrl}" style="width:60px;height:60px;border:1px solid #e2e8f0;border-radius:4px;padding:2px;"><span style="font-size:.55rem;color:#94a3b8;">Scan เพื่อดูสถานะ</span></div>` : ''}
-    </div>
-  </div>
-
-  <!-- TITLE BAR -->
-  <div style="background:${coPalette.grad};color:#fff;text-align:center;padding:7px 16px;border-radius:5px;margin-bottom:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-    <div style="font-size:.9375rem;font-weight:700;letter-spacing:.02em;">${esc(docMeta.label)} / ${esc(docMeta.en)}</div>
-    <div style="font-size:.67rem;opacity:.85;margin-top:1px;">IT Support &amp; Maintenance Dept. | FM-IT-001 Rev.03</div>
-  </div>
-
-  <!-- INFO GRID -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
-    ${infoRowsHtml}
-  </div>
-
-  <!-- PROBLEM DESCRIPTION -->
-  <div style="border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fafafa;">
-    <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">รายละเอียดปัญหา / Problem Description</div>
-    <div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;min-height:52px;">${txt(log.problem)}</div>
-  </div>
-
-  ${showWorkBox ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">บันทึกการซ่อม / Work Notes <em style="font-weight:400;">(กรอกระหว่างปฏิบัติงาน)</em></div><div style="font-size:.775rem;line-height:2;white-space:pre-wrap;min-height:64px;">${formattedSolution?esc(formattedSolution):''}</div></div>` : ''}
-
-  ${showSolution&&!showWorkBox&&formattedSolution ? `<div style="border:1px solid #a7f3d0;border-left:3px solid #059669;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#f0fdf4;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">วิธีการแก้ไข / Solution &amp; Action Taken</div><div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;">${esc(formattedSolution)}</div></div>` : ''}
-
-  ${showRootCause&&log.root_cause ? `<div style="border:1px solid #fde68a;border-left:3px solid #d97706;border-radius:5px;padding:8px 10px;margin-bottom:10px;background:#fffbeb;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:5px;">สาเหตุที่แท้จริง / Root Cause Analysis</div><div style="font-size:.775rem;line-height:1.7;white-space:pre-wrap;">${esc(log.root_cause)}</div></div>` : ''}
-
-  ${docType==='completion'&&log.rating ? `<div style="border:1px solid #e2e8f0;border-radius:5px;padding:6px 10px;margin-bottom:10px;background:#fafafa;"><div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;margin-bottom:2px;">ความพึงพอใจ / User Satisfaction</div><div style="font-size:11px;font-weight:700;color:#f59e0b;">${'★'.repeat(Number(log.rating))}${'☆'.repeat(5-Number(log.rating))} ${log.rating}/5</div></div>` : ''}
-
-  <!-- SIGNATURES -->
-  <div style="display:grid;grid-template-columns:${sigCols===1?'1fr':sigCols===2?'1fr 1fr':'1fr 1fr 1fr'};gap:10px;margin-top:auto;padding-top:20px;">
-    ${sigBoxHtml}
-  </div>
-
-  <!-- FOOTER -->
-  <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:6px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="font-size:.6rem;color:#94a3b8;">ออกโดยระบบ Powertech System Center · พิมพ์: ${printDateStr}</div>
-    <div style="font-size:.6rem;color:#94a3b8;text-align:right;">FM-IT-001 Rev.03 · หน้า 1/1 · ${txt(log.id)}</div>
-  </div>
-
-</div>`;
-                pc.innerHTML = html;
-                document.body.classList.add('printing-ticket');
-                setTimeout(() => {
-                    try { window.print(); } finally {
-                        document.body.classList.remove('printing-ticket');
-                        pc.innerHTML = '';
-                        const sn = document.getElementById('print-orientation');
-                        if (sn) sn.remove();
-                    }
-                }, 300);
-            }, 300);
+            const includeImages = !!document.getElementById('print-include-images')?.checked;
+            try { await TicketPrint.print(log, { includeImages }); }
+            catch (e) { ptcAlert('error', 'พิมพ์ไม่สำเร็จ', e.message || ''); }
         };
 
         async function uploadMoreAttachments(logId, inputId) {

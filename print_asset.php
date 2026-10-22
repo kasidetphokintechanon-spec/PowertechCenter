@@ -74,7 +74,7 @@ header('Content-Type: text/html; charset=utf-8');
 <body>
 <p style="font-family:sans-serif;padding:40px;color:#64748b">กำลังเตรียมเอกสาร...</p>
 <script src="js/vendor/qrcode.min.js"></script>
-<script src="js/doc-print.js?v=20261022"></script>
+<script src="js/doc-print.js?v=20261022b"></script>
 <script>
 (async () => {
     const D = <?= json_encode($data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;

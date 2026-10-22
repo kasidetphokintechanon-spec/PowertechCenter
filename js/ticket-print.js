@@ -46,6 +46,14 @@
         const doc = DOC[docType];
         const base = location.origin + location.pathname.replace(/\/[^/]*$/, '/');
         const imgs = o.includeImages ? await images(log.id) : [];
+        // นับการพิมพ์เฉพาะงานที่บันทึกแล้ว (ใบร่างจากทะเบียนพัสดุยังไม่มีเลขงาน)
+        let printLog = null;
+        if (log.id) {
+            try {
+                const j = await (await fetch(`${base}api.php?action=ticket_print_log&ticket_id=${encodeURIComponent(log.id)}&doc=${docType}`, { cache: 'no-store' })).json();
+                if (j.status === 'success') printLog = { url: base + 'api.php', data: { action: 'ticket_print_log', ticket_id: log.id, doc: docType }, next: (+j.count || 0) + 1 };
+            } catch (_) {}
+        }
 
         const cancelReason = (String(log.solution || '').match(/\[CANCELLED BY IT\]\s*เหตุผล:\s*([\s\S]+)/) || [])[1] || '';
         const solution = String(log.solution || '').replace(/\[CANCELLED BY IT\][\s\S]*/, '').trim();
@@ -82,7 +90,7 @@
             dateText: 'แจ้งเมื่อ ' + thDate(log.date), statusText: STATUS_TH[log.status] || log.status,
             title: doc, info, blocks, sigs,
             images: imgs.map(f => base + 'uploads/attachments/' + f.stored_filename),
-            qr: base + 'request.html?tab=tickets',
+            qr: base + 'request.html?tab=tickets', printLog,
         };
     }
 
