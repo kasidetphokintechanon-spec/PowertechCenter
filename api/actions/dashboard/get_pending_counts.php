@@ -9,9 +9,10 @@ try {
         $role = $_SESSION['role'] ?? 'guest';
 
         // Loan (สินทรัพย์ที่รออนุมัติยืม)
-        $sql = "SELECT COUNT(*) as count FROM it_assets WHERE status = 'รออนุมัติ'";
+        _initLoanTables($conn);
+        $sql = "SELECT COUNT(*) as count FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending'))";
         if ($role !== 'admin' && !empty($sessionCompany)) {
-            $sql .= " AND company = ?";
+            $sql .= " AND asset_company = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $loan_count = (int)$row['count']; }
         } else {

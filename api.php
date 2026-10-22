@@ -57,6 +57,7 @@ function sendTelegramNotification($conn, $message, $type = 'general') {
 require_once __DIR__ . '/includes/permissions_registry.php';
 require_once __DIR__ . '/includes/notify_helper.php';
 require_once __DIR__ . '/includes/notify_cron.php';
+require_once __DIR__ . '/includes/loan_helper.php';
 
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
@@ -313,7 +314,8 @@ try {
         'save_notify_channel' => ['settings.notifications'], 'delete_notify_channel' => ['settings.notifications'],
         'test_notify_channel' => ['settings.notifications'], 'test_notify_routing' => ['settings.notifications'],
         'get_notify_log' => ['settings.notifications'],
-        'get_notify_overview' => ['settings.notifications'], 'save_line_webhook_secret' => ['settings.notifications'],
+        'get_notify_overview' => ['settings.notifications'],
+        'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
         'save_it_support_settings' => ['admin.access_admin'], 'save_doc_forms' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],
         'reorder_services' => ['admin.access_admin'], 'probe_host' => ['admin.access_admin', 'it_log.access'],
@@ -323,7 +325,6 @@ try {
         'getSetupRecords' => ['it_log.access', 'asset.manage'], 'getSetupRecord' => ['it_log.access', 'asset.manage'],
         'saveSetupRecord' => ['it_log.access', 'asset.manage'], 'deleteSetupRecord' => ['it_log.access', 'asset.manage'],
         'findSetupRecordByAsset' => ['it_log.access', 'asset.manage'], 'setupHandover' => ['it_log.access', 'asset.manage'], 'getSetupAssetCodes' => ['it_log.access', 'asset.manage'],
-        'clear_loan_history' => ['loan.manage'], 'denyRequest' => ['loan.manage'], 'update_loan_status' => ['loan.manage'],
     ];
     if (isset($ACTION_PERMS[$safeAction])) {
         $allowed = false;

@@ -2,954 +2,426 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดการการยืม-คืน - PowertechCenter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="icon" href="favicon.ico">
     <link rel="manifest" href="app-manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ea580c">
     <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
     <script src="js/favicon-version.js"></script>
     <script src="js/pwa.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <title>ยืม-คืนอุปกรณ์ (IT)</title>
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
-    <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
+    <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
+    <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script src="js/vendor/qrcode.min.js"></script>
+    <script src="js/doc-print.js?v=20261022b"></script>
+    <script src="js/loan-print.js?v=20261023"></script>
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
-    <style>
-        body { font-family: 'Kanit', 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; }
-        html.dark body { background: #0f172a; color: #e2e8f0; }
-
-        /* ── Nav tab bar ── */
-        .borrow-nav-tabs { display: flex; margin-left: auto; border-bottom: none; overflow: visible; }
-        .borrow-nav-tabs .ptc-tab { height: 56px; padding: 0 18px; font-size: 13.5px; position: relative; }
-        @media (max-width: 520px) { .borrow-nav-tabs .ptc-tab { padding: 0 11px; font-size: 12px; } }
-        .tab-badge {
-            position: absolute; top: 10px; right: 4px;
-            min-width: 18px; height: 18px; border-radius: 9px;
-            background: #ef4444; color: #fff;
-            font-size: 10px; font-weight: 700; line-height: 18px;
-            text-align: center; padding: 0 4px; display: none;
-        }
-        .tab-badge.show { display: inline-block; }
-        .tab-badge.amber { background: #f59e0b; }
-
-        /* ── Main layout ── */
-        .borrow-main { flex: 1; padding: 20px 24px; max-width: 1240px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        @media (max-width: 640px) { .borrow-main { padding: 14px 14px; } }
-
-        /* ── Card grid / list ── */
-        .borrow-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-        .borrow-card-list { display: block; }
-        @media (max-width: 600px) { .borrow-card-grid { grid-template-columns: 1fr; gap: 14px; } }
-
-        /* ── Loan card ── */
-        .loan-card { display: flex; flex-direction: column; overflow: hidden; }
-        .loan-card-img { height: 156px; background: #f1f5f9; position: relative; overflow: hidden; }
-        html.dark .loan-card-img { background: #0f172a; }
-        .loan-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .loan-card-id-tag {
-            position: absolute; top: 8px; right: 8px;
-            background: rgba(0,0,0,.65); color: #fff;
-            font-size: 11px; font-family: 'Courier New', monospace;
-            padding: 2px 8px; border-radius: 5px; letter-spacing: .02em;
-        }
-        .loan-card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; }
-        .loan-card-title { font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        html.dark .loan-card-title { color: #f1f5f9; }
-        .loan-card-meta { display: flex; flex-direction: column; gap: 7px; flex: 1; margin-bottom: 12px; }
-        .loan-card-borrower { display: flex; align-items: center; gap: 9px; }
-        .loan-card-borrower img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.12); flex-shrink: 0; }
-        .loan-card-borrower-name { font-weight: 600; font-size: 13px; color: #334155; line-height: 1.3; }
-        .loan-card-borrower-dept { font-size: 11px; color: #94a3b8; }
-        html.dark .loan-card-borrower-name { color: #e2e8f0; }
-        .loan-card-info { font-size: 12.5px; color: #64748b; display: flex; align-items: flex-start; gap: 6px; }
-        .loan-card-info i { width: 16px; flex-shrink: 0; margin-top: 2px; }
-        .loan-card-info span { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .loan-card-actions { display: flex; gap: 8px; }
-        .loan-card-actions > * { flex: 1; justify-content: center; }
-
-        /* ── Extra button variants ── */
-        .ptc-btn-warning {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #f59e0b; color: #fff; border: none; border-radius: 8px;
-            padding: 7px 14px; font-size: 13px; font-family: inherit; font-weight: 600;
-            cursor: pointer; transition: background .12s; white-space: nowrap;
-        }
-        .ptc-btn-warning:hover { background: #d97706; }
-
-        /* ── Active loan summary ── */
-        .active-loan-summary { margin-bottom: 18px; }
-        .active-loan-item {
-            display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            border: 1px solid #f1f5f9; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px;
-        }
-        html.dark .active-loan-item { border-color: #1e293b; }
-        .active-loan-item-name { font-weight: 600; font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .active-loan-item-sub { font-size: 11px; color: #94a3b8; }
-        .active-loan-item-due { font-size: 11px; color: #64748b; white-space: nowrap; flex-shrink: 0; }
-        html.dark .active-loan-item-name { color: #e2e8f0; }
-
-        /* ── History filter bar ── */
-        .history-filters-bar { display: none; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; padding: 16px; }
-        .history-filters-bar.visible { display: flex; }
-        .filter-field { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
-        .filter-field.flex-1 { flex: 1; min-width: 200px; }
-        .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
-
-        /* ── Loading / empty states ── */
-        .loading-center { display: flex; justify-content: center; align-items: center; padding: 80px 0; color: #94a3b8; font-size: 26px; }
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: #94a3b8; gap: 10px; }
-        .empty-state i { font-size: 40px; }
-        .empty-state p { font-size: 14px; }
-
-        /* ── Signature pad ── */
-        .sig-area { border: 2px dashed #e2e8f0; border-radius: 10px; background: #fff; touch-action: none; overflow: hidden; }
-        html.dark .sig-area { border-color: #334155; background: #1e293b; }
-        .sig-area canvas { width: 100%; height: 160px; display: block; }
-
-        /* ── Loan preview box inside modal ── */
-        .loan-preview-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 12.5px; }
-        html.dark .loan-preview-box { background: #0f172a; border-color: #334155; }
-        .loan-preview-row { display: flex; gap: 8px; margin-bottom: 4px; line-height: 1.4; }
-        .loan-preview-lbl { color: #94a3b8; width: 90px; flex-shrink: 0; }
-        .loan-preview-val { color: #334155; font-weight: 500; }
-        html.dark .loan-preview-val { color: #e2e8f0; }
-
-        /* ── History detail inside modal ── */
-        .hist-det-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px; }
-        @media (max-width: 600px) { .hist-det-grid { grid-template-columns: 1fr; } }
-        .hist-det-asset-img { width: 100%; border-radius: 8px; border: 1px solid #e2e8f0; display: block; }
-        html.dark .hist-det-asset-img { border-color: #334155; }
-        .hist-det-name { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 4px; }
-        html.dark .hist-det-name { color: #f1f5f9; }
-        .hist-det-id { font-family: monospace; font-size: 12px; color: #94a3b8; margin: 0 0 14px; }
-        .hist-det-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-        html.dark .hist-det-info-grid { border-top-color: #1e293b; }
-        .hist-det-info-grid .span2 { grid-column: span 2; }
-        .hist-detail-label { font-size: 11px; color: #94a3b8; margin: 0 0 1px; }
-        .hist-detail-value { font-size: 13px; color: #334155; font-weight: 500; margin: 0; }
-        html.dark .hist-detail-value { color: #e2e8f0; }
-        .hist-det-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 600px) { .hist-det-sections { grid-template-columns: 1fr; } }
-        .hist-det-section { background: #f8fafc; border-radius: 8px; padding: 14px; }
-        html.dark .hist-det-section { background: #1e293b; }
-        .hist-det-section h5 { font-weight: 700; font-size: 13px; margin: 0 0 10px; display: flex; align-items: center; gap: 6px; color: #1e293b; }
-        html.dark .hist-det-section h5 { color: #f1f5f9; }
-
-        /* ── Focus ring on inputs ── */
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #2563eb !important;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.12) !important;
-        }
-
-        /* ── Scrollbar ── */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    </style>
+<style>
+/* ════ ยืม-คืนอุปกรณ์ (IT) — บอร์ด 4 ช่อง + หน้าส่งมอบ/รับคืน + ประวัติ · แพทเทิร์นเดียวกับ log.html · สีจาก token design-system ════ */
+body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
+.lg-tabs { display:flex; border:1px solid var(--ptc-border); border-radius:8px; overflow:hidden; margin-left:auto; }
+.lg-tabs button { height:34px; padding:0 14px; border:0; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.lg-tabs button.on { background:var(--ptc-text); color:var(--ptc-surface); }
+.lg-tabs .cnt { min-width:18px; height:18px; border-radius:9px; background:#dc2626; color:#fff; font-size:11px; display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
+.nb { height:34px; padding:0 12px; border:1px solid var(--ptc-border); border-radius:8px; display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12.5px; font-weight:700; color:var(--ptc-text-2); text-decoration:none; background:var(--ptc-surface); cursor:pointer; white-space:nowrap; }
+.wrap { max-width:1480px; margin:0 auto; padding:18px 16px 40px; }
+.card { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; }
+.btn { height:36px; padding:0 13px; border-radius:8px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-weight:700; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:7px; white-space:nowrap; text-decoration:none; }
+.btn:hover { border-color:var(--ptc-primary); }
+.btn.pri { background:var(--ptc-primary); border-color:var(--ptc-primary); color:#fff; }
+.btn.ok { background:#16a34a; border-color:#16a34a; color:#fff; }
+.btn.sm { height:30px; padding:0 10px; font-size:12px; }
+.btn.danger { color:#dc2626; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.muted { color:var(--ptc-text-muted); }
+.pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; color:var(--c, #64748b); background:color-mix(in srgb, var(--c, #64748b) 12%, transparent); }
+.chip { padding:6px 12px; border-radius:99px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.chip.on { border-color:var(--ptc-primary); background:var(--ptc-primary-light); color:var(--ptc-primary); }
+.av { width:22px; height:22px; border-radius:50%; background:var(--ptc-primary); color:#fff; font-size:9px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.empty { padding:30px 14px; text-align:center; color:var(--ptc-text-muted); font-size:13px; }
+.empty i { font-size:22px; display:block; margin-bottom:6px; opacity:.6; }
+/* KPI */
+.kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:14px; }
+.kpi { padding:12px 14px; text-align:left; font:inherit; color:inherit; }
+.kpi b { font-size:24px; font-weight:800; display:block; line-height:1.15; }
+.kpi span { font-size:12px; color:var(--ptc-text-muted); }
+.kpi.bad { background:#fef2f2; border-color:#fecaca; } .kpi.bad b { color:#dc2626; }
+html.dark .kpi.bad { background:rgba(220,38,38,.1); border-color:rgba(220,38,38,.35); }
+.fbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.fbar input[type=text] { flex:1; min-width:180px; height:36px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 12px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13px; }
+/* บอร์ด */
+.board { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; align-items:start; }
+.col { background:var(--ptc-surface-2); border:1px solid var(--ptc-border); border-radius:10px; padding:10px; min-width:0; }
+.col-h { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; padding:2px 4px 10px; }
+.col-h i.dot { width:8px; height:8px; border-radius:50%; background:var(--c); }
+.col-h .n { margin-left:auto; font-size:11.5px; font-weight:700; background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:99px; padding:0 8px; }
+.jc { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:9px; padding:10px 11px; margin-bottom:8px; cursor:pointer; display:block; min-width:0; }
+.jc:last-child { margin-bottom:0; }
+.jc:hover { border-color:var(--ptc-primary); }
+.jc.u3 { box-shadow:inset 3px 0 0 #dc2626; } .jc.u2 { box-shadow:inset 3px 0 0 #d97706; }
+.jc-top { display:flex; align-items:center; gap:6px; font-size:11.5px; min-width:0; }
+.jc-top .no { font-family:Consolas,monospace; font-weight:700; color:var(--ptc-primary); white-space:nowrap; }
+.jc-top .pill { margin-left:auto; }
+.jc h4 { font-size:13.5px; font-weight:700; margin:5px 0 3px; overflow-wrap:anywhere; }
+.jc-m { font-size:11.5px; color:var(--ptc-text-muted); display:flex; flex-wrap:wrap; gap:2px 10px; }
+.jc-f { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:11.5px; color:var(--ptc-text-2); flex-wrap:wrap; }
+.mtabs { display:none; }
+/* หน้าส่งมอบ / รับคืน */
+.ws { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:start; }
+.back { font-size:13px; color:var(--ptc-primary); font-weight:700; cursor:pointer; margin-bottom:10px; display:inline-flex; gap:6px; align-items:center; background:none; border:0; font-family:inherit; padding:0; }
+.ws-h { padding:16px 18px; border-bottom:1px solid var(--ptc-border); }
+.ws-h .no { font-family:Consolas,monospace; font-weight:700; color:var(--ptc-primary); }
+.ws-h h2 { font-size:19px; margin:6px 0 3px; overflow-wrap:anywhere; }
+.sec { padding:14px 18px; border-bottom:1px solid var(--ptc-border); }
+.sec:last-child { border-bottom:0; }
+.sec h4 { font-size:12px; font-weight:800; color:var(--ptc-text-2); letter-spacing:.03em; margin:0 0 8px; }
+.qa { display:grid; grid-template-columns:110px 1fr; gap:5px 12px; font-size:13px; }
+.qa span { color:var(--ptc-text-muted); } .qa b { font-weight:600; overflow-wrap:anywhere; }
+.acts { display:flex; gap:8px; flex-wrap:wrap; }
+.acts .btn { flex:1 1 150px; height:40px; }
+.cks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+.cks label { display:flex; gap:8px; align-items:center; border:1px solid var(--ptc-border); border-radius:8px; padding:8px 10px; font-size:13px; cursor:pointer; min-width:0; overflow-wrap:anywhere; }
+.cks label:has(input:checked) { border-color:#16a34a; background:#f0fdf4; }
+.cks label.miss { border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
+html.dark .cks label:has(input:checked) { background:rgba(22,163,74,.12); border-color:rgba(22,163,74,.5); }
+html.dark .cks label.miss { background:rgba(220,38,38,.1); border-color:rgba(220,38,38,.4); color:#fca5a5; }
+.add-it { display:flex; gap:6px; margin-top:8px; }
+.add-it input { flex:1; min-width:0; height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13px; }
+.opt { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.opt label { margin:0; border:1px solid var(--ptc-border); border-radius:8px; padding:9px 10px; cursor:pointer; font-weight:600; font-size:13px; display:flex; gap:7px; align-items:center; }
+.opt label:has(input:checked) { border-color:var(--ptc-primary); background:var(--ptc-primary-light); color:var(--ptc-primary); }
+.opt label.bad:has(input:checked) { border-color:#dc2626; background:#fef2f2; color:#dc2626; }
+html.dark .opt label.bad:has(input:checked) { background:rgba(220,38,38,.12); }
+.wipe { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:9px; border:1px solid #fde68a; background:#fffbeb; font-size:13px; cursor:pointer; }
+.wipe:has(input:checked) { border-color:#bbf7d0; background:#f0fdf4; }
+html.dark .wipe { background:rgba(217,119,6,.1); border-color:rgba(217,119,6,.35); } html.dark .wipe:has(input:checked) { background:rgba(22,163,74,.12); border-color:rgba(22,163,74,.45); }
+.wipe input { margin-top:3px; width:16px; height:16px; }
+.ta { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:9px 11px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13.5px; resize:vertical; }
+.sig { position:relative; border:1px dashed var(--ptc-border-strong, #cbd5e1); border-radius:9px; background:#fff; height:160px; touch-action:none; }
+.sig canvas { width:100%; height:100%; display:block; cursor:crosshair; }
+.sig .ph { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:13px; pointer-events:none; }
+.sig .clr { position:absolute; top:6px; right:6px; }
+.side .card { padding:14px 16px; margin-bottom:12px; }
+.side h4 { font-size:12px; font-weight:800; color:var(--ptc-text-2); letter-spacing:.03em; margin:0 0 10px; }
+.person { display:flex; gap:10px; align-items:center; }
+.person .av { width:36px; height:36px; font-size:12px; }
+.person b { display:block; font-size:13.5px; overflow-wrap:anywhere; } .person div > span { font-size:12px; color:var(--ptc-text-muted); }
+.hist { font-size:12.5px; }
+.hist div { display:grid; grid-template-columns:86px 1fr; gap:8px; padding:6px 0; border-top:1px solid var(--ptc-border); }
+.hist div:first-child { border-top:0; }
+.hist span { color:var(--ptc-text-muted); } .hist b { font-weight:500; overflow-wrap:anywhere; }
+.banner { padding:10px 12px; border-radius:9px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+.banner b { flex:1; min-width:200px; font-weight:600; }
+.banner.go { background:#eff6ff; border:1px solid #bfdbfe; } .banner.bad { background:#fef2f2; border:1px solid #fecaca; }
+html.dark .banner.go { background:rgba(37,99,235,.12); border-color:rgba(37,99,235,.35); } html.dark .banner.bad { background:rgba(220,38,38,.1); border-color:rgba(220,38,38,.35); }
+/* ประวัติ / เครื่อง */
+.tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.tbl th { text-align:left; font-size:11.5px; color:var(--ptc-text-muted); font-weight:700; padding:10px 12px; border-bottom:1px solid var(--ptc-border); white-space:nowrap; }
+.tbl td { padding:10px 12px; border-bottom:1px solid var(--ptc-border); vertical-align:top; }
+.tbl tbody tr.cl { cursor:pointer; } .tbl tbody tr.cl:hover { background:var(--ptc-surface-2); }
+.tbl .no { font-family:Consolas,monospace; font-weight:700; color:var(--ptc-primary); white-space:nowrap; }
+.fsel { height:36px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13px; }
+.pager { display:flex; align-items:center; gap:8px; padding:12px; font-size:12.5px; color:var(--ptc-text-muted); }
+.pager .sp { flex:1; }
+.tl { display:flex; gap:2px; min-width:140px; } .tl i { flex:1; height:6px; border-radius:2px; background:#bbf7d0; } .tl i.b { background:#fecaca; }
+html.dark .tl i { background:rgba(22,163,74,.45); } html.dark .tl i.b { background:rgba(220,38,38,.55); }
+@media (max-width:1180px) { .kpis { grid-template-columns:repeat(3,1fr); } .ws { grid-template-columns:minmax(0,1fr); } }
+@media (max-width:900px) {
+  .board { grid-template-columns:minmax(0,1fr); }
+  .board .col { display:none; } .board .col.show { display:block; }
+  .mtabs { display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; padding-bottom:2px; scrollbar-width:none; }
+  .mtabs .chip b { margin-left:4px; }
+  .tbl thead { display:none; }
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display:block; width:100%; box-sizing:border-box; }
+  .tbl tr { border-bottom:1px solid var(--ptc-border); padding:8px 0; }
+  .tbl td { border:0; padding:3px 14px; }
+}
+@media (max-width:640px) {
+  .kpis { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin-bottom:10px; }
+  .kpis::-webkit-scrollbar, .mtabs::-webkit-scrollbar { display:none; }
+  .kpi { flex:0 0 auto; min-width:84px; padding:8px 12px; }
+  .kpi b { font-size:19px; } .kpi span { font-size:11px; white-space:nowrap; }
+  .wrap { padding:12px 10px 30px; }
+  .lg-tabs { position:fixed; top:var(--lg-nav-h, 56px); left:0; right:0; z-index:90; border-radius:0; border-width:0 0 1px; margin:0; }
+  .lg-tabs button { flex:1; justify-content:center; height:44px; }
+  .wrap { padding-top:calc(44px + 12px) !important; }
+  .nb span, .ptc-nav-sub { display:none; }
+  .qa { grid-template-columns:90px 1fr; }
+  .cks, .opt { grid-template-columns:1fr; }
+}
+</style>
 </head>
-<body class="ptc-normalize ptc-unified-v1" data-page="loan">
-
+<body>
 <nav class="ptc-nav">
-    <a href="admin.html" class="nav-back" title="กลับ Admin"><i class="fas fa-arrow-left"></i></a>
+    <a href="index.html" class="nav-back" title="กลับหน้าแรก"><i class="fa fa-arrow-left"></i></a>
     <div class="ptc-nav-brand">
-        <div class="ptc-nav-icon"><i class="fas fa-hand-holding-box"></i></div>
-        <div>
-            <div class="ptc-nav-title">Loan Management</div>
-            <div class="ptc-nav-sub">จัดการการยืม-คืนอุปกรณ์</div>
-        </div>
+        <div class="ptc-nav-icon" style="background:#ea580c"><i class="fa fa-rotate"></i></div>
+        <div><div class="ptc-nav-title">ยืม-คืนอุปกรณ์</div><div class="ptc-nav-sub">อนุมัติ · ส่งมอบ · รับคืน</div></div>
     </div>
-    <div class="ptc-tabs borrow-nav-tabs">
-        <button class="ptc-tab active" id="tab-pending" onclick="switchTab('pending')">
-            รออนุมัติ
-            <span class="tab-badge" id="badge-pending">0</span>
-        </button>
-        <button class="ptc-tab" id="tab-active" onclick="switchTab('active')">
-            กำลังถูกยืม
-            <span class="tab-badge amber" id="badge-active">0</span>
-        </button>
-        <button class="ptc-tab" id="tab-history" onclick="switchTab('history')">ประวัติ</button>
+    <div class="lg-tabs">
+        <button id="t-board" onclick="tab('board')"><i class="fa fa-table-columns"></i>บอร์ด<span class="cnt" id="new-cnt" style="display:none">0</span></button>
+        <button id="t-hist" onclick="tab('hist')"><i class="fa fa-list"></i>ประวัติ</button>
+        <button id="t-eq" onclick="tab('eq')"><i class="fa fa-laptop"></i>เครื่อง</button>
     </div>
-    <div id="nav-user-area" style="margin-left:auto"></div>
+    <div id="nav-user-area"></div>
 </nav>
-<div style="display:flex;height:calc(100vh - 56px);overflow:hidden;">
-<aside id="ptc-sidebar"></aside>
-<main class="borrow-main" style="flex:1;overflow-y:auto;">
 
-    <!-- History Filters (hidden by default, shown when tab=history) -->
-    <div id="history-filters" class="ptc-card history-filters-bar">
-        <div class="filter-field flex-1">
-            <label class="ptc-label">ค้นหา</label>
-            <input type="text" id="hist-search" class="ptc-input" placeholder="ชื่ออุปกรณ์, ผู้ยืม, รหัส..." onkeyup="renderHistoryTable()">
-        </div>
-        <div class="filter-field">
-            <label class="ptc-label">วันที่เริ่ม</label>
-            <input type="date" id="hist-start" class="ptc-input" onchange="renderHistoryTable()">
-        </div>
-        <div class="filter-field">
-            <label class="ptc-label">ถึงวันที่</label>
-            <input type="date" id="hist-end" class="ptc-input" onchange="renderHistoryTable()">
-        </div>
-        <div class="filter-field">
-            <label class="ptc-label">สถานะ</label>
-            <select id="hist-status" class="ptc-input" onchange="renderHistoryTable()">
-                <option value="all">ทั้งหมด</option>
-                <option value="active">กำลังยืม</option>
-                <option value="overdue">เกินกำหนดคืน</option>
-                <option value="returned">คืนแล้ว</option>
-            </select>
-        </div>
-        <div class="filter-actions">
-            <button onclick="exportHistory()" class="ptc-btn-success"><i class="fas fa-file-excel"></i> Export</button>
-            <button onclick="clearAllHistory()" class="ptc-btn-danger"><i class="fas fa-trash-alt"></i> ล้างประวัติ</button>
-        </div>
-    </div>
-
-    <!-- Active Loan Summary (shown on pending/active tabs) -->
-    <div id="active-loan-summary" class="ptc-card active-loan-summary" style="display:none">
-        <div class="ptc-card-header">
-            <div class="ptc-card-title">
-                <i class="fas fa-list-check" style="color:#f59e0b;margin-right:6px"></i>รายการที่กำลังถูกยืม
-            </div>
-            <span id="active-loan-count-text" class="badge badge-yellow">0 รายการ</span>
-        </div>
-        <div style="padding:12px 16px">
-            <ul id="active-loan-list" style="list-style:none;margin:0;padding:0"></ul>
-        </div>
-    </div>
-
-    <!-- Main Content Area (cards or table) -->
-    <div id="content-area" class="borrow-card-grid"></div>
-
+<main class="wrap">
+    <section id="v-board">
+        <div class="kpis" id="kpis"></div>
+        <div class="fbar"><input type="text" id="q" placeholder="ค้นหาเลขที่ / ผู้ยืม / รหัสเครื่อง…" oninput="renderBoard()"></div>
+        <div class="mtabs" id="mtabs"></div>
+        <div class="board" id="board"></div>
+    </section>
+    <section id="v-ws" style="display:none"></section>
+    <section id="v-hist" style="display:none">
+        <div class="fbar"><input type="text" id="hq" placeholder="ค้นหาเลขที่ / ผู้ยืม / แผนก / รหัสเครื่อง…" oninput="clearTimeout(window._ht);window._ht=setTimeout(()=>loadHist(1),300)">
+            <select class="fsel" id="hs" onchange="loadHist(1)"><option value="">ทุกสถานะ</option><option value="requested">รออนุมัติ</option><option value="approved">รอรับของ</option><option value="active">กำลังยืม</option><option value="returned">คืนแล้ว</option><option value="rejected">ไม่อนุมัติ</option><option value="cancelled">ยกเลิก</option></select></div>
+        <div class="card" id="hist"></div>
+    </section>
+    <section id="v-eq" style="display:none"><div class="card" id="eq"></div>
+        <p class="muted" style="font-size:12px;margin-top:10px">เปิด/ปิดให้ยืม และของในชุด แก้ได้ที่หน้าทะเบียนทรัพย์สิน → แก้ไขเครื่อง (ช่อง "เปิดให้พนักงานยืมได้" / อุปกรณ์เสริม)</p></section>
 </main>
-</div><!-- end ptc shell -->
-
-<!-- ═══════════════════════════════════════════════
-     SIGNATURE / ACTION MODAL
-══════════════════════════════════════════════════ -->
-<div id="sigModal" class="ptc-modal" style="display:none">
-    <div class="ptc-modal-overlay" onclick="closeModal()"></div>
-    <div class="ptc-modal-dialog modal-sm">
-        <div class="ptc-modal-header">
-            <div class="ptc-modal-title" id="sigTitle">ยืนยัน</div>
-            <button class="ptc-modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="ptc-modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
-
-            <p id="sigDesc" style="font-size:13px;color:#64748b;margin:0">กรุณาเซ็นชื่อเพื่อยืนยัน</p>
-
-            <div id="loanDetailPreview" class="loan-preview-box" style="display:none">
-                <div class="loan-preview-row"><span class="loan-preview-lbl">ผู้ยืม:</span><span class="loan-preview-val" id="loan-detail-borrower">-</span></div>
-                <div class="loan-preview-row"><span class="loan-preview-lbl">แผนก:</span><span class="loan-preview-val" id="loan-detail-dept">-</span></div>
-                <div class="loan-preview-row"><span class="loan-preview-lbl">กำหนดคืน:</span><span class="loan-preview-val" id="loan-detail-due">-</span></div>
-                <div class="loan-preview-row"><span class="loan-preview-lbl">วัตถุประสงค์:</span><span class="loan-preview-val" id="loan-detail-purpose">-</span></div>
-            </div>
-
-            <div id="return-check-form" style="display:none;flex-direction:column;gap:12px">
-                <div>
-                    <label class="ptc-label">ผลตรวจสภาพก่อนคืน</label>
-                    <select id="return-condition" class="ptc-input">
-                        <option value="">-- เลือกผลตรวจสภาพ --</option>
-                        <option value="ปกติ">ปกติ</option>
-                        <option value="มีรอย/ตำหนิเล็กน้อย">มีรอย/ตำหนิเล็กน้อย</option>
-                        <option value="ชำรุด">ชำรุด</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="ptc-label">รายละเอียดการตรวจสภาพ</label>
-                    <textarea id="return-notes" rows="3" class="ptc-input" style="resize:vertical" placeholder="ระบุจุดที่พบ, อุปกรณ์ครบหรือไม่, สภาพการใช้งาน..."></textarea>
-                </div>
-            </div>
-
-            <div id="signature-area" class="sig-area">
-                <canvas id="signature-pad"></canvas>
-            </div>
-            <div id="signature-actions" style="display:flex;justify-content:flex-end">
-                <button onclick="clearSig()" style="font-size:12px;color:#ef4444;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0">ล้างลายเซ็น</button>
-            </div>
-        </div>
-        <div class="ptc-modal-footer">
-            <button id="btn-cancel-modal" onclick="closeModal()" class="ptc-ghost">ยกเลิก</button>
-            <button onclick="submitAction()" id="btn-confirm" class="ptc-btn"><i class="fas fa-check"></i> ยืนยัน</button>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════
-     HISTORY DETAIL MODAL
-══════════════════════════════════════════════════ -->
-<div id="historyDetailModal" class="ptc-modal" style="display:none">
-    <div class="ptc-modal-overlay" onclick="closeHistoryDetailsModal()"></div>
-    <div class="ptc-modal-dialog modal-lg" style="max-height:90vh;display:flex;flex-direction:column">
-        <div class="ptc-modal-header">
-            <div class="ptc-modal-title">รายละเอียดการยืม-คืน</div>
-            <button class="ptc-modal-close" onclick="closeHistoryDetailsModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="historyDetailBody" class="ptc-modal-body" style="padding:24px;overflow-y:auto;flex:1"></div>
-        <div class="ptc-modal-footer">
-            <button onclick="closeHistoryDetailsModal()" class="ptc-ghost">ปิด</button>
-        </div>
-    </div>
-</div>
 
 <script>
-    let currentTab = 'pending';
-    let currentItem = null;
-    let signaturePad = null;
-    let allHistoryItems = [];
-    let currentLoanItems = [];
-    const api = 'api.php';
-    let _cachedSession = null;   // session fetched once, reused across tab switches
-    let _loadSeq = 0;            // increment on each loadData() call; stale calls bail early
+const gid = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDays = (s, n) => { const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return ymd(d); };
+const thD = s => s ? new Date(String(s).slice(0, 10) + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) : '';
+const thDT = s => s ? new Date(String(s).replace(' ', 'T')).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+const initials = n => String(n || '').replace(/^(Mr\.?|Mrs\.?|Ms\.?|นาย|นางสาว|นาง)\s*/i, '').split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '?';
+const STATUS_C = { requested: '#d97706', approved: '#2563eb', active: '#ea580c', returned: '#16a34a', rejected: '#64748b', cancelled: '#64748b' };
+const COND = { ok: 'ปกติ', minor: 'มีรอยเล็กน้อย', broken: 'เสีย ต้องซ่อม' };
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initSignaturePad();
-        loadData();
-        setInterval(updateBadgeCount, 10000);
-    });
+let rows = [], today = ymd(new Date()), util = null, mcol = 'new', cur = null, sig = null, busy = false;
 
-    function initSignaturePad() {
-        const canvas = document.getElementById('signature-pad');
-        signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+async function api(p) { const j = await (await fetch('api.php?' + new URLSearchParams(p), { cache: 'no-store' })).json(); if (j.status !== 'success') throw new Error(j.message || 'โหลดไม่สำเร็จ'); return j; }
+async function post(o) { const fd = new FormData(); Object.entries(o).forEach(([k, v]) => fd.append(k, v ?? '')); const j = await (await fetch('api.php', { method: 'POST', body: fd })).json(); if (j.status !== 'success') throw new Error(j.message || 'ไม่สำเร็จ'); return j; }
+
+// ── บอร์ด ──
+function colOf(l) {
+    if (l.status === 'requested') return 'new';
+    if (l.status === 'approved') return 'out';
+    if (l.status === 'active') return l.extend_status === 'pending' ? 'new' : 'act';
+    return 'done';
+}
+const COLS = [{ k: 'new', t: 'คำขอใหม่', c: '#d97706' }, { k: 'out', t: 'รอรับของ', c: '#2563eb' }, { k: 'act', t: 'กำลังยืม', c: '#ea580c' }, { k: 'done', t: 'ปิดวันนี้', c: '#16a34a' }];
+function renderKpis() {
+    const n = s => rows.filter(s).length;
+    const k = [
+        { b: n(l => l.status === 'requested' || l.extend_status === 'pending' && l.status === 'active'), s: 'รอตัดสินใจ' },
+        { b: n(l => l.status === 'approved' && l.start_date <= today), s: 'ต้องส่งมอบวันนี้' },
+        { b: n(l => l.status === 'active'), s: 'กำลังยืม' },
+        { b: n(l => l.overdue_days > 0), s: 'เกินกำหนดคืน', bad: true },
+        { b: util == null ? '-' : util + '%', s: 'ใช้งานเครื่อง 30 วัน' },
+    ];
+    gid('kpis').innerHTML = k.map(x => `<div class="card kpi ${x.bad && x.b ? 'bad' : ''}"><b>${x.b}</b><span>${x.s}</span></div>`).join('');
+    const c = k[0].b; gid('new-cnt').textContent = c; gid('new-cnt').style.display = c ? '' : 'none';
+}
+function card(l) {
+    const due = l.status === 'active' ? (l.overdue_days ? `<span class="pill" style="--c:#dc2626">เกิน ${l.overdue_days} วัน</span>` : !l.end_date ? '<span class="pill">ไม่มีกำหนด</span>' : `<span class="pill" style="--c:${l.days_left <= 1 ? '#d97706' : '#16a34a'}">${l.days_left === 0 ? 'คืนวันนี้' : 'อีก ' + l.days_left + ' วัน'}</span>`)
+        : l.status === 'approved' ? `<span class="pill" style="--c:${l.start_date <= today ? '#2563eb' : '#64748b'}">${l.start_date <= today ? 'รับได้วันนี้' : 'รับ ' + thD(l.start_date)}</span>`
+        : l.status === 'requested' ? `<span class="pill" style="--c:#d97706">ขอยืม</span>` : `<span class="pill" style="--c:${STATUS_C[l.status]}">${esc(l.status_th)}</span>`;
+    const ext = l.extend_status === 'pending' && l.status === 'active' ? `<span class="pill" style="--c:#2563eb">ขอขยายถึง ${thD(l.extend_to)}</span>` : '';
+    return `<div class="jc ${l.overdue_days ? 'u3' : (l.status === 'approved' && l.start_date <= today) || ext ? 'u2' : ''}" onclick="openWs(${l.id})">
+        <div class="jc-top"><span class="no">${esc(l.code)}</span>${ext || due}</div>
+        <h4>${esc(l.equipment_name)}</h4>
+        <div class="jc-m"><span>${esc(l.equipment_id)}</span><span>${thD(l.start_date)}${l.end_date ? '–' + thD(l.end_date) : ' · ไม่มีกำหนด'}</span></div>
+        <div class="jc-f"><span class="av">${esc(initials(l.borrower_name))}</span>${esc(l.borrower_name)}<span class="muted">${esc(l.department || '')}</span></div></div>`;
+}
+function renderBoard() {
+    const q = gid('q').value.trim().toLowerCase();
+    const list = rows.filter(l => !q || [l.code, l.borrower_name, l.department, l.equipment_id, l.equipment_name].join(' ').toLowerCase().includes(q));
+    const by = k => list.filter(l => colOf(l) === k);
+    gid('mtabs').innerHTML = COLS.map(c => `<button class="chip ${mcol === c.k ? 'on' : ''}" onclick="mcol='${c.k}';renderBoard()">${c.t}<b>${by(c.k).length}</b></button>`).join('');
+    gid('board').innerHTML = COLS.map(c => { const it = by(c.k); return `<div class="col ${mcol === c.k ? 'show' : ''}" style="--c:${c.c}"><div class="col-h"><i class="dot"></i>${c.t}<span class="n">${it.length}</span></div>
+        ${it.map(card).join('') || '<div class="empty" style="padding:18px 8px">ว่าง</div>'}</div>`; }).join('');
+}
+async function loadBoard() {
+    try { const j = await api({ action: 'loan_board' }); rows = j.data || []; today = j.today || today; util = j.util; renderKpis(); renderBoard(); }
+    catch (e) { gid('board').innerHTML = `<div class="card empty" style="grid-column:1/-1"><i class="fa fa-triangle-exclamation"></i>${esc(e.message)}</div>`; }
+}
+
+// ── หน้าส่งมอบ / รับคืน ──
+async function openWs(id) {
+    try { const j = await api({ action: 'loan_get', id }); cur = j; } catch (e) { return ptcAlert('error', 'เปิดไม่ได้', e.message); }
+    tab('ws'); renderWs();
+    try { const u = new URL(location.href); u.searchParams.set('id', id); history.replaceState(null, '', u); } catch (_) {}
+}
+function itemsChecklist(list, name) {
+    return `<div class="cks" id="cks">${list.map((n, i) => `<label><input type="checkbox" name="${name}" value="${esc(n)}" checked onchange="this.parentNode.classList.toggle('miss',!this.checked)"> ${esc(n)}</label>`).join('')
+        || '<span class="muted" style="font-size:12.5px">เครื่องนี้ไม่ได้บันทึกของในชุด — เพิ่มได้ด้านล่าง</span>'}</div>
+        <div class="add-it"><input id="add-it" placeholder="เพิ่มรายการ เช่น สายชาร์จ, เมาส์" onkeydown="if(event.key==='Enter'){event.preventDefault();addItem('${name}')}"><button class="btn sm" type="button" onclick="addItem('${name}')"><i class="fa fa-plus"></i> เพิ่ม</button></div>`;
+}
+function addItem(name) {
+    const v = gid('add-it').value.trim(); if (!v) return;
+    const box = gid('cks'); if (!box.querySelector('input')) box.innerHTML = '';
+    box.insertAdjacentHTML('beforeend', `<label><input type="checkbox" name="${name}" value="${esc(v)}" checked onchange="this.parentNode.classList.toggle('miss',!this.checked)"> ${esc(v)}</label>`);
+    gid('add-it').value = '';
+}
+const readItems = name => [...document.querySelectorAll(`input[name="${name}"]`)].map(i => ({ name: i.value, ok: i.checked }));
+function sigBox(label) { return `<h4 style="margin-top:14px">${label}</h4><div class="sig" id="sig"><canvas></canvas><span class="ph">เซ็นชื่อตรงนี้ (นิ้ว / เมาส์)</span><button class="btn sm clr" type="button" onclick="sig.clear()">ล้าง</button></div>`; }
+function mountSig() {
+    const box = gid('sig'); if (!box) return (sig = null);
+    const cv = box.querySelector('canvas'), ph = box.querySelector('.ph'), r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr); ctx.lineWidth = 2.2; ctx.lineCap = ctx.lineJoin = 'round'; ctx.strokeStyle = '#0f172a';
+    let draw = false, used = false, last = null;
+    const pt = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+    cv.onpointerdown = e => { draw = true; last = pt(e); cv.setPointerCapture(e.pointerId); };
+    cv.onpointermove = e => { if (!draw) return; const p = pt(e); ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(...p); ctx.stroke(); last = p; if (!used) { used = true; ph.style.display = 'none'; } };
+    cv.onpointerup = cv.onpointercancel = () => { draw = false; };
+    sig = { empty: () => !used, data: () => cv.toDataURL('image/png'), clear: () => { ctx.clearRect(0, 0, cv.width, cv.height); used = false; ph.style.display = ''; } };
+}
+function renderWs() {
+    const l = cur.loan, acc = cur.accessories || [];
+    const info = [['ผู้ยืม', l.borrower_name], ['แผนก', l.department], ['ติดต่อ', l.contact || '-'], ['ช่วงยืม', thD(l.start_date) + ' – ' + (l.end_date ? thD(l.end_date) : 'ไม่มีกำหนดคืน')],
+        ['ใช้ทำอะไร', l.purpose || '-'], ['ขอเมื่อ', thDT(l.created_at)]];
+    if (l.decided_by) info.push([l.status === 'rejected' || l.status === 'cancelled' ? 'ปิดโดย' : 'อนุมัติโดย', `${l.decided_by} · ${thDT(l.decided_at)}`]);
+    if (l.handover_by) info.push(['ส่งมอบโดย', `${l.handover_by} · ${thDT(l.handover_at)}`]);
+    if (l.return_by) info.push(['รับคืนโดย', `${l.return_by} · ${thDT(l.return_at)}`]);
+    let act = '';
+    if (l.status === 'requested') {
+        act = `<div class="sec"><h4>ตัดสินใจ</h4>${cur.asset_status && !['ใช้งานปกติ', 'ถูกยืม'].includes(cur.asset_status) ? `<div class="banner bad"><i class="fa fa-triangle-exclamation" style="color:#dc2626"></i><b>สถานะเครื่องตอนนี้: ${esc(cur.asset_status)}</b></div>` : ''}
+            <div class="acts"><button class="btn ok" onclick="decide('approve')"><i class="fa fa-check"></i> อนุมัติ</button><button class="btn danger" onclick="decide('reject')"><i class="fa fa-xmark"></i> ไม่อนุมัติ</button></div></div>`;
+    } else if (l.status === 'approved') {
+        act = `<div class="sec"><h4>ส่งมอบ — เช็กของในชุดต่อหน้าผู้ยืม</h4>${l.start_date > today ? `<div class="banner go"><i class="fa fa-calendar" style="color:#2563eb"></i><b>นัดรับ ${thD(l.start_date)} — ส่งมอบก่อนวันนัดได้ถ้าเครื่องว่าง</b></div>` : ''}
+            ${itemsChecklist(acc, 'out')}${sigBox('ลายเซ็นผู้รับของ — ' + esc(l.borrower_name))}
+            <div class="acts" style="margin-top:12px"><button class="btn pri" id="go" onclick="handover()"><i class="fa fa-hand-holding"></i> ยืนยันส่งมอบ</button><button class="btn danger" onclick="cancelLoan()">ยกเลิกคำขอ</button></div></div>`;
+    } else if (l.status === 'active') {
+        const ext = l.extend_status === 'pending' ? `<div class="banner go"><i class="fa fa-clock-rotate-left" style="color:#2563eb"></i><b>ขอขยายเวลาถึง ${thD(l.extend_to)}${l.extend_reason ? ' — ' + esc(l.extend_reason) : ''}</b>
+            <button class="btn sm ok" onclick="extDecide('approve')">อนุมัติ</button><button class="btn sm danger" onclick="extDecide('reject')">ไม่อนุมัติ</button></div>` : '';
+        const out = (l.handover_items || []).filter(i => i.ok).map(i => i.name);
+        act = `<div class="sec">${ext}${l.overdue_days ? `<div class="banner bad"><i class="fa fa-triangle-exclamation" style="color:#dc2626"></i><b>เกินกำหนดคืน ${l.overdue_days} วัน</b></div>` : ''}
+            <h4>รับคืน — เช็กของที่ส่งมอบไป</h4>${itemsChecklist(out, 'in')}
+            <h4 style="margin-top:14px">สภาพเครื่อง</h4><div class="opt">${Object.entries(COND).map(([k, t]) => `<label class="${k === 'broken' ? 'bad' : ''}"><input type="radio" name="cond" value="${k}" ${k === 'ok' ? 'checked' : ''}> ${t}</label>`).join('')}</div>
+            <h4 style="margin-top:14px">ล้างข้อมูล (TISAX)</h4><label class="wipe"><input type="checkbox" id="wiped"><span><b>ล้างข้อมูลของผู้ยืมแล้ว</b><br><span class="muted" style="font-size:12px">ออกจากบัญชี/อีเมล ลบไฟล์ในเครื่อง ล้างประวัติเบราว์เซอร์ ก่อนเครื่องกลับเข้าคลัง</span></span></label>
+            <h4 style="margin-top:14px">หมายเหตุ</h4><textarea class="ta" id="rnotes" rows="2" placeholder="จำเป็นถ้ามีของขาด หรือเครื่องมีรอย/เสีย"></textarea>
+            ${sigBox('ลายเซ็นผู้คืน — ' + esc(l.borrower_name))}
+            <div class="acts" style="margin-top:12px"><button class="btn ok" id="go" onclick="doReturn()"><i class="fa fa-box-archive"></i> ยืนยันรับคืน</button></div></div>`;
+    } else if (l.status === 'returned') {
+        act = `<div class="sec"><h4>ผลการรับคืน</h4><div class="qa"><span>สภาพ</span><b>${esc(COND[l.return_condition] || '-')}</b><span>ล้างข้อมูล</span><b>${+l.wiped ? '✓ ล้างแล้ว' : '-'}</b>${l.return_notes ? `<span>หมายเหตุ</span><b>${esc(l.return_notes)}</b>` : ''}</div>
+            ${l.return_condition === 'broken' ? `<div class="acts" style="margin-top:12px"><a class="btn" href="request.html?asset_id=${encodeURIComponent(l.equipment_id)}"><i class="fa fa-wrench"></i> เปิดงานซ่อมเครื่องนี้</a></div>` : ''}</div>`;
+    } else if (l.reject_reason) act = `<div class="sec"><h4>เหตุผล</h4><p style="margin:0;font-size:13px">${esc(l.reject_reason)}</p></div>`;
+    const showItems = (t, list) => list.length ? `<div class="sec"><h4>${t}</h4><div style="display:flex;gap:6px;flex-wrap:wrap">${list.map(i => `<span class="pill" style="--c:${i.ok ? '#16a34a' : '#dc2626'}">${i.ok ? '✓' : '✗'} ${esc(i.name)}</span>`).join('')}</div></div>` : '';
+    gid('v-ws').innerHTML = `<button class="back" onclick="tab('board')"><i class="fa fa-arrow-left"></i> กลับบอร์ด</button>
+    <div class="ws"><div class="card">
+        <div class="ws-h"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="no">${esc(l.code)}</span><span class="pill" style="--c:${l.overdue_days ? '#dc2626' : STATUS_C[l.status]}">${l.overdue_days ? 'เกินกำหนด' : esc(l.status_th)}</span>
+            <button class="btn sm" style="margin-left:auto" onclick="LoanPrint.preview(cur.loan)"><i class="fa fa-print"></i> ใบยืม-คืน</button></div>
+            <h2>${esc(l.equipment_name)}</h2><span class="muted" style="font-size:12.5px">${esc(l.equipment_id)}${l.asset_company ? ' · ' + esc(l.asset_company) : ''}</span></div>
+        <div class="sec"><div class="qa">${info.map(([a, b]) => `<span>${a}</span><b>${esc(b)}</b>`).join('')}</div></div>
+        ${l.status === 'returned' ? showItems('ของตอนส่งมอบ', l.handover_items) + showItems('ของตอนรับคืน', l.return_items) : l.status === 'active' ? '' : ''}
+        ${act}</div>
+    <div class="side"><div class="card"><h4>ผู้ยืม</h4><div class="person"><span class="av">${esc(initials(l.borrower_name))}</span><div><b>${esc(l.borrower_name)}</b><span>${esc(l.department || '')}${l.borrower_company ? ' · ' + esc(l.borrower_company) : ''}</span></div></div></div>
+        <div class="card"><h4>ประวัติยืมเครื่องนี้</h4><div class="hist">${(cur.history || []).map(h => `<div><span>${thD(h.start_date)}</span><b>${esc(h.borrower_name)} · ${esc(LOAN_TH[h.status] || h.status)}${h.return_condition && h.return_condition !== 'ok' ? ' · ' + esc(COND[h.return_condition] || '') : ''}</b></div>`).join('') || '<span class="muted">ยังไม่เคยมีคนยืม</span>'}</div></div></div></div>`;
+    mountSig();
+}
+const LOAN_TH = { requested: 'รออนุมัติ', approved: 'รอรับของ', active: 'กำลังยืม', returned: 'คืนแล้ว', rejected: 'ไม่อนุมัติ', cancelled: 'ยกเลิก' };
+async function refreshWs(msg) { ptcToast('success', msg); await loadBoard(); await openWs(cur.loan.id); }
+async function decide(d) {
+    let reason = '';
+    if (d === 'reject') {
+        const { value, isConfirmed } = await ptcSwal().fire({ title: 'ไม่อนุมัติ', input: 'text', inputPlaceholder: 'เหตุผล (ผู้ยืมจะเห็น)', showCancelButton: true, confirmButtonText: 'ไม่อนุมัติ', cancelButtonText: 'กลับ', inputValidator: v => !v.trim() && 'ใส่เหตุผล' });
+        if (!isConfirmed) return; reason = value.trim();
     }
+    try { await post({ action: 'loan_decide', id: cur.loan.id, decision: d, reason }); refreshWs(d === 'approve' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติแล้ว'); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+}
+async function extDecide(d) {
+    try { await post({ action: 'loan_extend_decide', id: cur.loan.id, decision: d }); refreshWs(d === 'approve' ? 'ขยายเวลาแล้ว' : 'ไม่อนุมัติขยายเวลา'); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+}
+async function cancelLoan() {
+    const { value, isConfirmed } = await ptcSwal().fire({ title: 'ยกเลิกคำขอนี้?', input: 'text', inputPlaceholder: 'เหตุผล เช่น ผู้ยืมไม่มารับ', showCancelButton: true, confirmButtonText: 'ยกเลิกคำขอ', cancelButtonText: 'กลับ' });
+    if (!isConfirmed) return;
+    try { await post({ action: 'loan_cancel', id: cur.loan.id, reason: (value || '').trim() || 'ยกเลิกโดย IT' }); refreshWs('ยกเลิกแล้ว'); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+}
+async function handover() {
+    if (busy) return;
+    if (!sig || sig.empty()) return ptcAlert('warning', 'ยังไม่ได้เซ็น', 'ให้ผู้ยืมเซ็นรับของก่อน');
+    busy = true; gid('go').disabled = true;
+    try {
+        await post({ action: 'loan_handover', id: cur.loan.id, items: JSON.stringify(readItems('out')), signature: sig.data() });
+        await loadBoard(); await openWs(cur.loan.id);
+        const { isConfirmed } = await ptcSwal().fire({ icon: 'success', title: 'ส่งมอบแล้ว', text: 'พิมพ์ใบยืมให้ผู้ยืมเก็บไว้ไหม', showCancelButton: true, confirmButtonText: 'พิมพ์ใบยืม', cancelButtonText: 'ไม่พิมพ์' });
+        if (isConfirmed) LoanPrint.preview(cur.loan);
+    } catch (e) { ptcAlert('error', 'ส่งมอบไม่สำเร็จ', e.message); }
+    finally { busy = false; if (gid('go')) gid('go').disabled = false; }
+}
+async function doReturn() {
+    if (busy) return;
+    const items = readItems('in'), miss = items.filter(i => !i.ok).map(i => i.name), notes = gid('rnotes').value.trim(), cond = document.querySelector('input[name=cond]:checked')?.value;
+    if (!gid('wiped').checked) return ptcAlert('warning', 'ยังไม่ได้ล้างข้อมูล', 'ต้องล้างข้อมูลของผู้ยืมก่อนรับคืน (TISAX)');
+    if (miss.length && !notes) return ptcAlert('warning', 'ของขาด: ' + miss.join(', '), 'บันทึกหมายเหตุด้วยว่าขาดเพราะอะไร');
+    if (cond !== 'ok' && !notes) return ptcAlert('warning', 'บอกอาการด้วย', 'เครื่องมีรอย/เสีย — ใส่หมายเหตุว่าเป็นอะไร');
+    if (!sig || sig.empty()) return ptcAlert('warning', 'ยังไม่ได้เซ็น', 'ให้ผู้คืนเซ็นก่อน');
+    busy = true; gid('go').disabled = true;
+    try {
+        const j = await post({ action: 'loan_return', id: cur.loan.id, items: JSON.stringify(items), condition: cond, wiped: 1, notes, signature: sig.data() });
+        await loadBoard(); await openWs(cur.loan.id);
+        if (j.broken) {
+            const { isConfirmed } = await ptcSwal().fire({ icon: 'warning', title: 'รับคืนแล้ว — เครื่องเสีย', text: 'เครื่องถูกตั้งเป็น "ชำรุด" ยืมต่อไม่ได้จนกว่าจะซ่อม · เปิดงานซ่อมเลยไหม', showCancelButton: true, confirmButtonText: 'เปิดงานซ่อม', cancelButtonText: 'ภายหลัง' });
+            if (isConfirmed) location.href = 'request.html?asset_id=' + encodeURIComponent(cur.loan.equipment_id);
+        } else ptcToast('success', 'รับคืนแล้ว', 'เครื่องกลับเข้าคลังพร้อมให้ยืม');
+    } catch (e) { ptcAlert('error', 'รับคืนไม่สำเร็จ', e.message); }
+    finally { busy = false; if (gid('go')) gid('go').disabled = false; }
+}
 
-    function resizeCanvas() {
-        const canvas = document.getElementById('signature-pad');
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext('2d').scale(ratio, ratio);
-    }
+// ── ประวัติ ──
+async function loadHist(page) {
+    try {
+        const j = await api({ action: 'loan_history', q: gid('hq').value.trim(), status: gid('hs').value, page });
+        gid('hist').innerHTML = j.data.length ? `<table class="tbl"><thead><tr><th>เลขที่</th><th>อุปกรณ์</th><th>ผู้ยืม</th><th>ช่วงยืม</th><th>สถานะ</th></tr></thead><tbody>
+            ${j.data.map(l => `<tr class="cl" onclick="openWs(${l.id})"><td class="no">${esc(l.code)}</td><td><b style="font-weight:600">${esc(l.equipment_name)}</b><br><span class="muted" style="font-size:12px">${esc(l.equipment_id)}</span></td>
+                <td>${esc(l.borrower_name)}<br><span class="muted" style="font-size:12px">${esc(l.department || '')}</span></td><td>${thD(l.start_date)} – ${l.end_date ? thD(l.end_date) : 'ไม่มีกำหนด'}</td>
+                <td><span class="pill" style="--c:${l.overdue_days ? '#dc2626' : STATUS_C[l.status]}">${l.overdue_days ? 'เกินกำหนด' : esc(l.status_th)}</span>${l.return_condition && l.return_condition !== 'ok' ? `<br><span class="muted" style="font-size:12px">${esc(COND[l.return_condition])}</span>` : ''}</td></tr>`).join('')}</tbody></table>
+            <div class="pager"><span>ทั้งหมด ${j.total} รายการ</span><span class="sp"></span><button class="btn sm" ${page <= 1 ? 'disabled' : ''} onclick="loadHist(${page - 1})">‹</button><span>${page} / ${j.pages}</span><button class="btn sm" ${page >= j.pages ? 'disabled' : ''} onclick="loadHist(${page + 1})">›</button></div>`
+            : '<div class="empty"><i class="fa fa-inbox"></i>ไม่พบรายการ</div>';
+    } catch (e) { gid('hist').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
 
-    function hasValidDate(value) {
-        if (!value) return false;
-        const raw = String(value).trim().toLowerCase();
-        return raw && raw !== 'null' && raw !== '0000-00-00' && raw !== '0000-00-00 00:00:00';
-    }
+// ── เครื่องให้ยืม ──
+async function loadEq() {
+    try {
+        const j = await api({ action: 'loan_catalog' }), t = j.today || today;
+        const busyOn = (it, d) => it.bookings.some(b => b.from <= d && (!b.to || b.to >= d));
+        gid('eq').innerHTML = j.items.length ? `<table class="tbl"><thead><tr><th>รหัส</th><th>อุปกรณ์</th><th>สถานะเครื่อง</th><th>14 วันข้างหน้า</th><th>ของในชุด</th></tr></thead><tbody>
+            ${j.items.map(i => `<tr><td class="no">${esc(i.equipment_id)}</td><td><b style="font-weight:600">${esc(i.name)}</b><br><span class="muted" style="font-size:12px">${esc(i.category)}${i.company ? ' · ' + esc(i.company) : ''}</span></td>
+                <td><span class="pill" style="--c:${i.blocked ? '#dc2626' : i.status === 'ถูกยืม' ? '#ea580c' : '#16a34a'}">${esc(i.status)}</span></td>
+                <td><div class="tl">${Array.from({ length: 14 }, (_, n) => `<i class="${busyOn(i, addDays(t, n)) ? 'b' : ''}" title="${thD(addDays(t, n))}"></i>`).join('')}</div></td>
+                <td style="font-size:12px">${esc(i.accessories.join(', ') || '-')}</td></tr>`).join('')}</tbody></table>`
+            : '<div class="empty"><i class="fa fa-box-open"></i>ยังไม่มีเครื่องที่เปิดให้ยืม — ตั้ง "ให้ยืมได้" ที่หน้าทะเบียนทรัพย์สิน</div>';
+    } catch (e) { gid('eq').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
 
-    function toDateOnly(value) {
-        if (!hasValidDate(value)) return '';
-        return String(value).split(' ')[0];
-    }
-
-    function getHistoryStatusMeta(item) {
-        const isReturned = hasValidDate(item.return_date);
-        const expectedReturnDate = toDateOnly(item.expected_return_date);
-        const expectedDateObj = expectedReturnDate ? new Date(`${expectedReturnDate}T00:00:00`) : null;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const isOverdue = !isReturned && !!expectedDateObj && expectedDateObj < today;
-        return { isReturned, isOverdue, expectedReturnDate };
-    }
-
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    function switchTab(tab) {
-        currentTab = tab;
-        ['pending', 'active', 'history'].forEach(t => {
-            const el = document.getElementById('tab-' + t);
-            if (el) el.classList.toggle('active', t === tab);
-        });
-
-        const filterDiv = document.getElementById('history-filters');
-        const contentArea = document.getElementById('content-area');
-        const summary = document.getElementById('active-loan-summary');
-
-        if (tab === 'history') {
-            filterDiv.classList.add('visible');
-            contentArea.className = 'borrow-card-list';
-            if (summary) summary.style.display = 'none';
-        } else {
-            filterDiv.classList.remove('visible');
-            contentArea.className = 'borrow-card-grid';
-            if (summary) summary.style.display = '';
-        }
-        loadData();
-    }
-
-    function setBadgeValue(elId, count) {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        el.textContent = count;
-        el.classList.toggle('show', count > 0);
-    }
-
-    function setLoanBadgesAndSummary(items) {
-        if (!Array.isArray(items)) return;
-        const pendingItems = items.filter(i => i.loan_status === 'Pending');
-        const activeItems = items.filter(i => i.loan_status === 'Active');
-        setBadgeValue('badge-pending', pendingItems.length);
-        setBadgeValue('badge-active', activeItems.length);
-
-        const summary = document.getElementById('active-loan-summary');
-        const countText = document.getElementById('active-loan-count-text');
-        const listEl = document.getElementById('active-loan-list');
-        if (!summary || !countText || !listEl) return;
-        countText.textContent = `${activeItems.length} รายการ`;
-        if (currentTab === 'history') {
-            summary.style.display = 'none';
-            return;
-        }
-        summary.style.display = '';
-        if (activeItems.length === 0) {
-            listEl.innerHTML = `<li style="color:#94a3b8;font-size:13px;padding:4px 0">ตอนนี้ไม่มีรายการที่กำลังถูกยืม</li>`;
-            return;
-        }
-        const previewItems = activeItems.slice(0, 5);
-        listEl.innerHTML = previewItems.map(i => {
-            const dueText = hasValidDate(i.return_date)
-                ? new Date(`${toDateOnly(i.return_date)}T00:00:00`).toLocaleDateString('th-TH')
-                : 'ไม่มีกำหนดคืน';
-            return `<li class="active-loan-item">
-                <div style="min-width:0;flex:1">
-                    <div class="active-loan-item-name">${escapeHtml(i.asset_name || '-')}</div>
-                    <div class="active-loan-item-sub">${escapeHtml(i.equipment_id || '-')} · ${escapeHtml(i.borrower_name || '-')}</div>
-                </div>
-                <div class="active-loan-item-due">คืน ${dueText}</div>
-            </li>`;
-        }).join('') + (activeItems.length > 5 ? `<li style="font-size:12px;color:#94a3b8;padding:4px 0">และอีก ${activeItems.length - 5} รายการ</li>` : '');
-    }
-
-    async function updateBadgeCount() {
-        try {
-            const sess = await (await fetch(`${api}?action=check_session`)).json();
-            if (!sess?.loggedin) return;
-            let companyParam = sess.company || '';
-            if (sess.role === 'admin') companyParam = 'All';
-            const res = await fetch(`${api}?action=getLoanRequests&company=${encodeURIComponent(companyParam)}&t=${Date.now()}`);
-            const items = await res.json();
-            setLoanBadgesAndSummary(items);
-        } catch(e) {}
-    }
-
-    async function loadData() {
-        const seq = ++_loadSeq;
-        const area = document.getElementById('content-area');
-        area.innerHTML = '<div class="loading-center"><i class="fas fa-circle-notch fa-spin"></i></div>';
-
-        try {
-            // Fetch session only once; reuse on subsequent tab switches
-            if (!_cachedSession) {
-                const sessRes = await fetch(`${api}?action=check_session`);
-                _cachedSession = await sessRes.json();
-                const _p = _cachedSession.effective_permissions || [];
-                const isItUser = (_cachedSession.role === 'admin')
-                    || (_cachedSession.primary_department === 'IT')
-                    || _p.includes('*')
-                    || _p.includes('loan.manage');
-                if (!isItUser) {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Access Denied',
-                        text: 'หน้าจัดการการยืม-คืนใช้สำหรับทีม IT/ผู้ดูแลเท่านั้น',
-                        confirmButtonText: 'กลับหน้าแรก'
-                    });
-                    window.location.href = 'index.html';
-                    return;
-                }
-            }
-            const sess = _cachedSession;
-
-            // Bail if a newer loadData() call has already started
-            if (seq !== _loadSeq) return;
-
-            if (currentTab === 'history') {
-                currentLoanItems = [];
-                const res = await fetch(`${api}?action=getLoanManagementHistory`);
-                const items = await res.json();
-                if (seq !== _loadSeq) return;
-                allHistoryItems = items;
-                renderHistoryTable();
-                return;
-            }
-
-            let companyParam = sess.company || '';
-            if (sess.role === 'admin') companyParam = 'All';
-            const res = await fetch(`${api}?action=getLoanRequests&company=${encodeURIComponent(companyParam)}&t=${Date.now()}`);
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(`Server Error: ${res.status} ${res.statusText}\n${text}`);
-            }
-            const items = await res.json();
-
-            if (seq !== _loadSeq) return;
-
-            if (!Array.isArray(items)) {
-                area.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i><p style="color:#ef4444">API Error: ${items.message || 'Unknown error'}</p></div>`;
-                return;
-            }
-            setLoanBadgesAndSummary(items);
-
-            const filtered = items.filter(i => currentTab === 'pending' ? i.loan_status === 'Pending' : i.loan_status === 'Active');
-            currentLoanItems = filtered;
-
-            if (filtered.length === 0) {
-                area.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>ไม่มีรายการ${currentTab === 'pending' ? 'รออนุมัติ' : 'ที่กำลังถูกยืม'}</p></div>`;
-                return;
-            }
-
-            area.innerHTML = filtered.map(i => {
-                const img = i.image_path || 'https://via.placeholder.com/300x200?text=No+Image';
-                const borrowerImgSrc = i.borrower_image
-                    ? `uploads/employees/${i.borrower_image}`
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(i.borrower_name || 'U')}&background=random&color=fff&size=32`;
-                const dueDateText = hasValidDate(i.return_date)
-                    ? new Date(`${toDateOnly(i.return_date)}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
-                    : 'ไม่มีกำหนดคืน';
-                const purposeText = i.purpose ? escapeHtml(i.purpose) : '-';
-
-                return `
-                <div class="ptc-card loan-card">
-                    <div class="loan-card-img">
-                        <img src="${img}" alt="${escapeHtml(i.asset_name)}">
-                        <span class="loan-card-id-tag">${escapeHtml(i.equipment_id)}</span>
-                    </div>
-                    <div class="loan-card-body">
-                        <div class="loan-card-title">${escapeHtml(i.asset_name || 'ไม่ระบุชื่อ')}</div>
-                        <div class="loan-card-meta">
-                            <div class="loan-card-borrower">
-                                <img src="${borrowerImgSrc}" alt="${escapeHtml(i.borrower_name)}">
-                                <div>
-                                    <div class="loan-card-borrower-name">${escapeHtml(i.borrower_name)}</div>
-                                    <div class="loan-card-borrower-dept">${escapeHtml(i.department)}</div>
-                                </div>
-                            </div>
-                            <div class="loan-card-info"><i class="fas fa-calendar" style="color:#fb923c"></i><span>กำหนดคืน: ${dueDateText}</span></div>
-                            <div class="loan-card-info"><i class="fas fa-clipboard-list" style="color:#60a5fa"></i><span>วัตถุประสงค์: ${purposeText}</span></div>
-                        </div>
-                        <div class="loan-card-actions">
-                            ${currentTab === 'pending' ? `
-                                <button onclick="denyRequest(${i.loan_id})" class="ptc-btn-danger" title="ปฏิเสธ" style="flex:0.6;justify-content:center">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button onclick="openActionModal('${i.loan_id}', '${escapeHtml(i.equipment_id)}', 'pending')" class="ptc-btn-success">
-                                    <i class="fas fa-check"></i> อนุมัติ
-                                </button>
-                            ` : `
-                                <button onclick="openActionModal('${i.loan_id}', '${escapeHtml(i.equipment_id)}', 'active')" class="ptc-btn-warning">
-                                    <i class="fas fa-undo"></i> รับคืน
-                                </button>
-                                <button onclick="openActionModal('${i.loan_id}', '${escapeHtml(i.equipment_id)}', 'view')" class="ptc-ghost">
-                                    <i class="fas fa-eye"></i> รายละเอียด
-                                </button>
-                            `}
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-
-        } catch(e) {
-            if (seq !== _loadSeq) return;
-            console.error(e);
-            area.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:#ef4444"></i><p style="color:#ef4444">โหลดข้อมูลผิดพลาด: ${escapeHtml(e.message||'Unknown error')}</p><button onclick="loadData()" class="ptc-btn" style="margin-top:12px">ลองใหม่</button></div>`;
-        }
-    }
-
-    function renderHistoryTable() {
-        const area = document.getElementById('content-area');
-        const search = document.getElementById('hist-search').value.toLowerCase();
-        const start = document.getElementById('hist-start').value;
-        const end = document.getElementById('hist-end').value;
-        const status = document.getElementById('hist-status').value;
-
-        const filtered = allHistoryItems.filter(i => {
-            const txt = (i.equipment_name + i.equipment_id + i.borrower).toLowerCase();
-            const matchSearch = !search || txt.includes(search);
-            const date = i.lend_date.split(' ')[0];
-            const matchStart = !start || date >= start;
-            const matchEnd = !end || date <= end;
-            const { isReturned, isOverdue } = getHistoryStatusMeta(i);
-            const matchStatus =
-                status === 'all' ||
-                (status === 'returned' && isReturned) ||
-                (status === 'overdue' && isOverdue) ||
-                (status === 'active' && !isReturned && !isOverdue);
-            return matchSearch && matchStart && matchEnd && matchStatus;
-        });
-
-        if (filtered.length === 0) {
-            area.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>ไม่พบข้อมูลประวัติ</p></div>`;
-            return;
-        }
-
-        area.innerHTML = `
-        <div class="ptc-table-wrap">
-            <table class="ptc-table">
-                <thead>
-                    <tr>
-                        <th>อุปกรณ์</th>
-                        <th>ผู้ยืม</th>
-                        <th>วันที่ยืม</th>
-                        <th>กำหนดคืน / คืนจริง</th>
-                        <th>สถานะ</th>
-                        <th>ผู้อนุมัติ / รับคืน</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filtered.map(i => {
-                        const { isReturned, isOverdue, expectedReturnDate } = getHistoryStatusMeta(i);
-                        const statusBadge = isReturned
-                            ? `<span class="badge badge-green">คืนแล้ว</span>`
-                            : isOverdue
-                                ? `<span class="badge badge-red">เกินกำหนดคืน</span>`
-                                : `<span class="badge badge-yellow">กำลังยืม</span>`;
-
-                        return `<tr onclick="showHistoryDetails(${i.history_id})" style="cursor:pointer">
-                            <td data-label="อุปกรณ์">
-                                <div style="font-weight:700;color:#1e293b">${escapeHtml(i.equipment_name)}</div>
-                                <div style="font-size:11px;color:#94a3b8;font-family:monospace">${escapeHtml(i.equipment_id)}</div>
-                            </td>
-                            <td data-label="ผู้ยืม">
-                                <div style="display:flex;align-items:center;gap:8px">
-                                    <img src="${i.borrower_image ? 'uploads/employees/'+i.borrower_image : 'https://ui-avatars.com/api/?name='+encodeURIComponent(i.borrower)+'&background=random&color=fff&size=32'}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #e2e8f0;flex-shrink:0">
-                                    <span>${escapeHtml(i.borrower)}</span>
-                                </div>
-                            </td>
-                            <td data-label="วันที่ยืม">
-                                <div>${new Date(i.lend_date).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit'})}</div>
-                                <div style="font-size:11px;color:#94a3b8">${new Date(i.lend_date).toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'})}</div>
-                            </td>
-                            <td data-label="กำหนดคืน / คืนจริง">
-                                ${isReturned
-                                    ? new Date(i.return_date).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit'})
-                                    : expectedReturnDate
-                                        ? `<span style="${isOverdue ? 'color:#e11d48;font-weight:600' : ''}">${new Date(`${expectedReturnDate}T00:00:00`).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit'})}</span>`
-                                        : `<span style="color:#7c3aed">ไม่มีกำหนดคืน</span>`}
-                            </td>
-                            <td data-label="สถานะ">${statusBadge}</td>
-                            <td data-label="ผู้อนุมัติ / รับคืน" style="font-size:12px">
-                                <div><span style="color:#94a3b8">อนุมัติ:</span> ${escapeHtml(i.approver_name || '-')}</div>
-                                ${isReturned ? `<div><span style="color:#94a3b8">รับคืน:</span> ${escapeHtml(i.return_receiver_name || '-')}</div>` : ''}
-                            </td>
-                        </tr>`;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>`;
-    }
-
-    async function clearAllHistory() {
-        const { isConfirmed } = await Swal.fire({
-            title: 'ล้างประวัติทั้งหมด?',
-            text: 'คุณต้องการลบประวัติการยืม-คืนทั้งหมดใช่หรือไม่? (ใช้สำหรับการ Reset ระบบใหม่)',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'ใช่, ลบทั้งหมด',
-            cancelButtonText: 'ยกเลิก'
-        });
-        if (isConfirmed) {
-            try {
-                const fd = new FormData();
-                fd.append('action', 'clear_loan_history');
-                const res = await fetch(api, { method: 'POST', body: fd });
-                const json = await res.json();
-                if (json.status === 'success') {
-                    Swal.fire('สำเร็จ', 'ล้างประวัติเรียบร้อยแล้ว', 'success');
-                    allHistoryItems = [];
-                    renderHistoryTable();
-                } else {
-                    throw new Error(json.message || 'Server Error');
-                }
-            } catch(e) {
-                Swal.fire('Error', 'ไม่สามารถล้างประวัติได้ (กรุณาตรวจสอบว่า API รองรับ action: clear_loan_history หรือไม่)', 'error');
-            }
-        }
-    }
-
-    function exportHistory() {
-        const search = document.getElementById('hist-search').value.toLowerCase();
-        const start = document.getElementById('hist-start').value;
-        const end = document.getElementById('hist-end').value;
-        const status = document.getElementById('hist-status').value;
-
-        const filtered = allHistoryItems.filter(i => {
-            const txt = (i.equipment_name + i.equipment_id + i.borrower).toLowerCase();
-            const matchSearch = !search || txt.includes(search);
-            const date = i.lend_date.split(' ')[0];
-            const matchStart = !start || date >= start;
-            const matchEnd = !end || date <= end;
-            const { isReturned, isOverdue } = getHistoryStatusMeta(i);
-            const matchStatus =
-                status === 'all' ||
-                (status === 'returned' && isReturned) ||
-                (status === 'overdue' && isOverdue) ||
-                (status === 'active' && !isReturned && !isOverdue);
-            return matchSearch && matchStart && matchEnd && matchStatus;
-        });
-
-        if (filtered.length === 0) { Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ Export', 'warning'); return; }
-
-        let csvContent = '﻿Equipment ID,Equipment Name,Borrower,Lend Date,Return Date,Status,Approver,Receiver\n';
-        filtered.forEach(i => {
-            const { isReturned, isOverdue } = getHistoryStatusMeta(i);
-            const rowStatus = isReturned ? 'Returned' : isOverdue ? 'Overdue' : 'Borrowed';
-            const row = [
-                `"${i.equipment_id}"`, `"${i.equipment_name}"`, `"${i.borrower}"`,
-                `"${i.lend_date}"`, `"${i.return_date || ''}"`, `"${rowStatus}"`,
-                `"${i.approver_name || ''}"`, `"${i.return_receiver_name || ''}"`
-            ];
-            csvContent += row.join(',') + '\n';
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(blob));
-        link.setAttribute('download', `Loan_History_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function closeHistoryDetailsModal() {
-        document.getElementById('historyDetailModal').style.display = 'none';
-    }
-
-    async function showHistoryDetails(historyId) {
-        const modal = document.getElementById('historyDetailModal');
-        const body = document.getElementById('historyDetailBody');
-        modal.style.display = '';
-        body.innerHTML = '<div class="loading-center" style="padding:40px 0"><i class="fas fa-spinner fa-spin"></i></div>';
-
-        try {
-            const res = await fetch(`${api}?action=getLoanHistoryDetails&id=${historyId}`);
-            const result = await res.json();
-            if (result.status !== 'success') throw new Error(result.message);
-            const d = result.data;
-            const assetImg = d.asset_image_url || 'https://via.placeholder.com/300x200?text=No+Image';
-
-            const getSigImg = (path) => {
-                if (!path || path === 'null') return '<span style="font-size:13px;color:#94a3b8">ไม่มีลายเซ็น</span>';
-                if (path.startsWith('data:') || path.startsWith('http')) {
-                    return `<img src="${path}" style="height:80px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;padding:4px;object-fit:contain;display:block">`;
-                }
-                const filename = path.split(/[/\\]/).pop();
-                const fullPath = `uploads/signatures/${encodeURIComponent(filename)}?t=${Date.now()}`;
-                return `<img src="${fullPath}" style="height:80px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;padding:4px;object-fit:contain;display:block" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:11px;color:#ef4444">ไม่พบรูปภาพ</span>`;
-            };
-
-            const borrowerSig = getSigImg(d.borrower_signature);
-            const returnerSig = getSigImg(d.return_approver_signature);
-
-            body.innerHTML = `
-                <div class="hist-det-grid">
-                    <div>
-                        <img src="${assetImg}" class="hist-det-asset-img" alt="${escapeHtml(d.equipment_name)}">
-                    </div>
-                    <div>
-                        <p class="hist-det-name">${escapeHtml(d.equipment_name)}</p>
-                        <p class="hist-det-id">${escapeHtml(d.equipment_id)}</p>
-                        <div class="hist-det-info-grid">
-                            <div><p class="hist-detail-label">ผู้ยืม</p><p class="hist-detail-value">${escapeHtml(d.borrower)}</p></div>
-                            <div><p class="hist-detail-label">แผนก</p><p class="hist-detail-value">${escapeHtml(d.department)}</p></div>
-                            <div class="span2"><p class="hist-detail-label">วัตถุประสงค์</p><p class="hist-detail-value">${escapeHtml(d.purpose || '-')}</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="hist-det-sections">
-                    <div class="hist-det-section">
-                        <h5><i class="fas fa-calendar-plus" style="color:#3b82f6"></i> ข้อมูลการยืม</h5>
-                        <p class="hist-detail-label">วันที่ยืม</p>
-                        <p class="hist-detail-value" style="margin-bottom:8px">${new Date(d.lend_date).toLocaleString('th-TH')}</p>
-                        <p class="hist-detail-label">ผู้อนุมัติ</p>
-                        <p class="hist-detail-value" style="margin-bottom:10px">${escapeHtml(d.approver_name || '-')}</p>
-                        <p class="hist-detail-label" style="margin-bottom:6px">ลายเซ็นผู้ยืม:</p>
-                        ${borrowerSig}
-                    </div>
-                    <div class="hist-det-section">
-                        <h5><i class="fas fa-calendar-check" style="color:#10b981"></i> ข้อมูลการคืน</h5>
-                        ${d.return_date ? `
-                            <p class="hist-detail-label">วันที่คืน</p>
-                            <p class="hist-detail-value" style="margin-bottom:8px">${new Date(d.return_date).toLocaleString('th-TH')}</p>
-                            <p class="hist-detail-label">ผู้รับคืน</p>
-                            <p class="hist-detail-value" style="margin-bottom:8px">${escapeHtml(d.return_receiver_name || '-')}</p>
-                            <p class="hist-detail-label">ผลตรวจสภาพ</p>
-                            <p class="hist-detail-value" style="margin-bottom:8px">${escapeHtml(d.return_condition || '-')}</p>
-                            <p class="hist-detail-label">หมายเหตุ</p>
-                            <p class="hist-detail-value" style="margin-bottom:10px">${escapeHtml(d.return_notes || '-')}</p>
-                            <p class="hist-detail-label" style="margin-bottom:6px">ลายเซ็นผู้รับคืน:</p>
-                            ${returnerSig}
-                        ` : '<p style="color:#f59e0b;font-size:13px">ยังไม่คืนอุปกรณ์</p>'}
-                    </div>
-                </div>`;
-        } catch(e) {
-            body.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:#ef4444"></i><p style="color:#ef4444">${escapeHtml(e.message)}</p></div>`;
-        }
-    }
-
-    function openActionModal(loanId, equipId, type) {
-        const itemData = currentLoanItems.find(x => String(x.loan_id) === String(loanId)) || null;
-        currentItem = { loanId, equipId, type, itemData };
-
-        document.getElementById('sigModal').style.display = '';
-        setTimeout(() => { resizeCanvas(); signaturePad.clear(); }, 100);
-
-        const title = document.getElementById('sigTitle');
-        const desc = document.getElementById('sigDesc');
-        const detailPreview = document.getElementById('loanDetailPreview');
-        const returnCheckForm = document.getElementById('return-check-form');
-        const returnCondition = document.getElementById('return-condition');
-        const returnNotes = document.getElementById('return-notes');
-        const signatureArea = document.getElementById('signature-area');
-        const signatureActions = document.getElementById('signature-actions');
-        const btnConfirm = document.getElementById('btn-confirm');
-        const btnCancel = document.getElementById('btn-cancel-modal');
-
-        const borrower = itemData?.borrower_name || '-';
-        const department = itemData?.department || '-';
-        const dueDate = hasValidDate(itemData?.return_date)
-            ? new Date(`${toDateOnly(itemData.return_date)}T00:00:00`).toLocaleDateString('th-TH')
-            : 'ไม่มีกำหนดคืน';
-        const purpose = itemData?.purpose || '-';
-
-        document.getElementById('loan-detail-borrower').textContent = borrower;
-        document.getElementById('loan-detail-dept').textContent = department;
-        document.getElementById('loan-detail-due').textContent = dueDate;
-        document.getElementById('loan-detail-purpose').textContent = purpose;
-        detailPreview.style.display = 'block';
-        returnCondition.value = '';
-        returnNotes.value = '';
-
-        if (type === 'pending') {
-            title.textContent = 'ยืนยันการอนุมัติ (Approve)';
-            desc.textContent = `อนุมัติให้ยืมอุปกรณ์รหัส ${equipId}`;
-            returnCheckForm.style.display = 'none';
-            signatureArea.style.display = 'block';
-            signatureActions.style.display = 'flex';
-            btnConfirm.style.display = '';
-            btnCancel.textContent = 'ยกเลิก';
-        } else {
-            title.textContent = type === 'active' ? 'ยืนยันการรับคืน (Return)' : 'รายละเอียดการยืม';
-            desc.textContent = type === 'active'
-                ? `รับคืนอุปกรณ์รหัส ${equipId} พร้อมตรวจสภาพก่อนคืน`
-                : `ข้อมูลการยืมอุปกรณ์รหัส ${equipId}`;
-            if (type === 'active') {
-                returnCheckForm.style.display = 'flex';
-                signatureArea.style.display = 'block';
-                signatureActions.style.display = 'flex';
-                btnConfirm.style.display = '';
-                btnCancel.textContent = 'ยกเลิก';
-            } else {
-                returnCheckForm.style.display = 'none';
-                signatureArea.style.display = 'none';
-                signatureActions.style.display = 'none';
-                btnConfirm.style.display = 'none';
-                btnCancel.textContent = 'ปิด';
-            }
-        }
-    }
-
-    function closeModal() { document.getElementById('sigModal').style.display = 'none'; }
-    function clearSig() { signaturePad.clear(); }
-
-    async function denyRequest(loanId) {
-        const { isConfirmed } = await Swal.fire({
-            title: 'ปฏิเสธคำขอยืม?',
-            text: "คุณต้องการปฏิเสธคำขอยืมนี้ใช่หรือไม่? อุปกรณ์จะกลับสู่สถานะ 'ว่าง'",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonText: 'ใช่, ปฏิเสธเลย'
-        });
-        if (isConfirmed) {
-            const fd = new FormData();
-            fd.append('action', 'denyRequest');
-            fd.append('id', loanId);
-            try {
-                const res = await fetch(api, { method: 'POST', body: fd });
-                const json = await res.json();
-                if (json.status === 'success') {
-                    Swal.fire('สำเร็จ', 'ปฏิเสธคำขอเรียบร้อย', 'success');
-                    loadData();
-                } else {
-                    throw new Error(json.message || 'API Error');
-                }
-            } catch(e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
-        }
-    }
-
-    async function submitAction() {
-        if (signaturePad.isEmpty()) return Swal.fire('แจ้งเตือน', 'กรุณาเซ็นชื่อ', 'warning');
-        if (currentItem?.type === 'active') {
-            const returnCondition = document.getElementById('return-condition').value;
-            const returnNotes = document.getElementById('return-notes').value.trim();
-            if (!returnCondition) {
-                return Swal.fire('แจ้งเตือน', 'กรุณาเลือกผลตรวจสภาพก่อนคืน', 'warning');
-            }
-            if (returnCondition !== 'ปกติ' && !returnNotes) {
-                return Swal.fire('แจ้งเตือน', 'กรุณาระบุรายละเอียดสภาพอุปกรณ์', 'warning');
-            }
-        }
-
-        const btn = document.getElementById('btn-confirm');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> บันทึก...';
-
-        try {
-            const sigData = signaturePad.toDataURL();
-
-            // 1. Upload Signature
-            const sigFd = new FormData();
-            sigFd.append('action', 'upload_signature');
-            sigFd.append('signature_data', sigData);
-            sigFd.append('prefix', currentItem.type);
-
-            const upRes = await fetch(api, { method: 'POST', body: sigFd });
-            const upJson = await upRes.json();
-            if (upJson.status !== 'success') throw new Error(upJson.message || 'อัปโหลดลายเซ็นไม่สำเร็จ');
-            const sigPath = upJson.path;
-
-            // 2. Call approve / return API
-            const fd = new FormData();
-            fd.append('action', 'update_loan_status');
-            if (currentItem.type === 'pending') {
-                fd.append('status', 'Active');
-            } else {
-                fd.append('status', 'Completed');
-                fd.append('return_condition', document.getElementById('return-condition').value);
-                fd.append('return_notes', document.getElementById('return-notes').value.trim());
-            }
-            fd.append('id', currentItem.loanId);
-            fd.append('signature', sigPath);
-
-            const res = await fetch(api, { method: 'POST', body: fd });
-            const json = await res.json();
-            if (json.status !== 'success') throw new Error(json.message || 'Server Error');
-
-            closeModal();
-            await Swal.fire({
-                icon: 'success',
-                title: 'สำเร็จ',
-                text: currentItem.type === 'pending' ? 'อนุมัติเรียบร้อยแล้ว' : 'รับคืนเรียบร้อยแล้ว',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            loadData();
-
-        } catch(e) {
-            Swal.fire('ผิดพลาด', e.message || 'เกิดข้อผิดพลาด', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check"></i> ยืนยัน';
-        }
-    }
+// ── เริ่มต้น ──
+function syncNavH() { const n = document.querySelector('.ptc-nav'); if (n) document.documentElement.style.setProperty('--lg-nav-h', n.getBoundingClientRect().bottom + 'px'); }
+window.addEventListener('resize', syncNavH);
+function tab(t) {
+    syncNavH();
+    ['board', 'ws', 'hist', 'eq'].forEach(k => gid('v-' + k).style.display = k === t ? '' : 'none');
+    ['board', 'hist', 'eq'].forEach(k => gid('t-' + k).classList.toggle('on', k === t || (t === 'ws' && k === 'board')));
+    if (t !== 'ws') { try { const u = new URL(location.href); u.searchParams.delete('id'); u.searchParams.set('tab', t); history.replaceState(null, '', u); } catch (_) {} }
+    if (t === 'hist') loadHist(1);
+    if (t === 'eq') loadEq();
+    window.scrollTo(0, 0);
+}
+(async function init() {
+    let S = {};
+    try { S = await (await fetch('api.php?action=check_session', { cache: 'no-store' })).json(); } catch (_) {}
+    if (!S.loggedin) { location.href = 'login.html?returnUrl=' + encodeURIComponent(location.pathname.split('/').pop() + location.search); return; }
+    const qs = new URLSearchParams(location.search);
+    await loadBoard();
+    if (+qs.get('id')) openWs(+qs.get('id'));
+    else tab(['hist', 'eq'].includes(qs.get('tab')) ? qs.get('tab') : 'board');
+    // รีเฟรชบอร์ดทุก 1 นาทีตอนเปิดหน้าอยู่ — ไม่ยุ่งตอนกำลังเซ็น/กรอกในหน้าส่งมอบ
+    setInterval(() => { if (document.visibilityState === 'visible' && gid('v-board').style.display !== 'none') loadBoard(); }, 60000);
+})();
 </script>
-<script src="js/sidebar.js?v=20261023b"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>

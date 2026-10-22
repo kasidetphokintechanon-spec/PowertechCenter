@@ -201,6 +201,7 @@ function _notifySendLine($token, $dest_id, $message, $event = 'general') {
         'server_check_issue' => '#B91C1C',
         'server_check_missing' => '#B45309',
         'loan_return'   => '#0891B2',
+        'loan_overdue'  => '#DC2626',
         'it_user_reply' => '#7C3AED',
         'it_overdue'    => '#DC2626',
         'it_daily_summary' => '#0F172A',

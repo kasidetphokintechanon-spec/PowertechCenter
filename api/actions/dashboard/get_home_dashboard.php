@@ -74,11 +74,12 @@ try {
     $sql = 'SELECT COUNT(*) AS c FROM it_logs WHERE ' . implode(' AND ', $where);
     $kpi['completed_today'] = homeDashScalar($conn, $sql, $types, $params);
 
-    $loanSql = "SELECT COUNT(*) AS c FROM it_assets WHERE status = 'รออนุมัติ'";
+    _initLoanTables($conn);
+    $loanSql = "SELECT COUNT(*) AS c FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending'))";
     $loanParams = [];
     $loanTypes = '';
     if ($role !== 'admin' && $company !== '') {
-        $loanSql .= ' AND company = ?';
+        $loanSql .= ' AND asset_company = ?';
         $loanParams[] = $company;
         $loanTypes = 's';
     }
@@ -112,11 +113,12 @@ try {
 // My active loans (max 3)
 $myLoans = [];
 try {
-    $sql = "SELECT a.id AS loan_id, a.name AS asset_name, a.borrower_id,
-            CASE WHEN a.status = 'รออนุมัติ' THEN 'Pending' WHEN a.status = 'ถูกยืม' THEN 'Active' ELSE a.status END AS loan_status
-            FROM it_assets a
-            WHERE a.borrower_id = ? AND a.status IN ('รออนุมัติ', 'ถูกยืม')
-            ORDER BY a.id DESC LIMIT 3";
+    _initLoanTables($conn);
+    $sql = "SELECT id AS loan_id, equipment_name AS asset_name, borrower_id, end_date,
+            CASE status WHEN 'requested' THEN 'Pending' WHEN 'approved' THEN 'Approved' ELSE 'Active' END AS loan_status
+            FROM it_loan_requests
+            WHERE borrower_id = ? AND status IN ('requested', 'approved', 'active')
+            ORDER BY start_date LIMIT 3";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
         $stmt->bind_param('s', $userId);

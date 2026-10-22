@@ -268,10 +268,10 @@
                 '<div class="h2-job-sub">' + esc(l.id) + ' · ' + who + '</div>' + steps(STEP[l.status] || 3) + '</a>');
         });
         loanList.forEach((l) => {
-            const pending = l.loan_status === 'Pending';
-            jobs.push('<a class="h2-job" href="my_borrow_history.html"><div class="h2-job-top"><b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
-                '<span class="h2-pill" style="--c:' + (pending ? '#d97706' : '#7c3aed') + '">' + (pending ? 'รออนุมัติ' : 'ยืมอยู่') + '</span></div>' +
-                '<div class="h2-job-sub">' + (pending ? 'รอ IT อนุมัติ' : 'อย่าลืมคืนตามกำหนด') + '</div>' + steps(pending ? 2 : 5, pending ? '' : 'loan') + '</a>');
+            const pending = l.loan_status === 'Pending', ready = l.loan_status === 'Approved';
+            jobs.push('<a class="h2-job" href="loan.html?tab=mine"><div class="h2-job-top"><b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
+                '<span class="h2-pill" style="--c:' + (pending ? '#d97706' : ready ? '#2563eb' : '#7c3aed') + '">' + (pending ? 'รออนุมัติ' : ready ? 'รอรับของ' : 'ยืมอยู่') + '</span></div>' +
+                '<div class="h2-job-sub">' + (pending ? 'รอ IT อนุมัติ' : ready ? 'อนุมัติแล้ว ไปรับของที่ห้อง IT' : (l.end_date ? 'คืนภายใน ' + esc(l.end_date) : 'ยืมระยะยาว')) + '</div>' + steps(pending ? 2 : ready ? 3 : 5, pending || ready ? '' : 'loan') + '</a>');
         });
         const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
         container.innerHTML = head + jobs.join('') + more;

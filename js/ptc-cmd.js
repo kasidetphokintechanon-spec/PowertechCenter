@@ -15,7 +15,7 @@
         { label: 'ยืม-คืนอุปกรณ์',        icon: 'fa-hand-holding-box', color: '#ec4899', href: 'loan.html' },
         { label: 'Admin Panel',             icon: 'fa-cogs',             color: '#ef4444', href: 'admin.html' },
         { label: 'รายการแจ้งซ่อมของฉัน', icon: 'fa-ticket-alt',       color: '#0ea5e9', href: 'my_tickets.html' },
-        { label: 'ประวัติการยืมของฉัน',   icon: 'fa-box-open',         color: '#d97706', href: 'my_borrow_history.html' },
+        { label: 'ประวัติการยืมของฉัน',   icon: 'fa-box-open',         color: '#d97706', href: 'loan.html?tab=mine' },
         { label: 'Daily Checklist',         icon: 'fa-clipboard-check',  color: '#16a34a', href: 'daily_checklist.html' },
         { label: 'Audit Log',               icon: 'fa-history',          color: '#64748b', href: 'audit_log.html' },
         { label: 'Knowledge Base',          icon: 'fa-book-open',        color: '#f59e0b', href: 'kb.html' },

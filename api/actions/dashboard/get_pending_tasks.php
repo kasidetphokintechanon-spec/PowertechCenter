@@ -57,14 +57,15 @@ try {
     }
 
     // Loan requests จาก it_assets (status = รออนุมัติ)
-    $sqlLoan = "SELECT id, equipment_id, name, borrower, borrower_id, company, department, return_date 
-                FROM it_assets 
-                WHERE status = 'รออนุมัติ'";
+    _initLoanTables($conn);
+    $sqlLoan = "SELECT id, code, equipment_id, equipment_name AS name, borrower_name AS borrower, asset_company AS company
+                FROM it_loan_requests
+                WHERE status = 'requested'";
     $params = [];
     $types = "";
 
     if ($role !== 'admin' && !empty($sessionCompany)) {
-        $sqlLoan .= " AND company = ?";
+        $sqlLoan .= " AND asset_company = ?";
         $params[] = $sessionCompany;
         $types .= "s";
     }
@@ -79,14 +80,14 @@ try {
         while ($row = $resLoan->fetch_assoc()) {
             $tasks[] = [
                 'type' => 'loan',
-                'id' => $row['equipment_id'],
+                'id' => $row['code'],
                 'title' => $row['name'],
                 'status' => 'Pending',
                 'urgency' => null,
                 'is_urgent' => false,
                 'requester' => $row['borrower'],
                 'company' => $row['company'],
-                'link' => 'borrow_management.html'
+                'link' => 'borrow_management.html?id=' . (int)$row['id']
             ];
         }
     }

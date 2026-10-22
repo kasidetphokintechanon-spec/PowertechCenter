@@ -41,8 +41,9 @@ try {
                                   : $scalar("SELECT COUNT(*) AS c FROM it_logs WHERE status='Completed' AND DATE(date)=CURDATE()");
     $kpi['stock_pending']   = $co ? $scalar("SELECT COUNT(*) AS c FROM stock_requests WHERE status='pending' AND company=?", 's', [$co])
                                   : $scalar("SELECT COUNT(*) AS c FROM stock_requests WHERE status='pending'");
-    $kpi['loan_pending']    = $co ? $scalar("SELECT COUNT(*) AS c FROM it_assets WHERE status='รออนุมัติ' AND company=?", 's', [$co])
-                                  : $scalar("SELECT COUNT(*) AS c FROM it_assets WHERE status='รออนุมัติ'");
+    _initLoanTables($conn);
+    $kpi['loan_pending']    = $co ? $scalar("SELECT COUNT(*) AS c FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending')) AND asset_company=?", 's', [$co])
+                                  : $scalar("SELECT COUNT(*) AS c FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending'))");
 } catch (Throwable $e) {
     error_log('[get_admin_dashboard] KPI: ' . $e->getMessage());
 }
@@ -82,9 +83,10 @@ try {
 // ─── Loan รอ Approve (top 5) ──────────────────────────────────────────────
 $loanReqs = [];
 try {
-    $sql = "SELECT id, name AS asset_name, equipment_id, borrower, company, department
-            FROM it_assets WHERE status='รออนุมัติ'" .
-           ($co ? " AND company=?" : "") . " ORDER BY id DESC LIMIT 5";
+    _initLoanTables($conn);
+    $sql = "SELECT id, equipment_name AS asset_name, equipment_id, borrower_name AS borrower, asset_company AS company, department
+            FROM it_loan_requests WHERE status='requested'" .
+           ($co ? " AND asset_company=?" : "") . " ORDER BY id DESC LIMIT 5";
     if ($co) {
         $stmt = $conn->prepare($sql); $stmt->bind_param('s', $co); $stmt->execute();
         $res = $stmt->get_result();

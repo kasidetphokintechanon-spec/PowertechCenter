@@ -6,6 +6,7 @@
  * กันส่งซ้ำด้วย notify_log (event + ref) — แต่ละเรื่องเด้งครั้งเดียว
  *   it_overdue           งานไม่มีใครรับเกินเวลารับเรื่อง / ซ่อมนานเกินเวลาปิดงาน (ต่องาน)
  *   server_check_missing 15:00–18:00 วันทำงาน ห้องที่ยังไม่บันทึกผลตรวจวันนี้ (วันละครั้ง)
+ *   loan_overdue         ยืมอุปกรณ์เลยกำหนดคืน (ต่อใบ ครั้งเดียว)
  *   it_daily_summary     08:00–10:00 วันทำงาน สรุปงานค้างให้ทีม IT (วันละครั้ง)
  */
 
@@ -28,6 +29,7 @@ function _checkNotifyCrons($conn) {
 
         $workday = _notifyIsWorkday($conn, date('Y-m-d'));
         _cronItOverdue($conn);
+        if (function_exists('_initLoanTables')) _cronLoanOverdue($conn);
         $hm = date('H:i');
         if ($workday && $hm >= '08:00' && $hm < '10:00') _cronItDailySummary($conn);
         if ($workday && $hm >= '15:00' && $hm < '18:00') _cronServerCheckMissing($conn);
@@ -153,4 +155,16 @@ function _cronServerCheckMissing($conn) {
          . implode("\n", array_map(fn($r) => "• {$r['code']} — {$r['name']} ({$r['company']})", $rooms)) . "\n"
          . "<b>หมายเหตุ:</b> บันทึกย้อนหลังเกิน 1 วันต้องระบุเหตุผล";
     sendNotify($conn, $msg, 'server_check_missing', null, $today);
+}
+
+// ยืมอุปกรณ์เลยกำหนดคืน — เตือนกลุ่มครั้งเดียวต่อใบ (ขยายเวลาแล้วไม่นับ เพราะ end_date เลื่อนไปแล้ว)
+function _cronLoanOverdue($conn) {
+    _initLoanTables($conn);
+    $r = $conn->query("SELECT * FROM it_loan_requests WHERE status = 'active' AND end_date IS NOT NULL AND end_date < CURDATE()");
+    if (!$r) return;
+    foreach ($r->fetch_all(MYSQLI_ASSOC) as $l) {
+        if (notifyAlreadySent($conn, 'loan_overdue', $l['code'])) continue;
+        $days = (int)((strtotime(date('Y-m-d')) - strtotime($l['end_date'])) / 86400);
+        loanNotify($conn, 'loan_overdue', '⏰ ยืมอุปกรณ์เกินกำหนดคืน', $l, ['เกินมาแล้ว' => $days . ' วัน', 'ติดต่อ' => $l['contact']]);
+    }
 }
