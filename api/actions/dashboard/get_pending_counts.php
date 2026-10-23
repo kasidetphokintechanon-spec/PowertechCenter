@@ -1,7 +1,7 @@
 <?php
 // api/actions/dashboard/get_pending_counts.php
 
-$loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
+$stock_pending = 0; $loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
 
 try {
     if (isset($conn) && $conn instanceof mysqli) {
@@ -52,6 +52,11 @@ try {
             if ($res = $conn->query($stockSql)) $stock_low = (int)$res->fetch_assoc()['count'];
         }
 
+        // ใบเบิกของรออนุมัติ — ตัวเลขบนเมนู "สต็อก & เบิกของ" (งานที่ผู้ดูแลต้องทำ)
+        $sql = "SELECT COUNT(*) FROM stock_requests WHERE status = 'pending'" . ($role !== 'admin' && !empty($sessionCompany) ? ' AND company = ?' : '');
+        $stmt = $conn->prepare($sql);
+        if ($stmt) { if ($role !== 'admin' && !empty($sessionCompany)) $stmt->bind_param('s', $sessionCompany); $stmt->execute(); $stock_pending = (int)$stmt->get_result()->fetch_row()[0]; }
+
         // Users no role (admin only — employees ที่ยังไม่มี role)
         if ($role === 'admin') {
             if ($res = $conn->query("SELECT COUNT(*) AS count FROM employees WHERE role IS NULL OR role = ''")) {
@@ -82,6 +87,7 @@ echo json_encode([
     'loan_pending'       => $loan_count,
     'ticket_unassigned'  => $repair_count,
     'stock_low'          => $stock_low,
+    'stock_pending'      => $stock_pending,
     'users_no_role'      => $users_no_role,
     'kb_draft_count'     => $kb_draft_count,
     'server_check_missing' => $sc_missing,

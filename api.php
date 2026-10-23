@@ -58,6 +58,7 @@ require_once __DIR__ . '/includes/permissions_registry.php';
 require_once __DIR__ . '/includes/notify_helper.php';
 require_once __DIR__ . '/includes/notify_cron.php';
 require_once __DIR__ . '/includes/loan_helper.php';
+require_once __DIR__ . '/includes/stock_helper.php';
 
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
@@ -314,6 +315,8 @@ try {
         'test_notify_channel' => ['settings.notifications'], 'test_notify_routing' => ['settings.notifications'],
         'get_notify_log' => ['settings.notifications'],
         'get_notify_overview' => ['settings.notifications'],
+        // ผู้ดูแลสต็อก — ฝั่งพนักงาน (stock_catalog/submit/my/cancel/get) เช็กเจ้าของในตัว action
+        'stock_board' => ['stock.manage'], 'stock_decide' => ['stock.manage'], 'stock_ready' => ['stock.manage'], 'stock_issue' => ['stock.manage'], 'stock_inventory' => ['stock.manage'], 'stock_receive' => ['stock.manage'], 'stock_count' => ['stock.manage'], 'stock_item_history' => ['stock.manage'], 'stock_report' => ['stock.manage'], 'stock_quota' => ['stock.manage'],
         'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
         'save_it_support_settings' => ['admin.access_admin'], 'save_doc_forms' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],

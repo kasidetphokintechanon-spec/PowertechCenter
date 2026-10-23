@@ -16,13 +16,15 @@
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
     <script src="js/vendor/qrcode.min.js"></script>
-    <script src="js/doc-print.js?v=20261022b"></script>
+    <script src="js/doc-print.js?v=20261023"></script>
     <script src="js/ticket-print.js?v=20261022b"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
 <style>
 /* ════ แจ้งซ่อม IT (ฝั่งผู้ใช้) — แจ้ง 3 ขั้น + ติดตาม/ปิดงาน · สีจาก token design-system (ธีมมืดเปลี่ยนตามเอง) ════ */
+/* enterprise-theme ล็อกการเลื่อนทั้งหน้าบนจอกว้าง (ไว้ใช้กับหน้าที่มีเมนูซ้าย) — หน้านี้เลื่อนทั้งหน้าตามปกติ */
+html { overflow:auto !important; height:auto !important; } body { overflow:visible !important; height:auto !important; }
 body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
 .rq-tabs { display:flex; border:1px solid var(--ptc-border); border-radius:8px; overflow:hidden; margin-left:auto; }
 .rq-tabs button { height:34px; padding:0 14px; border:0; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }

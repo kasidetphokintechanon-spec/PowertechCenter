@@ -9,6 +9,7 @@
  *     images:[url...], sigs:[{ role, name, date, stamp }], qr:'url', size:'a4'|'a5l'|'land', fit:true,
  *     flow:true = เอกสารยาวหลายหน้า (ใบตรวจนับ) — ไม่ย่อให้พอดีแผ่น เลขหน้าพิมพ์ที่ขอบกระดาษ,
  *     barHtml = ปุ่ม/ตัวเลือกเพิ่มในแถบเครื่องมือ (ใช้คู่ toolbar:true)
+ *     dept = ฝ่ายที่ออกเอกสาร (ค่าเริ่มต้น ฝ่ายเทคโนโลยีสารสนเทศ) — ใบเบิกของ/สต็อกเป็นของฝ่ายธุรการ
  *     printLog = { url, data:{...}, next } นับการพิมพ์จริง (ตอนกดพิมพ์/Ctrl+P ไม่ใช่ตอนเปิดดู) · ใบที่ 2 ขึ้นไปขึ้น "สำเนา"
  *   }
  *   ตัวช่วยสร้างกล่อง: DocPrint.section(title, body, { cls, clamp, html, lined, height })
@@ -90,7 +91,7 @@ ${s.toolbar ? `<div class="dp-bar">${s.barHtml || ''}<button class="pri" onclick
 <div class="dp-page${sizeCls}" style="--acc:${acc};--doc:${s.title.color || acc}"><div class="dp-fit" id="dp-fit">
   <div class="dp-hd">
     ${LOGO[co] ? `<img class="dp-logo" src="${esc(b + 'uploads/logos/' + LOGO[co])}" alt="" onerror="this.remove()">` : ''}
-    <div class="dp-co"><b>${esc(nameEn || nameTh)}</b><span>${nameEn ? esc(nameTh) + ' · ' : ''}ฝ่ายเทคโนโลยีสารสนเทศ</span>${addr ? `<small>${esc(addr)}</small>` : ''}</div>
+    <div class="dp-co"><b>${esc(nameEn || nameTh)}</b><span>${nameEn ? esc(nameTh) + ' · ' : ''}${esc(s.dept || 'ฝ่ายเทคโนโลยีสารสนเทศ')}</span>${addr ? `<small>${esc(addr)}</small>` : ''}</div>
     <div class="dp-meta"><div>${s.classified ? '<div class="dp-class">ข้อมูลภายใน · INTERNAL</div>' : ''}${s.docNo ? `<div class="t">เลขที่</div><div class="id">${esc(s.docNo)}</div>` : ''}
       ${s.dateText ? `<div class="t">${esc(s.dateText)}</div>` : ''}${s.statusText ? `<div class="st">${esc(s.statusText)}</div>` : ''}${s.printLog ? '<div class="dp-copy" id="dp-copy"></div>' : ''}${formBox}</div>
       ${qr ? `<img class="dp-qr" src="${qr}" alt="">` : ''}</div>

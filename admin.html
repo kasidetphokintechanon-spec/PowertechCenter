@@ -22,7 +22,7 @@
     <script src="js/service-gateway.js"></script>
     <script src="js/vendor/chart.min.js"></script>
     <script src="js/vendor/qrcode.min.js"></script>
-    <script src="js/doc-print.js?v=20261022b"></script>
+    <script src="js/doc-print.js?v=20261023"></script>
     <script src="js/ticket-print.js?v=20261022b"></script>
     <script src="js/vendor/jsbarcode.min.js"></script>
     <script src="js/vendor/sortable.min.js"></script>
@@ -2514,7 +2514,7 @@
             </tr>`).join('') || emptyState('ไม่มี Ticket รอ — เรียบร้อยดี');
 
         const stockRows = (d.stock_requests || []).map(r => `
-            <tr class="dash-tr" onclick="window.open('stock_management.html','_blank')">
+            <tr class="dash-tr" onclick="location.href='stock_management.html?id=${+r.id||''}'">
                 <td class="dash-td-muted">${escapeHtml(r.company||'')}</td>
                 <td class="dash-td-bold">${escapeHtml(r.requester_name||'')}</td>
                 <td class="dash-td">${escapeHtml(r.stock_type||'')}</td>
@@ -6079,7 +6079,7 @@
 
 </script>
 <script src="js/employee-form.js?v=20261021b"></script>
-<script src="js/sidebar.js?v=20261023b"></script>
+<script src="js/sidebar.js?v=20261023c"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>

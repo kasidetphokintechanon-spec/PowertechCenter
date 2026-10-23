@@ -132,6 +132,24 @@ try {
     error_log('[get_home_dashboard] loans: ' . $e->getMessage());
 }
 
+// ใบเบิกของที่ยังไม่ปิด (สูงสุด 3) — "พร้อมรับ" ขึ้นก่อน ให้รู้ว่าต้องไปรับของ
+$myStock = [];
+try {
+    _initStockFlow($conn);
+    $st = $conn->prepare("SELECT id FROM stock_requests WHERE requester_id = ? AND status IN ('pending','approved','ready') ORDER BY FIELD(status,'ready','approved','pending'), id DESC LIMIT 3");
+    if ($st) {
+        $st->bind_param('s', $userId);
+        $st->execute();
+        foreach ($st->get_result()->fetch_all() as $x) {
+            $r = stockRow(stockGetRequest($conn, (int)$x[0]));
+            $myStock[] = ['id' => $r['id'], 'code' => $r['code'], 'status' => $r['status'], 'status_th' => $r['status_th'], 'type_th' => $r['type_th'],
+                'items' => implode(', ', array_map(fn($i) => $i['name'] . ' ×' . ($r['status'] === 'pending' ? $i['qty_requested'] : $i['qty_approved']), $r['items']))];
+        }
+    }
+} catch (Throwable $e) {
+    error_log('[get_home_dashboard] stock: ' . $e->getMessage());
+}
+
 // Services menu (light columns)
 $services = [];
 try {
@@ -176,6 +194,7 @@ echo json_encode([
     'kpi' => $kpi,
     'my_tickets' => $myTickets,
     'my_loans' => $myLoans,
+    'my_stock' => $myStock,
     'services' => $services,
     'queue' => ['pending' => $queuePending, 'active' => $queueActive],
     'pending_total' => (int)$kpi['pending'] + (int)$kpi['loan_pending'],

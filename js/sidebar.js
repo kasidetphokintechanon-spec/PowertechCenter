@@ -33,7 +33,7 @@
         {
             key: 'office', label: 'งานธุรการ', color: '#8b5cf6',
             items: [
-                { id: 'stock',           icon: 'fa-boxes-stacked',      label: 'สต็อก & เบิกของ',       href: 'stock_management.html', page: 'stock_management', perm: 'stock.manage', badgeTitle: 'สต็อกใกล้หมด' },
+                { id: 'stock',           icon: 'fa-boxes-stacked',      label: 'สต็อก & เบิกของ',       href: 'stock_management.html', page: 'stock_management', perm: 'stock.manage', badgeTitle: 'ใบเบิกรออนุมัติ' },
                 { id: 'loan',            icon: 'fa-rotate',             label: 'ยืม-คืนอุปกรณ์',        href: 'borrow_management.html', page: 'loan', perm: 'loan.manage', badgeTitle: 'รออนุมัติยืม' },
                 { id: 'task_center',     icon: 'fa-list-check',         label: 'Task Center',          href: 'task_center.html',page: 'task_center',       perm: null },
             ],
@@ -535,7 +535,7 @@
             if (hasAll || perms.includes('loan.manage'))  setBadge('loan',  d.loan_pending      || 0);
             if (hasAll || perms.includes('it_log.access')) setBadge('log',   d.ticket_unassigned || 0);
             if (hasAll || perms.includes('it_log.access')) setBadge('server_check_daily', d.server_check_missing || 0);
-            if (hasAll || perms.includes('stock.manage')) setBadge('stock', d.stock_low         || 0);
+            if (hasAll || perms.includes('stock.manage')) setBadge('stock', d.stock_pending     || 0);
             if (hasAll || perms.includes('admin.manage_permissions')) setBadge('settings', d.users_no_role || 0);
             if (hasAll || perms.includes('kb.manage')) setBadge('kb_articles', d.kb_draft_count || 0);
             window.ptcPendingCounts = d;

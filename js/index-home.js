@@ -170,9 +170,9 @@
         // ตัวเลขบน "ระบบจัดการ" = งานค้างรวม (งานซ่อมรอรับ + ยืมรออนุมัติ + ของใกล้หมด)
         if (adminLink && !adminLink.classList.contains('index-admin-link-hidden')) {
             fetch('api.php?action=get_pending_counts', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => {
-                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_low || 0);
+                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_pending || 0);
                 const b = $('mgmtBadge');
-                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ของใกล้หมด ' + (d.stock_low || 0); }
+                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ใบเบิกรออนุมัติ ' + (d.stock_pending || 0); }
             }).catch(() => {});
         }
 
@@ -227,12 +227,13 @@
         });
     }
 
-    function renderMyStatus(tickets, loans) {
+    function renderMyStatus(tickets, loans, stock) {
         const container = $('my-status-content');
         if (!container) return;
         const ticketList = Array.isArray(tickets) ? tickets : [];
         const loanList = Array.isArray(loans) ? loans : [];
-        const total = ticketList.length + loanList.length;
+        const stockList = Array.isArray(stock) ? stock : [];
+        const total = ticketList.length + loanList.length + stockList.length;
 
         const uidMe = String(session.user_id || '');
         const mineReq = ticketList.filter((l) => String(l.requester_id ?? '') === uidMe);
@@ -250,7 +251,7 @@
             '<div class="h2-kp">' + kp.map((k) => '<div><b style="color:' + k[2] + '">' + k[1] + '</b><span>' + k[0] + '</span></div>').join('') + '</div>';
         if (total === 0) {
             container.innerHTML = head + '<div class="status-clear"><i class="fas fa-circle-check"></i>' +
-                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อมและการยืมของคุณเรียบร้อยทั้งหมด</span></div></div>';
+                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อม การยืม และใบเบิกของของคุณเรียบร้อยทั้งหมด</span></div></div>';
             return;
         }
         const STEP = { Pending: 1, Received: 2, 'Awaiting Confirmation': 4 };
@@ -272,6 +273,14 @@
             jobs.push('<a class="h2-job" href="loan.html?tab=mine"><div class="h2-job-top"><b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
                 '<span class="h2-pill" style="--c:' + (pending ? '#d97706' : ready ? '#2563eb' : '#7c3aed') + '">' + (pending ? 'รออนุมัติ' : ready ? 'รอรับของ' : 'ยืมอยู่') + '</span></div>' +
                 '<div class="h2-job-sub">' + (pending ? 'รอ IT อนุมัติ' : ready ? 'อนุมัติแล้ว ไปรับของที่ห้อง IT' : (l.end_date ? 'คืนภายใน ' + esc(l.end_date) : 'ยืมระยะยาว')) + '</div>' + steps(pending ? 2 : ready ? 3 : 5, pending || ready ? '' : 'loan') + '</a>');
+        });
+        // ใบเบิกของ: ส่งคำขอ → อนุมัติ → จัดของเสร็จ (พร้อมรับ) → รับของแล้ว
+        const SSTEP = { pending: 1, approved: 2, ready: 3 }, SC = { pending: '#d97706', approved: '#2563eb', ready: '#0891b2' };
+        const SSUB = { pending: 'รอผู้ดูแลสต็อกอนุมัติ', approved: 'อนุมัติแล้ว กำลังจัดของ', ready: 'ของพร้อมแล้ว — ไปรับที่ผู้ดูแลสต็อก' };
+        stockList.forEach((r) => {
+            jobs.push('<a class="h2-job" href="stock_request.html?tab=mine"><div class="h2-job-top"><b>เบิก ' + esc(r.items || r.type_th) + '</b>' +
+                '<span class="h2-pill" style="--c:' + (SC[r.status] || '#64748b') + '">' + esc(r.status_th) + '</span></div>' +
+                '<div class="h2-job-sub">' + esc(r.code) + ' · ' + esc(SSUB[r.status] || '') + '</div>' + steps(SSTEP[r.status] || 1) + '</a>');
         });
         const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
         container.innerHTML = head + jobs.join('') + more;
@@ -671,7 +680,7 @@
             }
             applySession(data.session || {});
             renderKpi(data.kpi || {});
-            renderMyStatus(data.my_tickets, data.my_loans);
+            renderMyStatus(data.my_tickets, data.my_loans, data.my_stock);
 
             renderServices(data.services || []);
             renderNotifList(data.kpi || {});

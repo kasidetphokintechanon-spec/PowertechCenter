@@ -30,6 +30,9 @@ foreach ($rows as $i => $row) {
     $min_stock  = max(0, intval($row['min_stock']  ?? 0));
     $max_stock  = max(0, intval($row['max_stock']  ?? 0));
     $description = trim($row['description']  ?? '');
+    // หน่วยซื้อ เช่น แพ็ค 4 ก้อน — ไม่ใส่ = ไม่มีหน่วยซื้อ
+    $pack_size  = max(1, intval($row['pack_size'] ?? 1));
+    $pack_unit  = $pack_size > 1 ? trim($row['pack_unit'] ?? '') : '';
 
     if (!$item_code) { $errors[] = "แถว {$rowNum}: ไม่มี item_code"; continue; }
     if (!$name)      { $errors[] = "แถว {$rowNum}: ไม่มีชื่อสินค้า [{$item_code}]"; continue; }
@@ -45,14 +48,14 @@ foreach ($rows as $i => $row) {
     $chk->close();
 
     if ($existing) {
-        $stmt = $conn->prepare("UPDATE stock_items SET name=?,unit=?,category=?,type=?,price_per_unit=?,min_stock=?,max_stock=?,description=? WHERE id=?");
-        $stmt->bind_param("ssssdiisi", $name, $unit, $category, $type, $price, $min_stock, $max_stock, $description, $existing['id']);
+        $stmt = $conn->prepare("UPDATE stock_items SET name=?,unit=?,category=?,type=?,price_per_unit=?,min_stock=?,max_stock=?,description=?,pack_unit=?,pack_size=? WHERE id=?");
+        $stmt->bind_param("ssssdiissii", $name, $unit, $category, $type, $price, $min_stock, $max_stock, $description, $pack_unit, $pack_size, $existing['id']);
         $stmt->execute();
         $stmt->close();
         $updated++;
     } else {
-        $stmt = $conn->prepare("INSERT INTO stock_items (item_code,name,unit,category,type,company,price_per_unit,min_stock,max_stock,description,is_active) VALUES (?,?,?,?,?,?,?,?,?,?,1)");
-        $stmt->bind_param("ssssssdiis", $item_code, $name, $unit, $category, $type, $company, $price, $min_stock, $max_stock, $description);
+        $stmt = $conn->prepare("INSERT INTO stock_items (item_code,name,unit,category,type,company,price_per_unit,min_stock,max_stock,description,pack_unit,pack_size,is_active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)");
+        $stmt->bind_param("ssssssdiissi", $item_code, $name, $unit, $category, $type, $company, $price, $min_stock, $max_stock, $description, $pack_unit, $pack_size);
         $stmt->execute();
         $stmt->close();
         $inserted++;
