@@ -157,6 +157,13 @@ if ($custodian_type === 'department') {
 // --- Server-side validation (Inspector checklist) ---
 if ($name === '') throw new Exception('กรุณาระบุชื่ออุปกรณ์');
 if ($company === '') throw new Exception('กรุณาเลือกบริษัท');
+if (!inScope($conn, $company)) throw new Exception("ไม่มีสิทธิ์ดูแลทรัพย์สินของ {$company}");
+if (!empty($db_id)) {
+    // แก้เครื่องเดิมได้เฉพาะของบริษัทที่ดูแล — ย้ายบริษัทให้ใช้ "โอนย้าย" (มีประวัติ)
+    $own = $conn->prepare("SELECT company FROM it_assets WHERE id = ?"); $own->bind_param('i', $db_id); $own->execute();
+    $was = $own->get_result()->fetch_row()[0] ?? null;
+    if ($was !== null && !inScope($conn, $was)) throw new Exception("ไม่มีสิทธิ์ดูแลทรัพย์สินของ {$was}");
+}
 if (!$department_id) throw new Exception('กรุณาเลือกแผนก');
 if (!$category_id) throw new Exception('กรุณาเลือกหมวดหมู่');
 if ($location === '') throw new Exception('กรุณาระบุ Location');

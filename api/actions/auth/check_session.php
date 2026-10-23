@@ -42,6 +42,8 @@ echo json_encode([
     'company' => $company_code,
     'company_full_name' => $company_full,
     'available_companies' => $available_companies,
+    // บริษัทที่ดูแลในหน้าจัดการ (ตั้งในหน้ากำหนดสิทธิ์) — หน้าเว็บใช้ซ่อนตัวเลือกบริษัทที่ไม่ได้ดูแล
+    'managed_companies' => isset($_SESSION['user_id']) && function_exists('userCompanies') ? userCompanies($conn) : [],
     'primary_department' => $_SESSION['primary_department'] ?? null,
     'image' => $_SESSION['image'] ?? null,
     'can_manage_stock' => intval($_SESSION['can_manage_stock'] ?? 0),

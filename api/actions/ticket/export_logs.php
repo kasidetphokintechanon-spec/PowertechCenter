@@ -8,6 +8,10 @@ $search = $_GET['search'] ?? '';
 $sql = "SELECT * FROM it_logs WHERE 1=1";
 $params = [];
 $types = "";
+// ส่งออกเฉพาะบริษัทที่ดูแล (เดิมไม่เช็ก — ส่งออกงานทุกบริษัทได้)
+[$cw, $cp] = scopeSql('company', userCompanies($conn));
+$sql .= $cw;
+foreach ($cp as $c) { $params[] = $c; $types .= 's'; }
 
 if (!empty($company)) {
     $sql .= " AND company = ?";

@@ -4,6 +4,7 @@ if (!isset($conn)) { http_response_code(500); echo json_encode(['status'=>'error
 if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['status'=>'error','message'=>'Unauthorized']); exit; }
 
 $id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
+requireSetupInScope($conn, $id);
 if (!$id) { echo json_encode(['status'=>'error','message'=>'ไม่ระบุ ID']); exit; }
 
 require_once __DIR__ . '/../../../includes/setup_handover.php';

@@ -48,6 +48,8 @@ $employee_name  = trim($_POST['employee_name'] ?? '');
 $employee_id    = trim($_POST['employee_id'] ?? '');
 $department     = trim($_POST['department'] ?? '');
 $company        = trim($_POST['company'] ?? '');
+requireSetupInScope($conn, $id);
+if ($company !== '' && !inScope($conn, $company)) throw new Exception("ไม่มีสิทธิ์ดูแลใบติดตั้งของ {$company}");
 $asset_code     = trim($_POST['asset_code'] ?? '');
 $serial_number  = trim($_POST['serial_number'] ?? '');
 $pc_name        = trim($_POST['pc_name'] ?? '');

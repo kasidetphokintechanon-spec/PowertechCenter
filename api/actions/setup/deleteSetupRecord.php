@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['
 if (($_SESSION['role'] ?? '') !== 'admin') { echo json_encode(['status'=>'error','message'=>'ลบใบติดตั้งได้เฉพาะผู้ดูแลระบบ']); exit; }
 
 $id = intval($_POST['id'] ?? 0);
+requireSetupInScope($conn, $id);
 $reason = trim((string)($_POST['reason'] ?? ''));
 if (!$id) { echo json_encode(['status'=>'error','message'=>'ไม่ระบุ ID']); exit; }
 if (mb_strlen($reason) < 3) { echo json_encode(['status'=>'error','message'=>'กรุณาระบุเหตุผลที่ลบ']); exit; }

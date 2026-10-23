@@ -9,6 +9,12 @@ $transfer_set = isset($_POST['transfer_set']) && $_POST['transfer_set'] === '1';
 if (empty($db_id) || empty($new_company)) {
     throw new Exception("Missing parameters.");
 }
+// โอนได้เฉพาะระหว่างบริษัทที่ดูแล (ทั้งต้นทางและปลายทาง)
+if (!inScope($conn, $new_company)) throw new Exception("ไม่มีสิทธิ์ดูแลทรัพย์สินของ {$new_company}");
+$own = $conn->prepare("SELECT company FROM it_assets WHERE id = ?"); $own->bind_param('i', $db_id); $own->execute();
+$from = $own->get_result()->fetch_row()[0] ?? null;
+if ($from === null) throw new Exception('ไม่พบทรัพย์สิน');
+if (!inScope($conn, $from)) throw new Exception("ไม่มีสิทธิ์ดูแลทรัพย์สินของ {$from}");
 
 $conn->begin_transaction();
 try {

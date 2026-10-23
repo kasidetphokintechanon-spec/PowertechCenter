@@ -54,14 +54,16 @@ if ($key === 'it_logs') {
     $id = $data['id'] ?? null; // For updates
 
     $sessionCompany = $_SESSION['company'] ?? '';
-    if ($role !== 'admin' && $sessionCompany && $id) {
+    // ช่าง IT แก้งานได้ทุกบริษัทที่ดูแล · คนอื่นเฉพาะบริษัทที่ล็อกอิน
+    $allowCos = hasPermission($conn, 'it_log.access') ? userCompanies($conn) : ($sessionCompany ? [$sessionCompany] : []);
+    if ($role !== 'admin' && $allowCos && $id) {
         $stmt_chk = $conn->prepare("SELECT company FROM it_logs WHERE id = ? LIMIT 1");
         if (!$stmt_chk) throw new Exception("Prepare failed");
         $stmt_chk->bind_param("s", $id);
         $stmt_chk->execute();
         $res_chk = $stmt_chk->get_result();
         $row_chk = $res_chk ? $res_chk->fetch_assoc() : null;
-        if (!$row_chk || ($row_chk['company'] ?? '') !== $sessionCompany) throw new Exception("Access Denied");
+        if (!$row_chk || !in_array($row_chk['company'] ?? '', $allowCos, true)) throw new Exception("Access Denied");
     }
 
     // Add the extra IDs to the data array

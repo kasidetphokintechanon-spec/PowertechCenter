@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['
 requirePermission($conn, 'it_log.access');
 
 $id                 = intval($_POST['id'] ?? 0);
+requireSetupInScope($conn, $id);
 $offboard_checklist = $_POST['offboard_checklist'] ?? '[]';
 $offboard_notes     = trim($_POST['offboard_notes'] ?? '');
 $offboard_date      = trim($_POST['offboard_date'] ?? date('Y-m-d'));

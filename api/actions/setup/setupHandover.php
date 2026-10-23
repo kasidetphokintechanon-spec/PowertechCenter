@@ -24,6 +24,7 @@ if ($op === 'contact') {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception('Method not allowed');
 $id = (int)($_POST['id'] ?? 0);
+requireSetupInScope($conn, $id);
 if ($id <= 0) throw new Exception('ต้องบันทึกใบติดตั้งก่อน');
 $by = $_SESSION['display_name'] ?? $_SESSION['username'] ?? 'IT';
 

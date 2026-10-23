@@ -8,7 +8,9 @@ $yearParam = isset($_GET['year']) ? intval($_GET['year']) : intval(date('Y'));
 $months    = isset($_GET['months']) ? min(max(intval($_GET['months']), 1), 24) : 12;
 
 // Build WHERE fragments — company is whitelisted above, safe to interpolate
-$cWhere    = $company !== 'all' ? " AND company = '{$company}'" : '';
+// "ทั้งหมด" = ทุกบริษัทที่ดูแล · เลือกบริษัทที่ไม่ได้ดูแล = ไม่เห็นข้อมูล (ค่ามาจากรายการคงที่ ACCESS_COS จึงต่อ string ได้)
+$repCos = $company === 'all' ? userCompanies($conn) : array_intersect([$company], userCompanies($conn));
+$cWhere    = count($repCos) === 3 && $company === 'all' ? '' : ($repCos ? " AND company IN ('" . implode("','", $repCos) . "')" : ' AND 1 = 0');
 $yearWhere = " AND YEAR(date) = $yearParam";
 $cYear     = $cWhere . $yearWhere;
 

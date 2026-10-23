@@ -810,7 +810,7 @@ function switchTab(t) {
     SUP = sup || {}; techs = Array.isArray(tl) ? tl : [];
     switchTab(q.get('tab') === 'all' ? 'all' : 'queue');
     await loadBoard();
-    const cos = [...new Set(board.map(l => l.company).filter(Boolean)), 'PTA', 'PT4', 'PTE'].filter((v, i, a) => a.indexOf(v) === i).sort();
+    const cos = (S.managed_companies && S.managed_companies.length ? S.managed_companies : [...new Set(board.map(l => l.company).filter(Boolean))]).slice().sort();
     gid('a-co').innerHTML = '<option value="">ทุกบริษัท</option>' + cos.map(c => `<option>${esc(c)}</option>`).join('');
     const open = q.get('ticket_id') || q.get('id');
     if (open) openTicket(open);

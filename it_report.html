@@ -568,6 +568,10 @@ fetch('api.php?action=check_session', { credentials: 'same-origin' })
   .then(sess => {
     if (!sess.loggedin) { location.href = 'login.html'; return; }
     const perms = sess.effective_permissions || [];
+    // ซ่อนบริษัทที่ไม่ได้ดูแล (เลือกไปก็ไม่มีข้อมูล)
+    const mc = sess.managed_companies || [];
+    if (mc.length) document.querySelectorAll('#selCompany option').forEach(o => { if (o.value !== 'all' && !mc.includes(o.value)) o.remove(); });
+    if (mc.length === 1) { const s = document.getElementById('selCompany'); s.value = mc[0]; s.querySelector('option[value="all"]')?.remove(); }
     const canView = (sess.role === 'admin')
         || String(sess.primary_department || '').toUpperCase() === 'IT'
         || perms.includes('*')

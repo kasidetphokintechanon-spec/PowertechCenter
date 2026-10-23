@@ -10,6 +10,10 @@ $sql = "SELECT a.*, c.cat_name, d.dept_name FROM it_assets a
         WHERE 1=1";
 $params = [];
 $types = "";
+// ส่งออกเฉพาะบริษัทที่ดูแล
+[$cw, $cp] = scopeSql('a.company', userCompanies($conn));
+$sql .= $cw;
+foreach ($cp as $c) { $params[] = $c; $types .= 's'; }
 
 if (!empty($category)) {
     $sql .= " AND c.cat_name = ?";

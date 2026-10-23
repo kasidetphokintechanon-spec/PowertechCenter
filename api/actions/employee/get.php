@@ -167,16 +167,18 @@ if ($file === 'employees') {
         if ($file === 'it_logs') {
             $role = $_SESSION['role'] ?? 'guest';
             $sessionCompany = $_SESSION['company'] ?? '';
+            // ช่าง IT เห็นงานของบริษัทที่ดูแล (ตั้งในหน้ากำหนดสิทธิ์) · พนักงานทั่วไปเห็นแค่บริษัทที่ล็อกอิน
+            $logCos = $role === 'admin' ? null : (hasPermission($conn, 'it_log.access') ? userCompanies($conn) : ($sessionCompany ? [$sessionCompany] : null));
+            $logCoSql = $logCos === null ? '' : ($logCos ? 'company IN (' . implode(',', array_fill(0, count($logCos), '?')) . ')' : '1 = 0');
 
             // Lightweight payload for index.html dashboard (avoid loading full table into browser)
             if (($_GET['scope'] ?? '') === 'dashboard') {
                 $where = ["(status NOT IN ('Completed','Closed','Cancelled','Unrepairable') OR date >= DATE_SUB(NOW(), INTERVAL 90 DAY))"];
                 $params = [];
                 $types = '';
-                if ($role !== 'admin' && $sessionCompany) {
-                    $where[] = 'company = ?';
-                    $params[] = $sessionCompany;
-                    $types .= 's';
+                if ($logCoSql !== '') {
+                    $where[] = $logCoSql;
+                    foreach ($logCos as $c) { $params[] = $c; $types .= 's'; }
                 }
                 $whereStr = ' WHERE ' . implode(' AND ', $where);
                 $limit = min(400, max(50, (int)($_GET['limit'] ?? 250)));
@@ -230,7 +232,7 @@ if ($file === 'employees') {
                 if (!hasPermission($conn, 'it_log.access')) { echo json_encode(['status' => 'error', 'message' => 'Access Denied']); exit; }
                 $bw = ["(status NOT IN ('Completed','Cancelled','Unrepairable') OR DATE(COALESCE(closed_date, completed_date)) = CURDATE())"];
                 $bp = []; $bt = '';
-                if ($role !== 'admin' && $sessionCompany) { $bw[] = 'company = ?'; $bp[] = $sessionCompany; $bt .= 's'; }
+                if ($logCoSql !== '') { $bw[] = $logCoSql; foreach ($logCos as $c) { $bp[] = $c; $bt .= 's'; } }
                 $bsql = "SELECT id, date, company, requester, department, asset_id, requester_id, servicedBy, servicedById, problem, contact, status, type, urgency,
                         appointment_date, closed_date, completed_date, awaiting_confirmation_at, repair_cost, pr_no, po_no, vendor_name, eta_date, rating,
                         (SELECT MIN(e.created_at) FROM mt_ticket_events e WHERE e.log_id COLLATE utf8mb4_unicode_ci = it_logs.id COLLATE utf8mb4_unicode_ci AND e.event_type = 'CREATE') AS created_at,
@@ -257,11 +259,10 @@ if ($file === 'employees') {
             $page            = max(1, intval($_GET['page']     ?? 1));
             $perPage         = min(200, max(1, intval($_GET['per_page'] ?? 20)));
 
-            // Company restriction for non-admins
-            if ($role !== 'admin' && $sessionCompany) {
-                $where_clauses[] = "company = ?";
-                $params[] = $sessionCompany;
-                $types .= "s";
+            // Company restriction for non-admins (ช่าง = บริษัทที่ดูแล)
+            if ($logCoSql !== '') {
+                $where_clauses[] = $logCoSql;
+                foreach ($logCos as $c) { $params[] = $c; $types .= "s"; }
             }
             // Optional company filter (admin can cross-company)
             if ($filterId !== '') {

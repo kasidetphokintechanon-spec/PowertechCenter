@@ -47,6 +47,10 @@ $types  = '';
 
 if ($status) { $where[] = 'status=?'; $params[] = $status; $types .= 's'; }
 if ($company) { $where[] = 'company=?'; $params[] = $company; $types .= 's'; }
+// ใบติดตั้งมี IP / ชื่อผู้ใช้ VPN — เห็นเฉพาะบริษัทที่ดูแล
+$cos = userCompanies($conn);
+$where[] = $cos ? 'company IN (' . implode(',', array_fill(0, count($cos), '?')) . ')' : '1=0';
+foreach ($cos as $c) { $params[] = $c; $types .= 's'; }
 if ($search) {
     $like = '%'.$search.'%';
     $where[] = '(employee_name LIKE ? OR asset_code LIKE ? OR pc_name LIKE ?)';

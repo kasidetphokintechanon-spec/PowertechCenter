@@ -41,10 +41,12 @@ $role = $_SESSION['role'] ?? 'guest';
 $sessionCompany = $_SESSION['company'] ?? '';
 $stmt = null;
 
-if ($role !== 'admin' && !empty($sessionCompany)) {
-    $sql .= " WHERE a.company = ? ORDER BY a.id DESC";
+// ผู้ดูแลทรัพย์สิน/ช่าง IT เห็นบริษัทที่ดูแล · คนอื่นเฉพาะบริษัทที่ล็อกอิน
+$assetCos = (hasPermission($conn, 'asset.manage') || hasPermission($conn, 'it_log.access')) ? userCompanies($conn) : (!empty($sessionCompany) ? [$sessionCompany] : []);
+if ($role !== 'admin' && (!empty($sessionCompany) || $assetCos)) {
+    $sql .= ($assetCos ? " WHERE a.company IN (" . implode(',', array_fill(0, count($assetCos), '?')) . ")" : " WHERE 1 = 0") . " ORDER BY a.id DESC";
     $stmt = $conn->prepare($sql);
-    if ($stmt) $stmt->bind_param("s", $sessionCompany);
+    if ($stmt && $assetCos) $stmt->bind_param(str_repeat('s', count($assetCos)), ...$assetCos);
 } else {
     $sql .= " ORDER BY a.id DESC";
     $stmt = $conn->prepare($sql);
