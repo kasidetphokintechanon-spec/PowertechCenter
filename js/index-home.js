@@ -170,9 +170,10 @@
         // ตัวเลขบน "ระบบจัดการ" = งานค้างรวม (งานซ่อมรอรับ + ยืมรออนุมัติ + ของใกล้หมด)
         if (adminLink && !adminLink.classList.contains('index-admin-link-hidden')) {
             fetch('api.php?action=get_pending_counts', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => {
-                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_pending || 0);
+                const rm = (+d.room_pending || 0) + (+d.room_prep || 0);
+                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_pending || 0) + rm;
                 const b = $('mgmtBadge');
-                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ใบเบิกรออนุมัติ ' + (d.stock_pending || 0); }
+                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ใบเบิกรออนุมัติ ' + (d.stock_pending || 0) + ' · ห้องประชุม ' + rm; }
             }).catch(() => {});
         }
 
@@ -227,13 +228,16 @@
         });
     }
 
-    function renderMyStatus(tickets, loans, stock) {
+    let roomTodo = null;
+    function renderMyStatus(tickets, loans, stock, rooms, todo) {
         const container = $('my-status-content');
         if (!container) return;
         const ticketList = Array.isArray(tickets) ? tickets : [];
         const loanList = Array.isArray(loans) ? loans : [];
         const stockList = Array.isArray(stock) ? stock : [];
-        const total = ticketList.length + loanList.length + stockList.length;
+        const roomList = Array.isArray(rooms) ? rooms : [];
+        const rp = todo ? (+todo.pending || 0) : 0, rq = todo ? (+todo.prep || 0) : 0;
+        const total = ticketList.length + loanList.length + stockList.length + roomList.length + (rp + rq ? 1 : 0);
 
         const uidMe = String(session.user_id || '');
         const mineReq = ticketList.filter((l) => String(l.requester_id ?? '') === uidMe);
@@ -251,13 +255,19 @@
             '<div class="h2-kp">' + kp.map((k) => '<div><b style="color:' + k[2] + '">' + k[1] + '</b><span>' + k[0] + '</span></div>').join('') + '</div>';
         if (total === 0) {
             container.innerHTML = head + '<div class="status-clear"><i class="fas fa-circle-check"></i>' +
-                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อม การยืม และใบเบิกของของคุณเรียบร้อยทั้งหมด</span></div></div>';
+                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อม การยืม ใบเบิกของ และการจองห้องของคุณเรียบร้อยทั้งหมด</span></div></div>';
             return;
         }
         const STEP = { Pending: 1, Received: 2, 'Awaiting Confirmation': 4 };
         const steps = (n, cls) => '<div class="h2-steps ' + (cls || '') + '">' + [1, 2, 3, 4, 5].map((i) => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
         const shortName = (v) => String(v || '').replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|นาย|นาง|นางสาว)\s*/i, '').split(' ')[0];
         const jobs = [];
+        // ผู้ดูแลห้องประชุม: งานที่ต้องจัดการขึ้นก่อน (อนุมัติช้า = คนจองไม่รู้ว่าได้ห้องไหม)
+        if (rp + rq) {
+            jobs.push('<a class="h2-job" href="rooms.html?tab=keep"><div class="h2-job-top"><b>ห้องประชุมที่คุณดูแล</b>' +
+                '<span class="h2-pill" style="--c:#d97706">' + (rp + rq) + ' งาน</span></div>' +
+                '<div class="h2-job-sub">' + [rp ? 'รออนุมัติ ' + rp : '', rq ? 'ต้องเตรียมของวันนี้ ' + rq : ''].filter(Boolean).join(' · ') + '</div></a>');
+        }
         ticketList.slice(0, 5).forEach((l) => {
             const lbl = STATUS_LABEL[l.status] || l.status;
             const dot = STATUS_DOT[l.status] || '#94a3b8';
@@ -281,6 +291,22 @@
             jobs.push('<a class="h2-job" href="stock_request.html?tab=mine"><div class="h2-job-top"><b>เบิก ' + esc(r.items || r.type_th) + '</b>' +
                 '<span class="h2-pill" style="--c:' + (SC[r.status] || '#64748b') + '">' + esc(r.status_th) + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(r.code) + ' · ' + esc(SSUB[r.status] || '') + '</div>' + steps(SSTEP[r.status] || 1) + '</a>');
+        });
+        // จองห้องประชุม: ไม่อนุมัติ / รออนุมัติ / ประชุมวันนี้-พรุ่งนี้ (ไม่มีขั้นตอนเป็นลำดับ จึงไม่ใส่แถบขั้น)
+        const today = new Date(), dkey = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        const tmr = new Date(today.getTime() + 864e5);
+        const when = (s, e) => {
+            const d = String(s).slice(0, 10), hm = (v) => String(v).slice(11, 16);
+            const day = d === dkey(today) ? 'วันนี้' : d === dkey(tmr) ? 'พรุ่งนี้' : new Date(d + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            return day + ' ' + hm(s) + '–' + hm(e);
+        };
+        roomList.forEach((b) => {
+            const st = b.status === 'rejected' ? ['ไม่อนุมัติ', '#dc2626', 'เหตุผล: ' + (b.cancel_reason || '-')]
+                : b.status === 'pending' ? ['รออนุมัติ', '#d97706', 'รอผู้ดูแลห้องอนุมัติ']
+                : [b.needs_approval ? 'อนุมัติแล้ว' : 'จองแล้ว', b.needs_approval ? '#16a34a' : '#0d9488', b.extras ? (b.prepared_at ? 'ผู้ดูแลเตรียมของแล้ว' : 'ขอเตรียมของไว้แล้ว') : ''];
+            jobs.push('<a class="h2-job" href="rooms.html?tab=mine"><div class="h2-job-top"><b>ห้อง ' + esc(b.room_name) + ' · ' + esc(b.title) + '</b>' +
+                '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
+                '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + (st[2] ? ' · ' + esc(st[2]) : '') + '</div></a>');
         });
         const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
         container.innerHTML = head + jobs.join('') + more;
@@ -508,7 +534,7 @@
         const QUICK = [
             { svc: 'IT -Service', href: 'request.html?tab=form', icon: 'fa-plus', t: 'แจ้งซ่อม IT', s: 'คอม / โปรแกรม / เน็ต', pri: true },
             { svc: 'service-it-loan', icon: 'fa-right-left', t: 'ยืมอุปกรณ์', s: 'โน้ตบุ๊ก โปรเจกเตอร์', tone: 'stock' },
-            { svc: 'service-room', href: 'rooms.html', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
+            { svc: 'service-room-new', href: 'rooms.html', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
             { svc: 'service-contact', icon: 'fa-address-book', t: 'หาเบอร์เพื่อน', s: 'สมุดรายชื่อ', tone: 'people' },
         ];
         row.innerHTML = '';
@@ -649,6 +675,10 @@
         if ((kpi.loan_pending || 0) > 0) {
             html += '<div class="notif-item" data-href="borrow_management.html">คำขอยืมรออนุมัติ ' + kpi.loan_pending + ' รายการ</div>';
         }
+        const rm = roomTodo ? (+roomTodo.pending || 0) + (+roomTodo.prep || 0) : 0;
+        if (rm > 0) {
+            html += '<div class="notif-item" data-href="rooms.html?tab=keep">ห้องประชุมรอคุณจัดการ ' + rm + ' รายการ</div>';
+        }
         if (!html) html = '<div class="notif-empty">ไม่มีการแจ้งเตือนใหม่</div>';
         list.innerHTML = html;
         list.querySelectorAll('.notif-item').forEach((el) => {
@@ -658,7 +688,7 @@
             });
         });
         const badge = $('notifBadge');
-        const total = (kpi.pending || 0) + (kpi.loan_pending || 0);
+        const total = (kpi.pending || 0) + (kpi.loan_pending || 0) + rm;
         if (badge) {
             if (total > 0) {
                 badge.textContent = total > 99 ? '99+' : String(total);
@@ -680,7 +710,8 @@
             }
             applySession(data.session || {});
             renderKpi(data.kpi || {});
-            renderMyStatus(data.my_tickets, data.my_loans, data.my_stock);
+            renderMyStatus(data.my_tickets, data.my_loans, data.my_stock, data.my_rooms, data.room_todo);
+            roomTodo = data.room_todo;
 
             renderServices(data.services || []);
             renderNotifList(data.kpi || {});

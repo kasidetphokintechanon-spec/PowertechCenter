@@ -150,6 +150,32 @@ try {
     error_log('[get_home_dashboard] stock: ' . $e->getMessage());
 }
 
+// การจองห้องของฉัน (สูงสุด 3): ไม่อนุมัติ (3 วันล่าสุด) → รออนุมัติ → ประชุมวันนี้/พรุ่งนี้
+$myRooms = [];
+$roomTodo = null;
+try {
+    _initRoomTables($conn);
+    $st = $conn->prepare("SELECT b.id, b.code, b.title, b.start_at, b.end_at, b.status, b.extras, b.prepared_at, b.cancel_reason, r.name AS room_name, r.needs_approval
+        FROM rm_bookings b JOIN rm_rooms r ON r.id = b.room_id
+        WHERE b.booker_id = ? AND (
+            (b.status = 'pending' AND b.end_at > NOW())
+            OR (b.status = 'booked' AND b.end_at > NOW() AND b.start_at < CURDATE() + INTERVAL 2 DAY)
+            OR (b.status = 'rejected' AND b.start_at > NOW() AND b.cancelled_at >= NOW() - INTERVAL 3 DAY))
+        ORDER BY FIELD(b.status, 'rejected', 'pending', 'booked'), b.start_at LIMIT 3");
+    if ($st) {
+        $st->bind_param('s', $userId);
+        $st->execute();
+        foreach ($st->get_result()->fetch_all(MYSQLI_ASSOC) as $r) {
+            $r['id'] = (int)$r['id']; $r['needs_approval'] = (int)$r['needs_approval']; $r['extras'] = $r['extras'] !== null && $r['extras'] !== '';
+            $myRooms[] = $r;
+        }
+    }
+    // ผู้ดูแลห้อง: งานที่ต้องจัดการ (ตัวเลขเดียวกับเมนูห้องประชุม)
+    if (roomCanManage($conn)) $roomTodo = roomKeeperTodo($conn);
+} catch (Throwable $e) {
+    error_log('[get_home_dashboard] rooms: ' . $e->getMessage());
+}
+
 // Services menu (light columns)
 $services = [];
 try {
@@ -195,6 +221,8 @@ echo json_encode([
     'my_tickets' => $myTickets,
     'my_loans' => $myLoans,
     'my_stock' => $myStock,
+    'my_rooms' => $myRooms,
+    'room_todo' => $roomTodo,
     'services' => $services,
     'queue' => ['pending' => $queuePending, 'active' => $queueActive],
     'pending_total' => (int)$kpi['pending'] + (int)$kpi['loan_pending'],

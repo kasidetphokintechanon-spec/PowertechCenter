@@ -185,7 +185,7 @@ function renderDay() {
         <div class="tl"><div class="tl-in" style="--span:${SPAN}"><div class="tl-row hd"><div class="tl-rm" style="cursor:default"><small>ห้อง</small></div><div class="lane">${hours}</div></div>${lanes || '<div class="empty">ไม่มีห้องที่จุคนได้ตามที่เลือก</div>'}</div></div>
         <div class="legend"><span><i style="background:#ccfbf1;border:1px solid #5eead4"></i>จองแล้ว</span><span><i style="background:#dbeafe;border:1px solid #93c5fd"></i>ของคุณ</span><span><i style="background:#fde68a;border:1px solid #f59e0b"></i>ที่เลือก</span><span><i style="background:#fef3c7;border:1px dashed #f59e0b"></i>รออนุมัติ</span><span><i style="background:#dc2626;width:2px"></i>ตอนนี้</span><span>กดช่องว่าง = เลือกห้องและเวลา · กดแถบ = ดูว่าใครจอง</span></div>
     </div>
-    <div class="card form">${room ? `<h3 style="margin:0;font-size:15px">จอง ${esc(room.name)}</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">${esc([room.building, room.seats ? room.seats + ' คน' : '', room.equipment].filter(Boolean).join(' · '))}${room.contact_name ? `<br>ผู้ดูแลห้อง ${esc(room.contact_name)} ${esc(room.contact_phone || '')}` : ''}</p>`
+    <div class="card form">${room && room.photo ? `<img src="${esc(room.photo)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;margin-bottom:10px;background:var(--ptc-surface-2)" onerror="this.remove()">` : ''}${room ? `<h3 style="margin:0;font-size:15px">จอง ${esc(room.name)}</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">${esc([room.building, room.seats ? room.seats + ' คน' : '', room.equipment].filter(Boolean).join(' · '))}${room.contact_name ? `<br>ผู้ดูแลห้อง ${esc(room.contact_name)} ${esc(room.contact_phone || '')}` : ''}</p>`
             : '<h3 style="margin:0;font-size:15px">เลือกห้องก่อน</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">กดช่องว่างในตาราง หรือเลือกจากรายการ</p>'}
         ${room && room.needs_approval ? '<div class="note" style="color:#d97706"><i class="fa fa-user-check"></i>ห้องนี้ต้องให้ผู้ดูแลห้องอนุมัติก่อนใช้</div>' : ''}
         <div class="f"><label>ห้อง</label><select onchange="selRoom(+this.value)"><option value="">— เลือกห้อง —</option>${D.rooms.map(r => `<option value="${r.id}" ${r.id === BF.room_id ? 'selected' : ''}>${esc(r.name)}${r.seats ? ' (' + r.seats + ' คน)' : ''}</option>`).join('')}</select></div>
@@ -346,22 +346,28 @@ async function cancelBk(id, keeper) {
 }
 
 // ── ผู้ดูแลห้อง ──
-let kv = 'today', K = null;
-function keepTabs() { return `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">${[['today', 'วันนี้ต้องเตรียม'], ['tomorrow', 'พรุ่งนี้'], ['week', '7 วันข้างหน้า'], ['rooms', 'ห้อง'], ['report', 'รายงาน']].map(([k, t]) => `<button class="chip ${kv === k ? 'on' : ''}" onclick="kv='${k}';loadKeep()">${t}</button>`).join('')}</div>`; }
+let kv = 'today', K = null, KC = { pending: 0, prep: 0 };
+// ตัวเลขแท็บผู้ดูแล = ตัวเลขบนเมนูซ้าย (รออนุมัติ + วันนี้ต้องเตรียม) ใช้ที่มาเดียวกันจะได้ไม่ขัดกัน
+async function refreshKeepCnt() {
+    try { const d = await (await fetch('api.php?action=get_pending_counts', { cache: 'no-store' })).json(); KC = { pending: d.room_pending || 0, prep: d.room_prep || 0 }; } catch (_) { return KC; }
+    const n = KC.pending + KC.prep; gid('keep-cnt').textContent = n; gid('keep-cnt').style.display = n ? '' : 'none';
+    return KC;
+}
+function keepTabs() { return `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">${[['pending', 'รออนุมัติ' + (KC.pending ? ' (' + KC.pending + ')' : '')], ['today', 'วันนี้ต้องเตรียม'], ['tomorrow', 'พรุ่งนี้'], ['week', '7 วันข้างหน้า'], ['rooms', 'ห้อง'], ['report', 'รายงาน']].map(([k, t]) => `<button class="chip ${kv === k ? 'on' : ''}" data-kv="${k}" onclick="kv='${k}';loadKeep()">${t}</button>`).join('')}</div>`; }
 async function loadKeep() {
     gid('v-keep').innerHTML = keepTabs() + '<div class="card empty">กำลังโหลด…</div>';
     try {
         if (kv === 'rooms') return renderRooms(await api({ action: 'room_rooms' }));
         if (kv === 'report') return renderReport(await api({ action: 'room_report', month: K?.month || ymd(new Date()).slice(0, 7) }));
         const d0 = kv === 'tomorrow' ? addDays(ymd(new Date()), 1) : ymd(new Date());
-        K = { ...(K || {}), list: (await api({ action: 'room_prep', date: d0, days: kv === 'week' ? 7 : 1 })).data };
+        K = { ...(K || {}), list: (await api(kv === 'pending' ? { action: 'room_prep', pending: 1 } : { action: 'room_prep', date: d0, days: kv === 'week' ? 7 : 1 })).data };
     } catch (e) { gid('v-keep').innerHTML = keepTabs() + `<div class="card empty">${esc(e.message)}</div>`; return; }
     const list = K.list, need = list.filter(b => b.status === 'pending' || (b.extras.length && !b.prepared_at)).length;
-    if (kv === 'today') { gid('keep-cnt').textContent = need; gid('keep-cnt').style.display = need ? '' : 'none'; }
+    refreshKeepCnt().then(() => { const b = gid('v-keep').querySelector('[data-kv="pending"]'); if (b) b.textContent = 'รออนุมัติ' + (KC.pending ? ' (' + KC.pending + ')' : ''); });
     const byDay = {};
     list.forEach(b => (byDay[b.start_at.slice(0, 10)] = byDay[b.start_at.slice(0, 10)] || []).push(b));
     gid('v-keep').innerHTML = keepTabs() + (list.length ? Object.entries(byDay).map(([d, bs]) => `<h3 style="font-size:13.5px;margin:14px 0 6px">${thDay(d)} · ${bs.length} การจอง${bs.some(b => b.status === 'pending') ? ` · <span style="color:#d97706">รออนุมัติ ${bs.filter(b => b.status === 'pending').length}</span>` : ''}${bs.some(b => b.status === 'booked' && b.extras.length && !b.prepared_at) ? ` · <span style="color:#d97706">ต้องเตรียม ${bs.filter(b => b.status === 'booked' && b.extras.length && !b.prepared_at).length}</span>` : ''}</h3><div class="card">${bs.map(b => rowHtml(b, true)).join('')}</div>`).join('')
-        : '<div class="card empty"><i class="fa fa-mug-hot"></i><br>ไม่มีการจองในห้องที่คุณดูแล</div>');
+        : `<div class="card empty"><i class="fa fa-mug-hot"></i><br>${kv === 'pending' ? 'ไม่มีการจองรออนุมัติ' : 'ไม่มีการจองในห้องที่คุณดูแล'}</div>`);
 }
 async function decideBk(id, d) {
     let reason = '';
@@ -427,8 +433,9 @@ function tab(t) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(qs.get('date') || '')) date = qs.get('date');
     api({ action: 'room_people' }).then(j => { PEOPLE = j.people || []; peopleList(); }).catch(() => {});
     await loadDay(); loadMine();
+    if (D?.can_manage) await refreshKeepCnt();
+    if (KC.pending) kv = 'pending';
     tab(['mine', 'keep'].includes(qs.get('tab')) && (qs.get('tab') !== 'keep' || D?.can_manage) ? qs.get('tab') : 'day');
-    if (D?.can_manage) api({ action: 'room_prep' }).then(j => { const n = j.data.filter(b => b.extras.length && !b.prepared_at).length; gid('keep-cnt').textContent = n; gid('keep-cnt').style.display = n ? '' : 'none'; }).catch(() => {});
     // รีเฟรชตารางทุก 1 นาที (เส้นเวลาตอนนี้ + การจองของคนอื่น) — ไม่รีเฟรชตอนกำลังพิมพ์ในฟอร์ม
     setInterval(() => { if (document.visibilityState === 'visible' && gid('v-day').style.display !== 'none' && !document.activeElement?.closest?.('.form')) loadDay(); }, 60000);
 })();

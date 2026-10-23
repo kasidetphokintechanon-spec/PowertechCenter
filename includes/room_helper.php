@@ -157,6 +157,20 @@ function roomKeptIds($conn) {
     }
     return $memo = $ids;
 }
+/** งานค้างของผู้ดูแลห้อง (ตัวเลขบนเมนู): รออนุมัติทุกวันที่ยังไม่จบ + การจองวันนี้ที่ขอเตรียมของแต่ยังไม่ได้กดเตรียมแล้ว */
+function roomKeeperTodo($conn) {
+    $kept = roomKeptIds($conn);
+    if ($kept === []) return ['pending' => 0, 'prep' => 0];
+    $w = ''; $p = []; $t = '';
+    if ($kept !== null) { $w = ' AND room_id IN (' . implode(',', array_fill(0, count($kept), '?')) . ')'; $p = $kept; $t = str_repeat('i', count($kept)); }
+    $n = function ($cond) use ($conn, $w, $p, $t) {
+        $st = $conn->prepare("SELECT COUNT(*) FROM rm_bookings WHERE {$cond}{$w}");
+        if ($t) $st->bind_param($t, ...$p);
+        $st->execute(); return (int)$st->get_result()->fetch_row()[0];
+    };
+    return ['pending' => $n("status = 'pending' AND end_at > NOW()"),
+        'prep' => $n("status = 'booked' AND extras <> '' AND prepared_at IS NULL AND DATE(start_at) = CURDATE() AND end_at > NOW()")];
+}
 function roomKeeps($conn, $roomId) { $k = roomKeptIds($conn); return $k === null ? roomCanManage($conn) : in_array((int)$roomId, $k, true); }
 
 function roomNextCode($conn) {
@@ -226,5 +240,6 @@ function roomNotify($conn, $event, $title, $b, $extra = [], $force = false) {
         "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : '') . ($b['contact'] ? " · {$b['contact']}" : ''),
         $ex ? "<b>เตรียม:</b> " . roomExtrasText($ex, $b['room_company'] ?? null) . ($b['extras_note'] ? " ({$b['extras_note']})" : '') : '<b>เตรียม:</b> -'];
     foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> {$v}";
-    sendNotify($conn, implode("\n", array_filter($lines)), $event, $b['company'] ?: null);
+    // ส่งตามบริษัทเจ้าของห้อง (กลุ่มผู้ดูแลห้องนั้น) ไม่ใช่บริษัทผู้จอง — คน PT4 จองห้อง PTA ต้องเตือนผู้ดูแล PTA
+    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['room_company'] ?? '') ?: ($b['company'] ?: null));
 }

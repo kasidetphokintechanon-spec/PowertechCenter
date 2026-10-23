@@ -7,6 +7,12 @@ $j = json_decode((string)($_POST['payload'] ?? ''), true);
 if (!is_array($j) || !isset($j['rooms'], $j['reservations'])) throw new Exception('ข้อมูลนำเข้าไม่ถูกต้อง');
 // รหัสของเดิม (tb_equip) → ของที่ขอเตรียมแบบใหม่
 $EQ = ['01' => 'welcome', '02' => 'water', '03' => 'coffee', '04' => 'coffee', '05' => 'snack', '06' => 'food', '07' => 'fruit', '08' => 'snack', '09' => 'projector', '10' => 'projector', '11' => 'confcall', '12' => 'mic', '13' => 'mic'];
+$ROOM_RENAME = [
+    1 => ['Mercedes-Benz', 'อาคาร F7 ชั้น 2'], 2 => ['War Room 1', 'อาคาร F7 ชั้น 1'], 3 => ['Conference Hall', 'Canteen F6 ชั้น 2'],
+    4 => ['BMW War Room', 'อาคาร F17 ชั้น 1'], 5 => ['Meeting Room 1', 'อาคาร F16 ชั้น 2'], 6 => ['War Room 2', 'อาคาร F16 ชั้น 1'],
+    7 => ['Meeting Room 2', 'Canteen F17 ชั้น 2'], 8 => ['Training Room 1', 'อาคาร F8 ชั้น 2 (ห้องนอก)'], 9 => ['Training Room 2', 'อาคาร F8 ชั้น 2 (ห้องใน)'],
+    10 => ['BMW Meeting Room', 'อาคาร F4 ชั้น 1'], 11 => ['Meeting Room 3', 'อาคาร F6 ชั้น 1'], 12 => ['Meeting Room 4', 'อาคาร F20 ชั้น 2'], 13 => ['PTE Meeting Room', 'อาคาร PTE ชั้นล่าง'],
+];
 $map = [];
 foreach ($conn->query("SELECT id, legacy_id FROM rm_rooms WHERE legacy_id IS NOT NULL")->fetch_all() as [$id, $lg]) $map[(int)$lg] = (int)$id;
 $newRooms = 0;
@@ -14,6 +20,8 @@ $ins = $conn->prepare("INSERT INTO rm_rooms (name, building, seats, contact_name
 foreach ($j['rooms'] as $r) {
     $lg = (int)$r['id']; if (isset($map[$lg])) continue;
     $name = trim(preg_replace('/^RM\d+-/', '', (string)$r['name'])) ?: (string)$r['name'];
+    // ชื่อใหม่ที่ตกลงกัน (ชื่อห้องไม่มีตึก/ชั้น · ที่ตั้งแยกช่อง) ตามรหัสห้องของระบบเดิม
+    if (isset($ROOM_RENAME[(int)$r['id']])) { [$nm, $bd] = $ROOM_RENAME[(int)$r['id']]; $name = $nm; $r['place'] = $bd; }
     $b = trim((string)$r['place']); $s = (int)$r['sit_amount']; $cn = trim((string)$r['person_name']); $cp = trim((string)$r['phone']); $nt = trim((string)$r['detail']);
     $act = (int)$r['status'] === 0 ? 1 : 0; $so = $lg;
     // ระบบเดิมไม่มีบริษัท — เดาจากชื่อห้อง (เช่น PTE Meeting Room) ที่เหลือให้ผู้ดูแลตั้งเอง
