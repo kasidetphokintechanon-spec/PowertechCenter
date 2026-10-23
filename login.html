@@ -79,7 +79,7 @@
         }
         .sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
         .login-side-brand { display: flex; align-items: center; gap: .65rem; margin-bottom: 1.1rem; }
-        .login-side-title { font-size: 1.35rem; font-weight: 800; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 .55rem; }
+        .login-side-title { font-size: 1.35rem; font-weight: 800; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 .55rem; color: #fff !important; }
         .login-side-desc { font-size: .8125rem; line-height: 1.55; opacity: .85; margin: 0; }
         .login-side-features { display: flex; flex-direction: column; gap: .45rem; margin-bottom: 1rem; }
         .login-side-features > div { display: flex; align-items: center; gap: .5rem; font-size: .75rem; opacity: .9; }
@@ -505,7 +505,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="css/login-unified-theme.css?v=20260529">
+    <link rel="stylesheet" href="css/login-unified-theme.css?v=20261023">
 <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
 </head>
 <body  class="ptc-normalize ptc-body lang-th login-unified-v1 ptc-unified-v1">
@@ -527,7 +527,7 @@
         <div id="login-sidebar" class="login-sidebar" aria-hidden="true">
             <div class="migard-side-top" style="position:relative;z-index:1">
                 <h1 class="login-side-title">
-                    Powertech<br>IT Support Center
+                    Powertech<br>System Center
                 </h1>
                 <p id="company-desc" class="login-side-desc">
                     ศูนย์รวมระบบบริหารจัดการภายในองค์กร<br>เชื่อมต่อทุกการทำงานให้เป็นหนึ่งเดียว
@@ -538,22 +538,21 @@
                 <!-- Feature bullets -->
                 <div class="login-side-features">
                     <div>
-                        <i class="fas fa-ticket-alt" style="width:14px;text-align:center;opacity:.8"></i>
-                        <span>ระบบแจ้งซ่อมและติดตามสถานะ</span>
+                        <i class="fas fa-screwdriver-wrench" style="width:14px;text-align:center;opacity:.8"></i>
+                        <span>แจ้งซ่อม IT และติดตามงาน</span>
                     </div>
                     <div>
-                        <i class="fas fa-boxes" style="width:14px;text-align:center;opacity:.8"></i>
-                        <span>บริหารจัดการทรัพย์สินและอุปกรณ์</span>
+                        <i class="fas fa-calendar-check" style="width:14px;text-align:center;opacity:.8"></i>
+                        <span>จองห้องประชุม</span>
                     </div>
                     <div>
-                        <i class="fas fa-chart-bar" style="width:14px;text-align:center;opacity:.8"></i>
-                        <span>Dashboard วิเคราะห์ข้อมูลเรียลไทม์</span>
+                        <i class="fas fa-right-left" style="width:14px;text-align:center;opacity:.8"></i>
+                        <span>ยืมอุปกรณ์ IT · เบิกของ</span>
                     </div>
-                </div>
-                <div class="sidebar-dots">
-                    <div class="sidebar-dot"></div>
-                    <div class="sidebar-dot" style="opacity:.6"></div>
-                    <div class="sidebar-dot" style="opacity:.35"></div>
+                    <div>
+                        <i class="fas fa-address-book" style="width:14px;text-align:center;opacity:.8"></i>
+                        <span>สมุดรายชื่อ · คู่มือการใช้งาน</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -574,7 +573,7 @@
 
                 <div>
                     <h2 class="login-welcome-title">ยินดีต้อนรับ</h2>
-                    <p class="login-welcome-sub">กรุณาลงชื่อเข้าใช้เพื่อจัดการระบบ</p>
+                    <p class="login-welcome-sub">เข้าสู่ระบบด้วยรหัสพนักงานของคุณ</p>
                 </div>
             </div>
 
@@ -594,18 +593,18 @@
 
                 <!-- Username -->
                 <div>
-                    <label class="field-label" for="username">Username</label>
+                    <label class="field-label" for="username">รหัสพนักงาน</label>
                     <div class="field-wrap">
                         <i class="field-icon fas fa-user"></i>
                         <input type="text" id="username" class="login-input input-theme"
-                               placeholder="ชื่อผู้ใช้ หรือ รหัสพนักงาน" required autocomplete="username">
+                               placeholder="รหัสพนักงาน หรือชื่อผู้ใช้" required autocomplete="username">
                     </div>
                 </div>
 
                 <!-- Password -->
                 <div>
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.375rem">
-                        <label class="field-label" for="password" style="margin:0">Password</label>
+                        <label class="field-label" for="password" style="margin:0">รหัสผ่าน</label>
                         <a href="forgot_password.html" class="login-link btn-text-theme"
                            style="font-size:.75rem">ลืมรหัสผ่าน?</a>
                     </div>
@@ -657,13 +656,11 @@
                     ติดตั้งแอปหลัก
                 </button>
                 <div style="font-size:.6875rem;color:var(--ptc-text-faint);display:flex;align-items:center;justify-content:center;gap:.625rem;flex-wrap:wrap">
-                    <a href="index.html" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">Dashboard</a>
+                    <a href="help.html" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">คู่มือการใช้งาน</a>
                     <span>·</span>
-                    <a href="reg_generator.html" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">Setup Tools</a>
+                    <a href="directory.html?public=1" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">สมุดรายชื่อ</a>
                     <span>·</span>
-                    <a href="directory.html?public=1" style="color:inherit;text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--ptc-text-muted)'" onmouseout="this.style.color='var(--ptc-text-faint)'">Directory</a>
-                    <span>·</span>
-                    <span>© 2025 Powertech Group</span>
+                    <span>© <span id="footYear">2026</span> Powertech Group</span>
                 </div>
                 <div style="font-size:.625rem;color:var(--ptc-text-faint);opacity:.75">Developed by Kasidet P.</div>
             </div>
@@ -673,6 +670,7 @@
     <script>
         /* ── Session check: ถ้า login ค้างอยู่แล้ว redirect ทันทีโดยไม่โชว์ฟอร์ม ── */
         const REMEMBERED_COMPANY_KEY = 'ptc_login_company';
+        document.getElementById('footYear').textContent = new Date().getFullYear();
 
         function revealLoginCard() {
             const loader = document.getElementById('pageLoader');

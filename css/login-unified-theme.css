@@ -30,7 +30,7 @@ html.dark body.login-unified-v1 .login-card {
 
 /* Default sidebar: log blue (company themes PTA/PT4/PTE unchanged) */
 body.login-unified-v1 .login-sidebar:not(.theme-pta):not(.theme-pt4):not(.theme-pte) {
-    background: linear-gradient(150deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%) !important;
+    background: #1d4ed8 !important;
 }
 
 body.login-unified-v1 .migard-badge {
