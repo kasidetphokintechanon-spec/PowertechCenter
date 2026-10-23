@@ -166,7 +166,7 @@ function carKeeperTodo($conn) {
 }
 
 /** LINE/Telegram ไปกลุ่มของบริษัทเจ้าของรถ (ผู้ดูแลรถคันนั้น) */
-function carNotify($conn, $event, $title, $b, $extra = []) {
+function carNotify($conn, $event, $title, $b, $extra = [], $ref = null) {
     if (!function_exists('sendNotify') || !$b) return;
     $sameDay = date('Y-m-d', strtotime($b['start_at'])) === date('Y-m-d', strtotime($b['end_at']));
     $when = date('d/m H:i', strtotime($b['start_at'])) . '–' . ($sameDay ? date('H:i', strtotime($b['end_at'])) : date('d/m H:i', strtotime($b['end_at'])));
@@ -175,5 +175,69 @@ function carNotify($conn, $event, $title, $b, $extra = []) {
         !empty($b['rider_name']) ? "<b>ผู้ใช้รถ:</b> {$b['rider_name']}" : '',
         "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : '') . ($b['contact'] ? " · {$b['contact']}" : '')];
     foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> {$v}";
-    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['car_company'] ?? '') ?: ($b['company'] ?: null));
+    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['car_company'] ?? '') ?: ($b['company'] ?: null), $ref);
+}
+
+/**
+ * แจ้งเตือนตามเวลา (เรียกจาก _checkNotifyCrons ทุก 5 นาที) · กันส่งซ้ำด้วย notify_log (event + ref)
+ *   car_daily        16:00–18:00 งานคนขับ + ใบจองของวันทำงานถัดไป แยกกลุ่มตามบริษัทเจ้าของรถ (วันละครั้งต่อบริษัท)
+ *   car_pending_soon อีกไม่ถึง 1 ชม. จะออกรถ แต่ยังไม่อนุมัติ (ต่อใบ ครั้งเดียว) — ระบบเดิมมีใบที่ไม่มีใครกดหลายร้อยใบ
+ *   car_key_overdue  เลยเวลาคืน 1 ชม. แล้วยังไม่รับกุญแจ (ต่อใบ ครั้งเดียว · ส่งเฉพาะ 07–20 น.)
+ */
+function _cronCars($conn) {
+    _initCarTables($conn);
+    $hm = date('H:i');
+    if ($hm >= '16:00' && $hm < '18:00') _cronCarDaily($conn);
+    $ids = fn($sql) => array_column($conn->query($sql)->fetch_all(), 0);
+    foreach ($ids("SELECT id FROM cr_bookings WHERE status = 'pending' AND start_at <= NOW() + INTERVAL 1 HOUR AND end_at > NOW()") as $id) {
+        $b = carGet($conn, (int)$id);
+        if (!$b || notifyAlreadySent($conn, 'car_pending_soon', $b['code'])) continue;
+        $min = (int)round((strtotime($b['start_at']) - time()) / 60);
+        carNotify($conn, 'car_pending_soon', '⏳ ใกล้เวลาออกรถ — ยังไม่อนุมัติ', $b, ['ออกรถ' => $min > 0 ? "อีก {$min} นาที" : 'ถึงเวลาแล้ว'], $b['code']);
+    }
+    if ($hm < '07:00' || $hm >= '20:00') return;
+    foreach ($ids("SELECT id FROM cr_bookings WHERE status IN ('approved','returning') AND end_at < NOW() - INTERVAL 1 HOUR") as $id) {
+        $b = carGet($conn, (int)$id);
+        if (!$b || notifyAlreadySent($conn, 'car_key_overdue', $b['code'])) continue;
+        $late = (int)round((time() - strtotime($b['end_at'])) / 3600);
+        carNotify($conn, 'car_key_overdue', '🔑 เลยเวลาคืนรถ — ยังไม่รับกุญแจ', $b,
+            ['สถานะ' => $b['status'] === 'returning' ? 'คนจองกดคืนแล้ว รอผู้ดูแลรับกุญแจ' : 'ยังไม่คืนรถ', 'เลยมา' => $late >= 24 ? round($late / 24) . ' วัน' : "{$late} ชม."], $b['code']);
+    }
+}
+
+/** วันทำงานถัดไป (ข้ามวันหยุดในตั้งค่าวันหยุด) — ศุกร์เย็นส่งของวันจันทร์ */
+function _carNextWorkday($conn) {
+    for ($i = 1; $i <= 7; $i++) { $d = date('Y-m-d', strtotime("+$i day")); if (!function_exists('_notifyIsWorkday') || _notifyIsWorkday($conn, $d)) return $d; }
+    return date('Y-m-d', strtotime('+1 day'));
+}
+
+function _cronCarDaily($conn) {
+    $day = _carNextWorkday($conn);
+    $from = "$day 00:00:00"; $to = date('Y-m-d', strtotime("$day +1 day")) . ' 00:00:00';
+    $st = $conn->prepare("SELECT b.*, c.plate, c.company AS car_company, d.name AS driver_name, d.nickname AS driver_nick FROM cr_bookings b JOIN cr_cars c ON c.id = b.car_id LEFT JOIN cr_drivers d ON d.id = b.driver_id
+        WHERE b.status IN ('pending','approved','returning') AND b.start_at < ? AND b.end_at > ? ORDER BY b.start_at");
+    $st->bind_param('ss', $to, $from); $st->execute();
+    $by = [];
+    foreach ($st->get_result()->fetch_all(MYSQLI_ASSOC) as $b) $by[(string)$b['car_company']][] = $b;
+    $drivers = $conn->query("SELECT id, name, nickname FROM cr_drivers WHERE is_active = 1 ORDER BY name")->fetch_all(MYSQLI_ASSOC);
+    $dTh = (int)date('j', strtotime($day)) . '/' . date('m', strtotime($day)) . '/' . (date('Y', strtotime($day)) + 543);
+    $wd = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'][(int)date('w', strtotime($day))];
+    foreach ($by as $co => $rows) {
+        $ref = "$day:" . ($co ?: '-');
+        if (notifyAlreadySent($conn, 'car_daily', $ref)) continue;
+        $tm = fn($b) => date('H:i', strtotime($b['start_at'])) . '–' . date('H:i', strtotime($b['end_at']));
+        $who = fn($b) => ($b['rider_name'] ?: $b['booker_name']);
+        $lines = ["<b>🚗 งานรถวัน{$wd} {$dTh}" . ($co ? " ({$co})" : '') . ' — ' . count($rows) . ' ใบ</b>'];
+        foreach ($drivers as $d) {
+            $jobs = array_filter($rows, fn($b) => (int)$b['driver_id'] === (int)$d['id']);
+            $lines[] = "<b>🧑‍✈️ {$d['name']}" . ($d['nickname'] ? " ({$d['nickname']})" : '') . ':</b> ' . ($jobs ? implode(' / ', array_map(fn($b) => $tm($b) . " {$b['plate']} → " . ($b['destination'] ?: $b['purpose']) . ' (' . $who($b) . ')', $jobs)) : 'ว่าง');
+        }
+        $need = array_filter($rows, fn($b) => (int)$b['need_driver'] && !$b['driver_id']);
+        if ($need) $lines[] = '<b>⚠️ ขอคนขับ ยังไม่ได้เลือก:</b> ' . implode(' / ', array_map(fn($b) => $tm($b) . " {$b['plate']}", $need));
+        $pend = array_filter($rows, fn($b) => $b['status'] === 'pending');
+        if ($pend) $lines[] = '<b>🕓 ยังรออนุมัติ:</b> ' . count($pend) . ' ใบ';
+        $lines[] = '<b>ทั้งหมด:</b>';
+        foreach ($rows as $b) $lines[] = '• ' . $tm($b) . " {$b['plate']} — {$b['purpose']}" . ($b['destination'] ? " → {$b['destination']}" : '') . ' · ' . $who($b) . ' · ' . ((int)$b['need_driver'] ? ($b['driver_name'] ?: 'ขอคนขับ') : 'ขับเอง');
+        sendNotify($conn, implode("\n", $lines), 'car_daily', $co ?: null, $ref);
+    }
 }

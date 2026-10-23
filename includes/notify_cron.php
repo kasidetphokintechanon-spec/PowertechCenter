@@ -8,6 +8,7 @@
  *   server_check_missing 15:00–18:00 วันทำงาน ห้องที่ยังไม่บันทึกผลตรวจวันนี้ (วันละครั้ง)
  *   loan_overdue         ยืมอุปกรณ์เลยกำหนดคืน (ต่อใบ ครั้งเดียว)
  *   it_daily_summary     08:00–10:00 วันทำงาน สรุปงานค้างให้ทีม IT (วันละครั้ง)
+ *   car_daily / car_pending_soon / car_key_overdue  จองรถ — ดู _cronCars ใน car_helper.php
  */
 
 // เวลาปิดงาน (ชม.) ชุดเดียวกับบอร์ดคิวงานและรายงาน IT
@@ -30,6 +31,7 @@ function _checkNotifyCrons($conn) {
         $workday = _notifyIsWorkday($conn, date('Y-m-d'));
         _cronItOverdue($conn);
         if (function_exists('_initLoanTables')) _cronLoanOverdue($conn);
+        if (function_exists('_cronCars')) _cronCars($conn);
         $hm = date('H:i');
         if ($workday && $hm >= '08:00' && $hm < '10:00') _cronItDailySummary($conn);
         if ($workday && $hm >= '15:00' && $hm < '18:00') _cronServerCheckMissing($conn);
