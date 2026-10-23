@@ -97,6 +97,11 @@ html.dark .ev.pick { background:rgba(245,158,11,.3); border-color:#f59e0b; color
 .prep { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
 .prep span { font-size:11.5px; padding:2px 8px; border-radius:6px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
 .prep span.done { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
+.prep span.wait { background:var(--ptc-surface-2); border-color:var(--ptc-border); color:var(--ptc-text-2); }
+html.dark .prep span.wait { background:var(--ptc-surface-2); border-color:var(--ptc-border); color:var(--ptc-text-2); }
+.pst { margin-top:6px; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.row .tx .pst.wait { color:#b45309; } .row .tx .pst.ok { color:#15803d; } .pst small { font-weight:500; color:var(--ptc-text-muted); }
+html.dark .row .tx .pst.wait { color:#fbbf24; } html.dark .row .tx .pst.ok { color:#86efac; }
 html.dark .prep span { background:rgba(217,119,6,.12); border-color:rgba(217,119,6,.35); color:#fcd34d; } html.dark .prep span.done { background:rgba(22,163,74,.12); border-color:rgba(22,163,74,.4); color:#86efac; }
 .tbl { width:100%; border-collapse:collapse; font-size:13px; }
 .tbl th { text-align:left; font-size:11.5px; color:var(--ptc-text-muted); font-weight:700; padding:9px 12px; border-bottom:1px solid var(--ptc-border); white-space:nowrap; }
@@ -314,9 +319,11 @@ function rowHtml(b, keeper) {
     const now = new Date(), past = toD(b.end_at) < now, off = !['booked', 'pending'].includes(b.status) || past, soon = !off && toD(b.start_at) - now < 2 * 36e5 && toD(b.start_at) > now;
     const multi = b.end_at.slice(0, 10) !== b.start_at.slice(0, 10), d = toD(b.start_at);
     const tag = b.status === 'pending' ? '<span class="pill" style="--c:#d97706">รออนุมัติ</span>' : b.status === 'rejected' ? '<span class="pill" style="--c:#dc2626">ไม่อนุมัติ</span>' : b.status === 'cancelled' ? '<span class="pill" style="--c:#64748b">ยกเลิก</span>' : past ? '<span class="pill" style="--c:#64748b">ผ่านไปแล้ว</span>' : toD(b.start_at) <= now ? '<span class="pill" style="--c:#dc2626">กำลังประชุม</span>' : soon ? '<span class="pill" style="--c:#2563eb">อีกไม่ถึง 2 ชม.</span>' : '';
-    const ex = b.extras.length ? `<div class="prep">${b.extras.map(k => `<span>${esc(EXI[k] || k)}</span>`).join('')}${b.prepared_at ? `<span class="done">✓ เตรียมแล้ว${keeper ? '' : ''}</span>` : ''}</div>${b.extras_note ? `<div style="margin-top:4px">${esc(b.extras_note)}</div>` : ''}` : '';
+    const ex = b.extras.length ? `<div class="prep">${b.extras.map(k => `<span>${esc(EXI[k] || k)}</span>`).join('')}${!keeper && b.status === 'booked' ? (b.prepared_at ? `<span class="done">✓ ผู้ดูแลเตรียมแล้ว</span>` : `<span class="wait">⏳ รอผู้ดูแลเตรียม</span>`) : ''}</div>${keeper && b.status === 'booked' ? (b.prepared_at
+            ? `<div class="pst ok"><i class="fa fa-circle-check"></i>สถานะ: เตรียมของเสร็จแล้ว <small>${esc([b.prepared_by, hm(b.prepared_at)].filter(Boolean).join(' · '))}</small></div>`
+            : `<div class="pst wait"><i class="fa fa-hourglass-half"></i>สถานะ: ยังไม่ได้เตรียมของ</div>`) : ''}${b.extras_note ? `<div style="margin-top:4px">${esc(b.extras_note)}</div>` : ''}` : '';
     const acts = keeper && b.status === 'pending' ? `<button class="btn ok" onclick="decideBk(${b.id},'approve')"><i class="fa fa-check"></i> อนุมัติ</button><button class="btn danger" onclick="decideBk(${b.id},'reject')">ไม่อนุมัติ</button>`
-        : keeper ? (b.extras.length ? `<button class="btn ${b.prepared_at ? '' : 'ok'}" onclick="prepared(${b.id})">${b.prepared_at ? '<i class="fa fa-rotate-left"></i> ยังไม่เตรียม' : '<i class="fa fa-check"></i> เตรียมแล้ว'}</button>` : '')
+        : keeper ? (b.extras.length ? (b.prepared_at ? `<button class="btn sm" onclick="prepared(${b.id})" title="กลับเป็น ยังไม่ได้เตรียมของ"><i class="fa fa-rotate-left"></i> กดผิด ยกเลิก</button>` : `<button class="btn ok" onclick="prepared(${b.id})"><i class="fa fa-check"></i> กดเมื่อเตรียมเสร็จ</button>`) : '')
         : !off ? `<button class="btn sm" onclick="editBk(${b.id})">แก้</button><button class="btn sm danger" onclick="cancelBk(${b.id})">ยกเลิก</button>` : '';
     return `<div class="row ${off && !keeper ? 'off' : ''}"><div class="dt"><b>${keeper ? hm(b.start_at) : d.getDate()}</b><span>${keeper ? hm(b.end_at) : d.toLocaleDateString('th-TH', { month: 'short' })}</span></div>
         <div class="tx"><b>${keeper ? esc(b.room_name) + ' · ' : ''}${esc(b.title)}</b> ${tag}<div>${[keeper ? esc(b.department || '') : esc(b.room_name), b.host ? 'ประชุมของ ' + esc(b.host) : '', keeper ? esc(b.booker_name) : '', +b.has_guest ? '🤝 แขก ' + esc(b.guest_company) : '', keeper ? esc(b.contact || '') : '',
@@ -366,9 +373,11 @@ async function loadKeep() {
     } catch (e) { gid('v-keep').innerHTML = keepTabs() + `<div class="card empty">${esc(e.message)}</div>`; return; }
     const list = K.list, need = list.filter(b => b.status === 'pending' || (b.extras.length && !b.prepared_at)).length;
     refreshKeepCnt().then(() => { const b = gid('v-keep').querySelector('[data-kv="pending"]'); if (b) b.textContent = 'รออนุมัติ' + (KC.pending ? ' (' + KC.pending + ')' : ''); });
-    const byDay = {};
-    list.forEach(b => (byDay[b.start_at.slice(0, 10)] = byDay[b.start_at.slice(0, 10)] || []).push(b));
-    gid('v-keep').innerHTML = keepTabs() + (list.length ? Object.entries(byDay).map(([d, bs]) => `<h3 style="font-size:13.5px;margin:14px 0 6px">${thDay(d)} · ${bs.length} การจอง${bs.some(b => b.status === 'pending') ? ` · <span style="color:#d97706">รออนุมัติ ${bs.filter(b => b.status === 'pending').length}</span>` : ''}${bs.some(b => b.status === 'booked' && b.extras.length && !b.prepared_at) ? ` · <span style="color:#d97706">ต้องเตรียม ${bs.filter(b => b.status === 'booked' && b.extras.length && !b.prepared_at).length}</span>` : ''}</h3><div class="card">${bs.map(b => rowHtml(b, true)).join('')}</div>`).join('')
+    const byDay = {}, d0 = kv === 'tomorrow' ? addDays(ymd(new Date()), 1) : ymd(new Date()), now = new Date();
+    const todo = b => b.status === 'pending' || (b.status === 'booked' && b.extras.length && !b.prepared_at && toD(b.end_at) > now);
+    const rank = b => todo(b) ? 0 : toD(b.end_at) > now ? 1 : 2;
+    list.slice().sort((a, b) => rank(a) - rank(b) || a.start_at.localeCompare(b.start_at)).forEach(b => { const k = kv === 'pending' ? b.start_at.slice(0, 10) : (b.start_at.slice(0, 10) < d0 ? d0 : b.start_at.slice(0, 10)); (byDay[k] = byDay[k] || []).push(b); });
+    gid('v-keep').innerHTML = keepTabs() + (list.length ? Object.entries(byDay).sort(([a], [b]) => a.localeCompare(b)).map(([d, bs]) => `<h3 style="font-size:13.5px;margin:14px 0 6px">${thDay(d)} · ${bs.length} การจอง${bs.some(b => b.status === 'pending') ? ` · <span style="color:#d97706">รออนุมัติ ${bs.filter(b => b.status === 'pending').length}</span>` : ''}${bs.some(b => b.status === 'booked' && todo(b)) ? ` · <span style="color:#d97706">ต้องเตรียม ${bs.filter(b => b.status === 'booked' && todo(b)).length}</span>` : ''}</h3><div class="card">${bs.map(b => rowHtml(b, true)).join('')}</div>`).join('')
         : `<div class="card empty"><i class="fa fa-mug-hot"></i><br>${kv === 'pending' ? 'ไม่มีการจองรออนุมัติ' : 'ไม่มีการจองในห้องที่คุณดูแล'}</div>`);
 }
 async function decideBk(id, d) {
@@ -376,7 +385,7 @@ async function decideBk(id, d) {
     if (d === 'reject') { const r = await ptcSwal().fire({ title: 'ไม่อนุมัติ', input: 'text', inputPlaceholder: 'เหตุผล (ผู้จองจะเห็น)', showCancelButton: true, confirmButtonText: 'ไม่อนุมัติ', cancelButtonText: 'กลับ', inputValidator: v => !v.trim() && 'ใส่เหตุผล' }); if (!r.isConfirmed) return; reason = r.value.trim(); }
     try { await post({ action: 'room_decide', id, decision: d, reason }); ptcToast('success', d === 'approve' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติแล้ว'); loadKeep(); loadDay(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
 }
-async function prepared(id) { try { const j = await post({ action: 'room_prepared', id }); ptcToast('success', j.prepared ? 'บันทึกว่าเตรียมแล้ว' : 'ยกเลิกสถานะเตรียมแล้ว'); loadKeep(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); } }
+async function prepared(id) { try { const j = await post({ action: 'room_prepared', id }); ptcToast('success', j.prepared ? 'สถานะ: เตรียมของเสร็จแล้ว' : 'สถานะ: กลับเป็นยังไม่ได้เตรียมของ'); loadKeep(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); } }
 function renderRooms(j) {
     const base = location.origin + location.pathname.replace(/[^/]*$/, '');
     gid('v-keep').innerHTML = keepTabs() + `<div style="display:flex;gap:8px;margin-bottom:10px">${j.kept_all ? '<a class="btn ok" href="settings_rooms.html"><i class="fa fa-gear"></i> ตั้งค่าห้องประชุม (แยกบริษัท)</a>' : ''}<span class="muted" style="font-size:12.5px;align-self:center">${j.is_admin ? 'คุณดูแลทุกห้อง' : 'แสดงทุกห้อง แก้ได้เฉพาะห้องที่คุณดูแล'} · ทุกบริษัทจองได้ทุกห้อง บริษัทใช้กรองตารางและกำหนดผู้ดูแล</span></div>

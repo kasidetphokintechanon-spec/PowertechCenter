@@ -303,7 +303,7 @@
         roomList.forEach((b) => {
             const st = b.status === 'rejected' ? ['ไม่อนุมัติ', '#dc2626', 'เหตุผล: ' + (b.cancel_reason || '-')]
                 : b.status === 'pending' ? ['รออนุมัติ', '#d97706', 'รอผู้ดูแลห้องอนุมัติ']
-                : [b.needs_approval ? 'อนุมัติแล้ว' : 'จองแล้ว', b.needs_approval ? '#16a34a' : '#0d9488', b.extras ? (b.prepared_at ? 'ผู้ดูแลเตรียมของแล้ว' : 'ขอเตรียมของไว้แล้ว') : ''];
+                : [b.needs_approval ? 'อนุมัติแล้ว' : 'จองแล้ว', b.needs_approval ? '#16a34a' : '#0d9488', b.extras ? (b.prepared_at ? '✓ ผู้ดูแลเตรียมของแล้ว' : 'รอผู้ดูแลเตรียมของ') : ''];
             jobs.push('<a class="h2-job" href="rooms.html?tab=mine"><div class="h2-job-top"><b>ห้อง ' + esc(b.room_name) + ' · ' + esc(b.title) + '</b>' +
                 '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + (st[2] ? ' · ' + esc(st[2]) : '') + '</div></a>');

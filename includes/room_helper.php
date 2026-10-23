@@ -169,7 +169,7 @@ function roomKeeperTodo($conn) {
         $st->execute(); return (int)$st->get_result()->fetch_row()[0];
     };
     return ['pending' => $n("status = 'pending' AND end_at > NOW()"),
-        'prep' => $n("status = 'booked' AND extras <> '' AND prepared_at IS NULL AND DATE(start_at) = CURDATE() AND end_at > NOW()")];
+        'prep' => $n("status = 'booked' AND extras <> '' AND prepared_at IS NULL AND start_at < CURDATE() + INTERVAL 1 DAY AND end_at > NOW()")];
 }
 function roomKeeps($conn, $roomId) { $k = roomKeptIds($conn); return $k === null ? roomCanManage($conn) : in_array((int)$roomId, $k, true); }
 
