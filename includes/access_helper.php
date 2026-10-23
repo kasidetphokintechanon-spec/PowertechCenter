@@ -67,6 +67,25 @@ const ACCESS_DUTIES = [
 ];
 
 /** หน้าที่จากสิทธิ์ที่มีผลจริง — นับว่ามีหน้าที่เมื่อมีสิทธิ์ครบทุกข้อของหน้าที่นั้น */
+/**
+ * หา id พนักงานจากข้อมูลระบบเก่า (roomsys / carsys) — รหัสผู้ใช้ในระบบเก่าส่วนใหญ่ไม่ใช่รหัสพนักงาน (เช่น "019")
+ * จึงลองรหัสก่อน แล้วเทียบชื่อแบบตัดคำนำหน้า/ช่องว่าง/จุด · ชื่อซ้ำกันหลายคน = ไม่เดา
+ * ใช้: $find = employeeMatcher($conn); $id = $find($code, $name1, $name2);
+ */
+function employeeMatcher($conn) {
+    $norm = fn($x) => mb_strtolower(preg_replace('/[\s.]+/u', '', preg_replace('/^\s*(mr|mrs|ms|miss|dr|นางสาว|นาย|นาง|คุณ)\.?\s*/iu', '', (string)$x)));
+    $ids = []; $byName = [];
+    foreach ($conn->query("SELECT id, name FROM employees")->fetch_all() as [$id, $nm]) {
+        $ids[(string)$id] = true; $k = $norm($nm);
+        if ($k !== '') $byName[$k] = isset($byName[$k]) ? false : (string)$id;
+    }
+    return function ($code, ...$names) use ($ids, $byName, $norm) {
+        if ($code !== null && isset($ids[(string)$code])) return (string)$code;
+        foreach ($names as $n) { $k = $norm($n); if ($k !== '' && !empty($byName[$k])) return $byName[$k]; }
+        return null;
+    };
+}
+
 function dutiesFromPerms(array $perms) {
     $out = [];
     foreach (ACCESS_DUTIES as $k => $d) if (!array_diff($d['perms'], $perms)) $out[] = $k;

@@ -328,7 +328,7 @@ try {
         // จองห้องประชุม — ผู้ดูแลห้อง · ฝั่งพนักงาน (room_day/book/my/update/cancel/display) เช็กในตัว action
         'room_prep' => ['room.manage'], 'room_prepared' => ['room.manage'], 'room_decide' => ['room.manage'], 'room_rules' => ['room.manage'], 'room_rooms' => ['room.manage'], 'room_save' => ['room.manage'], 'room_report' => ['room.manage'],
         // จองรถ — ผู้ดูแลรถ · ฝั่งพนักงาน (car_day/book/my/cancel/return) เช็กในตัว action
-        'car_board' => ['car.manage'], 'car_decide' => ['car.manage'], 'car_receive' => ['car.manage'], 'car_cars' => ['car.manage'], 'car_save' => ['car.manage'], 'car_driver_save' => ['car.manage'], 'car_report' => ['car.manage'],
+        'car_board' => ['car.manage'], 'car_decide' => ['car.manage'], 'car_receive' => ['car.manage'], 'car_cars' => ['car.manage'], 'car_save' => ['car.manage'], 'car_driver_save' => ['car.manage'], 'car_report' => ['car.manage'], 'car_log' => ['car.manage'], 'car_drivers_at' => ['car.manage'], 'car_set_driver' => ['car.manage'],
         'perm_people' => ['admin.manage_permissions'], 'perm_save' => ['admin.manage_permissions'],
         'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],

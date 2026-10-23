@@ -30,19 +30,25 @@ foreach ($j['rooms'] as $r) {
     $map[$lg] = $conn->insert_id; $newRooms++;
 }
 $have = array_flip(array_map('intval', array_column($conn->query("SELECT legacy_id FROM rm_bookings WHERE legacy_id IS NOT NULL")->fetch_all(), 0)));
-$emp = array_flip(array_column($conn->query("SELECT id FROM employees")->fetch_all(), 0));
+$findEmp = employeeMatcher($conn);
+$fill = $conn->prepare("UPDATE rm_bookings SET booker_id = ? WHERE legacy_id = ? AND booker_id IS NULL"); $linked = 0;
 $bi = $conn->prepare("INSERT INTO rm_bookings (code, room_id, title, start_at, end_at, attendees, booker_id, booker_name, department, contact, extras, extras_note, status, cancel_reason, legacy_id, created_at, host, participants, note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 $n = 0; $skip = 0;
 foreach ($j['reservations'] as $v) {
     $lg = (int)$v['id'];
-    if (isset($have[$lg]) || !isset($map[(int)$v['room_id']])) { $skip++; continue; }
+    // นำเข้าแล้วแต่ยังไม่รู้เจ้าของ → เติมให้ ("การจองของฉัน" จะเห็น)
+    if (isset($have[$lg])) {
+        if ($bid = $findEmp($v['user_code'] ?? null, $v['user_name'] ?? '', $v['person_name'] ?? '')) { $fill->bind_param('si', $bid, $lg); $fill->execute(); $linked += $fill->affected_rows; }
+        $skip++; continue;
+    }
+    if (!isset($map[(int)$v['room_id']])) { $skip++; continue; }
     $ex = [];
     foreach (array_filter(array_map('trim', explode(',', (string)$v['equipment']))) as $e) if (isset($EQ[substr($e, 0, 2)])) $ex[] = $EQ[substr($e, 0, 2)];
     $ex = implode(',', array_values(array_unique($ex)));
     $code = 'RS-' . ($v['docno'] ?: $lg);
     $rid = $map[(int)$v['room_id']]; $title = mb_substr(trim((string)$v['title']) ?: 'ประชุม', 0, 255);
     $s = (string)$v['start_date']; $e = (string)$v['end_date']; $att = (int)$v['human_amount'];
-    $bid = isset($emp[(string)$v['user_code']]) ? (string)$v['user_code'] : null;
+    $bid = $findEmp($v['user_code'] ?? null, $v['user_name'] ?? '', $v['person_name'] ?? '');
     $bn = trim((string)($v['person_name'] ?: $v['user_name'])) ?: '-'; $dp = (string)$v['depart_name']; $tel = (string)$v['tel'];
     $note = mb_substr(trim((string)$v['equipment_other']), 0, 500);
     $cancel = (int)$v['cancel_doc'] === 1 || (int)$v['status'] === 4;
@@ -52,4 +58,4 @@ foreach ($j['reservations'] as $v) {
     $bi->bind_param('sissssisssssssissss', $code, $rid, $title, $s, $e, $att, $bid, $bn, $dp, $tel, $ex, $note, $stt, $cr, $lg, $ca, $host, $parts, $gn);
     try { $bi->execute(); $n++; } catch (Throwable $x) { $skip++; }
 }
-echo json_encode(['status' => 'success', 'rooms_added' => $newRooms, 'bookings_added' => $n, 'skipped' => $skip]);
+echo json_encode(['status' => 'success', 'rooms_added' => $newRooms, 'bookings_added' => $n, 'owners_linked' => $linked, 'skipped' => $skip]);

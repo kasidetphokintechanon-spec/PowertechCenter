@@ -1,10 +1,12 @@
 <?php
-// api/actions/car/car_report.php — การใช้รถรายเดือน: ต่อคัน (ครั้ง ชั่วโมง อัตราการใช้ในเวลาทำการ 08–17) · ตามแผนก · ตามคนขับ · ไปที่ไหนบ่อย · อนุมัติเร็วแค่ไหน
+// api/actions/car/car_report.php — การใช้รถรายเดือน / รายปี (year=YYYY): ต่อคัน (ครั้ง ชั่วโมง อัตราการใช้ในเวลาทำการ 08–17) · ตามแผนก · ตามคนขับ · ไปที่ไหนบ่อย · อนุมัติเร็วแค่ไหน
 // สิทธิ์ car.manage · นับเฉพาะรถของบริษัทที่ดูแล · ใบที่ใช้จริง = อนุมัติแล้ว / รอรับกุญแจ / คืนแล้ว
 _initCarTables($conn);
+$year = preg_match('/^\d{4}$/', (string)($_GET['year'] ?? '')) ? (string)$_GET['year'] : '';
 $m = preg_match('/^\d{4}-\d{2}$/', (string)($_GET['month'] ?? '')) ? $_GET['month'] : date('Y-m');
-$from = "$m-01 00:00:00"; $to = date('Y-m-d 00:00:00', strtotime("$m-01 +1 month"));
-$wd = 0; for ($d = strtotime("$m-01"); $d < strtotime($to); $d += 86400) if (date('N', $d) < 6) $wd++;
+if ($year) { $from = "$year-01-01 00:00:00"; $to = ($year + 1) . '-01-01 00:00:00'; }
+else { $from = "$m-01 00:00:00"; $to = date('Y-m-d 00:00:00', strtotime("$m-01 +1 month")); }
+$wd = 0; for ($d = strtotime(substr($from, 0, 10)); $d < strtotime($to); $d += 86400) if (date('N', $d) < 6) $wd++;
 [$w, $p] = carScopeSql($conn);
 $USED = "b.status IN ('approved','returning','returned')";
 // ชั่วโมงนับเฉพาะส่วนที่อยู่ในเดือนนี้ (ใบข้ามเดือนไม่นับซ้ำ)
@@ -31,5 +33,5 @@ $drivers = $q("SELECT d.name, COUNT(*) n, ROUND(SUM(TIMESTAMPDIFF(MINUTE, b.star
 // อนุมัติเร็วแค่ไหน (นาที จากส่งคำขอถึงตัดสิน) — ระบบเดิมช้าเกิน 1 วันถึง 1 ใน 3 ใช้ติดตามว่าดีขึ้นไหม
 $sp = $q("SELECT COUNT(*) n, ROUND(AVG(TIMESTAMPDIFF(MINUTE, b.created_at, b.decided_at))) avg_min, SUM(TIMESTAMPDIFF(MINUTE, b.created_at, b.decided_at) <= 60) in_1h
     FROM cr_bookings b JOIN cr_cars c ON c.id = b.car_id WHERE b.decided_at IS NOT NULL AND b.legacy_id IS NULL AND b.start_at < ? AND b.end_at > ?{$w}", $t, $args)[0];
-echo json_encode(['status' => 'success', 'month' => $m, 'workdays' => $wd, 'cars' => $cars, 'departments' => $depts, 'destinations' => $dests, 'drivers' => $drivers,
+echo json_encode(['status' => 'success', 'month' => $m, 'year' => $year, 'workdays' => $wd, 'cars' => $cars, 'departments' => $depts, 'destinations' => $dests, 'drivers' => $drivers,
     'approve' => ['n' => (int)$sp['n'], 'avg_min' => $sp['avg_min'] !== null ? (int)$sp['avg_min'] : null, 'in_1h' => (int)$sp['in_1h']]], JSON_UNESCAPED_UNICODE);

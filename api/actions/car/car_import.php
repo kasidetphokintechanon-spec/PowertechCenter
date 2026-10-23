@@ -34,20 +34,25 @@ foreach ($j['drivers'] ?? [] as $d) {
 }
 
 $have = array_flip(array_map('intval', array_column($conn->query("SELECT legacy_id FROM cr_bookings WHERE legacy_id IS NOT NULL")->fetch_all(), 0)));
-$emp = array_flip(array_column($conn->query("SELECT id FROM employees")->fetch_all(), 0));
+$findEmp = employeeMatcher($conn);
+$fill = $conn->prepare("UPDATE cr_bookings SET booker_id = ? WHERE legacy_id = ? AND booker_id IS NULL"); $linked = 0;
 $bi = $conn->prepare("INSERT INTO cr_bookings (code, car_id, driver_id, need_driver, purpose, destination, start_at, end_at, passengers, passenger_names, booker_id, booker_name, rider_name, department, contact, note, status,
     decided_at, decided_by, received_at, received_by, cancelled_at, cancel_reason, legacy_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 $n = 0; $skip = 0; $now = time();
 foreach ($j['bookings'] as $v) {
     $lg = (int)$v['id'];
-    if (isset($have[$lg]) || !isset($carMap[(int)$v['car_id']]) || empty($v['start_date']) || empty($v['end_date'])) { $skip++; continue; }
+    if (isset($have[$lg])) {
+        if ($bid = $findEmp($v['user_code'] ?? null, $v['user_name'] ?? '', $v['person_name'] ?? '')) { $fill->bind_param('si', $bid, $lg); $fill->execute(); $linked += $fill->affected_rows; }
+        $skip++; continue;
+    }
+    if (!isset($carMap[(int)$v['car_id']]) || empty($v['start_date']) || empty($v['end_date'])) { $skip++; continue; }
     $code = 'CS-' . ($t($v['docno'], 16) ?: $lg);
     $car = $carMap[(int)$v['car_id']]; $drv = $drvMap[(int)$v['driver_id']] ?? null; $need = $drv ? 1 : 0;
     $purpose = $t($v['working'] ?? '') ?: 'ใช้รถ';
     $dest = $t(implode(' ', array_unique(array_filter([$t($v['address'] ?? ''), $t($v['province'] ?? '')]))));
     $s = (string)$v['start_date']; $e = (string)$v['end_date']; $pax = (int)$v['passenger_amount'];
     $names = $t($v['passenger_name'] ?? '', 1000);
-    $bid = isset($emp[(string)$v['user_code']]) ? (string)$v['user_code'] : null;
+    $bid = $findEmp($v['user_code'] ?? null, $v['user_name'] ?? '', $v['person_name'] ?? '');
     // ระบบเดิม: user_save = คนกดจอง · person_name = คนใช้รถ (ถ้าเป็นคนอื่น = จองให้)
     $bn = $t($v['user_name'] ?: $v['person_name']) ?: '-'; $rider = $t($v['person_name'] ?? '');
     $nm = fn($x) => mb_strtolower(preg_replace('/[\s.]+/u', '', preg_replace('/^\s*(mr|mrs|ms|miss|dr|นางสาว|นาย|นาง|คุณ)\.?\s*/iu', '', $x)));
@@ -65,4 +70,4 @@ foreach ($j['bookings'] as $v) {
     $bi->bind_param('siiissssissssssssssssssis', $code, $car, $drv, $need, $purpose, $dest, $s, $e, $pax, $names, $bid, $bn, $rider, $dp, $tel, $note, $st, $dAt, $dBy, $rAt, $rBy, $cAt, $cr, $lg, $ca);
     try { $bi->execute(); $n++; } catch (Throwable $x) { $skip++; }
 }
-echo json_encode(['status' => 'success', 'cars_added' => $newCars, 'drivers' => count($drvMap), 'bookings_added' => $n, 'skipped' => $skip]);
+echo json_encode(['status' => 'success', 'cars_added' => $newCars, 'drivers' => count($drvMap), 'bookings_added' => $n, 'owners_linked' => $linked, 'skipped' => $skip]);
