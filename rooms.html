@@ -44,6 +44,8 @@ html.dark .chip.on { color:#5eead4; }
 /* ตารางห้อง */
 .tb { display:flex; gap:8px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--ptc-border); flex-wrap:wrap; }
 .tb .dte { font-size:14px; font-weight:800; min-width:170px; }
+.tb select { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); cursor:pointer; }
+.tb .flt { display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--ptc-text-muted); }
 .tb input[type=date] { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); }
 .tl { overflow-x:auto; }
 .tl-in { min-width:900px; }
@@ -181,7 +183,7 @@ function renderDay() {
     <div class="g2"><div class="card">
         <div class="tb"><button class="btn" onclick="go(-1)" aria-label="วันก่อน">‹</button><span class="dte">${thDay(date)}</span><button class="btn" onclick="go(1)" aria-label="วันถัดไป">›</button>
             <button class="btn" onclick="date='${ymd(new Date())}';loadDay()">วันนี้</button><input type="date" value="${date}" onchange="date=this.value;loadDay()">
-            <span style="flex:1"></span>${coChips()}<span style="width:1px;height:22px;background:var(--ptc-border)"></span>${[[0, 'ทุกขนาด'], [6, '6+ คน'], [20, '20+ คน'], [50, '50+ คน']].map(([n, t]) => `<button class="chip ${seatF === n ? 'on' : ''}" onclick="seatF=${n};renderDay()">${t}</button>`).join('')}</div>
+            <span style="flex:1"></span>${coChips()}<label class="flt">ขนาดห้อง<select onchange="seatF=+this.value;renderDay()">${[[0, 'ทุกขนาด'], [6, '6 คนขึ้นไป'], [20, '20 คนขึ้นไป'], [50, '50 คนขึ้นไป']].map(([n, t]) => `<option value="${n}" ${seatF === n ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
         <div class="tl"><div class="tl-in" style="--span:${SPAN}"><div class="tl-row hd"><div class="tl-rm" style="cursor:default"><small>ห้อง</small></div><div class="lane">${hours}</div></div>${lanes || '<div class="empty">ไม่มีห้องที่จุคนได้ตามที่เลือก</div>'}</div></div>
         <div class="legend"><span><i style="background:#ccfbf1;border:1px solid #5eead4"></i>จองแล้ว</span><span><i style="background:#dbeafe;border:1px solid #93c5fd"></i>ของคุณ</span><span><i style="background:#fde68a;border:1px solid #f59e0b"></i>ที่เลือก</span><span><i style="background:#fef3c7;border:1px dashed #f59e0b"></i>รออนุมัติ</span><span><i style="background:#dc2626;width:2px"></i>ตอนนี้</span><span>กดช่องว่าง = เลือกห้องและเวลา · กดแถบ = ดูว่าใครจอง</span></div>
     </div>
@@ -211,7 +213,7 @@ function renderDay() {
 function coChips() {
     const cos = [...new Set(D.rooms.map(r => r.company).filter(Boolean))].sort();
     if (!cos.length) return '';
-    return [['', 'ทุกบริษัท ' + D.rooms.length], ...cos.map(c => [c, c + ' ' + D.rooms.filter(r => r.company === c).length])].map(([c, t]) => `<button class="chip ${(coF || '') === c ? 'on' : ''}" onclick="coF=${c ? `'${c}'` : 'null'};renderDay()">${esc(t)}</button>`).join('');
+    return `<label class="flt">บริษัท<select onchange="coF=this.value;renderDay()">${[['', 'ทุกบริษัท'], ...cos.map(c => [c, 'ห้องของ ' + c])].map(([c, t]) => `<option value="${esc(c)}" ${(coF || '') === c ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`;
 }
 // ปุ่มจองกดได้เสมอ — ถ้ายังกรอกไม่ครบ บอกว่าขาดอะไร (เดิมปุ่มเทาเฉย ๆ ผู้ใช้ไม่รู้ว่าต้องทำอะไร)
 // รูปโปรไฟล์วงกลม: มีรูปใช้รูป · ไม่มีรูปใช้ตัวย่อสีตามชื่อ · ไม่ใช่พนักงาน (แผนก/แขกที่พิมพ์เอง) ใช้ไอคอนกลุ่ม
