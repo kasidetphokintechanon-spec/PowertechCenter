@@ -34,11 +34,12 @@ function stockCode($id) { return 'SR-' . str_pad((string)$id, 5, '0', STR_PAD_LE
 function stockActor() { return $_SESSION['display_name'] ?? $_SESSION['username'] ?? 'ผู้ดูแลสต็อก'; }
 function stockCanManage($conn) { return ($_SESSION['role'] ?? '') === 'admin' || hasPermission($conn, 'stock.manage'); }
 
-// ผู้ดูแลที่ไม่ใช่ admin ดูแลเฉพาะบริษัทตัวเอง
-function stockCompanyScope($want = '') {
-    $mine = (string)($_SESSION['company'] ?? '');
-    if (($_SESSION['role'] ?? '') === 'admin') return in_array($want, STOCK_COS, true) ? $want : '';
-    return $mine;
+// หน้าที่ทำกับบริษัทเดียว (รับเข้า/นับ/วงเงิน): บริษัทที่เลือกต้องอยู่ในบริษัทที่ดูแล (includes/access_helper.php)
+function stockPickOne($conn, $want) {
+    $cos = userCompanies($conn);
+    if (in_array($want, $cos, true)) return $want;
+    if ($want === '' && count($cos) === 1) return $cos[0];
+    throw new Exception($want === '' ? 'เลือกบริษัทก่อน' : "ไม่มีสิทธิ์ดูแลสต็อกของ {$want}");
 }
 
 /** [item_id => ยอดคงเหลือ] */

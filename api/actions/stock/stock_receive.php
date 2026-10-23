@@ -3,8 +3,7 @@
 // กรอกเป็นแพ็คได้ (in_pack) → แปลงเป็นหน่วยเบิก · ราคาที่กรอกเป็นราคาต่อหน่วยที่กรอก → ทุนต่อหน่วยเบิก
 // ราคากลางสินค้า = ถัวเฉลี่ยถ่วงน้ำหนัก (ยอดเดิม × ราคาเดิม + ของเข้า × ราคาใหม่) ÷ ยอดรวม
 _initStockFlow($conn);
-$co = stockCompanyScope((string)($_POST['company'] ?? ''));
-if (!$co) throw new Exception('เลือกบริษัทก่อน');
+$co = stockPickOne($conn, (string)($_POST['company'] ?? ''));
 $rows = json_decode((string)($_POST['rows'] ?? '[]'), true);
 if (!is_array($rows)) throw new Exception('ข้อมูลรายการไม่ถูกต้อง — ลองใหม่อีกครั้ง');
 $rows = array_values(array_filter($rows, fn($x) => (int)($x['item_id'] ?? 0) > 0 && (float)($x['qty'] ?? 0) > 0));

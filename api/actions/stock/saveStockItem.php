@@ -31,6 +31,14 @@ if (!in_array($category, $allowed_cats)) $category = 'other';
 if (!$item_code || !$name) throw new Exception("item_code และ name จำเป็นต้องระบุ");
 if (!$type) throw new Exception("ประเภทไม่ถูกต้อง");
 if (!in_array($company, ['PTA','PT4','PTE'])) throw new Exception("บริษัทไม่ถูกต้อง");
+if (!inScope($conn, $company)) throw new Exception("ไม่มีสิทธิ์ดูแลสต็อกของ {$company}");
+// แก้สินค้าเดิม: ห้ามย้ายบริษัท (ยอด/ประวัติผูกกับบริษัทเดิม) และต้องเป็นบริษัทที่ดูแล
+if ($id > 0) {
+    $own = $conn->prepare("SELECT company FROM stock_items WHERE id = ?"); $own->bind_param('i', $id); $own->execute();
+    $was = $own->get_result()->fetch_row()[0] ?? null;
+    if ($was === null) throw new Exception('ไม่พบสินค้า');
+    if ($was !== $company) throw new Exception('ย้ายสินค้าข้ามบริษัทไม่ได้ — เพิ่มเป็นสินค้าใหม่ของบริษัทนั้นแทน');
+}
 
 // Handle image upload
 if (!empty($_FILES['item_image']['name'])) {

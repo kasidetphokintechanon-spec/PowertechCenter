@@ -5,8 +5,7 @@ _initStockFlow($conn);
 $r = stockGetRequest($conn, (int)($_POST['id'] ?? 0));
 if (!$r) throw new Exception('ไม่พบใบเบิก');
 if ($r['status'] !== 'pending') throw new Exception('ใบนี้ถูกจัดการไปแล้ว');
-$co = stockCompanyScope($r['company']);
-if ($co && $co !== $r['company']) throw new Exception('ใบนี้เป็นของบริษัทอื่น');
+if (!inScope($conn, $r['company'])) throw new Exception('ใบนี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 $ok = ($_POST['decision'] ?? '') === 'approve';
 $by = stockActor();
 

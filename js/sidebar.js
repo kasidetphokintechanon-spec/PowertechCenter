@@ -43,6 +43,7 @@
             items: [
                 { id: 'it_assets',       icon: 'fa-laptop',             label: 'ทะเบียนพัสดุ',          tab: 'it_assets',        page: 'admin',             perm: 'asset.manage' },
                 { id: 'employees',       icon: 'fa-users',              label: 'พนักงาน',              tab: 'employees',        page: 'admin',             perm: 'employee.manage' },
+                { id: 'permissions',     icon: 'fa-user-shield',        label: 'สิทธิ์ผู้ใช้',            tab: 'permissions',      page: 'admin',             perm: 'admin.manage_permissions' },
                 { id: 'kb_articles',     icon: 'fa-book-open',          label: 'คลังความรู้',           tab: 'kb_articles',      page: 'admin',             perm: 'kb.manage', badgeTone: 'muted', badgeTitle: 'บทความร่างรอตรวจ' },
                 { id: 'directory',       icon: 'fa-address-book',       label: 'Contact List',         href: 'directory.html',  page: 'directory',         perm: null },
             ],
@@ -51,7 +52,7 @@
             key: 'settings', label: '', color: '#2563eb', divider: true,
             items: [
                 { id: 'settings',        icon: 'fa-gear',               label: 'ตั้งค่า',               href: 'settings.html',   page: 'settings',          perm: 'any-setting', badgeTone: 'muted', badgeTitle: 'ผู้ใช้รอกำหนดสิทธิ์',
-                  also: ['settings_system', 'settings_notify', 'audit_log', 'admin_logo', 'admin:job_positions', 'admin:departments', 'admin:asset_categories', 'admin:locations', 'admin:kb_categories', 'admin:services', 'admin:server_check', 'admin:permissions'] },
+                  also: ['settings_system', 'settings_notify', 'audit_log', 'admin_logo', 'admin:job_positions', 'admin:departments', 'admin:asset_categories', 'admin:locations', 'admin:kb_categories', 'admin:services', 'admin:server_check'] },
             ],
         },
     ];

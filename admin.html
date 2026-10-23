@@ -3529,250 +3529,182 @@
         return result;
     }
 
-    function renderPermissionsContent(container) {
+    // ════ กำหนดสิทธิ์ — ตอบ 3 คำถาม: เป็นใคร → ทำหน้าที่อะไร → ดูแลบริษัทไหน (api: perm_people / perm_save) ════
+    // เดิมซ้อน 3 ชั้น (บทบาท + ชุดสิทธิ์ + ยกเว้นรายคน) จนอ่านไม่ออกว่าใครทำอะไรได้ · ตอนนี้บันทึกเป็นสิทธิ์รายคนตรงกับการ์ดที่เห็น
+    const PM = { c: null, d: null, sel: null, f: 'duty', q: '', view: 'edit', dr: null };
+    const PM_SHORT = { it: 'ช่าง IT', asset: 'ทรัพย์สิน', stock: 'สต็อก', loan: 'ยืม-คืน', employee: 'พนักงาน', kb: 'คลังความรู้', notify: 'แจ้งเตือน', audit: 'Audit', perm: 'สิทธิ์' };
+    const PM_CO_C = { PTA: '#059669', PT4: '#dc2626', PTE: '#2563eb' };
+    function pmStyle() {
+        if (gid('pm-style')) return;
+        const st = document.createElement('style'); st.id = 'pm-style';
+        st.textContent = `
+.pm-wrap{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+.pm-card{background:var(--ptc-surface);border:1px solid var(--ptc-border);border-radius:10px}
+.pm-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.pm-top .sp{flex:1}
+.pm-seg{display:flex;border:1px solid var(--ptc-border);border-radius:8px;overflow:hidden}
+.pm-seg button{height:32px;padding:0 12px;border:0;background:var(--ptc-surface);color:var(--ptc-text-2);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.pm-seg button.on{background:var(--ptc-text);color:var(--ptc-surface)}
+.pm-chip{padding:5px 11px;border-radius:99px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.pm-chip.on{border-color:var(--ptc-primary);background:var(--ptc-primary-light);color:var(--ptc-primary)}
+.pm-list-h{padding:12px;border-bottom:1px solid var(--ptc-border)}
+.pm-list-h input{width:100%;box-sizing:border-box;height:34px;border:1px solid var(--ptc-border);border-radius:8px;padding:0 10px;font:inherit;font-size:13px;background:var(--ptc-surface);color:var(--ptc-text)}
+.pm-list{max-height:calc(100vh - 230px);overflow-y:auto}
+.pm-it{display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--ptc-border);font-size:13px;cursor:pointer}
+.pm-it:hover{background:var(--ptc-surface-2)}
+.pm-it.on{background:var(--ptc-primary-light);box-shadow:inset 3px 0 0 var(--ptc-primary)}
+.pm-it b{display:block;font-weight:600;overflow-wrap:anywhere}.pm-it small{color:var(--ptc-text-muted);font-size:11.5px}
+.pm-av{width:34px;height:34px;border-radius:50%;color:#fff;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pm-sec{padding:16px 18px;border-bottom:1px solid var(--ptc-border)}.pm-sec:last-child{border-bottom:0}
+.pm-sec h4{font-size:12.5px;font-weight:800;color:var(--ptc-text-2);margin:0 0 4px}.pm-sec .s{font-size:12px;color:var(--ptc-text-muted);margin:0 0 10px}
+.pm-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pm-opt{border:1px solid var(--ptc-border);border-radius:10px;padding:11px 12px;font-size:12.5px;cursor:pointer;background:var(--ptc-surface);text-align:left;font-family:inherit;color:var(--ptc-text-muted)}
+.pm-opt b{display:block;font-size:13.5px;margin-bottom:2px;color:var(--ptc-text)}
+.pm-opt.on{border-color:var(--ptc-primary);background:var(--ptc-primary-light);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.pm-opt.adm.on{border-color:#dc2626;background:#fef2f2;box-shadow:0 0 0 2px rgba(220,38,38,.12)}
+html.dark .pm-opt.adm.on{background:rgba(220,38,38,.12)}
+.pm-opt:disabled{opacity:.45;cursor:not-allowed}
+.pm-jobs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pm-job{border:1px solid var(--ptc-border);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12.5px;cursor:pointer;background:var(--ptc-surface);text-align:left;font-family:inherit;color:var(--ptc-text-muted)}
+.pm-job b{display:block;font-size:13.5px;color:var(--ptc-text)}
+.pm-ck{width:18px;height:18px;border-radius:5px;border:2px solid var(--ptc-border-strong,#cbd5e1);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px}
+.pm-job.on{border-color:var(--ptc-primary);background:var(--ptc-primary-light)}.pm-job.on .pm-ck{background:var(--ptc-primary);border-color:var(--ptc-primary)}
+.pm-job:disabled{opacity:.45;cursor:not-allowed}
+.pm-cos{display:flex;gap:8px;flex-wrap:wrap}
+.pm-co{border:1px solid var(--ptc-border);border-radius:10px;padding:10px 16px;font-size:14px;font-weight:800;display:flex;gap:8px;align-items:center;cursor:pointer;background:var(--ptc-surface);font-family:inherit;color:var(--ptc-text)}
+.pm-co.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);color:var(--c)}.pm-co.on .pm-ck{background:var(--c);border-color:var(--c)}
+.pm-co:disabled{opacity:.45;cursor:not-allowed}
+.pm-sum{background:var(--ptc-surface-2);border:1px solid var(--ptc-border);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.9}
+.pm-sum .y{color:#16a34a;width:16px;display:inline-block}.pm-sum .n{color:var(--ptc-text-muted)}
+.pm-note{margin-top:10px;padding:9px 11px;border-radius:9px;background:#fffbeb;border:1px solid #fde68a;font-size:12.5px;color:#92400e}
+html.dark .pm-note{background:rgba(217,119,6,.1);border-color:rgba(217,119,6,.35);color:#fcd34d}
+.pm-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.pm-btn{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--ptc-border);background:var(--ptc-surface);color:var(--ptc-text);font:inherit;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.pm-btn.pri{background:var(--ptc-primary);border-color:var(--ptc-primary);color:#fff}.pm-btn:disabled{opacity:.5;cursor:not-allowed}
+.pm-empty{padding:40px 14px;text-align:center;color:var(--ptc-text-muted);font-size:13px}
+.pm-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.pm-tbl th{font-size:11.5px;color:var(--ptc-text-muted);padding:9px 10px;border-bottom:1px solid var(--ptc-border);font-weight:700;text-align:center;white-space:nowrap}
+.pm-tbl td{padding:9px 10px;border-bottom:1px solid var(--ptc-border);text-align:center}
+.pm-tbl th:first-child,.pm-tbl td:first-child{text-align:left}
+.pm-tbl tr.cl{cursor:pointer}.pm-tbl tr.cl:hover td{background:var(--ptc-surface-2)}
+.pm-tbl .y{color:#16a34a;font-weight:800}.pm-tbl .n{color:var(--ptc-border-strong,#cbd5e1)}
+.pm-pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+@media(max-width:900px){.pm-wrap{grid-template-columns:minmax(0,1fr)}.pm-list{max-height:320px}.pm-roles,.pm-jobs{grid-template-columns:1fr}}`;
+        document.head.appendChild(st);
+    }
+    const pmInit = n => String(n || '').replace(/^(Mr\.?|Mrs\.?|Ms\.?|นาย|นางสาว|นาง)\s*/i, '').split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '?';
+    const pmColor = p => p.role === 'admin' ? '#dc2626' : p.role === 'staff' ? '#2563eb' : '#94a3b8';
+    function pmLine(p) {
+        if (p.role === 'admin') return 'Admin กลาง · ทุกบริษัท';
+        if (p.role === 'staff' && p.duties.length) return p.duties.map(k => PM_SHORT[k]).join(' · ') + ' · ' + (p.scope.length ? p.scope.join(', ') : 'บริษัทตัวเอง');
+        return (p.role === 'staff' ? 'เจ้าหน้าที่ · ยังไม่มีหน้าที่' : 'ผู้ใช้ทั่วไป') + (p.department ? ' · ' + p.department : '');
+    }
+    async function renderPermissionsContent(container) {
         if (!container) return;
-        const employees = (data.employees||[]).filter(e=>(e.employment_status||'').toLowerCase()==='active');
-        const searchVal = gid('search-input').value.toLowerCase();
-        const hasRoleOf = e => ['admin','staff'].includes((e.role||'').toLowerCase());
-        const searched = employees.filter(e => { const t=Object.values(e).join(' ').toLowerCase(); return !searchVal||t.includes(searchVal); });
-        // ตัวกรองสถานะสิทธิ์ (จำไว้ระหว่างกดเลือกคน)
-        const pf = window.permFilter || 'all';
-        const cntHas = searched.filter(hasRoleOf).length, cntNone = searched.length - cntHas;
-        const filtered = searched.filter(e => pf === 'all' || (pf === 'has' ? hasRoleOf(e) : !hasRoleOf(e)));
-        const pfChip = (key, label, n, dot) => `<button type="button" class="perm-filter-chip${pf===key?' on':''}" data-pf="${key}">${dot?`<span style="width:7px;height:7px;border-radius:50%;background:${dot}"></span>`:''}${label}<span class="n">${n}</span></button>`;
-        const avatarColorsPerm = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
-        const leftList = filtered.map(e => {
-            const primaryAssign = (e.assignments&&e.assignments.find(a=>a.is_primary==1))||(e.assignments&&e.assignments[0]);
-            const dept = primaryAssign?primaryAssign.department:'';
-            const isSelected = window.selectedPermissionUser === e.id;
-            const eRole = (e.role||'').toLowerCase();
-            const hasRole = eRole === 'admin' || eRole === 'staff';
-            const needsAttention = !hasRole;
-            let cls = 'perm-user-item';
-            if (isSelected) cls += ' is-selected';
-            else if (needsAttention) cls += ' needs-role';
-            const avatarBg = hasRole
-                ? (eRole === 'admin' ? '#854d0e' : '#1d4ed8')
-                : avatarColorsPerm[(e.id||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0)%avatarColorsPerm.length];
-            // ใช้อักษรย่อจากชื่ออังกฤษ (เดิมตัด 2 ตัวแรกของชื่อไทย = "นา" จาก นาย/นาง ทุกคน)
-            const initials2 = escapeHtml((String(e.name||e.name_th||'?').replace(/^(mr|ms|mrs|miss)\.?\s*/i,'').replace(/^(นางสาว|นาย|นาง)\s*/,'').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2) || '?').toUpperCase());
-            let roleBadge = '';
-            if (eRole==='admin') roleBadge = `<span style="padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#fef9c3;color:#854d0e;border:1px solid #fde047;margin-left:3px">ADMIN</span>`;
-            else if (eRole==='staff') roleBadge = `<span style="padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;margin-left:3px">STAFF</span>`;
-            else roleBadge = `<span style="padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;margin-left:3px" title="ยังไม่ได้กำหนดสิทธิ์"><i class="fa fa-exclamation-circle" style="font-size:8px"></i></span>`;
-            const deptText = dept?`<div style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ptc-text-faint)">${dept}</div>`:'';
-            return `<div class="${cls}" data-user-id="${e.id}">
-                <div style="width:32px;height:32px;border-radius:50%;background:${avatarBg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">${initials2}</div>
-                <div style="flex:1;min-width:0">
-                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(e.name_th||e.name)}</span>${roleBadge}</div>
-                    ${deptText}
-                </div>
-            </div>`;
-        }).join('');
-        const html = `<div class="perm-panel-wrap">
-            <div class="perm-panel-left">
-                <div class="perm-panel-hd">
-                    <div class="perm-panel-hd-label">เลือกผู้ใช้</div>
-                    <button type="button" id="permission-role-manager-btn" class="ptc-btn-ghost ptc-btn-sm" style="font-size:11px;white-space:nowrap">จัดการชุดสิทธิ์</button>
-                </div>
-                <div class="perm-filter-row">
-                    ${pfChip('all','ทั้งหมด',searched.length,'')}
-                    ${pfChip('has','มีสิทธิ์แล้ว',cntHas,'#2563eb')}
-                    ${pfChip('none','ยังไม่ได้ตั้ง',cntNone,'#ea580c')}
-                </div>
-                <div class="perm-legend"><i class="fa fa-exclamation-circle" style="color:#c2410c"></i> = ยังไม่ได้ตั้งสิทธิ์ เข้าหน้า admin ไม่ได้ · ADMIN = ทำได้ทุกอย่าง · STAFF = ตามชุดสิทธิ์ที่ตั้ง</div>
-                <div id="permission-user-list" style="display:flex;flex-direction:column;gap:2px">${leftList||'<div style="font-size:12px;color:var(--ptc-text-faint)">ไม่พบผู้ใช้</div>'}</div>
-            </div>
-            <div class="perm-panel-right">
-                <div id="permission-detail-container" style="font-size:12px;color:var(--ptc-text-faint)">
-                    <div class="perm-empty">
-                        <div class="ic"><i class="fa fa-user-shield"></i></div>
-                        <div class="t">เลือกผู้ใช้จากด้านซ้ายเพื่อจัดการสิทธิ์</div>
-                        <div class="s">${cntNone ? `มี <b>${cntNone} คน</b> ที่ยังไม่ได้ตั้งสิทธิ์ — <a href="#" data-pf-jump="none">ดูรายชื่อ</a>` : 'ทุกคนตั้งสิทธิ์ครบแล้ว ✓'}</div>
-                    </div>
-                </div>
-            </div>
+        pmStyle(); PM.c = container;
+        container.innerHTML = '<div class="pm-empty">กำลังโหลด…</div>';
+        try {
+            const j = await (await fetch(`${apiPath}?action=perm_people&v=${Date.now()}`, { cache: 'no-store' })).json();
+            if (j.status !== 'success') throw new Error(j.message || 'โหลดไม่สำเร็จ');
+            PM.d = j;
+        } catch (e) { container.innerHTML = `<div class="pm-empty">${escapeHtml(e.message)}</div>`; return; }
+        if (PM.sel && !PM.d.people.some(p => p.id === PM.sel)) PM.sel = null;
+        if (!PM.sel) { const first = PM.d.people.find(p => p.role !== 'user' && p.id !== PM.d.me); PM.sel = first ? first.id : null; }
+        pmPick(PM.sel, true);
+    }
+    function pmPick(id, keepView) {
+        PM.sel = id;
+        const p = PM.d.people.find(x => x.id === id);
+        PM.dr = p ? { role: p.role, duties: new Set(p.duties), scope: new Set(p.scope) } : null;
+        if (!keepView) PM.view = 'edit';
+        pmRender();
+    }
+    function pmListHtml() {
+        const ppl = PM.d.people, q = PM.q.trim().toLowerCase();
+        const n = { duty: ppl.filter(p => p.role !== 'user').length, admin: ppl.filter(p => p.role === 'admin').length, all: ppl.length };
+        // ค้นหา = ค้นทุกคน (ไว้เพิ่มหน้าที่ให้คนใหม่) · ไม่ค้น = ตามตัวกรอง
+        const list = ppl.filter(p => q ? (p.name + ' ' + p.department + ' ' + p.id).toLowerCase().includes(q) : PM.f === 'all' || (PM.f === 'admin' ? p.role === 'admin' : p.role !== 'user'));
+        return `<div class="pm-card"><div class="pm-list-h"><input id="pm-q" placeholder="ค้นหาชื่อ เพื่อเพิ่มหน้าที่…" value="${escapeHtml(PM.q)}">
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${[['duty', 'มีหน้าที่'], ['admin', 'Admin กลาง'], ['all', 'ทั้งหมด']].map(([k, t]) => `<button class="pm-chip ${PM.f === k && !q ? 'on' : ''}" data-pmf="${k}">${t} ${n[k]}</button>`).join('')}</div></div>
+            <div class="pm-list">${list.map(p => `<div class="pm-it ${p.id === PM.sel ? 'on' : ''}" data-pmid="${escapeHtml(p.id)}"><span class="pm-av" style="background:${pmColor(p)}">${escapeHtml(pmInit(p.name))}</span>
+                <div style="min-width:0"><b>${escapeHtml(p.name)}${p.id === PM.d.me ? ' <span class="pm-pill" style="--c:#64748b">คุณ</span>' : ''}</b><small>${escapeHtml(pmLine(p))}</small></div></div>`).join('') || '<div class="pm-empty">ไม่พบรายชื่อ</div>'}</div></div>`;
+    }
+    function pmEditorHtml() {
+        const p = PM.d.people.find(x => x.id === PM.sel), dr = PM.dr;
+        if (!p) return '<div class="pm-card pm-empty">เลือกคนจากรายชื่อทางซ้าย หรือค้นหาชื่อเพื่อเพิ่มหน้าที่</div>';
+        const iAdm = PM.d.i_am_admin, self = p.id === PM.d.me, lockAdmin = !iAdm && p.role === 'admin', locked = self || lockAdmin;
+        const staff = dr.role === 'staff', scopedOn = PM.d.duties.filter(d => d.scoped && dr.duties.has(d.key));
+        const own = p.companies.length ? p.companies.join(', ') : 'ไม่ระบุ';
+        const roles = [['user', 'ผู้ใช้ทั่วไป', 'แจ้งซ่อม ยืม เบิกของ ของตัวเอง'], ['staff', 'เจ้าหน้าที่', 'ทำหน้าที่ตามที่ติ๊กด้านล่าง'], ['admin', 'Admin กลาง', 'ทำได้ทุกอย่าง ทุกบริษัท']];
+        const cosTxt = dr.scope.size ? [...dr.scope].join(', ') : `บริษัทตัวเองตอนล็อกอิน (${own})`;
+        let sum = '';
+        if (dr.role === 'admin') sum = '<span class="y">✓</span> ทำได้ทุกอย่างในระบบ ทุกบริษัท รวมถึงตั้งสิทธิ์ให้คนอื่น';
+        else if (staff && dr.duties.size) sum = PM.d.duties.filter(d => dr.duties.has(d.key)).map(d => `<span class="y">✓</span> ${escapeHtml(d.d)}${d.scoped ? ` ของ <b>${escapeHtml(cosTxt)}</b>` : ''}`).join('<br>') + '<br><span class="y">✓</span> เข้าหน้า "ระบบจัดการ" (เห็นเฉพาะเมนูของหน้าที่นี้)';
+        else if (staff) sum = '<span class="n">ยังไม่ได้ติ๊กหน้าที่ — เข้าหน้า "ระบบจัดการ" ไม่ได้ ใช้งานแบบพนักงานทั่วไป (ยังทำงานเล็ก ๆ ของเจ้าหน้าที่เดิมได้ เช่น แม่แบบเช็กลิสต์ประจำวัน)</span>';
+        else sum = '<span class="n">ใช้งานแบบพนักงานทั่วไป — แจ้งซ่อม ยืมอุปกรณ์ เบิกของ ของตัวเอง</span>';
+        return `<div class="pm-card">
+            <div class="pm-sec" style="display:flex;gap:12px;align-items:center"><span class="pm-av" style="background:${pmColor(p)};width:44px;height:44px;font-size:14px">${escapeHtml(pmInit(p.name))}</span>
+                <div style="min-width:0"><b style="font-size:16px">${escapeHtml(p.name)}</b><br><span style="color:var(--ptc-text-muted);font-size:12.5px">${escapeHtml([p.department, p.position].filter(Boolean).join(' · ') || '-')} · พนักงานของ ${escapeHtml(own)}</span></div></div>
+            ${self ? '<div class="pm-sec"><div class="pm-note" style="margin:0">นี่คือบัญชีของคุณ — แก้สิทธิ์ตัวเองไม่ได้ ให้ Admin กลางอีกคนแก้ให้ (กันการยกสิทธิ์ให้ตัวเอง)</div></div>'
+              : lockAdmin ? '<div class="pm-sec"><div class="pm-note" style="margin:0">คนนี้เป็น Admin กลาง — แก้ได้เฉพาะ Admin กลาง</div></div>' : ''}
+            ${p.legacy_sets && !locked ? '<div class="pm-sec"><div class="pm-note" style="margin:0">สิทธิ์ของคนนี้มาจาก "ชุดสิทธิ์" แบบเดิม — การ์ดด้านล่างติ๊กตามสิทธิ์เดิมแล้ว กดบันทึกเพื่อย้ายเป็นแบบใหม่ (สิทธิ์เท่าเดิม)</div></div>' : ''}
+            <div class="pm-sec"><h4>1. เป็นใคร</h4><p class="s">คนส่วนใหญ่เป็น "ผู้ใช้ทั่วไป" ไม่ต้องตั้งอะไร</p>
+                <div class="pm-roles">${roles.map(([k, t, d]) => `<button type="button" class="pm-opt ${k === 'admin' ? 'adm' : ''} ${dr.role === k ? 'on' : ''}" data-pmrole="${k}" ${locked || (k === 'admin' && !iAdm) ? 'disabled' : ''}><b>${t}</b>${d}</button>`).join('')}</div></div>
+            <div class="pm-sec"><h4>2. ทำหน้าที่อะไร</h4><p class="s">${staff ? 'ติ๊กได้หลายข้อ · เข้าหน้า "ระบบจัดการ" ได้เองอัตโนมัติเมื่อมีหน้าที่' : dr.role === 'admin' ? 'Admin กลางทำได้ทุกหน้าที่อยู่แล้ว' : 'เลือก "เจ้าหน้าที่" ก่อน แล้วติ๊กหน้าที่'}</p>
+                <div class="pm-jobs">${PM.d.duties.map(d => { const on = dr.role === 'admin' || dr.duties.has(d.key); return `<button type="button" class="pm-job ${on ? 'on' : ''}" data-pmduty="${d.key}" ${locked || !staff || (d.key === 'perm' && !iAdm) ? 'disabled' : ''}><span class="pm-ck">${on ? '✓' : ''}</span><div><b>${escapeHtml(d.t)}</b>${escapeHtml(d.d)}</div></button>`; }).join('')}</div></div>
+            <div class="pm-sec"><h4>3. ดูแลบริษัทไหน</h4><p class="s">${dr.role === 'admin' ? 'Admin กลางดูแลทุกบริษัท' : `มีผลกับหน้าที่ ดูแลสต็อก และ ดูแลยืม-คืน · ไม่ติ๊กเลย = บริษัทตัวเองตอนล็อกอิน (${escapeHtml(own)})`}</p>
+                <div class="pm-cos">${PM.d.companies.map(c => { const on = dr.role === 'admin' || dr.scope.has(c); return `<button type="button" class="pm-co ${on ? 'on' : ''}" style="--c:${PM_CO_C[c] || '#64748b'}" data-pmco="${c}" ${locked || !staff ? 'disabled' : ''}><span class="pm-ck">${on ? '✓' : ''}</span>${c}</button>`; }).join('')}</div>
+                ${staff && dr.scope.size && !scopedOn.length ? '<p class="s" style="margin:8px 0 0">ยังไม่ได้ติ๊กหน้าที่ที่ใช้บริษัท (สต็อก / ยืม-คืน) — บริษัทที่เลือกยังไม่มีผล</p>' : ''}</div>
+            <div class="pm-sec"><h4>สรุป — คนนี้ทำอะไรได้บ้าง</h4><div class="pm-sum">${sum}</div>
+                ${dr.role === 'admin' && p.role !== 'admin' ? '<div class="pm-note">Admin กลางเห็นและแก้ข้อมูลได้ทุกบริษัท — ให้เฉพาะหัวหน้า IT / ผู้ดูแลระบบจริงเท่านั้น</div>' : ''}
+                <div class="pm-acts"><button type="button" class="pm-btn" data-pmreset ${locked ? 'disabled' : ''}>ยกเลิก</button><button type="button" class="pm-btn pri" data-pmsave ${locked ? 'disabled' : ''}><i class="fa fa-check"></i> บันทึก</button></div></div>
         </div>`;
-        container.innerHTML = html;
-        container.querySelectorAll('[data-pf],[data-pf-jump]').forEach(b => b.addEventListener('click', ev => {
-            ev.preventDefault();
-            window.permFilter = b.dataset.pf || b.dataset.pfJump;
-            renderPermissionsContent(container);
-        }));
-        const roleMgrBtn = gid('permission-role-manager-btn');
-        if (roleMgrBtn) {
-            roleMgrBtn.addEventListener('click', async () => {
-                await openPermissionRoleManager();
-                await loadPermissionRoles(true);
-                renderPermissionsContent(container);
-            });
-        }
-        const listEl = gid('permission-user-list');
-        if (listEl) {
-            listEl.querySelectorAll('[data-user-id]').forEach(el => {
-                el.addEventListener('click', async () => {
-                    const userId = el.getAttribute('data-user-id');
-                    window.selectedPermissionUser = userId;
-                    renderPermissionsContent(container);
-                    const detailWrap = gid('permission-detail-container');
-                    if (!detailWrap) return;
-                    detailWrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:40px;color:#94a3b8"><i class="fa fa-spinner fa-spin" style="margin-right:8px"></i>Loading...</div>';
-                    const roles = await loadPermissionRoles();
-                    const detail = await loadUserPermissionDetail(userId);
-                    if (!detail||detail.status!=='success') { detailWrap.innerHTML='<div style="font-size:12px;color:#ef4444">ไม่สามารถโหลดข้อมูลสิทธิ์ได้</div>'; return; }
-                    const user = detail.user||{};
-                    const effective = Array.isArray(detail.effective_permissions)?detail.effective_permissions:[];
-                    const assignedRoleIds = Array.isArray(detail.assigned_role_ids)?detail.assigned_role_ids:[];
-                    const roleOptions = roles.map(r=>`<option value="${r.id}" ${assignedRoleIds.includes(r.id)?'selected':''}>${r.name}</option>`).join('');
-                    const baseRole = user.base_role||'user';
-                    const effectiveText = effective.length?effective.join(', '):'-';
-                    const isAdminUser = baseRole === 'admin';
-                    const isSelf = user.id === (window.adminSession&&window.adminSession.user_id);
-                    detailWrap.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px">
-                        <div><div style="font-size:14px;font-weight:700;color:#0f172a">${user.name_th||user.name||''}</div><div style="font-size:11px;color:#94a3b8">กำหนดสิทธิ์จากหน้านี้เป็นศูนย์กลางเดียว</div></div>
-                        ${isAdminUser ? `
-                        <div>
-                            <div id="perm-role-badge" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                                <span style="display:inline-flex;align-items:center;gap:6px;background:#fef9c3;border:1px solid #fde047;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:#854d0e"><i class="fas fa-shield-alt"></i> ADMIN — สิทธิ์เต็ม (*)</span>
-                                ${!isSelf ? `<button type="button" onclick="document.getElementById('permission-base-role-select').value='staff';document.getElementById('perm-role-badge').style.display='none';document.getElementById('perm-role-staff-note').style.display='flex';" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fef2f2;color:#b91c1c;cursor:pointer">ถอดสิทธิ์ Admin</button>` : ''}
-                            </div>
-                            <div id="perm-role-staff-note" style="display:none;align-items:center;gap:6px;font-size:11px;color:#b91c1c;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:6px 10px;margin-top:6px"><i class="fas fa-exclamation-triangle"></i> จะเปลี่ยนเป็น Staff — บันทึกเพื่อยืนยัน</div>
-                            <input type="hidden" id="permission-base-role-select" value="admin">
-                        </div>` : `<input type="hidden" id="permission-base-role-select" value="staff">`}
-                        <div><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">ชุดสิทธิ์ (Permission Roles)</div><select id="permission-role-select" multiple style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:6px;font-size:12px;min-height:60px">${roleOptions||'<option value="">(ยังไม่มี Role)</option>'}</select><div style="font-size:11px;color:#94a3b8;margin-top:4px">กด Ctrl หรือ Command เพื่อเลือกหลายรายการ</div></div>
-                        <div><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px">สิทธิ์ที่มีผลรวม (Effective)</div><div style="font-size:11px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px;word-break:break-all">${effectiveText}</div></div>
-                        <div>
-                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                                <div style="font-size:11px;font-weight:700;color:#64748b">Why User Has This Permission</div>
-                                <button type="button" id="permission-trace-refresh" class="ptc-btn-ghost ptc-btn-sm" style="font-size:11px">รีเฟรช Trace</button>
-                            </div>
-                            <div id="permission-trace-panel" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#f8fafc"></div>
-                        </div>
-                        <div style="display:flex;justify-content:flex-end"><button id="btn-save-permissions" class="ptc-btn-primary">บันทึกการเปลี่ยนแปลง</button></div>
-                    </div>`;
-                    const tracePanel = gid('permission-trace-panel');
-                    const traceRefreshBtn = gid('permission-trace-refresh');
-                    const selectedRoleEl = gid('permission-role-select');
-                    const selectedBaseRoleEl = gid('permission-base-role-select');
-
-                    const collectSelectedRoleIds = () => {
-                        if (!selectedRoleEl || !selectedRoleEl.options) return [];
-                        return Array.from(selectedRoleEl.options)
-                            .filter(o => o.selected && o.value)
-                            .map(o => parseInt(o.value, 10))
-                            .filter(v => v > 0);
-                    };
-                    const permissionSetFromSelectedRoles = (selectedRoleIdsNow) => {
-                        const set = new Set();
-                        roles.forEach(r => {
-                            const rid = parseInt(r.id, 10);
-                            if (!selectedRoleIdsNow.includes(rid)) return;
-                            const perms = Array.isArray(r.permissions) ? r.permissions : [];
-                            perms.forEach(p => { if (p && p !== '*') set.add(String(p)); });
-                        });
-                        return set;
-                    };
-
-                    const preferredRoleIdsForBaseRole = (baseRoleNow) => {
-                        const normalized = String(baseRoleNow || 'user').trim().toLowerCase();
-                        const byName = (regex, excludeRegex = null) => roles
-                            .filter(r => regex.test(String(r.name || '')) && (!excludeRegex || !excludeRegex.test(String(r.name || ''))))
-                            .map(r => parseInt(r.id, 10))
-                            .filter(v => v > 0);
-                        const byPerm = (key) => roles
-                            .filter(r => Array.isArray(r.permissions) && r.permissions.includes(key))
-                            .map(r => parseInt(r.id, 10))
-                            .filter(v => v > 0);
-                        if (normalized === 'admin') {
-                            const m = byPerm('admin.manage_permissions');
-                            if (m.length) return m;
-                            const fallback = byName(/admin|permission/i);
-                            return fallback;
-                        }
-                        if (normalized === 'staff') {
-                            const m = byName(/staff|support|manager|operator/i, /admin/i);
-                            if (m.length) return m;
-                            const fallback = byPerm('admin.access_admin').filter(id => {
-                                const row = roles.find(r => parseInt(r.id, 10) === id);
-                                return row ? !(String(row.name || '').match(/admin/i)) : true;
-                            });
-                            return fallback.slice(0, 1);
-                        }
-                        const m = byName(/user|viewer|basic/i, /admin|staff|support|manager/i);
-                        if (m.length) return m;
-                        return [];
-                    };
-
-                    const applyHardRoleLinking = () => {
-                        const baseNow = String(selectedBaseRoleEl?.value || 'user').trim().toLowerCase();
-                        const targetRoleIds = preferredRoleIdsForBaseRole(baseNow);
-                        if (selectedRoleEl && selectedRoleEl.options) {
-                            Array.from(selectedRoleEl.options).forEach(opt => {
-                                const rid = parseInt(opt.value || '0', 10);
-                                opt.selected = targetRoleIds.includes(rid);
-                            });
-                        }
-                        const rolePerms = permissionSetFromSelectedRoles(targetRoleIds);
-                        permissionCheckboxEls.forEach(cb => {
-                            if (baseNow === 'admin') {
-                                cb.checked = true;
-                                return;
-                            }
-                            cb.checked = rolePerms.has(String(cb.value || ''));
-                        });
-                        Toast.fire({ icon: 'info', title: 'Sync สิทธิ์ตาม Base Role แล้ว' });
-                        renderTracePreview();
-                    };
-
-                    const renderTracePreview = () => {
-                        const selectedRoleIdsNow = collectSelectedRoleIds();
-                        const selectedBaseRoleNow = String(selectedBaseRoleEl?.value || baseRole || 'user').trim();
-                        const traceRows = buildPermissionTraceRows({
-                            baseRole: selectedBaseRoleNow,
-                            selectedRoleIds: selectedRoleIdsNow,
-                            checkedPerms: [],
-                            customPermissions: [],
-                            allRoles: roles
-                        });
-                        renderPermissionTracePanel(tracePanel, traceRows);
-                    };
-
-                    traceRefreshBtn?.addEventListener('click', renderTracePreview);
-                    selectedRoleEl?.addEventListener('change', renderTracePreview);
-                    selectedBaseRoleEl?.addEventListener('change', applyHardRoleLinking);
-                    renderTracePreview();
-                    const saveBtn = gid('btn-save-permissions');
-                    if (saveBtn) {
-                        saveBtn.addEventListener('click', async () => {
-                            const sel = gid('permission-role-select');
-                            let selectedRoles = [];
-                            if (sel&&sel.options) selectedRoles = Array.from(sel.options).filter(o=>o.selected&&o.value).map(o=>parseInt(o.value,10)).filter(v=>v>0);
-                            const baseRoleSel = gid('permission-base-role-select');
-                            const selectedBaseRole = String(baseRoleSel?.value || baseRole || 'user').trim();
-                            const fd = new FormData();
-                            fd.append('action','update_user_permissions'); fd.append('user_id',userId);
-                            fd.append('base_role', selectedBaseRole);
-                            fd.append('role_ids',JSON.stringify(selectedRoles)); fd.append('permissions',JSON.stringify([]));
-                            saveBtn.disabled=true; saveBtn.textContent='กำลังบันทึก...';
-                            try {
-                                const resSave = await fetch(apiPath,{method:'POST',body:fd}); const js = await resSave.json();
-                                if (js.status==='success') Toast.fire({icon:'success',title:'บันทึกสิทธิ์สำเร็จ'});
-                                else Toast.fire({icon:'error',title:js.message||'บันทึกไม่สำเร็จ'});
-                            } catch(e) { Toast.fire({icon:'error',title:'เกิดข้อผิดพลาดขณะบันทึก'}); }
-                            finally { saveBtn.disabled=false; saveBtn.textContent='บันทึกการเปลี่ยนแปลง'; }
-                        });
-                    }
-                });
-            });
-            const pendingUser = String(window.pendingPermissionUserId || '').trim();
-            if (pendingUser) {
-                const targetNode = Array.from(listEl.querySelectorAll('[data-user-id]')).find(el => String(el.getAttribute('data-user-id') || '') === pendingUser);
-                window.pendingPermissionUserId = '';
-                if (targetNode) {
-                    targetNode.click();
-                }
-            }
-        }
+    }
+    function pmMatrixHtml() {
+        const ppl = PM.d.people.filter(p => p.role !== 'user');
+        return `<div class="pm-card" style="overflow-x:auto"><table class="pm-tbl"><thead><tr><th>ชื่อ</th>${PM.d.duties.map(d => `<th>${escapeHtml(PM_SHORT[d.key] || d.t)}</th>`).join('')}<th>บริษัทที่ดูแล</th></tr></thead><tbody>
+            ${ppl.map(p => `<tr class="cl" data-pmgo="${escapeHtml(p.id)}"><td><b style="font-weight:600">${escapeHtml(p.name)}</b>${p.role === 'admin' ? ' <span class="pm-pill" style="--c:#dc2626">Admin กลาง</span>' : ''}<br><span style="color:var(--ptc-text-muted);font-size:12px">${escapeHtml(p.department || '')}</span></td>
+                ${p.role === 'admin' ? `<td colspan="${PM.d.duties.length}" style="color:var(--ptc-text-muted)">ทุกหน้าที่</td>` : PM.d.duties.map(d => p.duties.includes(d.key) ? '<td class="y">✓</td>' : '<td class="n">—</td>').join('')}
+                <td style="white-space:nowrap">${p.role === 'admin' ? 'ทุกบริษัท' : p.scope.length ? escapeHtml(p.scope.join(' · ')) : `<span style="color:var(--ptc-text-muted)">บริษัทตัวเอง (${escapeHtml(p.companies.join(', ') || '-')})</span>`}</td></tr>`).join('') || `<tr><td colspan="${PM.d.duties.length + 2}"><div class="pm-empty">ยังไม่มีใครมีหน้าที่</div></td></tr>`}</tbody></table></div>`;
+    }
+    function pmRender() {
+        const c = PM.c; if (!c) return;
+        const hasQ = document.activeElement && document.activeElement.id === 'pm-q';
+        c.innerHTML = `<div class="pm-top"><div class="pm-seg"><button class="${PM.view === 'edit' ? 'on' : ''}" data-pmview="edit"><i class="fa fa-user-pen"></i> ตั้งสิทธิ์รายคน</button><button class="${PM.view === 'matrix' ? 'on' : ''}" data-pmview="matrix"><i class="fa fa-table"></i> ภาพรวม ใครทำอะไรได้</button></div>
+            <span class="sp"></span>${PM.view === 'matrix' ? '<button class="pm-btn" data-pmcsv><i class="fa fa-file-csv"></i> ส่งออก</button><button class="pm-btn" onclick="window.print()"><i class="fa fa-print"></i> พิมพ์</button>' : ''}</div>
+            ${PM.view === 'matrix' ? pmMatrixHtml() : `<div class="pm-wrap">${pmListHtml()}${pmEditorHtml()}</div>`}`;
+        c.querySelectorAll('[data-pmview]').forEach(b => b.onclick = () => { PM.view = b.dataset.pmview; pmRender(); });
+        c.querySelectorAll('[data-pmf]').forEach(b => b.onclick = () => { PM.f = b.dataset.pmf; PM.q = ''; pmRender(); });
+        c.querySelectorAll('[data-pmid]').forEach(b => b.onclick = () => pmPick(b.dataset.pmid));
+        c.querySelectorAll('[data-pmgo]').forEach(b => b.onclick = () => pmPick(b.dataset.pmgo));
+        c.querySelectorAll('[data-pmrole]').forEach(b => b.onclick = () => { PM.dr.role = b.dataset.pmrole; pmRender(); });
+        c.querySelectorAll('[data-pmduty]').forEach(b => b.onclick = () => { const k = b.dataset.pmduty; PM.dr.duties.has(k) ? PM.dr.duties.delete(k) : PM.dr.duties.add(k); pmRender(); });
+        c.querySelectorAll('[data-pmco]').forEach(b => b.onclick = () => { const k = b.dataset.pmco; PM.dr.scope.has(k) ? PM.dr.scope.delete(k) : PM.dr.scope.add(k); pmRender(); });
+        const rs = c.querySelector('[data-pmreset]'); if (rs) rs.onclick = () => pmPick(PM.sel);
+        const sv = c.querySelector('[data-pmsave]'); if (sv) sv.onclick = pmSave;
+        const cs = c.querySelector('[data-pmcsv]'); if (cs) cs.onclick = pmCsv;
+        const q = gid('pm-q');
+        if (q) { q.oninput = () => { PM.q = q.value; pmRender(); }; if (hasQ) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+    }
+    async function pmSave() {
+        const p = PM.d.people.find(x => x.id === PM.sel), dr = PM.dr;
+        if (dr.role === 'admin' && p.role !== 'admin') { const r = await Swal.fire({ icon: 'warning', title: 'ตั้งเป็น Admin กลาง?', text: `${p.name} จะทำได้ทุกอย่าง ทุกบริษัท`, showCancelButton: true, confirmButtonText: 'ตั้งเป็น Admin กลาง', cancelButtonText: 'ยกเลิก' }); if (!r.isConfirmed) return; }
+        try {
+            const fd = new FormData();
+            Object.entries({ action: 'perm_save', user_id: p.id, role: dr.role, duties: JSON.stringify([...dr.duties]), companies: JSON.stringify([...dr.scope]) }).forEach(([k, v]) => fd.append(k, v));
+            const j = await (await fetch(apiPath, { method: 'POST', body: fd })).json();
+            if (j.status !== 'success') throw new Error(j.message || 'บันทึกไม่สำเร็จ');
+            ptcToast.success('บันทึกสิทธิ์แล้ว', 'มีผลตอนคนนั้นเปิดหน้าเว็บครั้งถัดไป');
+            renderPermissionsContent(PM.c);
+        } catch (e) { Swal.fire({ icon: 'error', title: 'บันทึกไม่สำเร็จ', text: e.message }); }
+    }
+    function pmCsv() {
+        const ppl = PM.d.people.filter(p => p.role !== 'user');
+        const rows = [['รหัส', 'ชื่อ', 'แผนก', 'บทบาท', ...PM.d.duties.map(d => d.t), 'บริษัทที่ดูแล'],
+            ...ppl.map(p => [p.id, p.name, p.department, p.role === 'admin' ? 'Admin กลาง' : 'เจ้าหน้าที่', ...PM.d.duties.map(d => p.role === 'admin' || p.duties.includes(d.key) ? '✓' : ''), p.role === 'admin' ? 'ทุกบริษัท' : (p.scope.join(' ') || 'บริษัทตัวเอง')])];
+        const body = '﻿' + rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([body], { type: 'text/csv;charset=utf-8' })), download: 'สิทธิ์ผู้ใช้-' + new Date().toISOString().slice(0, 10) + '.csv' });
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
     // ระดับในผังองค์กร — ต้องตรงกับ ORG_LEVELS ใน includes/job_position_levels.php
@@ -6079,7 +6011,7 @@
 
 </script>
 <script src="js/employee-form.js?v=20261021b"></script>
-<script src="js/sidebar.js?v=20261023c"></script>
+<script src="js/sidebar.js?v=20261023d"></script>
 <script src="js/nav-chip.js?v=20260707"></script>
 </body>
 </html>

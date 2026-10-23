@@ -58,6 +58,7 @@ require_once __DIR__ . '/includes/permissions_registry.php';
 require_once __DIR__ . '/includes/notify_helper.php';
 require_once __DIR__ . '/includes/notify_cron.php';
 require_once __DIR__ . '/includes/loan_helper.php';
+require_once __DIR__ . '/includes/access_helper.php';
 require_once __DIR__ . '/includes/stock_helper.php';
 
 function getBasePermissionsForRole($role) {
@@ -130,6 +131,11 @@ function hasPermission($conn, $permissionKey) {
 
 function refreshSessionPermissions($conn): array {
     $userId = $_SESSION['user_id'] ?? null;
+    // อ่านบทบาทจากฐานข้อมูลทุกครั้ง — ถอด Admin กลางแล้วต้องมีผลทันที ไม่ต้องรอผู้ใช้ล็อกอินใหม่ (TISAX)
+    if ($userId) {
+        $rs = $conn->prepare("SELECT role FROM employees WHERE id = ? LIMIT 1");
+        if ($rs) { $rs->bind_param('s', $userId); $rs->execute(); $dbRole = $rs->get_result()->fetch_row()[0] ?? null; if ($dbRole) $_SESSION['role'] = $dbRole; }
+    }
     $role = $_SESSION['role'] ?? 'guest';
     $effective = getEffectivePermissionsForUserId($conn, $userId, $role);
     $_SESSION['effective_permissions'] = $effective;
@@ -317,6 +323,7 @@ try {
         'get_notify_overview' => ['settings.notifications'],
         // ผู้ดูแลสต็อก — ฝั่งพนักงาน (stock_catalog/submit/my/cancel/get) เช็กเจ้าของในตัว action
         'stock_board' => ['stock.manage'], 'stock_decide' => ['stock.manage'], 'stock_ready' => ['stock.manage'], 'stock_issue' => ['stock.manage'], 'stock_inventory' => ['stock.manage'], 'stock_receive' => ['stock.manage'], 'stock_count' => ['stock.manage'], 'stock_item_history' => ['stock.manage'], 'stock_report' => ['stock.manage'], 'stock_quota' => ['stock.manage'],
+        'perm_people' => ['admin.manage_permissions'], 'perm_save' => ['admin.manage_permissions'],
         'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
         'save_it_support_settings' => ['admin.access_admin'], 'save_doc_forms' => ['admin.access_admin'], 'save_scan_settings' => ['admin.access_admin'],

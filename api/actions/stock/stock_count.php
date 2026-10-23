@@ -2,8 +2,7 @@
 // api/actions/stock/stock_count.php — นับสต็อก / ปรับยอด · บันทึกเฉพาะรายการที่ยอดจริงต่างจากระบบ · ต้องมีเหตุผล (ตรวจย้อนได้)
 // สิทธิ์ stock.manage · ไม่แก้/ลบประวัติเดิม — เพิ่มรายการ "ปรับยอด" ใหม่แทน
 _initStockFlow($conn);
-$co = stockCompanyScope((string)($_POST['company'] ?? ''));
-if (!$co) throw new Exception('เลือกบริษัทก่อน');
+$co = stockPickOne($conn, (string)($_POST['company'] ?? ''));
 $reason = mb_substr(trim(strip_tags((string)($_POST['reason'] ?? ''))), 0, 300);
 if ($reason === '') throw new Exception('กรุณาระบุเหตุผล เช่น นับสต็อกประจำเดือน / ของเสียหาย');
 $rows = json_decode((string)($_POST['rows'] ?? '[]'), true);

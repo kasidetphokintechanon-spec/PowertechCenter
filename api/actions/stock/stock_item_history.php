@@ -6,8 +6,7 @@ $st = $conn->prepare("SELECT id, name, unit, company FROM stock_items WHERE id =
 $st->bind_param('i', $id); $st->execute();
 $item = $st->get_result()->fetch_assoc();
 if (!$item) throw new Exception('ไม่พบสินค้า');
-$co = stockCompanyScope($item['company']);
-if ($co && $co !== $item['company']) throw new Exception('สินค้านี้เป็นของบริษัทอื่น');
+if (!inScope($conn, $item['company'])) throw new Exception('สินค้านี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 $st = $conn->prepare("SELECT id, type, quantity, unit_cost, transaction_date, requester_name, request_id, notes, supplier, expiry_date, created_by
     FROM stock_transactions WHERE item_id = ? ORDER BY transaction_date DESC, id DESC LIMIT 100");
 $st->bind_param('i', $id); $st->execute();

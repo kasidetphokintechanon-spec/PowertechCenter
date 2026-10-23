@@ -5,8 +5,9 @@ $q = trim((string)($_GET['q'] ?? ''));
 $stF = (string)($_GET['status'] ?? '');
 $page = max(1, (int)($_GET['page'] ?? 1)); $per = 30;
 $w = ['1=1']; $p = []; $t = '';
-$role = $_SESSION['role'] ?? ''; $co = (string)($_SESSION['company'] ?? '');
-if ($role !== 'admin' && $co !== '') { $w[] = 'asset_company = ?'; $p[] = $co; $t .= 's'; }
+$cos = userCompanies($conn);
+$w[] = $cos ? 'asset_company IN (' . implode(',', array_fill(0, count($cos), '?')) . ')' : '1 = 0';
+foreach ($cos as $c) { $p[] = $c; $t .= 's'; }
 if ($q !== '') { $w[] = '(code LIKE ? OR equipment_id LIKE ? OR equipment_name LIKE ? OR borrower_name LIKE ? OR department LIKE ?)'; $like = "%{$q}%"; array_push($p, $like, $like, $like, $like, $like); $t .= 'sssss'; }
 if ($stF !== '') { $w[] = 'status = ?'; $p[] = $stF; $t .= 's'; }
 $where = implode(' AND ', $w);

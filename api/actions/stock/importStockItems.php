@@ -38,6 +38,7 @@ foreach ($rows as $i => $row) {
     if (!$name)      { $errors[] = "แถว {$rowNum}: ไม่มีชื่อสินค้า [{$item_code}]"; continue; }
     if (!in_array($type, ['stationery','maid'])) { $errors[] = "แถว {$rowNum}: type '{$type}' ไม่ถูกต้อง [{$item_code}]"; continue; }
     if (!in_array($company, ['PTA','PT4','PTE'])) { $errors[] = "แถว {$rowNum}: company '{$company}' ไม่ถูกต้อง [{$item_code}]"; continue; }
+    if (!inScope($conn, $company)) { $errors[] = "แถว {$rowNum}: ไม่มีสิทธิ์ดูแลสต็อกของ {$company}"; continue; }
     if (!in_array($category, $allowed_cats)) $category = 'other';
 
     // Check existing

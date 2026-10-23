@@ -1,11 +1,12 @@
 <?php
 // api/actions/stock/stock_inventory.php — คลังสินค้า: คงเหลือ / จองไว้ / พร้อมเบิก / รับเข้าล่าสุด · สิทธิ์ stock.manage
 _initStockFlow($conn);
-$co = stockCompanyScope((string)($_GET['company'] ?? ''));
+$cos = scopeCompanies($conn, (string)($_GET['company'] ?? ''));
+[$cw, $cp] = scopeSql('company', $cos);
 $all = !empty($_GET['inactive']);
 $st = $conn->prepare("SELECT id, item_code, name, unit, price_per_unit, min_stock, max_stock, type, company, is_active, category, description, image_url, has_expiry, pack_unit, pack_size
-    FROM stock_items WHERE 1=1" . ($co ? ' AND company = ?' : '') . ($all ? '' : ' AND is_active = 1') . " ORDER BY company, type, category, name");
-if ($co) $st->bind_param('s', $co);
+    FROM stock_items WHERE 1=1{$cw}" . ($all ? '' : ' AND is_active = 1') . " ORDER BY company, type, category, name");
+if ($cp) $st->bind_param(str_repeat('s', count($cp)), ...$cp);
 $st->execute();
 $items = $st->get_result()->fetch_all(MYSQLI_ASSOC);
 $ids = array_column($items, 'id');
@@ -25,4 +26,4 @@ foreach ($items as &$i) {
     $i['last_received'] = $last[$id] ?? null;
 }
 unset($i);
-echo json_encode(['status' => 'success', 'items' => $items, 'company' => $co, 'is_admin' => ($_SESSION['role'] ?? '') === 'admin'], JSON_UNESCAPED_UNICODE);
+echo json_encode(['status' => 'success', 'items' => $items, 'companies' => userCompanies($conn), 'is_admin' => ($_SESSION['role'] ?? '') === 'admin'], JSON_UNESCAPED_UNICODE);

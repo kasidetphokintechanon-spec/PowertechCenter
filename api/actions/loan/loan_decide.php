@@ -3,6 +3,7 @@
 _initLoanTables($conn);
 $l = loanGet($conn, (int)($_POST['id'] ?? 0));
 if (!$l) throw new Exception('ไม่พบคำขอ');
+if (!inScope($conn, $l['asset_company'])) throw new Exception('คำขอนี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 if ($l['status'] !== 'requested') throw new Exception('คำขอนี้ถูกจัดการไปแล้ว');
 $ok = ($_POST['decision'] ?? '') === 'approve';
 $reason = trim(strip_tags((string)($_POST['reason'] ?? '')));

@@ -202,18 +202,19 @@ const CAT_TH = { office: 'สำนักงาน', it: 'IT', safety: 'คว�
 const STATUS_C = { pending: '#d97706', approved: '#2563eb', ready: '#0891b2', issued: '#16a34a', rejected: '#64748b', cancelled: '#64748b' };
 const COS = ['PTA', 'PT4', 'PTE'];
 
-let isAdmin = false, myCo = '', co = '', tf = '', rows = [], board = {}, mcol = 'pending', cur = null, sig = null, busy = false;
+let isAdmin = false, myCo = '', myCos = [], co = '', tf = '', rows = [], board = {}, mcol = 'pending', cur = null, sig = null, busy = false;
 let inv = [], invQ = '', invLow = false, invMode = 'list', recv = [], repMonth = new Date().toISOString().slice(0, 7);
 
 async function api(p) { const j = await (await fetch('api.php?' + new URLSearchParams(p), { cache: 'no-store' })).json(); if (j.status !== 'success') throw new Error(j.message || 'โหลดไม่สำเร็จ'); return j; }
 async function post(o) { const fd = o instanceof FormData ? o : new FormData(); if (!(o instanceof FormData)) Object.entries(o).forEach(([k, v]) => fd.append(k, v ?? '')); const j = await (await fetch('api.php', { method: 'POST', body: fd })).json(); if (j.status !== 'success') throw new Error(j.message || 'ไม่สำเร็จ'); return j; }
 
-// บริษัท: admin เลือกได้ (ว่าง = ทุกบริษัท) · ผู้ดูแลทั่วไปเห็นของบริษัทตัวเอง
+// บริษัทที่ดูแล (ตั้งในหน้ากำหนดสิทธิ์ · Admin กลาง = ทุกบริษัท) · ดูแลบริษัทเดียวโชว์เป็นป้าย ไม่ต้องเลือก
+const multiCo = () => myCos.length > 1;
 function coChips(allowAll, onPick) {
-    if (!isAdmin) return `<span class="pill" style="--c:#0891b2">${esc(myCo)}</span>`;
-    return (allowAll ? `<button class="chip ${co === '' ? 'on' : ''}" onclick="${onPick}('')">ทุกบริษัท</button>` : '') + COS.map(c => `<button class="chip ${co === c ? 'on' : ''}" onclick="${onPick}('${c}')">${c}</button>`).join('');
+    if (!multiCo()) return `<span class="pill" style="--c:#0891b2">${esc(myCos[0] || myCo)}</span>`;
+    return (allowAll ? `<button class="chip ${co === '' ? 'on' : ''}" onclick="${onPick}('')">${myCos.length === COS.length ? 'ทุกบริษัท' : 'ทุกบริษัทที่ดูแล'}</button>` : '') + myCos.map(c => `<button class="chip ${co === c ? 'on' : ''}" onclick="${onPick}('${c}')">${c}</button>`).join('');
 }
-const needCo = () => co || myCo || 'PTA';
+const needCo = () => co || myCos[0] || myCo;
 
 // ── บอร์ดคำขอ ──
 const COLS = [{ k: 'pending', t: 'คำขอใหม่', c: '#d97706' }, { k: 'approved', t: 'กำลังจัดของ', c: '#2563eb' }, { k: 'ready', t: 'รอมารับ', c: '#0891b2' }, { k: 'done', t: 'ปิดวันนี้', c: '#16a34a' }];
@@ -233,7 +234,7 @@ function card(r) {
     return `<div class="jc ${r.status === 'pending' && (Date.now() - new Date(String(r.request_date).replace(' ', 'T'))) > 864e5 ? 'u2' : ''}" onclick="openWs(${r.id})">
         <div class="jc-top"><span class="no">${esc(r.code)}</span><i class="fa ${TYPES[r.stock_type]?.ic || 'fa-box'} muted" title="${esc(r.type_th)}"></i>${tag}</div>
         <h4>${esc(r.department || 'ไม่ระบุแผนก')} · ${esc(r.requester_name)}</h4><div class="jc-m">${lines}</div>
-        <div class="jc-f">${r.items.length} รายการ · ${baht(r.value)}${isAdmin && !co ? ` · ${esc(r.company)}` : ''}</div></div>`;
+        <div class="jc-f">${r.items.length} รายการ · ${baht(r.value)}${multiCo() && !co ? ` · ${esc(r.company)}` : ''}</div></div>`;
 }
 function renderBoard() {
     const q = gid('q').value.trim().toLowerCase();
@@ -246,7 +247,7 @@ function renderBoard() {
         ${it.map(card).join('') || '<div class="empty" style="padding:18px 8px">ว่าง</div>'}</div>`; }).join('');
 }
 async function loadBoard() {
-    try { board = await api({ action: 'stock_board', company: co }); rows = board.data || []; renderKpis(); renderBoard(); }
+    try { board = await api({ action: 'stock_board', company: co }); rows = board.data || []; myCos = board.companies || myCos; renderKpis(); renderBoard(); }
     catch (e) { gid('board').innerHTML = `<div class="card empty" style="grid-column:1/-1"><i class="fa fa-triangle-exclamation"></i>${esc(e.message)}</div>`; }
 }
 
@@ -387,10 +388,10 @@ function renderInv() {
 }
 function renderInvTable() {
     const list = invList();
-    gid('inv-tbl').innerHTML = list.length ? `<table class="tbl cards"><thead><tr><th>รหัส</th><th>สินค้า</th>${isAdmin && !co ? '<th>บริษัท</th>' : ''}<th class="r">คงเหลือ</th><th class="r">จองไว้</th><th class="r">พร้อมเบิก</th><th class="r">จุดสั่งซื้อ</th><th>ระดับ</th><th class="r">ทุน/หน่วย</th><th></th></tr></thead><tbody>
+    gid('inv-tbl').innerHTML = list.length ? `<table class="tbl cards"><thead><tr><th>รหัส</th><th>สินค้า</th>${multiCo() && !co ? '<th>บริษัท</th>' : ''}<th class="r">คงเหลือ</th><th class="r">จองไว้</th><th class="r">พร้อมเบิก</th><th class="r">จุดสั่งซื้อ</th><th>ระดับ</th><th class="r">ทุน/หน่วย</th><th></th></tr></thead><tbody>
         ${list.map(i => { const max = Math.max(i.max_stock, i.min_stock * 3, 1), pct = Math.min(100, i.available / max * 100), low = i.min_stock > 0 && i.available <= i.min_stock;
             return `<tr class="${i.is_active ? '' : 'off'}"><td class="code">${esc(i.item_code)}</td><td><b style="font-weight:600">${esc(i.name)}</b>${i.is_active ? '' : ' <span class="pill">ปิดใช้งาน</span>'}<br><span class="muted" style="font-size:12px"><i class="fa ${TYPES[i.type]?.ic}"></i> ${esc(CAT_TH[i.category] || i.category)}${i.pack_size > 1 ? ` · ${esc(i.pack_unit)}ละ ${i.pack_size} ${esc(i.unit)}` : ''}</span></td>
-            ${isAdmin && !co ? `<td>${esc(i.company)}</td>` : ''}<td class="r" data-l="คงเหลือ">${num(i.balance)} ${esc(i.unit)}${packText(i, i.balance)}</td><td class="r" data-l="จองไว้">${i.reserved ? num(i.reserved) : '-'}</td>
+            ${multiCo() && !co ? `<td>${esc(i.company)}</td>` : ''}<td class="r" data-l="คงเหลือ">${num(i.balance)} ${esc(i.unit)}${packText(i, i.balance)}</td><td class="r" data-l="จองไว้">${i.reserved ? num(i.reserved) : '-'}</td>
             <td class="r ${low ? 'low' : ''}" data-l="พร้อมเบิก"><b>${num(i.available)}</b></td><td class="r" data-l="จุดสั่งซื้อ">${i.min_stock || '-'}</td>
             <td><div class="lvl"><i class="${low ? 'b' : pct < 50 ? 'w' : ''}" style="width:${pct}%"></i></div></td><td class="r" data-l="ทุน">${baht(i.price_per_unit)}</td>
             <td style="white-space:nowrap"><button class="btn sm" onclick="itemHistory(${i.id})" title="ประวัติเข้า-ออก"><i class="fa fa-clock-rotate-left"></i></button> <button class="btn sm" onclick="editItem(${i.id})" title="แก้ไข"><i class="fa fa-pen"></i></button></td></tr>`; }).join('')}</tbody></table>`
@@ -476,7 +477,7 @@ async function editItem(id) {
 }
 
 // รับของเข้า — หลายรายการในใบเดียว · เลือกได้ว่ากรอกเป็นแพ็คหรือหน่วยเบิก
-function startRecv() { if (isAdmin && !co) { co = 'PTA'; } invMode = 'recv'; recv = [{ item_id: '', qty: '', in_pack: true, price: '', expiry: '' }]; loadInv(); }
+function startRecv() { if (!co) co = needCo(); invMode = 'recv'; recv = [{ item_id: '', qty: '', in_pack: true, price: '', expiry: '' }]; loadInv(); }
 function renderRecv() {
     const items = inv.filter(i => i.is_active).sort((a, b) => a.name.localeCompare(b.name, 'th'));
     const optHtml = sel => '<option value="">— เลือกสินค้า —</option>' + Object.entries(TYPES).map(([k, v]) => `<optgroup label="${v.t}">${items.filter(i => i.type === k).map(i => `<option value="${i.id}" ${+sel === i.id ? 'selected' : ''}>${esc(i.name)} (${esc(i.item_code)})</option>`).join('')}</optgroup>`).join('');
@@ -516,7 +517,7 @@ async function saveRecv() {
 
 // นับสต็อก — กรอกยอดจริง (แพ็ค + หน่วย) · บันทึกเฉพาะที่ต่าง
 let countVals = {};
-function startCount() { if (isAdmin && !co) co = 'PTA'; invMode = 'count'; countVals = {}; loadInv(); }
+function startCount() { if (!co) co = needCo(); invMode = 'count'; countVals = {}; loadInv(); }
 function pickCountCo(c) { co = c; countVals = {}; loadInv(); }
 function countList() { return inv.filter(i => i.is_active && (!tf || i.type === tf)).sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name, 'th')); }
 function renderCount() {
@@ -563,9 +564,9 @@ async function loadRep() {
         <div class="card kpi"><b>${baht(t.val_closing)}</b><span>มูลค่าคงเหลือสิ้นเดือน</span></div><div class="card kpi"><b>${nReq}</b><span>ใบเบิก · จ่ายแล้ว ${rq.issued || 0} · ไม่อนุมัติ ${rq.rejected || 0} · ยกเลิก ${rq.cancelled || 0}</span></div></div>
     <div class="ws" style="grid-template-columns:minmax(0,1fr) 380px">
         <div class="card"><div class="h3">ความเคลื่อนไหวรายสินค้า<span class="sp"></span><span class="muted" style="font-size:12px;font-weight:500">ยกมา + รับเข้า − จ่ายออก ± ปรับยอด = คงเหลือ</span></div><div class="tblwrap"><table class="tbl cards"><thead><tr><th>สินค้า</th><th class="r">ยกมา</th><th class="r">รับเข้า</th><th class="r">จ่ายออก</th><th class="r">ปรับยอด</th><th class="r">คงเหลือ</th><th class="r">มูลค่าจ่าย</th></tr></thead><tbody>
-            ${rep.items.map(i => `<tr><td><b style="font-weight:600">${esc(i.name)}</b> <span class="code">${esc(i.item_code)}</span> <span class="muted" style="font-size:12px">${esc(i.unit)}${isAdmin && !co ? ' · ' + esc(i.company) : ''}</span></td><td class="r" data-l="ยกมา">${num(i.opening)}</td><td class="r" data-l="รับเข้า">${i.qty_in ? '+' + num(i.qty_in) : '-'}</td>
+            ${rep.items.map(i => `<tr><td><b style="font-weight:600">${esc(i.name)}</b> <span class="code">${esc(i.item_code)}</span> <span class="muted" style="font-size:12px">${esc(i.unit)}${multiCo() && !co ? ' · ' + esc(i.company) : ''}</span></td><td class="r" data-l="ยกมา">${num(i.opening)}</td><td class="r" data-l="รับเข้า">${i.qty_in ? '+' + num(i.qty_in) : '-'}</td>
                 <td class="r" data-l="จ่ายออก">${i.qty_out ? '−' + num(i.qty_out) : '-'}</td><td class="r" data-l="ปรับยอด">${i.qty_adj ? (i.qty_adj > 0 ? '+' : '') + num(i.qty_adj) : '-'}</td><td class="r" data-l="คงเหลือ"><b>${num(i.closing)}</b></td><td class="r" data-l="มูลค่าจ่าย">${i.val_out ? baht(i.val_out) : '-'}</td></tr>`).join('') || '<tr><td colspan="7"><div class="empty">ไม่มีความเคลื่อนไหว</div></td></tr>'}</tbody></table></div></div>
-        <div><div class="card" style="margin-bottom:12px"><div class="h3">เบิกตามแผนก</div><div style="padding:8px 14px 12px">${rep.departments.map(d => `<div style="padding:7px 0;font-size:13px"><div style="display:flex;gap:8px"><span style="flex:1;overflow-wrap:anywhere">${esc(d.department)}${isAdmin && !co ? ' · ' + esc(d.company) : ''}</span><b>${baht(d.value)}</b></div>
+        <div><div class="card" style="margin-bottom:12px"><div class="h3">เบิกตามแผนก</div><div style="padding:8px 14px 12px">${rep.departments.map(d => `<div style="padding:7px 0;font-size:13px"><div style="display:flex;gap:8px"><span style="flex:1;overflow-wrap:anywhere">${esc(d.department)}${multiCo() && !co ? ' · ' + esc(d.company) : ''}</span><b>${baht(d.value)}</b></div>
             <div class="meter" style="margin-top:5px"><i style="width:${d.value / maxD * 100}%;background:var(--ptc-primary)"></i></div><span class="muted" style="font-size:11.5px">${d.requests} ใบ</span></div>`).join('') || '<div class="empty">ยังไม่มีการจ่ายของ</div>'}</div></div>
             <div class="card"><div class="h3">วงเงินแผนก / เดือน<span class="sp"></span><button class="btn sm" onclick="quotaEdit()"><i class="fa fa-sliders"></i> ตั้งวงเงิน</button></div><p class="muted" style="font-size:12.5px;margin:10px 14px 12px">เกินวงเงินแค่ขึ้นเตือนทั้งฝั่งพนักงานและผู้อนุมัติ ไม่บล็อกการเบิก</p></div></div></div>`;
 }

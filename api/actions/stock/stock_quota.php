@@ -2,8 +2,7 @@
 // api/actions/stock/stock_quota.php — วงเงินเบิกต่อแผนก/เดือน (เตือน ไม่บล็อก) · GET = รายการทุกแผนก + ใช้ไปเดือนนี้ · POST = บันทึก
 // สิทธิ์ stock.manage ($ACTION_PERMS) · ใส่ 0 = ไม่จำกัด
 _initStockFlow($conn);
-$co = stockCompanyScope((string)($_REQUEST['company'] ?? ''));
-if (!$co) throw new Exception('เลือกบริษัทก่อน');
+$co = stockPickOne($conn, (string)($_REQUEST['company'] ?? ''));
 $type = (string)($_REQUEST['stock_type'] ?? 'stationery');
 if (!isset(STOCK_TYPE_TH[$type])) throw new Exception('ประเภทไม่ถูกต้อง');
 

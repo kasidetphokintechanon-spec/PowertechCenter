@@ -3,6 +3,7 @@
 _initLoanTables($conn);
 $l = loanGet($conn, (int)($_POST['id'] ?? 0));
 if (!$l || $l['extend_status'] !== 'pending') throw new Exception('ไม่มีคำขอขยายเวลาที่รออยู่');
+if (!inScope($conn, $l['asset_company'])) throw new Exception('คำขอนี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 $ok = ($_POST['decision'] ?? '') === 'approve';
 if ($ok) {
     $clash = loanOverlaps($conn, (int)$l['asset_id'], date('Y-m-d', strtotime(($l['end_date'] ?: date('Y-m-d')) . ' +1 day')), $l['extend_to'], (int)$l['id']);

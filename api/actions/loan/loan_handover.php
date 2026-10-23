@@ -4,6 +4,7 @@
 _initLoanTables($conn);
 $l = loanGet($conn, (int)($_POST['id'] ?? 0));
 if (!$l) throw new Exception('ไม่พบคำขอ');
+if (!inScope($conn, $l['asset_company'])) throw new Exception('คำขอนี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 if ($l['status'] !== 'approved') throw new Exception('ส่งมอบได้เฉพาะคำขอที่อนุมัติแล้ว');
 $st = $conn->prepare("SELECT status FROM it_assets WHERE id = ?"); $st->bind_param('i', $l['asset_id']); $st->execute();
 $aSt = $st->get_result()->fetch_row()[0] ?? '';

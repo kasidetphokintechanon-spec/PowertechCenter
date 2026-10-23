@@ -10,14 +10,10 @@ try {
 
         // Loan (สินทรัพย์ที่รออนุมัติยืม)
         _initLoanTables($conn);
-        $sql = "SELECT COUNT(*) as count FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending'))";
-        if ($role !== 'admin' && !empty($sessionCompany)) {
-            $sql .= " AND asset_company = ?";
-            $stmt = $conn->prepare($sql);
-            if ($stmt) { $stmt->bind_param("s", $sessionCompany); $stmt->execute(); $res = $stmt->get_result(); if ($res && $row = $res->fetch_assoc()) $loan_count = (int)$row['count']; }
-        } else {
-            if ($res = $conn->query($sql)) $loan_count = (int)$res->fetch_assoc()['count'];
-        }
+        // นับเฉพาะบริษัทที่ดูแล (Admin กลาง = ทุกบริษัท · ตั้งในหน้ากำหนดสิทธิ์)
+        [$cw, $cp] = scopeSql('asset_company', userCompanies($conn));
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM it_loan_requests WHERE (status = 'requested' OR (status = 'active' AND extend_status = 'pending')){$cw}");
+        if ($stmt) { if ($cp) $stmt->bind_param(str_repeat('s', count($cp)), ...$cp); $stmt->execute(); $loan_count = (int)$stmt->get_result()->fetch_row()[0]; }
 
         // Repair (ตั๋วซ่อม status=Pending ยังไม่รับงาน)
         $sql = "SELECT COUNT(*) as count FROM it_logs WHERE status = 'Pending'";
@@ -53,9 +49,9 @@ try {
         }
 
         // ใบเบิกของรออนุมัติ — ตัวเลขบนเมนู "สต็อก & เบิกของ" (งานที่ผู้ดูแลต้องทำ)
-        $sql = "SELECT COUNT(*) FROM stock_requests WHERE status = 'pending'" . ($role !== 'admin' && !empty($sessionCompany) ? ' AND company = ?' : '');
-        $stmt = $conn->prepare($sql);
-        if ($stmt) { if ($role !== 'admin' && !empty($sessionCompany)) $stmt->bind_param('s', $sessionCompany); $stmt->execute(); $stock_pending = (int)$stmt->get_result()->fetch_row()[0]; }
+        [$cw, $cp] = scopeSql('company', userCompanies($conn));
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM stock_requests WHERE status = 'pending'{$cw}");
+        if ($stmt) { if ($cp) $stmt->bind_param(str_repeat('s', count($cp)), ...$cp); $stmt->execute(); $stock_pending = (int)$stmt->get_result()->fetch_row()[0]; }
 
         // Users no role (admin only — employees ที่ยังไม่มี role)
         if ($role === 'admin') {

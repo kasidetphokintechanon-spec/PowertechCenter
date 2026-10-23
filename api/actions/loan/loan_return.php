@@ -4,6 +4,7 @@
 _initLoanTables($conn);
 $l = loanGet($conn, (int)($_POST['id'] ?? 0));
 if (!$l) throw new Exception('ไม่พบคำขอ');
+if (!inScope($conn, $l['asset_company'])) throw new Exception('คำขอนี้เป็นของบริษัทที่คุณไม่ได้ดูแล');
 if ($l['status'] !== 'active') throw new Exception('รับคืนได้เฉพาะของที่กำลังยืม');
 $cond = (string)($_POST['condition'] ?? '');
 if (!in_array($cond, ['ok', 'minor', 'broken'], true)) throw new Exception('กรุณาเลือกสภาพเครื่อง');
