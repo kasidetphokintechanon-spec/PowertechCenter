@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือการใช้งาน - Powertech Center</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark','dark-theme');})()</script>
+<style>
+/* ════ คู่มือการใช้งานสำหรับพนักงาน — ภาษาง่าย ทีละขั้น · แต่ละหน้าในระบบมีปุ่ม "วิธีใช้" ลิงก์มาที่หัวข้อของตัวเอง (help.html#rooms) ════ */
+html { overflow:auto !important; height:auto !important; } body { overflow:visible !important; height:auto !important; }
+body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; font-family:Kanit, Inter, sans-serif; }
+.top { position:sticky; top:0; z-index:50; background:var(--ptc-surface); border-bottom:1px solid var(--ptc-border); border-top:3px solid var(--ptc-primary); display:flex; gap:12px; align-items:center; padding:0 16px; height:56px; }
+.top a.bk { width:34px; height:34px; border-radius:8px; border:1px solid var(--ptc-border); display:flex; align-items:center; justify-content:center; color:var(--ptc-text-2); text-decoration:none; }
+.top .ic { width:34px; height:34px; border-radius:9px; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center; }
+.top b { font-size:15px; display:block; } .top small { font-size:11.5px; color:var(--ptc-text-muted); }
+.top input { margin-left:auto; width:min(320px, 40vw); height:36px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 12px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); }
+.lay { max-width:1100px; margin:0 auto; padding:18px 16px 60px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:20px; align-items:start; }
+.toc { position:sticky; top:74px; display:flex; flex-direction:column; gap:2px; }
+.toc a { display:flex; gap:10px; align-items:center; padding:9px 12px; border-radius:9px; color:var(--ptc-text-2); text-decoration:none; font-size:13.5px; font-weight:600; border:1px solid transparent; }
+.toc a i { width:18px; text-align:center; color:var(--ptc-text-muted); }
+.toc a.on { background:var(--ptc-surface); border-color:var(--ptc-border); color:var(--ptc-text); box-shadow:inset 3px 0 0 var(--ptc-primary); }
+.toc small { font-size:11px; color:var(--ptc-text-muted); padding:12px 12px 4px; font-weight:800; letter-spacing:.04em; }
+.sec { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:12px; padding:20px 22px; margin-bottom:16px; scroll-margin-top:74px; }
+.sec h2 { font-size:19px; margin:0 0 4px; display:flex; gap:10px; align-items:center; }
+.sec h2 .bd { width:34px; height:34px; border-radius:9px; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.sec > p.lead { color:var(--ptc-text-muted); font-size:13.5px; margin:0 0 14px; }
+.sec h3 { font-size:14.5px; margin:16px 0 8px; }
+ol.steps { list-style:none; padding:0; margin:0; counter-reset:s; display:grid; gap:8px; }
+ol.steps li { counter-increment:s; display:grid; grid-template-columns:28px 1fr; gap:10px; font-size:14px; line-height:1.6; }
+ol.steps li:before { content:counter(s); width:26px; height:26px; border-radius:50%; background:var(--ptc-primary-light); color:var(--ptc-primary); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.tip { margin-top:12px; padding:10px 13px; border-radius:9px; background:#f0fdf4; border:1px solid #bbf7d0; font-size:13px; line-height:1.6; }
+.warn { margin-top:12px; padding:10px 13px; border-radius:9px; background:#fffbeb; border:1px solid #fde68a; font-size:13px; line-height:1.6; }
+html.dark .tip { background:rgba(22,163,74,.1); border-color:rgba(22,163,74,.35); } html.dark .warn { background:rgba(217,119,6,.1); border-color:rgba(217,119,6,.35); }
+.qa details { border-top:1px solid var(--ptc-border); padding:10px 0; font-size:13.5px; } .qa details:first-child { border-top:0; }
+.qa summary { cursor:pointer; font-weight:700; } .qa details p { margin:8px 0 0; color:var(--ptc-text-2); line-height:1.6; }
+.go { display:inline-flex; gap:6px; align-items:center; margin-top:14px; height:36px; padding:0 14px; border-radius:8px; background:var(--ptc-primary); color:#fff; text-decoration:none; font-weight:700; font-size:13px; }
+.st { display:inline-block; font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:99px; color:var(--c); background:color-mix(in srgb, var(--c) 13%, transparent); }
+kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-border); border-bottom-width:2px; border-radius:5px; background:var(--ptc-surface-2); }
+.hidden-by-search { display:none; }
+.none { text-align:center; color:var(--ptc-text-muted); padding:30px; display:none; }
+@media (max-width:820px) { .lay { grid-template-columns:minmax(0,1fr); } .toc { position:static; flex-direction:row; flex-wrap:wrap; } .toc small { display:none; } .toc a { padding:6px 10px; font-size:12.5px; } .top small { display:none; } }
+</style>
+</head>
+<body>
+<header class="top">
+    <a class="bk" href="index.html" aria-label="กลับหน้าแรก"><i class="fa fa-arrow-left"></i></a>
+    <div class="ic"><i class="fa fa-circle-question"></i></div>
+    <div><b>คู่มือการใช้งาน</b><small>สำหรับพนักงาน · อ่านทีละขั้น</small></div>
+    <input type="search" id="q" placeholder="ค้นหา เช่น ยกเลิก, เบิก, ห้องประชุม…" oninput="find(this.value)">
+</header>
+<div class="lay">
+<nav class="toc" id="toc">
+    <small>เริ่มต้น</small>
+    <a href="#start"><i class="fa fa-house"></i>เริ่มใช้งาน</a>
+    <small>ใช้งานประจำวัน</small>
+    <a href="#repair"><i class="fa fa-screwdriver-wrench"></i>แจ้งซ่อม IT</a>
+    <a href="#loan"><i class="fa fa-rotate"></i>ยืมอุปกรณ์ IT</a>
+    <a href="#stock"><i class="fa fa-box-open"></i>เบิกของ</a>
+    <a href="#rooms"><i class="fa fa-calendar-check"></i>จองห้องประชุม</a>
+    <a href="#contact"><i class="fa fa-address-book"></i>หาเบอร์ / Contact List</a>
+    <a href="#kb"><i class="fa fa-book"></i>คลังความรู้</a>
+    <small>สำหรับผู้ดูแล</small>
+    <a href="#keeper"><i class="fa fa-user-gear"></i>ผู้ดูแลสต็อก / ห้อง / ยืม-คืน</a>
+    <a href="#faq"><i class="fa fa-comments"></i>คำถามที่พบบ่อย</a>
+</nav>
+<main id="main">
+<section class="sec" id="start"><h2><span class="bd" style="background:#2563eb"><i class="fa fa-house"></i></span>เริ่มใช้งาน</h2>
+    <p class="lead">ทุกอย่างอยู่ในเว็บเดียว ใช้ได้ทั้งคอมและมือถือ</p>
+    <ol class="steps">
+        <li><span>เข้าเว็บ Powertech Center แล้ว <b>ล็อกอินด้วยรหัสพนักงาน</b> และเลือกบริษัทที่สังกัด</span></li>
+        <li><span>หน้าแรกมี <b>ปุ่มลัด 4 ปุ่ม</b> ด้านบน: แจ้งซ่อม IT · ยืมอุปกรณ์ · จองห้องประชุม · หาเบอร์เพื่อน</span></li>
+        <li><span>กล่อง <b>"งานของฉัน"</b> ทางขวา บอกสถานะเรื่องที่คุณแจ้ง/ยืม/เบิกไว้ทั้งหมด — กดเพื่อดูรายละเอียด</span></li>
+        <li><span>เมนูซ้าย <b>"ของฉัน"</b> รวมประวัติแจ้งซ่อม ยืม และเบิกของ</span></li>
+    </ol>
+    <div class="tip"><i class="fa fa-mobile-screen"></i> บนมือถือ: เปิดเว็บใน Chrome / Edge แล้วกด "เพิ่มลงหน้าจอหลัก" จะใช้งานเหมือนแอป</div>
+</section>
+
+<section class="sec" id="repair"><h2><span class="bd" style="background:#2563eb"><i class="fa fa-screwdriver-wrench"></i></span>แจ้งซ่อม IT</h2>
+    <p class="lead">คอมเสีย ปริ้นเตอร์ไม่ทำงาน เน็ตหลุด ขอติดตั้งโปรแกรม — แจ้งทางนี้ ทีม IT เห็นทันที</p>
+    <ol class="steps">
+        <li><span>หน้าแรก กด <b>"แจ้งซ่อม IT"</b></span></li>
+        <li><span>เลือก <b>มีปัญหาเรื่องอะไร</b> (คอมพิวเตอร์ ปริ้นเตอร์ เน็ต โปรแกรม ฯลฯ)</span></li>
+        <li><span>เลือก <b>อยู่ที่ไหน</b> และ <b>เครื่องไหน</b> — ถ้ามีสติกเกอร์ QR บนเครื่อง สแกนได้เลย ระบบรู้ว่าเป็นเครื่องไหน</span></li>
+        <li><span><b>เล่าอาการสั้น ๆ</b> แนบรูปหน้าจอ error ได้ แล้วกดส่ง</span></li>
+        <li><span>ติดตามที่แท็บ <b>"งานของฉัน"</b>: <span class="st" style="--c:#d97706">รอรับเรื่อง</span> → <span class="st" style="--c:#2563eb">กำลังซ่อม</span> → <span class="st" style="--c:#16a34a">รอคุณยืนยัน</span></span></li>
+        <li><span>ช่างซ่อมเสร็จ คุณกด <b>"ใช้ได้แล้ว ปิดงาน"</b> และให้ดาว — ถ้ายังไม่หาย กด "ยังไม่หาย" งานจะกลับไปที่ช่าง</span></li>
+    </ol>
+    <div class="warn"><i class="fa fa-clock"></i> ถ้าไม่กดยืนยันภายใน 3 วัน ระบบปิดงานให้อัตโนมัติ · เรื่องด่วนมาก (ทั้งแผนกใช้งานไม่ได้) โทรหาทีม IT ด้วย</div>
+    <a class="go" href="request.html"><i class="fa fa-arrow-right"></i>ไปหน้าแจ้งซ่อม</a>
+</section>
+
+<section class="sec" id="loan"><h2><span class="bd" style="background:#ea580c"><i class="fa fa-rotate"></i></span>ยืมอุปกรณ์ IT</h2>
+    <p class="lead">โน้ตบุ๊ก โปรเจกเตอร์ และอุปกรณ์อื่นที่ IT เปิดให้ยืม — จองล่วงหน้าได้</p>
+    <ol class="steps">
+        <li><span>หน้าแรก กด <b>"ยืมอุปกรณ์"</b> → แท็บ <b>"ยืมใหม่"</b></span></li>
+        <li><span>ดู <b>แถบสีใต้แต่ละเครื่อง</b> (14 วันข้างหน้า): <span class="st" style="--c:#16a34a">เขียว = ว่าง</span> <span class="st" style="--c:#dc2626">แดง = มีคนยืม</span> — กดเลือกเครื่องที่ต้องการ (ดูสเปกได้ทางขวา)</span></li>
+        <li><span>เลือก <b>วันรับ – วันคืน</b> (หรือ "ยืมระยะยาว ไม่มีกำหนดคืน") ใส่ว่าใช้ทำอะไร แล้วกด <b>"ส่งคำขอยืม"</b></span></li>
+        <li><span>รอ IT อนุมัติ แล้ว <b>ไปรับของที่ห้อง IT</b> ตามวันที่เลือก — เช็กของในชุดและ <b>เซ็นรับบนจอ</b></span></li>
+        <li><span>ครบกำหนด นำมาคืนที่ห้อง IT — ต้องการใช้ต่อ กด <b>"ขอขยายเวลา"</b> ที่แท็บ "ของที่ฉันยืม"</span></li>
+    </ol>
+    <div class="warn"><i class="fa fa-shield-halved"></i> ตอนคืน IT จะล้างข้อมูลในเครื่องทั้งหมด (ตามมาตรฐาน TISAX) — สำรองไฟล์ของคุณก่อนคืน</div>
+    <a class="go" href="loan.html"><i class="fa fa-arrow-right"></i>ไปหน้ายืมอุปกรณ์</a>
+</section>
+
+<section class="sec" id="stock"><h2><span class="bd" style="background:#0891b2"><i class="fa fa-box-open"></i></span>เบิกของ (เครื่องเขียน / ของแม่บ้าน)</h2>
+    <p class="lead">เบิกได้เฉพาะของบริษัทตัวเอง · เลือกของใส่ตะกร้าเหมือนช้อปปิ้ง</p>
+    <ol class="steps">
+        <li><span>เปิดหน้า <b>"เบิกของ"</b> เลือก <b>เครื่องเขียน</b> หรือ <b>ของแม่บ้าน</b> (ค้นหาชื่อได้)</span></li>
+        <li><span>กด <b>"ใส่ตะกร้า"</b> แล้วปรับจำนวน (+ / −) — ระบบบอกว่ามีให้เบิกกี่ชิ้น เบิกเกินไม่ได้</span></li>
+        <li><span>ตรวจตะกร้าทางขวา ใส่หมายเหตุ (ถ้ามี) กด <b>"ส่งใบเบิก"</b></span></li>
+        <li><span>ติดตามที่ <b>"ใบเบิกของฉัน"</b>: ส่งคำขอ → อนุมัติ → <b>จัดของเสร็จ (พร้อมรับ)</b> → รับของแล้ว</span></li>
+        <li><span>ขึ้น <span class="st" style="--c:#0891b2">พร้อมรับ</span> ไปรับที่ผู้ดูแลสต็อก <b>เซ็นรับ</b> แล้วจบ — ถ้ารีบ มารับได้เลยไม่ต้องรอสถานะ</span></li>
+    </ol>
+    <div class="tip"><i class="fa fa-circle-info"></i> ผู้ดูแลอาจปรับจำนวนลง เช่น "ขอ 5 ได้ 3" (ของไม่พอ / เกินวงเงินแผนก) — ดูได้ในใบเบิกของฉัน</div>
+    <a class="go" href="stock_request.html"><i class="fa fa-arrow-right"></i>ไปหน้าเบิกของ</a>
+</section>
+
+<section class="sec" id="rooms"><h2><span class="bd" style="background:#0d9488"><i class="fa fa-calendar-check"></i></span>จองห้องประชุม</h2>
+    <p class="lead">ทุกบริษัทจองได้ทุกห้อง · จองแล้วได้ห้องทันที (ยกเว้นห้องที่ต้องอนุมัติ)</p>
+    <ol class="steps">
+        <li><span>หน้าแรก กด <b>"จองห้องประชุม"</b> — ตารางแสดงทุกห้องทั้งวัน แถบสี = มีคนจองแล้ว (กดแถบเพื่อดูว่าใครจอง)</span></li>
+        <li><span>เลือกวันที่ด้านบน แล้ว <b>กดช่องว่างในแถวของห้อง</b> ตรงเวลาที่ต้องการ — ระบบเลือกห้องและเวลาให้</span></li>
+        <li><span>ใส่ <b>เรื่องที่ประชุม</b> (บังคับ) ปรับ <b>วันที่/เวลาเริ่ม – สิ้นสุด</b> (จองข้ามวันได้ เช่น อบรม 2 วัน)</span></li>
+        <li><span>ไม่บังคับ: <b>ประชุมของ</b> (ถ้าจองแทนผู้บริหาร) · <b>ผู้เข้าร่วม</b> (พิมพ์ชื่อแล้วเลือกจากรายชื่อ) · <b>มีแขกภายนอก</b> · <b>ขอให้เตรียม</b> น้ำ/กาแฟ/อาหาร/โปรเจกเตอร์</span></li>
+        <li><span>กด <b>"จองห้อง"</b> — ถ้ากรอกไม่ครบ ระบบบอกว่าขาดอะไร</span></li>
+        <li><span>แก้เวลาหรือยกเลิกได้ที่แท็บ <b>"การจองของฉัน"</b> — <b>ไม่ใช้แล้วกรุณายกเลิก</b> คนอื่นจะได้จองต่อ</span></li>
+    </ol>
+    <div class="warn"><i class="fa fa-user-check"></i> ห้องที่ขึ้น "ต้องอนุมัติ" (เช่น ห้องผู้บริหาร) จะเป็น <span class="st" style="--c:#d97706">รออนุมัติ</span> จนผู้ดูแลห้องกดอนุมัติ</div>
+    <a class="go" href="rooms.html"><i class="fa fa-arrow-right"></i>ไปหน้าจองห้อง</a>
+</section>
+
+<section class="sec" id="contact"><h2><span class="bd" style="background:#2563eb"><i class="fa fa-address-book"></i></span>หาเบอร์ / Contact List</h2>
+    <ol class="steps">
+        <li><span>หน้าแรก กด <b>"หาเบอร์เพื่อน"</b> แล้วพิมพ์ชื่อ ชื่อเล่น หรือแผนก</span></li>
+        <li><span>กดชื่อเพื่อดูเบอร์ภายใน อีเมล และผังองค์กร</span></li>
+    </ol>
+    <a class="go" href="directory.html"><i class="fa fa-arrow-right"></i>ไป Contact List</a>
+</section>
+
+<section class="sec" id="kb"><h2><span class="bd" style="background:#7c3aed"><i class="fa fa-book"></i></span>คลังความรู้</h2>
+    <p class="lead">วิธีแก้ปัญหาที่เจอบ่อย ลองทำเองได้ก่อนแจ้งซ่อม เช่น ปริ้นไม่ออก ลืมรหัส Wi-Fi</p>
+    <a class="go" href="kb.html"><i class="fa fa-arrow-right"></i>ไปคลังความรู้</a>
+</section>
+
+<section class="sec" id="keeper"><h2><span class="bd" style="background:#475569"><i class="fa fa-user-gear"></i></span>สำหรับผู้ดูแล</h2>
+    <p class="lead">เห็นเมนูเหล่านี้เมื่อได้รับหน้าที่ในหน้า "สิทธิ์ผู้ใช้" · ดูแลเฉพาะบริษัทที่ได้รับมอบ</p>
+    <h3><i class="fa fa-boxes-stacked"></i> ผู้ดูแลสต็อก (เมนู สต็อก & เบิกของ)</h3>
+    <ol class="steps">
+        <li><span>แท็บ <b>คำขอ</b>: กดใบเบิก → ปรับจำนวน → <b>"อนุมัติ → จัดของ"</b> → จัดเสร็จกด <b>"จัดของเสร็จ"</b> → พนักงานมารับ <b>เซ็นรับ</b> แล้วกด "จ่ายของ" (ตัดสต็อกตอนนี้)</span></li>
+        <li><span>พนักงานยืนรออยู่: กด <b>"อนุมัติและจ่ายเลย"</b> ให้เซ็นแล้วจบในครั้งเดียว</span></li>
+        <li><span>แท็บ <b>คลังสินค้า</b>: <b>รับของเข้า</b> (กรอกเป็นแพ็คหรือชิ้นได้) · <b>นับสต็อก</b> (พิมพ์ใบนับ → กรอกยอดจริง → ใส่เหตุผล) · เพิ่ม/แก้สินค้า · นำเข้า Excel</span></li>
+    </ol>
+    <h3><i class="fa fa-calendar-check"></i> ผู้ดูแลห้องประชุม</h3>
+    <ol class="steps">
+        <li><span>หน้าจองห้อง → แท็บ <b>ผู้ดูแลห้อง</b>: ดู "วันนี้ต้องเตรียม" เตรียมของตามที่ขอ แล้วกด <b>"เตรียมแล้ว"</b> · ห้องที่ต้องอนุมัติ กด <b>อนุมัติ / ไม่อนุมัติ</b></span></li>
+        <li><span><b>ตั้งค่า → ห้องประชุม</b>: ห้องของบริษัท · กติกา (จองล่วงหน้าได้กี่วัน นานสุดกี่ชั่วโมง) · ของที่ให้ขอเตรียม · ห้องที่ต้องอนุมัติ</span></li>
+    </ol>
+    <h3><i class="fa fa-rotate"></i> IT — ยืม-คืนอุปกรณ์</h3>
+    <ol class="steps">
+        <li><span>บอร์ด: อนุมัติคำขอ → วันรับของ เช็กของในชุด + <b>ผู้ยืมเซ็นรับ</b> → ตอนคืน เช็กของ เลือกสภาพเครื่อง <b>ติ๊กล้างข้อมูลแล้ว</b> + ผู้คืนเซ็น</span></li>
+    </ol>
+</section>
+
+<section class="sec qa" id="faq"><h2><span class="bd" style="background:#64748b"><i class="fa fa-comments"></i></span>คำถามที่พบบ่อย</h2>
+    <details><summary>ลืมรหัสผ่าน ทำอย่างไร</summary><p>หน้าล็อกอิน กด "ลืมรหัสผ่าน" หรือแจ้งทีม IT</p></details>
+    <details><summary>กดปุ่มแล้วไม่มีอะไรเกิดขึ้น / หน้าเก่า</summary><p>กด <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> เพื่อโหลดหน้าใหม่ ถ้ายังไม่ได้ แจ้งซ่อม IT พร้อมแนบรูปหน้าจอ</p></details>
+    <details><summary>จองห้องแล้วไม่ใช้ ต้องทำอะไร</summary><p>ไปที่ "การจองของฉัน" กด "ยกเลิก" ห้องจะว่างให้คนอื่นทันที ถ้าขอให้เตรียมของไว้ ผู้ดูแลห้องจะได้รับแจ้งว่าไม่ต้องเตรียม</p></details>
+    <details><summary>เบิกของไม่ได้ ขึ้นว่า "หมด"</summary><p>ของหมดหรือถูกจองไว้แล้ว แจ้งผู้ดูแลสต็อกให้สั่งเพิ่ม</p></details>
+    <details><summary>ทำไมเห็นแค่ของ/ห้องของบริษัทตัวเอง</summary><p>เบิกของได้เฉพาะของบริษัทที่คุณล็อกอิน ส่วนห้องประชุม ตารางเปิดมาเป็นห้องของบริษัทคุณก่อน กดปุ่ม "ทุกบริษัท" เพื่อดูห้องอื่น (จองได้ทุกห้อง)</p></details>
+    <details><summary>ใครเห็นข้อมูลที่ฉันกรอกบ้าง</summary><p>ข้อมูลอยู่ในระบบภายในบริษัท เปิดได้เฉพาะคนที่ล็อกอิน และเห็นตามหน้าที่ เช่น ช่าง IT เห็นงานซ่อม ผู้ดูแลสต็อกเห็นใบเบิก (ตามมาตรฐาน TISAX)</p></details>
+</section>
+<div class="none" id="none">ไม่พบหัวข้อที่ค้นหา — ลองคำอื่น หรือแจ้งทีม IT</div>
+</main>
+</div>
+<script>
+// ค้นหา: ซ่อนหัวข้อที่ไม่มีคำนั้น · แถบซ้ายไฮไลต์หัวข้อที่กำลังอ่าน
+function find(v) {
+    const q = v.trim().toLowerCase(); let n = 0;
+    document.querySelectorAll('main .sec').forEach(s => { const hit = !q || s.textContent.toLowerCase().includes(q); s.classList.toggle('hidden-by-search', !hit); n += hit; });
+    document.getElementById('none').style.display = n ? 'none' : 'block';
+}
+const links = [...document.querySelectorAll('.toc a')];
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-80px 0px -60% 0px' });
+document.querySelectorAll('main .sec').forEach(s => io.observe(s));
+</script>
+</body>
+</html>

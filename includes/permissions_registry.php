@@ -79,6 +79,12 @@ function getPowertechPermissionDefinitions(): array
             'description' => 'หน้าจัดการการยืม-คืน',
         ],
         [
+            'key' => 'room.manage',
+            'label' => 'ดูแลห้องประชุม',
+            'group' => 'operations',
+            'description' => 'rooms.html — เตรียมของตามที่จอง จัดการห้อง',
+        ],
+        [
             'key' => 'kb.manage',
             'label' => 'จัดการ Knowledge Base',
             'group' => 'content',

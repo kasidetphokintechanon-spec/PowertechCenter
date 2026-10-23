@@ -113,6 +113,7 @@ details.old { margin-top:14px; } details.old summary { cursor:pointer; font-size
     <div class="ptc-nav-brand"><div class="ptc-nav-icon" style="background:#ea580c"><i class="fa fa-rotate"></i></div>
         <div><div class="ptc-nav-title">ยืมอุปกรณ์ IT</div><div class="ptc-nav-sub">จองล่วงหน้า · ติดตาม · คืน</div></div></div>
     <div class="ln-tabs"><button id="t-new" onclick="tab('new')"><i class="fa fa-plus"></i>ยืมใหม่</button><button id="t-mine" onclick="tab('mine')"><i class="fa fa-box"></i>ของที่ฉันยืม<span class="cnt" id="mine-cnt" style="display:none">0</span></button></div>
+    <a href="help.html#loan" class="nav-back" title="วิธีใช้" aria-label="วิธีใช้" style="margin-left:6px"><i class="fa fa-circle-question"></i></a>
     <div id="nav-user-area"></div>
 </nav>
 <main class="wrap"><section id="v-new"></section><section id="v-mine" style="display:none"></section></main>
@@ -129,7 +130,7 @@ const CAT_IC = { Notebook: 'fa-laptop', Computer: 'fa-desktop', Monitor: 'fa-dis
 const DAYS = 14;
 
 let S = {}, items = [], today = ymd(new Date()), cat = '', q = '', sel = null, mine = [], legacy = [], sending = false;
-let form = { start: '', end: '', noDue: false, purpose: '', contact: '' };
+let LF = { start: '', end: '', noDue: false, purpose: '', contact: '' };
 
 async function api(p) { return (await fetch('api.php?' + new URLSearchParams(p), { cache: 'no-store' })).json(); }
 async function post(o) { const fd = new FormData(); Object.entries(o).forEach(([k, v]) => fd.append(k, v ?? '')); const j = await (await fetch('api.php', { method: 'POST', body: fd })).json(); if (j.status !== 'success') throw new Error(j.message || 'ไม่สำเร็จ'); return j; }
@@ -138,7 +139,7 @@ async function post(o) { const fd = new FormData(); Object.entries(o).forEach(([
 function busyOn(it, day) { return it.bookings.find(b => b.from <= day && (!b.to || b.to >= day)); }
 function rangeClash(it, a, b) { const end = b || '9999-12-31'; return it.bookings.find(x => x.from <= end && (!x.to || x.to >= a)); }
 function strip(it) {
-    const s = form.start, e = form.noDue ? '9999-12-31' : form.end;
+    const s = LF.start, e = LF.noDue ? '9999-12-31' : LF.end;
     let h = '';
     for (let i = 0; i < DAYS; i++) {
         const d = addDays(today, i), bk = busyOn(it, d), inSel = sel === it.id && s && d >= s && d <= e;
@@ -149,8 +150,8 @@ function strip(it) {
 function statusPill(it) {
     if (it.blocked) return `<span class="pill" style="--c:#64748b">ซ่อมอยู่</span>`;
     const now = busyOn(it, today);
-    if (form.start && rangeClash(it, form.start, form.noDue ? null : form.end)) return `<span class="pill" style="--c:#dc2626">ไม่ว่างช่วงที่เลือก</span>`;
-    if (form.start) return `<span class="pill" style="--c:#16a34a">ว่างช่วงที่เลือก</span>`;
+    if (LF.start && rangeClash(it, LF.start, LF.noDue ? null : LF.end)) return `<span class="pill" style="--c:#dc2626">ไม่ว่างช่วงที่เลือก</span>`;
+    if (LF.start) return `<span class="pill" style="--c:#16a34a">ว่างช่วงที่เลือก</span>`;
     return now ? `<span class="pill" style="--c:#dc2626">${now.mine ? 'คุณยืมอยู่' : 'ไม่ว่างวันนี้'}${now.to ? ' · ถึง ' + thD(now.to) : ''}</span>` : `<span class="pill" style="--c:#16a34a">ว่างวันนี้</span>`;
 }
 
@@ -159,9 +160,9 @@ function renderNew() {
     const cats = [...new Set(items.map(i => i.category))];
     const list = items.filter(i => (!cat || i.category === cat) && (!q || (i.name + ' ' + i.equipment_id + ' ' + (i.brand || '') + ' ' + (i.model || '')).toLowerCase().includes(q)));
     const it = items.find(i => i.id === sel);
-    const clash = it && form.start ? rangeClash(it, form.start, form.noDue ? null : form.end) : null;
-    const badRange = form.start && !form.noDue && (!form.end || form.end < form.start);
-    const canSend = it && !it.blocked && form.start && !badRange && !clash && form.purpose.trim().length >= 3 && !sending;
+    const clash = it && LF.start ? rangeClash(it, LF.start, LF.noDue ? null : LF.end) : null;
+    const badRange = LF.start && !LF.noDue && (!LF.end || LF.end < LF.start);
+    const canSend = it && !it.blocked && LF.start && !badRange && !clash && LF.purpose.trim().length >= 3 && !sending;
     const ic = i => CAT_IC[i.category] || 'fa-box';
     gid('v-new').innerHTML = items.length === 0 ? '<div class="card empty"><i class="fa fa-box-open"></i>ยังไม่มีอุปกรณ์ที่เปิดให้ยืม — ติดต่อทีม IT</div>' : `
     <div class="g2"><div>
@@ -175,16 +176,16 @@ function renderNew() {
     </div>
     <div class="card form">${it ? `<h3 class="h" style="font-size:15px">ขอยืม ${esc(it.name)}</h3><p class="s">${esc(it.equipment_id)}${it.location ? ' · อยู่ที่ ' + esc(it.location) : ''}</p>${specBox(it)}${it.accessories.length ? `<div class="acc">${it.accessories.map(a => `<span>${esc(a)}</span>`).join('')}</div>` : ''}`
         : '<h3 class="h" style="font-size:15px">เลือกเครื่องทางซ้ายก่อน</h3><p class="s">หรือเลือกวันที่ก่อนก็ได้ — เครื่องที่ว่างจะขึ้นป้ายเขียว</p>'}
-        <div class="f"><div class="two"><div><label>วันที่รับของ</label><input type="date" min="${today}" value="${esc(form.start)}" onchange="form.start=this.value;if(form.end&&form.end<form.start)form.end=form.start;renderNew()"></div>
-            <div><label>วันที่คืน</label><input type="date" min="${esc(form.start || today)}" value="${esc(form.end)}" ${form.noDue ? 'disabled' : ''} onchange="form.end=this.value;renderNew()"></div></div>
-            <label style="display:flex;gap:7px;align-items:center;font-weight:500;margin-top:8px;cursor:pointer"><input type="checkbox" ${form.noDue ? 'checked' : ''} onchange="form.noDue=this.checked;renderNew()"> ยืมระยะยาว ไม่มีกำหนดคืน</label></div>
-        <div class="f"><label>ใช้ทำอะไร</label><textarea id="f-purpose" rows="2" placeholder="เช่น อบรมพนักงานใหม่ ห้องประชุม 2" oninput="form.purpose=this.value;syncBtn()">${esc(form.purpose)}</textarea></div>
-        <div class="f"><label>เบอร์ติดต่อ (ไม่บังคับ)</label><input type="tel" value="${esc(form.contact)}" placeholder="ว่างไว้ = ใช้เบอร์ในระบบ" oninput="form.contact=this.value"></div>
+        <div class="f"><div class="two"><div><label>วันที่รับของ</label><input type="date" min="${today}" value="${esc(LF.start)}" onchange="LF.start=this.value;if(LF.end&&LF.end<LF.start)LF.end=LF.start;renderNew()"></div>
+            <div><label>วันที่คืน</label><input type="date" min="${esc(LF.start || today)}" value="${esc(LF.end)}" ${LF.noDue ? 'disabled' : ''} onchange="LF.end=this.value;renderNew()"></div></div>
+            <label style="display:flex;gap:7px;align-items:center;font-weight:500;margin-top:8px;cursor:pointer"><input type="checkbox" ${LF.noDue ? 'checked' : ''} onchange="LF.noDue=this.checked;renderNew()"> ยืมระยะยาว ไม่มีกำหนดคืน</label></div>
+        <div class="f"><label>ใช้ทำอะไร</label><textarea id="f-purpose" rows="2" placeholder="เช่น อบรมพนักงานใหม่ ห้องประชุม 2" oninput="LF.purpose=this.value;syncBtn()">${esc(LF.purpose)}</textarea></div>
+        <div class="f"><label>เบอร์ติดต่อ (ไม่บังคับ)</label><input type="tel" value="${esc(LF.contact)}" placeholder="ว่างไว้ = ใช้เบอร์ในระบบ" oninput="LF.contact=this.value"></div>
         <div class="f"><label>ผู้ยืม</label><div class="who"><span class="av">${esc(initials(S.display_name))}</span><div><b>${esc(S.display_name || '')}</b><br><span style="color:var(--ptc-text-muted)">${esc(S.primary_department || '')}${S.company ? ' · ' + esc(S.company) : ''} · จากบัญชีที่ล็อกอิน</span></div></div></div>
         ${it && it.blocked ? '<div class="note bad"><i class="fa fa-wrench"></i>เครื่องนี้อยู่ระหว่างซ่อม ยืมไม่ได้ตอนนี้</div>'
             : clash ? `<div class="note bad"><i class="fa fa-circle-xmark"></i>ไม่ว่างช่วงนี้ (${thD(clash.from)}${clash.to ? '–' + thD(clash.to) : ' เป็นต้นไป'}) — เลือกวันอื่นหรือเครื่องอื่น</div>`
             : badRange ? '<div class="note bad"><i class="fa fa-circle-xmark"></i>เลือกวันที่คืนให้ไม่ก่อนวันที่รับ</div>'
-            : it && form.start ? '<div class="note ok"><i class="fa fa-circle-check"></i>ว่างช่วงนี้ · ทีม IT จะอนุมัติภายในวันทำงาน</div>' : ''}
+            : it && LF.start ? '<div class="note ok"><i class="fa fa-circle-check"></i>ว่างช่วงนี้ · ทีม IT จะอนุมัติภายในวันทำงาน</div>' : ''}
         <button class="btn ok lg" id="send" style="width:100%;margin-top:12px" ${canSend ? '' : 'disabled'} onclick="send()"><i class="fa fa-paper-plane"></i> ส่งคำขอยืม</button></div>
     </div>`;
 }
@@ -198,12 +199,12 @@ function specBox(it) {
 }
 function syncBtn() {
     const it = items.find(i => i.id === sel), b = gid('send'); if (!b) return;
-    const clash = it && form.start ? rangeClash(it, form.start, form.noDue ? null : form.end) : null;
-    b.disabled = !(it && !it.blocked && form.start && !(form.start && !form.noDue && (!form.end || form.end < form.start)) && !clash && form.purpose.trim().length >= 3 && !sending);
+    const clash = it && LF.start ? rangeClash(it, LF.start, LF.noDue ? null : LF.end) : null;
+    b.disabled = !(it && !it.blocked && LF.start && !(LF.start && !LF.noDue && (!LF.end || LF.end < LF.start)) && !clash && LF.purpose.trim().length >= 3 && !sending);
 }
 function pick(id) {
     sel = id;
-    if (!form.start) { form.start = today; form.end = addDays(today, 1); }
+    if (!LF.start) { LF.start = today; LF.end = addDays(today, 1); }
     renderNew();
     if (window.innerWidth < 960) document.querySelector('.form')?.scrollIntoView({ behavior: 'smooth' });
 }
@@ -211,12 +212,12 @@ async function send() {
     const it = items.find(i => i.id === sel); if (!it) return;
     sending = true; syncBtn();
     try {
-        const j = await post({ action: 'loan_request', asset_id: it.id, start_date: form.start, end_date: form.noDue ? '' : form.end, no_due: form.noDue ? 1 : '', purpose: form.purpose.trim(), contact: form.contact.trim() });
+        const j = await post({ action: 'loan_request', asset_id: it.id, start_date: LF.start, end_date: LF.noDue ? '' : LF.end, no_due: LF.noDue ? 1 : '', purpose: LF.purpose.trim(), contact: LF.contact.trim() });
         gid('v-new').innerHTML = `<div class="card done"><div class="ic"><i class="fa fa-check"></i></div><h2 class="h">ส่งคำขอยืมแล้ว</h2>
             <p class="s" style="font-size:14px;margin-top:6px">เลขที่ <b style="color:var(--ptc-primary);font-family:Consolas">${esc(j.code)}</b> · ${esc(it.name)}</p>
-            <p style="font-size:14px;color:var(--ptc-text-2);margin:14px 0">ทีม IT จะอนุมัติภายในวันทำงาน แล้วไปรับของที่ห้อง IT ตามวันที่เลือก (${thD(form.start)})</p>
+            <p style="font-size:14px;color:var(--ptc-text-2);margin:14px 0">ทีม IT จะอนุมัติภายในวันทำงาน แล้วไปรับของที่ห้อง IT ตามวันที่เลือก (${thD(LF.start)})</p>
             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn pri lg" onclick="tab('mine')">ดูของที่ฉันยืม</button><button class="btn lg" onclick="reset()">ยืมอย่างอื่น</button></div></div>`;
-        form = { start: '', end: '', noDue: false, purpose: '', contact: '' }; sel = null;
+        LF = { start: '', end: '', noDue: false, purpose: '', contact: '' }; sel = null;
         load();
     } catch (e) { ptcAlert('error', 'ส่งไม่สำเร็จ', e.message); }
     finally { sending = false; syncBtn(); }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จอหน้าห้องประชุม</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+<style>
+/* จอหน้าห้อง (แท็บเล็ตติดหน้าห้อง) — พื้นมืดตลอด อ่านจากไกลได้ · ต้องล็อกอินค้างไว้ (ไม่เปิดให้คนนอกเห็นหัวข้อประชุม) */
+html, body { margin:0; height:100%; background:#0f172a; color:#f8fafc; font-family:Kanit, Inter, sans-serif; overflow:hidden; }
+.k { display:grid; grid-template-columns:1.25fr 1fr; gap:3vw; height:100%; box-sizing:border-box; padding:4vw 4.5vw; }
+.st { display:inline-block; font-size:clamp(14px,2vw,26px); font-weight:800; padding:.35em 1em; border-radius:99px; background:#16a34a; }
+.st.busy { background:#dc2626; } .st.soon { background:#d97706; }
+h1 { font-size:clamp(26px,4.6vw,64px); margin:.4em 0 .1em; line-height:1.1; }
+.loc { font-size:clamp(13px,1.6vw,20px); opacity:.6; }
+.what { font-size:clamp(16px,2.4vw,32px); margin-top:1.2em; opacity:.92; overflow-wrap:anywhere; }
+.big { font-size:clamp(30px,6vw,84px); font-weight:800; margin-top:.15em; letter-spacing:.02em; }
+.sub { font-size:clamp(13px,1.7vw,22px); opacity:.65; margin-top:.3em; }
+.nx { background:rgba(255,255,255,.06); border-radius:16px; padding:2vw 2.2vw; overflow:hidden; display:flex; flex-direction:column; }
+.nx h2 { font-size:clamp(14px,1.8vw,24px); margin:0 0 .6em; }
+.it { display:flex; gap:1em; padding:.7em 0; border-bottom:1px solid rgba(255,255,255,.1); font-size:clamp(13px,1.6vw,21px); }
+.it b { white-space:nowrap; font-variant-numeric:tabular-nums; } .it span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.it.done { opacity:.4; } .it.cur { color:#fca5a5; }
+.clock { margin-top:auto; padding-top:1em; opacity:.55; font-size:clamp(12px,1.5vw,20px); }
+.err { display:flex; align-items:center; justify-content:center; height:100%; font-size:22px; opacity:.7; text-align:center; padding:20px; }
+@media (max-width:700px) { .k { grid-template-columns:1fr; overflow:auto; } html, body { overflow:auto; } }
+</style>
+</head>
+<body>
+<div id="app" class="err">กำลังโหลด…</div>
+<script>
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const toD = s => new Date(String(s).replace(' ', 'T'));
+const hm = d => d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+const room = +new URLSearchParams(location.search).get('room');
+let skew = 0;
+async function load() {
+    if (!room) { document.getElementById('app').textContent = 'ใส่ ?room=รหัสห้อง ในลิงก์ (คัดลอกได้จากหน้าจองห้อง → ผู้ดูแลห้อง → ห้อง)'; return; }
+    try {
+        const r = await fetch(`api.php?action=room_display&room_id=${room}`, { cache: 'no-store' });
+        if (r.status === 401) { location.href = 'login.html?returnUrl=' + encodeURIComponent('room_display.html?room=' + room); return; }
+        const j = await r.json(); if (j.status !== 'success') throw new Error(j.message);
+        skew = toD(j.now) - new Date();   // ใช้นาฬิกาเซิร์ฟเวอร์ — แท็บเล็ตตั้งเวลาเพี้ยนบ่อย
+        render(j);
+    } catch (e) { document.getElementById('app').innerHTML = `<div class="err">โหลดไม่ได้ — ${esc(e.message)}<br>ลองใหม่อัตโนมัติทุก 1 นาที</div>`; }
+}
+function render(j) {
+    const now = new Date(Date.now() + skew);
+    const bs = j.bookings.map(b => ({ ...b, s: toD(b.start_at), e: toD(b.end_at) }));
+    const cur = bs.find(b => b.s <= now && b.e > now), next = bs.find(b => b.s > now);
+    const soon = !cur && next && next.s - now < 15 * 6e4;
+    const app = document.getElementById('app'); app.className = 'k';
+    app.innerHTML = `<div><span class="st ${cur ? 'busy' : soon ? 'soon' : ''}">${cur ? 'กำลังประชุม' : soon ? 'ใกล้เริ่มประชุม' : 'ว่าง'}</span>
+        <h1>${esc(j.room.name)}</h1><div class="loc">${esc(j.room.building || '')}${j.room.seats ? ' · ' + j.room.seats + ' ที่นั่ง' : ''}</div>
+        ${cur ? `<div class="what">${esc(cur.title)} · ${esc(cur.host || cur.department || cur.booker_name)}${+cur.has_guest ? `<br><span style="font-size:.8em;opacity:.85">🤝 ยินดีต้อนรับ ${esc(cur.guest_company)}</span>` : ''}</div><div class="big">${hm(cur.s)} – ${hm(cur.e)}</div><div class="sub">ว่างอีกครั้ง ${next && +next.s === +cur.e ? 'หลังประชุมถัดไป' : hm(cur.e)}</div>`
+            : next ? `<div class="what">ถัดไป: ${esc(next.title)}</div><div class="big">${hm(next.s)}</div><div class="sub">ว่างถึง ${hm(next.s)} · จองผ่านระบบ Powertech Center</div>`
+            : '<div class="what">ไม่มีการจองต่อจากนี้วันนี้</div><div class="sub" style="margin-top:1em">จองผ่านระบบ Powertech Center → จองห้องประชุม</div>'}</div>
+        <div class="nx"><h2>วันนี้</h2>${bs.length ? bs.map(b => `<div class="it ${b.e <= now ? 'done' : b === cur ? 'cur' : ''}"><b>${hm(b.s)}–${hm(b.e)}</b><span>${esc(b.title)}</span></div>`).join('') : '<div class="it" style="opacity:.6">ยังไม่มีการจอง</div>'}
+        <div class="clock">${now.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${hm(now)}</div></div>`;
+    window._last = j;
+}
+load();
+setInterval(load, 60000);
+setInterval(() => { if (window._last) render(window._last); }, 15000);
+</script>
+</body>
+</html>

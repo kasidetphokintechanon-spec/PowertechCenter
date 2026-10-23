@@ -60,6 +60,7 @@ require_once __DIR__ . '/includes/notify_cron.php';
 require_once __DIR__ . '/includes/loan_helper.php';
 require_once __DIR__ . '/includes/access_helper.php';
 require_once __DIR__ . '/includes/stock_helper.php';
+require_once __DIR__ . '/includes/room_helper.php';
 
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
@@ -323,6 +324,8 @@ try {
         'get_notify_overview' => ['settings.notifications'],
         // ผู้ดูแลสต็อก — ฝั่งพนักงาน (stock_catalog/submit/my/cancel/get) เช็กเจ้าของในตัว action
         'stock_board' => ['stock.manage'], 'stock_decide' => ['stock.manage'], 'stock_ready' => ['stock.manage'], 'stock_issue' => ['stock.manage'], 'stock_inventory' => ['stock.manage'], 'stock_receive' => ['stock.manage'], 'stock_count' => ['stock.manage'], 'stock_item_history' => ['stock.manage'], 'stock_report' => ['stock.manage'], 'stock_quota' => ['stock.manage'],
+        // จองห้องประชุม — ผู้ดูแลห้อง · ฝั่งพนักงาน (room_day/book/my/update/cancel/display) เช็กในตัว action
+        'room_prep' => ['room.manage'], 'room_prepared' => ['room.manage'], 'room_decide' => ['room.manage'], 'room_rules' => ['room.manage'], 'room_rooms' => ['room.manage'], 'room_save' => ['room.manage'], 'room_report' => ['room.manage'],
         'perm_people' => ['admin.manage_permissions'], 'perm_save' => ['admin.manage_permissions'],
         'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
@@ -361,7 +364,8 @@ try {
         'checklist',
         'stock',
         'setup',
-        'server_check'
+        'server_check',
+        'room'
     ];
 
     if (!empty($safeAction)) {

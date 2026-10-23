@@ -35,6 +35,7 @@
             items: [
                 { id: 'stock',           icon: 'fa-boxes-stacked',      label: 'สต็อก & เบิกของ',       href: 'stock_management.html', page: 'stock_management', perm: 'stock.manage', badgeTitle: 'ใบเบิกรออนุมัติ' },
                 { id: 'loan',            icon: 'fa-rotate',             label: 'ยืม-คืนอุปกรณ์',        href: 'borrow_management.html', page: 'loan', perm: 'loan.manage', badgeTitle: 'รออนุมัติยืม' },
+                { id: 'rooms',           icon: 'fa-calendar-check',     label: 'ห้องประชุม',            href: 'rooms.html?tab=keep', page: 'rooms', perm: 'room.manage' },
                 { id: 'task_center',     icon: 'fa-list-check',         label: 'Task Center',          href: 'task_center.html',page: 'task_center',       perm: null },
             ],
         },
@@ -52,7 +53,7 @@
             key: 'settings', label: '', color: '#2563eb', divider: true,
             items: [
                 { id: 'settings',        icon: 'fa-gear',               label: 'ตั้งค่า',               href: 'settings.html',   page: 'settings',          perm: 'any-setting', badgeTone: 'muted', badgeTitle: 'ผู้ใช้รอกำหนดสิทธิ์',
-                  also: ['settings_system', 'settings_notify', 'audit_log', 'admin_logo', 'admin:job_positions', 'admin:departments', 'admin:asset_categories', 'admin:locations', 'admin:kb_categories', 'admin:services', 'admin:server_check'] },
+                  also: ['settings_system', 'settings_rooms', 'settings_notify', 'audit_log', 'admin_logo', 'admin:job_positions', 'admin:departments', 'admin:asset_categories', 'admin:locations', 'admin:kb_categories', 'admin:services', 'admin:server_check'] },
             ],
         },
     ];
@@ -72,6 +73,7 @@
         ] },
         { group: 'บริการและการแจ้งเตือน', gIcon: 'fa-headset', gColor: '#7c3aed', items: [
             { id: 'notify',           icon: 'fa-bell',            title: 'ศูนย์แจ้งเตือน',            desc: 'LINE / Telegram เรื่องไหนเข้ากลุ่มไหน',     href: 'settings_notify.html', perm: 'settings.notifications', keys: 'line telegram แจ้งเตือน token กุญแจ' },
+            { id: 'rooms',            icon: 'fa-calendar-check',  title: 'ห้องประชุม',                desc: 'ห้องแต่ละบริษัท กติกาการจอง ของที่ขอเตรียม การอนุมัติ', href: 'settings_rooms.html', perm: 'room.manage' },
             { id: 'it_sla',           icon: 'fa-stopwatch',       title: 'ทีม IT และเวลาตอบสนอง',     desc: 'เบอร์ติดต่อ เวลารับเรื่อง (SLA)',           href: 'settings_system.html#it', perm: 'admin', keys: 'sla เบอร์ ติดต่อ เวลาทำการ' },
             { id: 'services',         icon: 'fa-link',            title: 'ลิงก์บริการหน้าแรก',        desc: 'ปุ่มทางลัดบนหน้าแรกของพนักงาน',           tab: 'services',         perm: 'employee.manage', keys: 'service link หน้าแรก ทางลัด' },
             { id: 'kb_categories',    icon: 'fa-folder-tree',     title: 'หมวดหมู่คลังความรู้',       desc: 'จัดกลุ่มบทความ KB',                        tab: 'kb_categories',    perm: 'kb.manage', keys: 'kb category คู่มือ' },

@@ -57,6 +57,7 @@ const ACCESS_DUTIES = [
     'asset'    => ['t' => 'ดูแลทรัพย์สิน IT', 'd' => 'ทะเบียนพัสดุ หมวดหมู่ สถานที่', 'perms' => ['asset.manage'], 'scoped' => true],
     'stock'    => ['t' => 'ดูแลสต็อก & เบิกของ', 'd' => 'อนุมัติ จ่ายของ รับเข้า นับสต็อก', 'perms' => ['stock.manage'], 'scoped' => true],
     'loan'     => ['t' => 'ดูแลยืม-คืนอุปกรณ์', 'd' => 'อนุมัติ ส่งมอบ รับคืน', 'perms' => ['loan.manage'], 'scoped' => true],
+    'room'     => ['t' => 'ดูแลห้องประชุม', 'd' => 'เตรียมของตามที่จอง จัดการห้อง ดูรายงานการใช้ห้อง', 'perms' => ['room.manage'], 'scoped' => false],
     'employee' => ['t' => 'ดูแลข้อมูลพนักงาน', 'd' => 'พนักงาน แผนก ตำแหน่ง ประกาศ วันหยุด', 'perms' => ['employee.manage'], 'scoped' => false],
     'kb'       => ['t' => 'ดูแลคลังความรู้', 'd' => 'เขียน/แก้บทความวิธีแก้ปัญหา', 'perms' => ['kb.manage'], 'scoped' => false],
     'notify'   => ['t' => 'ตั้งค่าแจ้งเตือน', 'd' => 'LINE / Telegram ใครได้รับเรื่องอะไร', 'perms' => ['settings.notifications'], 'scoped' => false],

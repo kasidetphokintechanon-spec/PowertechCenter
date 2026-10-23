@@ -508,7 +508,7 @@
         const QUICK = [
             { svc: 'IT -Service', href: 'request.html?tab=form', icon: 'fa-plus', t: 'แจ้งซ่อม IT', s: 'คอม / โปรแกรม / เน็ต', pri: true },
             { svc: 'service-it-loan', icon: 'fa-right-left', t: 'ยืมอุปกรณ์', s: 'โน้ตบุ๊ก โปรเจกเตอร์', tone: 'stock' },
-            { svc: 'service-room', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
+            { svc: 'service-room', href: 'rooms.html', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
             { svc: 'service-contact', icon: 'fa-address-book', t: 'หาเบอร์เพื่อน', s: 'สมุดรายชื่อ', tone: 'people' },
         ];
         row.innerHTML = '';
