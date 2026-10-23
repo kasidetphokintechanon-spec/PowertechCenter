@@ -176,6 +176,27 @@ try {
     error_log('[get_home_dashboard] rooms: ' . $e->getMessage());
 }
 
+// ใบจองรถของฉัน (สูงสุด 3): ไม่อนุมัติ (3 วันล่าสุด) → รอคืนกุญแจ → รออนุมัติ → อนุมัติแล้ว (ถึงพรุ่งนี้)
+$myCars = [];
+$carTodo = null;
+try {
+    _initCarTables($conn);
+    $st = $conn->prepare("SELECT b.id, b.code, b.purpose, b.destination, b.start_at, b.end_at, b.status, b.need_driver, b.cancel_reason, c.plate, c.name AS car_name, d.name AS driver_name
+        FROM cr_bookings b JOIN cr_cars c ON c.id = b.car_id LEFT JOIN cr_drivers d ON d.id = b.driver_id
+        WHERE b.booker_id = ? AND (b.status IN ('pending','returning')
+            OR (b.status = 'approved' AND b.start_at < CURDATE() + INTERVAL 2 DAY)
+            OR (b.status = 'rejected' AND b.start_at > NOW() AND b.decided_at >= NOW() - INTERVAL 3 DAY))
+        ORDER BY FIELD(b.status, 'rejected', 'returning', 'approved', 'pending'), b.start_at LIMIT 3");
+    if ($st) {
+        $st->bind_param('s', $userId);
+        $st->execute();
+        foreach ($st->get_result()->fetch_all(MYSQLI_ASSOC) as $r) { $r['id'] = (int)$r['id']; $r['need_driver'] = (int)$r['need_driver']; $myCars[] = $r; }
+    }
+    if (carCanManage($conn)) $carTodo = carKeeperTodo($conn);
+} catch (Throwable $e) {
+    error_log('[get_home_dashboard] cars: ' . $e->getMessage());
+}
+
 // Services menu (light columns)
 $services = [];
 try {
@@ -223,6 +244,8 @@ echo json_encode([
     'my_stock' => $myStock,
     'my_rooms' => $myRooms,
     'room_todo' => $roomTodo,
+    'my_cars' => $myCars,
+    'car_todo' => $carTodo,
     'services' => $services,
     'queue' => ['pending' => $queuePending, 'active' => $queueActive],
     'pending_total' => (int)$kpi['pending'] + (int)$kpi['loan_pending'],

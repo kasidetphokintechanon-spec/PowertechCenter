@@ -85,6 +85,12 @@ function getPowertechPermissionDefinitions(): array
             'description' => 'rooms.html — เตรียมของตามที่จอง จัดการห้อง',
         ],
         [
+            'key' => 'car.manage',
+            'label' => 'ดูแลรถบริษัท',
+            'group' => 'operations',
+            'description' => 'cars.html — อนุมัติจองรถ เลือกคนขับ รับกุญแจคืน จัดการรถ',
+        ],
+        [
             'key' => 'kb.manage',
             'label' => 'จัดการ Knowledge Base',
             'group' => 'content',

@@ -62,10 +62,11 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     <a href="#loan"><i class="fa fa-rotate"></i>ยืมอุปกรณ์ IT</a>
     <a href="#stock"><i class="fa fa-box-open"></i>เบิกของ</a>
     <a href="#rooms"><i class="fa fa-calendar-check"></i>จองห้องประชุม</a>
+    <a href="#cars"><i class="fa fa-car-side"></i>จองรถ</a>
     <a href="#contact"><i class="fa fa-address-book"></i>หาเบอร์ / Contact List</a>
     <a href="#kb"><i class="fa fa-book"></i>คลังความรู้</a>
     <small>สำหรับผู้ดูแล</small>
-    <a href="#keeper"><i class="fa fa-user-gear"></i>ผู้ดูแลสต็อก / ห้อง / ยืม-คืน</a>
+    <a href="#keeper"><i class="fa fa-user-gear"></i>ผู้ดูแลสต็อก / ห้อง / รถ / ยืม-คืน</a>
     <a href="#faq"><i class="fa fa-comments"></i>คำถามที่พบบ่อย</a>
 </nav>
 <main id="main">
@@ -134,6 +135,19 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     <a class="go" href="rooms.html"><i class="fa fa-arrow-right"></i>ไปหน้าจองห้อง</a>
 </section>
 
+<section class="sec" id="cars"><h2><span class="bd" style="background:#0284c7"><i class="fa fa-car-side"></i></span>จองรถบริษัท</h2>
+    <p class="lead">ทุกบริษัทจองรถได้ · ทุกใบต้องรอผู้ดูแลรถอนุมัติ · ใช้เสร็จต้องคืนกุญแจ</p>
+    <ol class="steps">
+        <li><span>หน้าแรก กด <b>"จองรถ"</b> — ตารางแสดงรถทุกคันทั้งวัน แถบสี = มีคนจองแล้ว</span></li>
+        <li><span><b>กดช่องว่างในแถวของรถ</b> ตรงเวลาที่จะออก หรือกดปุ่ม <b>ช่วงเช้า / ช่วงบ่าย / ทั้งวัน</b></span></li>
+        <li><span>ใส่ <b>ไปทำอะไร</b> กับ <b>ไปที่</b> (บังคับ) · เลือก <b>ขับเอง</b> หรือ <b>ขอคนขับ</b></span></li>
+        <li><span>กด <b>"ส่งคำขอจองรถ"</b> — สถานะเป็น <span class="st" style="--c:#d97706">รออนุมัติ</span> ดูได้ที่หน้าแรก "งานของฉัน"</span></li>
+        <li><span>อนุมัติแล้ว รับกุญแจที่ผู้ดูแลรถ · ใช้เสร็จกด <b>"คืนรถแล้ว"</b> ที่แท็บ "การจองของฉัน" แล้ว <b>นำกุญแจไปคืน</b> — ใบปิดเมื่อผู้ดูแลรับกุญแจ</span></li>
+    </ol>
+    <div class="warn"><i class="fa fa-triangle-exclamation"></i> ไม่ใช้แล้วกรุณากด "ยกเลิก" ก่อนเวลาออก คนอื่นจะได้จองต่อ · ออกรถแล้วยกเลิกไม่ได้ ต้องคืนรถ</div>
+    <a class="go" href="cars.html"><i class="fa fa-arrow-right"></i>ไปหน้าจองรถ</a>
+</section>
+
 <section class="sec" id="contact"><h2><span class="bd" style="background:#2563eb"><i class="fa fa-address-book"></i></span>หาเบอร์ / Contact List</h2>
     <ol class="steps">
         <li><span>หน้าแรก กด <b>"หาเบอร์เพื่อน"</b> แล้วพิมพ์ชื่อ ชื่อเล่น หรือแผนก</span></li>
@@ -157,8 +171,14 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     </ol>
     <h3><i class="fa fa-calendar-check"></i> ผู้ดูแลห้องประชุม</h3>
     <ol class="steps">
-        <li><span>หน้าจองห้อง → แท็บ <b>ผู้ดูแลห้อง</b>: ดู "วันนี้ต้องเตรียม" เตรียมของตามที่ขอ แล้วกด <b>"เตรียมแล้ว"</b> · ห้องที่ต้องอนุมัติ กด <b>อนุมัติ / ไม่อนุมัติ</b></span></li>
+        <li><span>หน้าจองห้อง → แท็บ <b>ผู้ดูแลห้อง</b>: ดู "วันนี้ต้องเตรียม" เตรียมของตามที่ขอ แล้วกด <b>"กดเมื่อเตรียมเสร็จ"</b> · ห้องที่ต้องอนุมัติ กด <b>อนุมัติ / ไม่อนุมัติ</b></span></li>
         <li><span><b>ตั้งค่า → ห้องประชุม</b>: ห้องของบริษัท · กติกา (จองล่วงหน้าได้กี่วัน นานสุดกี่ชั่วโมง) · ของที่ให้ขอเตรียม · ห้องที่ต้องอนุมัติ</span></li>
+    </ol>
+    <h3><i class="fa fa-car-side"></i> ผู้ดูแลรถ</h3>
+    <ol class="steps">
+        <li><span>หน้าจองรถ → แท็บ <b>ผู้ดูแลรถ</b> → <b>รออนุมัติ</b>: กด <b>อนุมัติ</b> (ใบที่ขอคนขับ ให้เลือกคนขับ) หรือ <b>ไม่อนุมัติ</b> พร้อมเหตุผล — ส่วนใหญ่จองวันเดียวกับที่ใช้ อนุมัติให้เร็ว</span></li>
+        <li><span>แท็บ <b>ใช้รถอยู่ / รับกุญแจคืน</b>: คนจองคืนรถแล้ว หรือเลยเวลาคืน → รับกุญแจแล้วกด <b>"รับกุญแจคืนแล้ว"</b> (คนจองลืมกดคืน ก็กดรับแทนได้)</span></li>
+        <li><span>แท็บ <b>รถ / คนขับ</b>: เพิ่ม/แก้รถ รูปรถ บริษัทเจ้าของ · รถที่ไม่ให้พนักงานจอง (เช่น รถผู้บริหาร) ให้ปิดการจอง</span></li>
     </ol>
     <h3><i class="fa fa-rotate"></i> IT — ยืม-คืนอุปกรณ์</h3>
     <ol class="steps">

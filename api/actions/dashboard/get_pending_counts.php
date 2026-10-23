@@ -1,7 +1,7 @@
 <?php
 // api/actions/dashboard/get_pending_counts.php
 
-$room_pending = 0; $room_prep = 0; $stock_pending = 0; $loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
+$room_pending = 0; $room_prep = 0; $car_todo = 0; $stock_pending = 0; $loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
 
 try {
     if (isset($conn) && $conn instanceof mysqli) {
@@ -26,6 +26,12 @@ try {
         }
 
         // จองห้อง/รถ ย้ายไปใช้ roomsys / carsys แล้ว — booking คงไว้เป็น 0 ให้หน้าที่ยังอ่านค่านี้ไม่พัง
+
+        // จองรถ: รออนุมัติ + รอรับกุญแจ + เลยเวลาคืน (เฉพาะรถของบริษัทที่ดูแล)
+        if (function_exists('carCanManage') && carCanManage($conn)) {
+            _initCarTables($conn);
+            $car_todo = array_sum(carKeeperTodo($conn));
+        }
 
         // ห้องประชุม: งานของผู้ดูแลห้อง (นับเฉพาะห้องที่ดูแล)
         if (function_exists('roomCanManage') && roomCanManage($conn)) {
@@ -95,6 +101,7 @@ echo json_encode([
     'server_check_missing' => $sc_missing,
     'room_pending'       => $room_pending,
     'room_prep'          => $room_prep,
+    'car_todo'           => $car_todo,
     // backward-compat keys
     'loan'               => $loan_count,
     'repair'             => $repair_count,

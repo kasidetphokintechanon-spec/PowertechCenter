@@ -170,10 +170,10 @@
         // ตัวเลขบน "ระบบจัดการ" = งานค้างรวม (งานซ่อมรอรับ + ยืมรออนุมัติ + ของใกล้หมด)
         if (adminLink && !adminLink.classList.contains('index-admin-link-hidden')) {
             fetch('api.php?action=get_pending_counts', { credentials: 'same-origin' }).then((r) => r.json()).then((d) => {
-                const rm = (+d.room_pending || 0) + (+d.room_prep || 0);
-                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_pending || 0) + rm;
+                const rm = (+d.room_pending || 0) + (+d.room_prep || 0), cm = +d.car_todo || 0;
+                const n = (+d.ticket_unassigned || 0) + (+d.loan_pending || 0) + (+d.stock_pending || 0) + rm + cm;
                 const b = $('mgmtBadge');
-                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ใบเบิกรออนุมัติ ' + (d.stock_pending || 0) + ' · ห้องประชุม ' + rm; }
+                if (b) { b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hidden', !n); b.title = 'งานซ่อมรอรับ ' + (d.ticket_unassigned || 0) + ' · ยืมรออนุมัติ ' + (d.loan_pending || 0) + ' · ใบเบิกรออนุมัติ ' + (d.stock_pending || 0) + ' · ห้องประชุม ' + rm + ' · รถ ' + cm; }
             }).catch(() => {});
         }
 
@@ -228,8 +228,8 @@
         });
     }
 
-    let roomTodo = null;
-    function renderMyStatus(tickets, loans, stock, rooms, todo) {
+    let roomTodo = null, carTodo = null;
+    function renderMyStatus(tickets, loans, stock, rooms, todo, cars, ctodo) {
         const container = $('my-status-content');
         if (!container) return;
         const ticketList = Array.isArray(tickets) ? tickets : [];
@@ -237,7 +237,9 @@
         const stockList = Array.isArray(stock) ? stock : [];
         const roomList = Array.isArray(rooms) ? rooms : [];
         const rp = todo ? (+todo.pending || 0) : 0, rq = todo ? (+todo.prep || 0) : 0;
-        const total = ticketList.length + loanList.length + stockList.length + roomList.length + (rp + rq ? 1 : 0);
+        const carList = Array.isArray(cars) ? cars : [];
+        const cp = ctodo ? (+ctodo.pending || 0) : 0, cr = ctodo ? (+ctodo.receive || 0) : 0, co = ctodo ? (+ctodo.overdue || 0) : 0;
+        const total = ticketList.length + loanList.length + stockList.length + roomList.length + carList.length + (rp + rq ? 1 : 0) + (cp + cr + co ? 1 : 0);
 
         const uidMe = String(session.user_id || '');
         const mineReq = ticketList.filter((l) => String(l.requester_id ?? '') === uidMe);
@@ -255,13 +257,19 @@
             '<div class="h2-kp">' + kp.map((k) => '<div><b style="color:' + k[2] + '">' + k[1] + '</b><span>' + k[0] + '</span></div>').join('') + '</div>';
         if (total === 0) {
             container.innerHTML = head + '<div class="status-clear"><i class="fas fa-circle-check"></i>' +
-                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อม การยืม ใบเบิกของ และการจองห้องของคุณเรียบร้อยทั้งหมด</span></div></div>';
+                '<div><b>ไม่มีงานค้าง</b><span>งานแจ้งซ่อม การยืม ใบเบิกของ และการจองห้อง/รถของคุณเรียบร้อยทั้งหมด</span></div></div>';
             return;
         }
         const STEP = { Pending: 1, Received: 2, 'Awaiting Confirmation': 4 };
         const steps = (n, cls) => '<div class="h2-steps ' + (cls || '') + '">' + [1, 2, 3, 4, 5].map((i) => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
         const shortName = (v) => String(v || '').replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|นาย|นาง|นางสาว)\s*/i, '').split(' ')[0];
         const jobs = [];
+        // ผู้ดูแลรถ: รออนุมัติ / รอรับกุญแจ / เลยเวลาคืน — คนจองส่วนใหญ่จองวันเดียวกับที่ใช้ อนุมัติช้า = ออกรถไม่ทัน
+        if (cp + cr + co) {
+            jobs.push('<a class="h2-job" href="cars.html?tab=keep"><div class="h2-job-top"><b>รถที่คุณดูแล</b>' +
+                '<span class="h2-pill" style="--c:#d97706">' + (cp + cr + co) + ' งาน</span></div>' +
+                '<div class="h2-job-sub">' + [cp ? 'รออนุมัติ ' + cp : '', cr ? 'รอรับกุญแจคืน ' + cr : '', co ? 'เลยเวลาคืน ' + co : ''].filter(Boolean).join(' · ') + '</div></a>');
+        }
         // ผู้ดูแลห้องประชุม: งานที่ต้องจัดการขึ้นก่อน (อนุมัติช้า = คนจองไม่รู้ว่าได้ห้องไหม)
         if (rp + rq) {
             jobs.push('<a class="h2-job" href="rooms.html?tab=keep"><div class="h2-job-top"><b>ห้องประชุมที่คุณดูแล</b>' +
@@ -307,6 +315,18 @@
             jobs.push('<a class="h2-job" href="rooms.html?tab=mine"><div class="h2-job-top"><b>ห้อง ' + esc(b.room_name) + ' · ' + esc(b.title) + '</b>' +
                 '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + (st[2] ? ' · ' + esc(st[2]) : '') + '</div></a>');
+        });
+        // จองรถ: ไม่อนุมัติ / รอคืนกุญแจ / อนุมัติแล้ว (พร้อมคนขับ) / รออนุมัติ
+        carList.forEach((b) => {
+            const st = b.status === 'rejected' ? ['ไม่อนุมัติ', '#dc2626', 'เหตุผล: ' + (b.cancel_reason || '-')]
+                : b.status === 'returning' ? ['รอรับกุญแจ', '#0891b2', 'นำกุญแจไปคืนผู้ดูแลรถ']
+                : b.status === 'approved' && new Date(String(b.end_at).replace(' ', 'T')) < today ? ['เลยเวลาคืน', '#dc2626', 'ใช้เสร็จแล้วกด "คืนรถแล้ว" แล้วนำกุญแจไปคืน']
+                : b.status === 'approved' && new Date(String(b.start_at).replace(' ', 'T')) <= today ? ['กำลังใช้รถ', '#2563eb', 'ใช้เสร็จกด "คืนรถแล้ว"']
+                : b.status === 'approved' ? ['อนุมัติแล้ว', '#16a34a', b.need_driver ? (b.driver_name ? 'คนขับ ' + b.driver_name : 'รอเลือกคนขับ') : 'ขับเอง']
+                : ['รออนุมัติ', '#d97706', 'รอผู้ดูแลรถอนุมัติ'];
+            jobs.push('<a class="h2-job" href="cars.html?tab=mine"><div class="h2-job-top"><b>รถ ' + esc(b.plate) + ' · ' + esc(b.purpose) + '</b>' +
+                '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
+                '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + ' · ' + esc(st[2]) + '</div></a>');
         });
         const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
         container.innerHTML = head + jobs.join('') + more;
@@ -535,6 +555,7 @@
             { svc: 'IT -Service', href: 'request.html?tab=form', icon: 'fa-plus', t: 'แจ้งซ่อม IT', s: 'คอม / โปรแกรม / เน็ต', pri: true },
             { svc: 'service-it-loan', icon: 'fa-right-left', t: 'ยืมอุปกรณ์', s: 'โน้ตบุ๊ก โปรเจกเตอร์', tone: 'stock' },
             { svc: 'service-room-new', href: 'rooms.html', icon: 'fa-calendar-check', t: 'จองห้องประชุม', s: 'ดูห้องว่างวันนี้', tone: 'booking' },
+            { svc: 'service-car-new', href: 'cars.html', icon: 'fa-car-side', t: 'จองรถ', s: 'ดูรถว่าง ขอใช้รถ', tone: 'booking' },
             { svc: 'service-contact', icon: 'fa-address-book', t: 'หาเบอร์เพื่อน', s: 'สมุดรายชื่อ', tone: 'people' },
         ];
         row.innerHTML = '';
@@ -679,6 +700,10 @@
         if (rm > 0) {
             html += '<div class="notif-item" data-href="rooms.html?tab=keep">ห้องประชุมรอคุณจัดการ ' + rm + ' รายการ</div>';
         }
+        const cm = carTodo ? (+carTodo.pending || 0) + (+carTodo.receive || 0) + (+carTodo.overdue || 0) : 0;
+        if (cm > 0) {
+            html += '<div class="notif-item" data-href="cars.html?tab=keep">รถรอคุณจัดการ ' + cm + ' รายการ</div>';
+        }
         if (!html) html = '<div class="notif-empty">ไม่มีการแจ้งเตือนใหม่</div>';
         list.innerHTML = html;
         list.querySelectorAll('.notif-item').forEach((el) => {
@@ -688,7 +713,7 @@
             });
         });
         const badge = $('notifBadge');
-        const total = (kpi.pending || 0) + (kpi.loan_pending || 0) + rm;
+        const total = (kpi.pending || 0) + (kpi.loan_pending || 0) + rm + cm;
         if (badge) {
             if (total > 0) {
                 badge.textContent = total > 99 ? '99+' : String(total);
@@ -710,8 +735,8 @@
             }
             applySession(data.session || {});
             renderKpi(data.kpi || {});
-            renderMyStatus(data.my_tickets, data.my_loans, data.my_stock, data.my_rooms, data.room_todo);
-            roomTodo = data.room_todo;
+            renderMyStatus(data.my_tickets, data.my_loans, data.my_stock, data.my_rooms, data.room_todo, data.my_cars, data.car_todo);
+            roomTodo = data.room_todo; carTodo = data.car_todo;
 
             renderServices(data.services || []);
             renderNotifList(data.kpi || {});
