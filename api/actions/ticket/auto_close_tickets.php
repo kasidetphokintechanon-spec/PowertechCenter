@@ -55,16 +55,7 @@ foreach ($rows as $row) {
         $closed++;
 
         // Notify IT group so the team is aware
-        $msg = "<b>⏰ Auto-Closed Ticket</b>\n" .
-               "➖➖➖➖➖➖➖➖➖➖\n" .
-               "<b>🏢 Company:</b> "  . ($row['company']    ?? '-') . "\n" .
-               "<b>🎫 Ticket:</b> <code>{$row['id']}</code>\n" .
-               "<b>👤 User:</b> "     . ($row['requester']  ?? '-') . "\n" .
-               "<b>👨‍🔧 Tech:</b> " . ($row['servicedBy']  ?? '-') . "\n" .
-               "<b>📝 Reason:</b> ผู้แจ้งไม่ยืนยันภายใน " . AUTO_CLOSE_DAYS . " วัน\n" .
-               "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
-               "\n#AutoClosed #System";
-        sendNotify($conn, $msg, 'it_approve', $row['company'] ?? null);
+        ticketNotify($conn, 'it_approve', 'ปิดงานอัตโนมัติ', $row['id'], ['ช่าง' => $row['servicedBy'] ?? '', 'เหตุผล' => 'ผู้แจ้งไม่ยืนยันภายใน ' . AUTO_CLOSE_DAYS . ' วัน']);
     }
 }
 

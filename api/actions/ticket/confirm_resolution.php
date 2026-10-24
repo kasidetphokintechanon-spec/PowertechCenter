@@ -55,18 +55,8 @@ $notifyStmt->execute();
 $ticketQ = $notifyStmt->get_result();
 if ($ticketQ && $ticketRow = $ticketQ->fetch_assoc()) {
     $docNum = $row['doc_number'] ?? '-';
-    $msg = "<b>✅ User Confirmed Resolution</b>\n" .
-           "➖➖➖➖➖➖➖➖➖➖\n" .
-           "<b>🏢 Company:</b> " . ($ticketRow['company'] ?? '-') . "\n" .
-           "<b>🎫 Ticket:</b> <code>{$ticket_id}</code>\n" .
-           "<b>📄 Doc No.:</b> {$docNum}\n" .
-           "<b>👤 User:</b> " . ($ticketRow['requester'] ?? '-') . "\n" .
-           "<b>👨‍🔧 Tech:</b> " . ($ticketRow['servicedBy'] ?? '-') . "\n" .
-           "<b>✍️ Confirmed by:</b> {$confirmedBy}\n" .
-           "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
-           "\n#Completed #UserConfirmed";
     require_once __DIR__ . '/../../../includes/notify_helper.php';
-    sendNotify($conn, $msg, 'it_approve', $ticketRow['company'] ?? null);
+    ticketNotify($conn, 'it_approve', 'ผู้แจ้งยืนยันแล้ว ปิดงาน', $ticket_id, ['ช่าง' => $ticketRow['servicedBy'] ?? '', 'ยืนยันโดย' => $confirmedBy, 'เลขใบซ่อม' => $docNum]);
 }
 
 echo json_encode(['status' => 'success', 'message' => 'Resolution confirmed. Ticket is now Completed.']);

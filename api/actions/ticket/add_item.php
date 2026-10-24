@@ -129,54 +129,8 @@ if ($key === 'it_logs') {
         $now = date("d/m/Y H:i");
         $uEmoji = ($urgency === 'ด่วนที่สุด') ? '🔥' : (($urgency === 'ด่วน') ? '⚡' : '✨');
         
-        $problemRaw = $data['problem'] ?? '-';
-        $isProgrammer = (strpos($problemRaw, '[PROGRAMMER REQUEST]') !== false);
-        
-        if ($isProgrammer) {
-            // Reformat programmer request for better display in Line/Telegram
-            $formattedProblem = str_replace(
-                ['[PROGRAMMER REQUEST]', 'Software:', 'Module:', '1. อาการที่พบ:', '2. ขั้นตอนที่ทำ:', '3. ความต้องการ:', '4. เอกสาร/อ้างอิง:', '----------------------'],
-                ['<b>💻 Programmer Request</b>', '<b>Software:</b>', '<b>Module:</b>', '<b>1. อาการที่พบ:</b>', '<b>2. ขั้นตอนที่ทำ:</b>', '<b>3. ความต้องการ:</b>', '<b>4. เอกสาร/อ้างอิง:</b>', '➖➖➖➖➖➖➖➖➖➖'],
-                $problemRaw
-            );
-            
-            $msg = "<b>🆕 New Programmer Ticket {$uEmoji}</b>\n" .
-                   "➖➖➖➖➖➖➖➖➖➖\n" .
-                   "<b>🏢 Company:</b> " . ($data['company']??'-') . "\n" .
-                   "<b>🎫 Ticket:</b> <code>{$new_id}</code>\n" .
-                   "<b>🕒 Time:</b> {$now}\n" .
-                   "<b>👤 User:</b> " . ($data['requester']??'-') . "\n" .
-                   "<b>🏢 Dept:</b> " . ($data['department']??'-') . "\n" .
-                   "<b>🚨 Level:</b> {$urgency}\n" .
-                   "➖➖➖➖➖➖➖➖➖➖\n" .
-                   $formattedProblem . "\n" .
-                   "\n#NewTicket #Programmer";
-        } else {
-            $typeStr     = trim((string)($data['type'] ?? ''));
-            $contactStr  = trim((string)($data['contact'] ?? ''));
-            $assetStr    = trim((string)($data['asset_id'] ?? ''));
-            $apptStr     = trim((string)($data['appointment_date'] ?? ''));
-
-            $typeLine    = $typeStr    ? "\n<b>🔧 ประเภทงาน:</b> {$typeStr}"        : '';
-            $contactLine = $contactStr ? "\n<b>📞 เบอร์โทร:</b> {$contactStr}"       : '';
-            $assetLine   = $assetStr   ? "\n<b>💻 อุปกรณ์:</b> {$assetStr}"          : '';
-            $apptLine    = $apptStr    ? "\n<b>📅 นัดหมาย:</b> {$apptStr}"           : '';
-
-            $msg = "<b>🆕 New Ticket Alert {$uEmoji}</b>\n" .
-                   "➖➖➖➖➖➖➖➖➖➖\n" .
-                   "<b>🏢 Company:</b> " . ($data['company']??'-') . "\n" .
-                   "<b>🎫 Ticket:</b> <code>{$new_id}</code>\n" .
-                   "<b>🕒 Time:</b> {$now}\n" .
-                   "<b>👤 User:</b> " . ($data['requester']??'-') . "\n" .
-                   "<b>🏢 Dept:</b> " . ($data['department']??'-') . "\n" .
-                   "<b>🚨 Level:</b> {$urgency}" .
-                   $typeLine . $contactLine . $assetLine . $apptLine . "\n" .
-                   "➖➖➖➖➖➖➖➖➖➖\n" .
-                   "<b>📝 Problem:</b>\n" . $problemRaw . "\n" .
-                   "\n#NewTicket #ITSupport";
-        }
-
-        sendNotify($conn, $msg, 'it_repair', $data['company'] ?? null);
+        $isProgrammer = strpos((string)($data['problem'] ?? ''), '[PROGRAMMER REQUEST]') !== false;
+        ticketNotify($conn, 'it_repair', $isProgrammer ? 'ขอโปรแกรมเมอร์ใหม่' : 'แจ้งซ่อมใหม่', $new_id, [], 'เปิดงาน / รับเรื่อง');
 
         // Log to Asset History (บันทึกประวัติการแจ้งซ่อมลงใน Asset)
         if (!empty($data['asset_id'])) {

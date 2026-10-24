@@ -62,17 +62,7 @@ $s3->bind_param("sss", $newSol, $now, $ticket_id);
 if (!$s3->execute()) throw new Exception("Update failed: " . $s3->error);
 
 // Notify IT team via Telegram
-$msg = "<b>🔄 Ticket Reopened ↩️</b>\n" .
-       "➖➖➖➖➖➖➖➖➖➖\n" .
-       "<b>🏢 Company:</b> "   . ($row['company']    ?? '-') . "\n" .
-       "<b>🎫 Ticket:</b> <code>{$ticket_id}</code>\n" .
-       "<b>👤 User:</b> "      . ($row['requester']  ?? '-') . "\n" .
-       "<b>👨‍🔧 Tech:</b> "   . ($row['servicedBy'] ?? '-') . "\n" .
-       "➖➖➖➖➖➖➖➖➖➖\n" .
-       "<b>❗ เหตุผล:</b> {$reason}\n" .
-       "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
-       "\n#Reopened #UserFeedback";
-sendNotify($conn, $msg, 'it_user_reply', $row['company'] ?? null);
+ticketNotify($conn, 'it_user_reply', 'ผู้แจ้งบอกยังไม่หาย — งานกลับมาที่ช่าง', $ticket_id, ['ช่าง' => $row['servicedBy'] ?? '', 'เหตุผล' => $reason]);
 
 echo json_encode(['status' => 'success', 'message' => 'Ticket reopened successfully.']);
 ?>

@@ -255,52 +255,12 @@ if ($key === 'it_logs') {
                     $s = $statusInfo[$newStatus];
                     
                     $isReopen = ($current_status === 'Completed' || $current_status === 'Cancelled') && $newStatus === 'In Progress';
-                    $headerText = $isReopen ? "🔄 Ticket Reopened ↩️" : "🔄 Update: {$s['text']} {$s['icon']}";
-
-                    $problemRaw = $ticketRow['problem'] ?? '-';
-                    $isProgrammer = (strpos($problemRaw, '[PROGRAMMER REQUEST]') !== false);
-                    
-                    if ($isProgrammer) {
-                        $formattedProblem = str_replace(
-                            ['[PROGRAMMER REQUEST]', 'Software:', 'Module:', '1. อาการที่พบ:', '2. ความต้องการ:', '3. แหล่งข้อมูล:', '----------------------'],
-                            ['<b>💻 Programmer Request</b>', '<b>Software:</b>', '<b>Module:</b>', '<b>1. อาการที่พบ:</b>', '<b>2. ความต้องการ:</b>', '<b>3. แหล่งข้อมูล:</b>', '➖➖➖➖➖➖➖➖➖➖'],
-                            $problemRaw
-                        );
-                        $problemDisplay = "\n" . $formattedProblem;
-                    } else {
-                        $problemDisplay = " " . $problemRaw;
-                    }
-
-                    $msg = "<b>{$headerText}</b>\n" .
-                           "➖➖➖➖➖➖➖➖➖➖\n" .
-                           "<b>🏢 Company:</b> " . ($ticketRow['company']??'-') . "\n" .
-                           "<b>🎫 Ticket:</b> <code>{$id}</code>\n" .
-                           "<b>🕒 Time:</b> {$now}\n" .
-                           "<b>👤 User:</b> {$requester}\n" .
-                           "<b>👨‍🔧 Tech:</b> {$servicedBy}\n" .
-                           "➖➖➖➖➖➖➖➖➖➖\n" .
-                           "<b>📝 Problem:</b>{$problemDisplay}\n";
-                    
-                    if (in_array($newStatus, ['Completed','Cancelled','Temporary Fix','Unrepairable','Awaiting Confirmation'], true) || $isReopen) {
-                        $msg .= "<b>💡 Note/Solution:</b> {$solution}\n";
-                    }
-                    if ($newStatus === 'Awaiting Confirmation') {
-                        $msg .= "\n⚠️ <i>กรุณาแจ้งให้ผู้ใช้ทราบเพื่อยืนยันผลการซ่อม (ระบบจะปิดงานอัตโนมัติใน 3 วัน)</i>";
-                    }
-                    
-                    $msg .= "\n#Update #StatusChange";
-                    if ($isReopen) $msg .= " #Reopened";
-                    
-                    // Map status → notify event
                     $notifyEvent = 'it_repair';
-                    if (in_array($newStatus, ['Completed', 'Awaiting Confirmation', 'Unrepairable'], true)) {
-                        $notifyEvent = 'it_approve';
-                    } elseif ($newStatus === 'Cancelled') {
-                        $notifyEvent = 'it_cancel';
-                    }
-                    $ticketCompany = $ticketRow['company'] ?? null;
+                    if (in_array($newStatus, ['Completed', 'Awaiting Confirmation', 'Unrepairable'], true)) $notifyEvent = 'it_approve';
+                    elseif ($newStatus === 'Cancelled') $notifyEvent = 'it_cancel';
                     require_once __DIR__ . '/../../../includes/notify_helper.php';
-                    sendNotify($conn, $msg, $notifyEvent, $ticketCompany);
+                    ticketNotify($conn, $notifyEvent, $isReopen ? 'เปิดงานซ่อมใหม่' : ($newStatus === 'Awaiting Confirmation' ? 'ซ่อมเสร็จ รอผู้แจ้งยืนยัน' : $s['text']), $id,
+                        ['ช่าง' => $servicedBy, 'วิธีแก้ / หมายเหตุ' => $solution !== '-' ? $solution : '', 'ถัดไป' => $newStatus === 'Awaiting Confirmation' ? 'ผู้แจ้งกดยืนยันในเว็บ (ปิดเองใน 3 วันถ้าไม่ยืนยัน)' : '']);
                 }
 
                 // Part 2: Update Asset Status & Log History

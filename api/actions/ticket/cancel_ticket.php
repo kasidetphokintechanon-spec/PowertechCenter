@@ -45,16 +45,7 @@ if ($stmt->execute()) {
     if ($ticketInfo) {
         require_once __DIR__ . '/../../../includes/notify_helper.php';
         $cancellerName = $_SESSION['display_name'] ?? $_SESSION['username'] ?? 'ผู้ใช้';
-        $msg = "<b>🚫 ยกเลิกงานซ่อม IT</b>\n" .
-               "➖➖➖➖➖➖➖➖➖➖\n" .
-               "<b>🏢 Company:</b> " . ($ticketInfo['company'] ?? '-') . "\n" .
-               "<b>🎫 Ticket:</b> <code>{$id}</code>\n" .
-               "<b>👤 User:</b> " . ($ticketInfo['requester'] ?? '-') . "\n" .
-               "<b>🚫 ยกเลิกโดย:</b> {$cancellerName}\n" .
-               "<b>📝 เหตุผล:</b> {$reason}\n" .
-               "<b>🕒 Time:</b> " . date("d/m/Y H:i") . "\n" .
-               "\n#Cancelled";
-        sendNotify($conn, $msg, 'it_cancel', $ticketInfo['company'] ?? null);
+        ticketNotify($conn, 'it_cancel', 'ยกเลิกงานซ่อม', $id, ['ยกเลิกโดย' => $cancellerName, 'เหตุผล' => $reason]);
     }
     echo json_encode(['status' => 'success']);
 } else {

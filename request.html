@@ -44,6 +44,8 @@ body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
 .rq-btn.ghost { background:transparent; }
 .rq-btn.danger { color:#dc2626; }
 .rq-btn:disabled { opacity:.5; cursor:not-allowed; }
+.wz-foot .miss { margin-left:auto; font-size:12.5px; color:#b45309; font-weight:600; text-align:right; } .wz-foot .miss:empty { display:none; }
+html.dark .wz-foot .miss { color:#fbbf24; }
 
 /* ขั้นตอน */
 .wz { padding:20px; }
@@ -267,7 +269,7 @@ const STATUS_C = { 'Pending': '#2563eb', 'Received': '#2563eb', 'Awaiting Confir
 const CLOSED = ['Completed', 'Cancelled', 'Unrepairable'];
 
 let S = {}, SUP = {}, myAssets = [], myLogs = [], filter = 'active', selId = null, sending = false;
-let wz = { step: 1, cat: -1, dev: null, bld: '', place: '', symptom: '', when: 0, urg: 0, phone: '', sched: false, sDate: '', sTime: '', files: [] };
+let wz = { step: 1, cat: -1, dev: null, devNote: '', bld: '', place: '', symptom: '', when: 0, urg: 0, phone: '', sched: false, sDate: '', sTime: '', files: [] };
 
 // ══════════ แจ้งปัญหา (3 ขั้น) ══════════
 function devList() {
@@ -288,6 +290,7 @@ function devLabel() {
     if (!wz.dev) return '—';
     if (wz.dev === 'place') return 'จุด / สถานที่ (ไม่ใช่ที่เครื่อง)';
     if (wz.dev === 'shared') return 'เครื่องส่วนกลาง';
+    if (wz.dev === 'other') return 'เครื่องของฉัน (ยังไม่มีในระบบ)' + (wz.devNote.trim() ? ' — ' + wz.devNote.trim() : '');
     const d = devList().find(x => x.key === wz.dev);
     return d ? `${d.name} (${d.code})` : '—';
 }
@@ -309,7 +312,7 @@ function renderForm() {
     } else if (wz.step === 2) {
         const place = `<div class="fld"><label>อยู่ที่ไหน ${placeRequired() ? '<span class="req">* จำเป็น — ช่างต้องรู้ว่าไปจุดไหน</span>' : noDev ? '<span style="font-weight:500;color:var(--ptc-text-muted)">(ไม่บังคับ)</span>' : ''}</label>
             <div class="chips" style="margin-bottom:8px">${BUILDINGS.map(b => `<button type="button" class="chip ${wz.bld === b ? 'on' : ''}" onclick="wz.bld=wz.bld==='${b}'?'':'${b}';renderForm()">${b}</button>`).join('')}</div>
-            <input type="text" id="wz-place" value="${esc(wz.place)}" placeholder="${placeRequired() ? 'เช่น ชั้น 2 ห้อง QC ปลั๊กแลนผนังจุดที่ 3' : 'เช่น ชั้น 2 ห้อง Production Office'}" oninput="wz.place=this.value"></div>`;
+            <input type="text" id="wz-place" value="${esc(wz.place)}" placeholder="${placeRequired() ? 'เช่น ชั้น 2 ห้อง QC ปลั๊กแลนผนังจุดที่ 3' : 'เช่น ชั้น 2 ห้อง Production Office'}" oninput="wz.place=this.value;wzSync()"></div>`;
         if (noDev) {
             body = `<h2 class="rq-h">อยู่ที่ไหน</h2><p class="rq-s">${c[3]} ไม่ต้องเลือกเครื่อง — ใส่ที่อยู่เผื่อช่างต้องเข้าไปหา</p><div class="wz-steps">${steps}</div>${place}`;
         } else {
@@ -318,23 +321,24 @@ function renderForm() {
             body = `<h2 class="rq-h">เป็นที่เครื่องไหน หรือจุดไหน</h2><p class="rq-s">${ds.length ? 'ระบบดึงเครื่องที่อยู่ในชื่อคุณมาให้แล้ว' : 'ยังไม่มีเครื่องในชื่อคุณ — เลือกแบบอื่นได้'}</p><div class="wz-steps">${steps}</div>
             <div class="devs">
                 ${ds.map(d => card(d.key, devIcon(d), esc(d.name), esc(d.code) + (d.mine ? ' · ของฉัน' : '') + (d.repairing ? ' · กำลังส่งซ่อม' : ''))).join('')}
+                ${card('other', 'fa-circle-question', 'เครื่องของฉัน แต่ไม่มีในรายการ', 'ช่างจะผูกเครื่องให้ตอนเข้าไปดู')}
                 ${card('shared', 'fa-qrcode', 'เครื่องส่วนกลาง', 'ปริ้นเตอร์ห้อง เครื่องในไลน์ผลิต')}
                 ${card('place', 'fa-network-wired', 'ไม่ใช่ที่เครื่อง — เป็นที่จุด / สถานที่', 'สายแลนเสีย ปลั๊กแลนที่ผนัง WiFi ทั้งโซน', 'wide place')}
-            </div>${place}`;
+            </div>${wz.dev === 'other' ? `<div class="fld"><label>รหัสบนสติกเกอร์ หรือชื่อเครื่อง <span style="font-weight:500;color:var(--ptc-text-muted)">(ไม่บังคับ — ไม่รู้ก็ข้ามได้)</span></label><input type="text" id="wz-devnote" value="${esc(wz.devNote)}" placeholder="เช่น PTA-NB-0142 หรือ Notebook Dell สีดำ" oninput="wz.devNote=this.value"></div>` : ''}${place}`;
         }
-        body += `<div class="wz-foot"><button type="button" class="rq-btn" onclick="goStep(1)"><i class="fa fa-arrow-left"></i> ย้อนกลับ</button><button type="button" class="rq-btn pri lg" onclick="goStep(3)">ถัดไป <i class="fa fa-arrow-right"></i></button></div>`;
+        body += `<div class="wz-foot"><button type="button" class="rq-btn" onclick="goStep(1)"><i class="fa fa-arrow-left"></i> ย้อนกลับ</button><span class="miss" id="wz-miss"></span><button type="button" class="rq-btn pri lg" id="wz-next" onclick="goStep(3)">ถัดไป <i class="fa fa-arrow-right"></i></button></div>`;
     } else if (wz.step === 3) {
         body = `<h2 class="rq-h">${wz.cat === 6 ? 'ต้องการอะไร' : 'เล่าอาการสั้น ๆ'}</h2><p class="rq-s">${c[3]} · ${esc(noDev ? (wz.bld || 'ไม่ผูกกับเครื่อง') : devLabel())}</p><div class="wz-steps">${steps}</div>
         <div class="fld"><label>${wz.cat === 6 ? 'โปรแกรม / สิทธิ์ที่ต้องการ และเหตุผล' : 'อาการที่เจอ'} <span class="req">*</span></label>
-            <textarea id="wz-symptom" rows="2" placeholder="${wz.cat === 6 ? 'เช่น ขอติดตั้ง AutoCAD เพื่อแก้แบบงาน' : ({ 1: 'เช่น สั่งพิมพ์แล้วไม่ออก ไฟสีส้มกะพริบ', 2: 'เช่น WiFi ต่อได้แต่เข้าเว็บไม่ได้', 4: 'เช่น บัญชีโดนล็อก เข้า Windows ไม่ได้', 5: 'เช่น เปิดโปรแกรมแล้วขึ้น error …' })[wz.cat] || 'เช่น เปิดเครื่องแล้วขึ้นจอฟ้า ตั้งแต่เมื่อเช้า'}" oninput="wz.symptom=this.value">${esc(wz.symptom)}</textarea></div>
+            <textarea id="wz-symptom" rows="2" placeholder="${wz.cat === 6 ? 'เช่น ขอติดตั้ง AutoCAD เพื่อแก้แบบงาน' : ({ 1: 'เช่น สั่งพิมพ์แล้วไม่ออก ไฟสีส้มกะพริบ', 2: 'เช่น WiFi ต่อได้แต่เข้าเว็บไม่ได้', 4: 'เช่น บัญชีโดนล็อก เข้า Windows ไม่ได้', 5: 'เช่น เปิดโปรแกรมแล้วขึ้น error …' })[wz.cat] || 'เช่น เปิดเครื่องแล้วขึ้นจอฟ้า ตั้งแต่เมื่อเช้า'}" oninput="wz.symptom=this.value;wzSync()">${esc(wz.symptom)}</textarea></div>
         ${wz.cat === 6 ? '' : `<div class="fld"><label>เริ่มเป็นเมื่อไหร่</label><div class="chips">${WHEN.map((w, i) => `<button type="button" class="chip ${i === wz.when ? 'on' : ''}" onclick="wz.when=${i};renderForm()">${w}</button>`).join('')}</div></div>`}
         <div class="fld"><label>ด่วนแค่ไหน</label><div class="chips">${URG.map((u, i) => `<button type="button" class="chip ${i === 2 ? 'red' : ''} ${i === wz.urg ? 'on' : ''}" onclick="wz.urg=${i};renderForm()">${u[1]} <small>· ${esc(SUP[u[2]] || '')}</small></button>`).join('')}</div></div>
         <div class="fld"><label><input type="checkbox" ${wz.sched ? 'checked' : ''} onchange="wz.sched=this.checked;renderForm()"> นัดเวลาให้ช่างเข้ามา (ไม่บังคับ)</label>
-            ${wz.sched ? `<div style="display:flex;gap:8px"><input type="date" min="${localDate()}" value="${esc(wz.sDate)}" onchange="wz.sDate=this.value"><input type="time" value="${esc(wz.sTime)}" onchange="wz.sTime=this.value"></div>` : ''}</div>
+            ${wz.sched ? `<div style="display:flex;gap:8px"><input type="date" min="${localDate()}" value="${esc(wz.sDate)}" onchange="wz.sDate=this.value;wzSync()"><input type="time" value="${esc(wz.sTime)}" onchange="wz.sTime=this.value"></div>` : ''}</div>
         <div class="fld-row"><div class="fld"><label>รูป / ภาพหน้าจอ (ถ้ามี · สูงสุด 4 รูป)</label><div class="drop" onclick="gid('wz-file').click()"><i class="fa fa-camera"></i> ถ่ายรูป เลือกรูป หรือวางภาพหน้าจอ (Ctrl+V)</div>
             <div class="thumbs">${wz.files.map((f, i) => `<div><img src="${f.url}" alt=""><button type="button" onclick="wz.files.splice(${i},1);renderForm()" title="ลบ">✕</button></div>`).join('')}</div></div>
         <div class="fld"><label>เบอร์ติดต่อกลับ</label><input type="tel" id="wz-phone" value="${esc(wz.phone)}" placeholder="เบอร์มือถือหรือเบอร์ภายใน" oninput="wz.phone=this.value"></div></div>
-        <div class="wz-foot"><button type="button" class="rq-btn" onclick="goStep(2)"><i class="fa fa-arrow-left"></i> ย้อนกลับ</button><button type="button" class="rq-btn ok lg" id="wz-send" onclick="submitTicket()"><i class="fa fa-paper-plane"></i> ส่งแจ้งซ่อม</button></div>`;
+        <div class="wz-foot"><button type="button" class="rq-btn" onclick="goStep(2)"><i class="fa fa-arrow-left"></i> ย้อนกลับ</button><span class="miss" id="wz-miss"></span><button type="button" class="rq-btn ok lg" id="wz-send" onclick="submitTicket()"><i class="fa fa-paper-plane"></i> ส่งแจ้งซ่อม</button></div>`;
     } else {
         body = `<div class="done-box"><div class="ic"><i class="fa fa-check"></i></div><h2 class="rq-h">แจ้งเรียบร้อยแล้ว</h2>
             <p class="rq-s" style="font-size:14px;margin-top:6px">เลขที่ <b style="color:var(--ptc-primary);font-family:Consolas">${esc(wz.newId)}</b></p>
@@ -350,6 +354,26 @@ function renderForm() {
         ${SUP.phone || SUP.line ? `<div class="rq-card"><h4>ติดต่อทีม IT</h4>${SUP.phone ? `<div class="kv"><span>โทร</span><b>${esc(SUP.phone)}</b></div>` : ''}${SUP.line ? `<div class="kv"><span>LINE</span><b>${esc(SUP.line)}</b></div>` : ''}${SUP.sla_hours ? `<div class="kv"><span>เวลาทำการ</span><b>${esc(SUP.sla_hours)}</b></div>` : ''}</div>` : ''}
     </div>`;
     gid('panel-form').innerHTML = `<div class="rq-grid"><div class="rq-card wz">${body}</div>${side}</div>`;
+    wzSync();
+}
+const SYMPTOM_MIN = 10; // 5 ตัวอักษรสั้นไป ("เสียอ่ะ") ช่างต้องโทรถามซ้ำ
+function wzMiss() {
+    const c = CATS[wz.cat];
+    if (wz.step === 2) {
+        if (c && c[6] && !wz.dev) return 'เลือกเครื่อง หรือจุดที่มีปัญหา';
+        if (placeRequired() && !wz.bld && !wz.place.trim()) return 'บอกว่าอยู่ที่ไหน (เลือกอาคาร หรือพิมพ์)';
+    }
+    if (wz.step === 3) {
+        const n = wz.symptom.trim().length;
+        if (n < SYMPTOM_MIN) return n ? `เล่า${wz.cat === 6 ? 'สิ่งที่ต้องการ' : 'อาการ'}อีก ${SYMPTOM_MIN - n} ตัวอักษร` : (wz.cat === 6 ? 'บอกสิ่งที่ต้องการ' : 'เล่าอาการที่เจอ');
+        if (wz.sched && !wz.sDate) return 'เลือกวันที่นัด';
+    }
+    return '';
+}
+function wzSync() {
+    const m = wzMiss(), btn = gid(wz.step === 2 ? 'wz-next' : 'wz-send'), el = gid('wz-miss');
+    if (btn && !sending) btn.disabled = !!m;
+    if (el) el.innerHTML = m ? '<i class="fa fa-circle-info"></i> ' + m : '';
 }
 function pickCat(i) {
     wz.cat = i;
@@ -374,7 +398,7 @@ function solvedSelf() {
 }
 function resetWizard() {
     const phone = wz.phone;
-    wz = { step: 1, cat: -1, dev: null, bld: '', place: '', symptom: '', when: 0, urg: 0, phone, sched: false, sDate: '', sTime: '', files: [] };
+    wz = { step: 1, cat: -1, dev: null, devNote: '', bld: '', place: '', symptom: '', when: 0, urg: 0, phone, sched: false, sDate: '', sTime: '', files: [] };
     renderForm(); window.scrollTo({ top: 0 });
 }
 function addFiles(list) {
@@ -387,7 +411,7 @@ document.addEventListener('paste', e => { if (gid('panel-form').style.display !=
 async function submitTicket() {
     if (sending) return;
     const c = CATS[wz.cat];
-    if (wz.symptom.trim().length < 5) { gid('wz-symptom')?.classList.add('bad'); gid('wz-symptom')?.focus(); return; }
+    if (wz.symptom.trim().length < SYMPTOM_MIN) { gid('wz-symptom')?.classList.add('bad'); gid('wz-symptom')?.focus(); return; }
     if (wz.sched && !wz.sDate) return ptcToast('warning', '', 'เลือกวันที่นัดก่อน');
     const where = [wz.bld, wz.place.trim()].filter(Boolean).join(' · ');
     const dev = c[6] ? devLabel() : '';

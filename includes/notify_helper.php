@@ -173,6 +173,43 @@ function notifyLink($conn, $path, $label) {
     return preg_match('#^https://#i', $base) ? ['url' => $base . '/' . ltrim($path, '/'), 'label' => $label] : null;
 }
 
+/**
+ * แจ้งเตือนงานซ่อม IT — หัวข้อไทย บอกความด่วน + ปุ่มเปิดงานในหน้าช่าง (แบบเดียวกับจองรถ/ห้อง)
+ * ไม่ใส่เบอร์โทรผู้แจ้ง: ข้อมูลส่วนตัวใน LINE ให้น้อยที่สุด (TISAX) — ช่างกดเปิดงานแล้วเห็นเบอร์ในเว็บ
+ */
+function ticketNotify($conn, $event, $title, $id, $extra = [], $label = 'เปิดงาน') {
+    if (!function_exists('sendNotify')) return;
+    $st = $conn->prepare("SELECT id, company, requester, department, urgency, problem, servicedBy, asset_id FROM it_logs WHERE id = ? LIMIT 1");
+    if (!$st) return;
+    $st->bind_param('s', $id); $st->execute();
+    $t = $st->get_result()->fetch_assoc();
+    if (!$t) return;
+    $cut = fn($v, $n = 200) => mb_strlen($v) > $n ? mb_substr($v, 0, $n) . '…' : $v;
+    // ใบที่แจ้งจากหน้าแจ้งซ่อมเป็นบรรทัด "หัวข้อ: ค่า" — ดึงมาเรียงใหม่ · ใบแบบเก่า/ขอโปรแกรมเมอร์ ใช้ข้อความทั้งก้อน
+    $topic = ''; $kv = []; $free = [];
+    foreach (preg_split('/\r?\n/', trim((string)$t['problem'])) as $ln) {
+        $ln = trim($ln);
+        if ($ln === '' || preg_match('/^[-➖]{3,}$/u', $ln)) continue;
+        if (preg_match('/^\[(แจ้งซ่อม|ขอใช้งาน)\]\s*(.*)$/u', $ln, $m)) { $topic = trim($m[2]); continue; }
+        if (preg_match('/^(อุปกรณ์|ตำแหน่ง|อาการที่พบ|ความต้องการ|เริ่มเกิดตั้งแต่|นัดให้เข้า)\s*:\s*(.+)$/u', $ln, $m)) { $kv[$m[1]] = $m[2]; continue; }
+        $free[] = $ln;
+    }
+    $urg = trim((string)$t['urgency']);
+    $icon = $urg === 'ด่วนที่สุด' ? '🔥 ' : ($urg === 'ด่วน' ? '⚡ ' : '');
+    $lines = ["<b>{$icon}{$title} — {$t['id']}</b>",
+        $topic ? "<b>เรื่อง:</b> {$topic}" : '',
+        isset($kv['อาการที่พบ']) ? '<b>อาการ:</b> ' . $cut($kv['อาการที่พบ']) : (isset($kv['ความต้องการ']) ? '<b>ต้องการ:</b> ' . $cut($kv['ความต้องการ']) : ''),
+        $free ? '<b>' . (isset($kv['อาการที่พบ']) || isset($kv['ความต้องการ']) ? 'รายละเอียด' : 'อาการ') . ':</b> ' . $cut(implode(' ', $free)) : '',
+        isset($kv['อุปกรณ์']) ? "<b>เครื่อง:</b> {$kv['อุปกรณ์']}" : (!empty($t['asset_id']) ? "<b>เครื่อง:</b> {$t['asset_id']}" : ''),
+        isset($kv['ตำแหน่ง']) ? "<b>ที่ไหน:</b> {$kv['ตำแหน่ง']}" : '',
+        isset($kv['เริ่มเกิดตั้งแต่']) ? "<b>เริ่มเป็น:</b> {$kv['เริ่มเกิดตั้งแต่']}" : '',
+        isset($kv['นัดให้เข้า']) ? "<b>นัดให้เข้า:</b> {$kv['นัดให้เข้า']}" : '',
+        $urg && $urg !== 'ปกติ' ? "<b>ความด่วน:</b> {$urg}" : '',
+        '<b>ผู้แจ้ง:</b> ' . ($t['requester'] ?: '-') . ($t['department'] ? " · {$t['department']}" : '') . ($t['company'] ? " · {$t['company']}" : '')];
+    foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> " . $cut((string)$v);
+    sendNotify($conn, implode("\n", array_filter($lines)), $event, $t['company'] ?: null, $t['id'], notifyLink($conn, 'log.html?id=' . rawurlencode($t['id']), $label));
+}
+
 // ── SEND VIA TELEGRAM ─────────────────────────────────────────────────
 function _notifySendTelegram($token, $chat_id, $message) {
     $url  = "https://api.telegram.org/bot{$token}/sendMessage";

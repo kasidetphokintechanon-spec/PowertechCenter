@@ -127,7 +127,7 @@ if ($userRole === 'user') {
               . "<b>จาก:</b> {$userName}\n"
               . "<b>ข้อความ:</b> " . ($snippet !== '' ? $snippet : '(แนบไฟล์)') . $fileNote . "\n"
               . "<b>ช่าง:</b> " . (($tRow['servicedBy'] ?? '') ?: 'ยังไม่มี');
-        sendNotify($conn, $nMsg, 'it_user_reply', $tRow['company'] ?? null);
+        sendNotify($conn, $nMsg, 'it_user_reply', $tRow['company'] ?? null, $ticketId, notifyLink($conn, 'log.html?id=' . rawurlencode($ticketId), 'เปิดงาน / ตอบกลับ'));
     }
 }
 
