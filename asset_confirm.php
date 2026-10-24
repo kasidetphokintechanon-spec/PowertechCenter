@@ -13,7 +13,7 @@ $token = trim($_GET['token'] ?? '');
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Kanit','Inter',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
+body{font-family:'Inter','IBM Plex Sans Thai',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
 .topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
 .topbar-logo{width:32px;height:32px;object-fit:contain}
 .topbar-title{font-size:15px;font-weight:700;color:#1e293b}

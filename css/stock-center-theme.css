@@ -9,7 +9,7 @@
     --sc-radius: 12px;
     --sc-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
     --sc-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif !important;
 }
 
 .stock-center-v4 #sidebar {
@@ -577,7 +577,7 @@ html.dark .stock-center-v4 .stk-tab.stk-on {
     --sc-nav-h: 56px;
     --sc-radius: 12px;
     --sc-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif !important;
     background:
         radial-gradient(ellipse 80% 50% at 100% -10%, rgba(37, 99, 235, 0.07), transparent 50%),
         radial-gradient(ellipse 60% 40% at 0% 100%, rgba(16, 185, 129, 0.05), transparent 45%),
@@ -858,7 +858,7 @@ html.dark .stock-center-request .workflow-shell {
     --sc-nav-h: 56px;
     --sc-radius: 12px;
     --sc-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif !important;
     background:
         radial-gradient(ellipse 80% 50% at 100% -10%, rgba(37, 99, 235, 0.07), transparent 50%),
         #eef2f7 !important;

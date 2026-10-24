@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="uploads/logos/pta_logo.png">
     <script src="js/favicon-version.js"></script>
     <script src="js/pwa.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -55,7 +55,7 @@
         .tabs::-webkit-scrollbar { display: none; }
         .tab-btn {
             padding: 10px 24px; border: none; background: white; border-radius: 999px; cursor: pointer;
-            font-family: 'Kanit'; font-size: 0.95rem; font-weight: 500; color: var(--text-light); white-space: nowrap;
+            font-family: 'Inter', 'IBM Plex Sans Thai'; font-size: 0.95rem; font-weight: 500; color: var(--text-light); white-space: nowrap;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); flex-shrink: 0; border: 2px solid transparent; transition: all 0.2s;
         }
         .tab-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -77,7 +77,7 @@
 
         /* Controls */
         .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .controls select { flex: 1; min-width: 150px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--gray-border); background: white; font-family: 'Kanit'; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: border-color 0.2s; }
+        .controls select { flex: 1; min-width: 150px; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--gray-border); background: white; font-family: 'Inter', 'IBM Plex Sans Thai'; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); outline: none; transition: border-color 0.2s; }
         .controls select:focus { border-color: #3b82f6; }
         
         /* Floating Add Button (Mobile Friendly) */
@@ -172,7 +172,7 @@
         .pc-meta-item { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
 
         /* Status cycle button */
-        .pc-status-btn { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer; font-family: 'Kanit'; font-weight: 500; transition: all .15s; white-space: nowrap; }
+        .pc-status-btn { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer; font-family: 'Inter', 'IBM Plex Sans Thai'; font-weight: 500; transition: all .15s; white-space: nowrap; }
         .pc-status-btn:hover { border-color: #3b82f6; color: #2563eb; }
         .pc-status-btn.doing { border-color: #f59e0b; color: #d97706; background: #fffbeb; }
         .pc-status-btn.done  { border-color: #22c55e; color: #16a34a; background: #f0fdf4; }
@@ -182,7 +182,7 @@
         .pc-quick-btn.is-pending { opacity:.6; cursor:not-allowed; }
 
         /* Update button */
-        .pc-update-btn { font-size: 11px; padding: 4px 12px; border-radius: 999px; border: none; background: #3b82f6; color: white; cursor: pointer; font-family: 'Kanit'; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: background .15s; white-space: nowrap; }
+        .pc-update-btn { font-size: 11px; padding: 4px 12px; border-radius: 999px; border: none; background: #3b82f6; color: white; cursor: pointer; font-family: 'Inter', 'IBM Plex Sans Thai'; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: background .15s; white-space: nowrap; }
         .pc-update-btn:hover { background: #2563eb; }
 
         /* Delete button */
@@ -580,7 +580,7 @@
                 </div>
                 <div class="form-row">
                     <label for="personalDescription"><i class="fas fa-file-alt text-slate-500"></i> รายละเอียดงาน</label>
-                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid var(--gray-border); border-radius:10px; font-family:'Kanit'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
+                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid var(--gray-border); border-radius:10px; font-family:'Inter', 'IBM Plex Sans Thai'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
                     <div>
@@ -746,11 +746,11 @@
                     <p id="dashLastUpdated" style="font-size:12px;color:#64748b;margin:0;">กำลังโหลด...</p>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button onclick="setDashFilter('all',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:none;background:white;color:#1e293b;font-size:12px;font-weight:600;cursor:pointer;font-family:'Kanit';">ทุกบริษัท</button>
-                    <button onclick="setDashFilter('PTA',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Kanit';">PTA</button>
-                    <button onclick="setDashFilter('PT4',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Kanit';">PT4</button>
-                    <button onclick="setDashFilter('PTE',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Kanit';">PTE</button>
-                    <button onclick="loadDashboard()" style="padding:8px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#94a3b8;font-size:12px;cursor:pointer;font-family:'Kanit';display:flex;align-items:center;gap:6px;"><i class="fas fa-sync-alt"></i> รีเฟรช</button>
+                    <button onclick="setDashFilter('all',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:none;background:white;color:#1e293b;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter', 'IBM Plex Sans Thai';">ทุกบริษัท</button>
+                    <button onclick="setDashFilter('PTA',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter', 'IBM Plex Sans Thai';">PTA</button>
+                    <button onclick="setDashFilter('PT4',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter', 'IBM Plex Sans Thai';">PT4</button>
+                    <button onclick="setDashFilter('PTE',this)" class="dash-filter-btn" style="padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter', 'IBM Plex Sans Thai';">PTE</button>
+                    <button onclick="loadDashboard()" style="padding:8px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:#94a3b8;font-size:12px;cursor:pointer;font-family:'Inter', 'IBM Plex Sans Thai';display:flex;align-items:center;gap:6px;"><i class="fas fa-sync-alt"></i> รีเฟรช</button>
                 </div>
             </div>
         </div>
@@ -868,7 +868,7 @@
             <div id="commentHistory" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:14px; padding-right:4px;"></div>
             <!-- New Comment -->
             <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">เพิ่ม comment</div>
-            <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า เช่น เดินสายไฟชั้น 3 เสร็จแล้ว กำลังทำชั้น 4..."></textarea>
+            <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Inter', 'IBM Plex Sans Thai'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า เช่น เดินสายไฟชั้น 3 เสร็จแล้ว กำลังทำชั้น 4..."></textarea>
             <button type="button" class="ptc-btn ptc-btn-primary" style="width:100%;" onclick="saveComment()">
                 <i class="fas fa-save"></i> บันทึก
             </button>
@@ -3071,7 +3071,7 @@
                         labels: statusLabels,
                         datasets: [{ data:[todo,doing,done,overdue], backgroundColor:['#e5e7eb','#fbbf24','#22c55e','#ef4444'] }]
                     },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'Kanit' } } } } }
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'IBM Plex Sans Thai' } } } } }
                 });
             }
 
@@ -3088,7 +3088,7 @@
                             { label:'รวม', data:js.map(j=>j.total||0), backgroundColor:'#e5e7eb' }
                         ]
                     },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'Kanit' } } } }, scales:{ x:{beginAtZero:true}, y:{beginAtZero:true} } }
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'IBM Plex Sans Thai' } } } }, scales:{ x:{beginAtZero:true}, y:{beginAtZero:true} } }
                 });
             }
 

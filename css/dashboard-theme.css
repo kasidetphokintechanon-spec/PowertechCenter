@@ -11,7 +11,7 @@
     --dash-accent: #2563eb;
     --dash-accent-btn: #1d4ed8;
     --dash-glow: rgba(37, 99, 235, 0.25);
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif !important;
     background:
         radial-gradient(ellipse 85% 55% at 100% -15%, rgba(37, 99, 235, 0.1), transparent 52%),
         radial-gradient(ellipse 55% 45% at 0% 100%, rgba(16, 185, 129, 0.07), transparent 48%),

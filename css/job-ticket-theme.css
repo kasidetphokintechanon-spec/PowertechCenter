@@ -14,7 +14,7 @@ body.ptc-normalize.jn-page-root {
 }
 
 body.ptc-normalize.jn-page-root {
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     background: var(--ptc-bg, #f8fafc);
     color: var(--ptc-text, #334155);
     padding-bottom: 88px;
@@ -378,7 +378,7 @@ html.dark .job-mode-segment button.active {
     border: 1px solid var(--ptc-border, #e2e8f0);
     border-radius: var(--ptc-radius-md, 8px);
     font-size: 0.95rem;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     background: var(--ptc-surface, #fff);
     color: var(--ptc-text, #334155);
 }

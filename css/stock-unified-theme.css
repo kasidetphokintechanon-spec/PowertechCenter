@@ -704,7 +704,7 @@ body.stock-unified-v1 .ptc-input {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 13px;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     outline: none;
     color: #0f172a;
 }
@@ -737,7 +737,7 @@ body.stock-unified-v1 .ptc-btn {
     font-weight: 600;
     cursor: pointer;
     border: none;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
@@ -905,7 +905,7 @@ body.stock-unified-v1 .rep-tab {
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     white-space: nowrap;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     transition: color 0.15s;
     display: inline-flex;
     align-items: center;
@@ -928,7 +928,7 @@ body.stock-unified-v1 .stk-tab {
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     white-space: nowrap;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     transition: color 0.15s;
 }
 
@@ -989,7 +989,7 @@ body.stock-unified-v1 .row-act-btn {
     font-size: 10px;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     white-space: nowrap;
     line-height: 1.4;
 }
@@ -1005,7 +1005,7 @@ body.stock-unified-v1 .rpt-sel {
     padding: 6px 10px;
     border: 1px solid #e2e8f0;
     border-radius: 7px;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     font-size: 12px;
     background: #fff;
     color: #374151;
@@ -1023,7 +1023,7 @@ body.stock-unified-v1 .rpt-action-btn {
     border-radius: 7px;
     background: #fff;
     cursor: pointer;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     font-size: 11px;
     font-weight: 600;
     color: #374151;
@@ -1048,7 +1048,7 @@ body.stock-unified-v1 .cat-filter-btn {
     color: #475569;
     font-size: 11px;
     cursor: pointer;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     transition: all 0.15s;
 }
 

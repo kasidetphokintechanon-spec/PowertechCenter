@@ -84,7 +84,7 @@
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 
 body {
-    font-family: 'Kanit','Inter','Segoe UI',system-ui,sans-serif;
+    font-family: 'Inter','IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;

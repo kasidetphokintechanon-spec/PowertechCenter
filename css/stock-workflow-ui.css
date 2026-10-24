@@ -34,7 +34,7 @@
     text-decoration: none;
     white-space: nowrap;
     transition: border-color 0.12s, color 0.12s, background 0.12s;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
 }
 
 .stock-mod-link:hover {
@@ -111,7 +111,7 @@
     color: var(--text2, #64748b);
     font-size: 11px;
     cursor: pointer;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     transition: all 0.15s;
 }
 

@@ -17,7 +17,7 @@ body.stock-request-unified-v1.stock-unified-v1.ptc-unified-v1 {
     --co-glow: rgba(37, 99, 235, 0.2);
     --accent: var(--co-btn-b);
     --accent2: var(--co-btn-b);
-    --font: 'Inter', 'Kanit', sans-serif;
+    --font: 'Inter', 'IBM Plex Sans Thai', sans-serif;
     background: #f1f5f9 !important;
     color: var(--text1);
     min-height: 100vh;

@@ -10,7 +10,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif;
     background: #f1f5f9;
     color: #0f172a;
     margin: 0;
@@ -615,7 +615,7 @@ html.dark .ptc-hamburger:hover { background: #1e293b; }
    SWEETALERT2 — Enterprise (light + dark)
 ────────────────────────────────────────── */
 .swal2-popup.ptc-swal-popup {
-    font-family: 'Inter', 'Kanit', -apple-system, sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif !important;
     border-radius: 14px !important;
     padding: 1.25rem 1.25rem 1rem !important;
     border: 1px solid #e2e8f0;
@@ -696,7 +696,7 @@ html.dark .ptc-hamburger:hover { background: #1e293b; }
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
 }
 .swal2-popup.ptc-swal-toast {
-    font-family: 'Inter', 'Kanit', sans-serif !important;
+    font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif !important;
     border-radius: 10px !important;
     border: 1px solid #e2e8f0;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;

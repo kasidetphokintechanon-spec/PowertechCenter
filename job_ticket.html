@@ -15,7 +15,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
@@ -24,14 +24,14 @@
     <link rel="stylesheet" href="css/ptc-unified-global.css?v=20260529">
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <style>
-        body { font-family: 'Kanit', sans-serif; background: #f1f5f9; color: #0f172a; }
+        body { font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; background: #f1f5f9; color: #0f172a; }
 
         /* ── Metric pills (ported from task_center) ── */
         .metric-pill {
             display: flex; align-items: center; gap: 10px;
             background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
             padding: 10px 14px; cursor: pointer; transition: all .15s; flex-shrink: 0;
-            font-family: 'Kanit', sans-serif; border: none;
+            font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; border: none;
         }
         .metric-pill:hover { border: 1px solid #94a3b8; box-shadow: 0 2px 8px rgba(15,23,42,.06); }
         .metric-pill.active { border: 1px solid #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
@@ -48,7 +48,7 @@
         .qf-chip {
             padding: 7px 14px; border-radius: 9999px; border: 1px solid #e2e8f0;
             background: #fff; font-size: 0.82rem; font-weight: 500; color: #475569;
-            cursor: pointer; transition: all .15s; white-space: nowrap; font-family: 'Kanit', sans-serif;
+            cursor: pointer; transition: all .15s; white-space: nowrap; font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif;
         }
         .qf-chip:hover { border-color: #94a3b8; }
         .qf-chip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
@@ -57,7 +57,7 @@
         .filter-input, .filter-select {
             width: 100%; border-radius: 10px; border: 1px solid #e2e8f0;
             background: #fff; padding: 9px 11px; font-size: 0.875rem;
-            font-family: 'Kanit', sans-serif; color: #0f172a; outline: none; transition: border-color .15s;
+            font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; color: #0f172a; outline: none; transition: border-color .15s;
         }
         .filter-input:focus, .filter-select:focus { border-color: #3b82f6; }
         .filter-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 5px; }
@@ -94,12 +94,12 @@
         .task-group-body.collapsed { display: none; }
 
         /* ── Analytics collapsible ── */
-        .analytics-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; background: none; border: none; cursor: pointer; font-family: 'Kanit', sans-serif; padding: 0; }
+        .analytics-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; background: none; border: none; cursor: pointer; font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; padding: 0; }
         #jnAnalyticsBody { transition: all .2s; }
 
         /* ── Scope segment (inline pill group) ── */
         .scope-segment { display: inline-flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px; }
-        .scope-btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border: none; background: transparent; font-family: 'Kanit', sans-serif; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
+        .scope-btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border: none; background: transparent; font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; white-space: nowrap; }
         .scope-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,.1); font-weight: 600; }
 
         /* ── Deadline alert strip ── */
@@ -416,7 +416,7 @@
                 </div>
                 <div class="form-row">
                     <label for="personalDescription"><i class="fas fa-file-alt text-slate-500"></i> รายละเอียดงาน</label>
-                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
+                    <textarea id="personalDescription" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Inter', 'IBM Plex Sans Thai'; font-size:0.95rem;" placeholder="รายละเอียด ขั้นตอน หรือโน้ตอื่นๆ"></textarea>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 form-row">
                     <div>
@@ -591,7 +591,7 @@
                 <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">ประวัติ comment</div>
                 <div id="commentHistory" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:14px; padding-right:4px;"></div>
                 <div style="font-size:0.8rem; color:#64748b; font-weight:500; margin-bottom:6px;">เพิ่ม comment</div>
-                <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Kanit'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า..."></textarea>
+                <textarea id="commentText" rows="3" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:10px; font-family:'Inter', 'IBM Plex Sans Thai'; font-size:0.95rem; resize:vertical; margin-bottom:10px;" placeholder="อธิบายความคืบหน้า..."></textarea>
                 <button type="button" class="ptc-btn ptc-btn-primary" style="width:100%;" onclick="saveComment()">
                     <i class="fas fa-save"></i> บันทึก
                 </button>

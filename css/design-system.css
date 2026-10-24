@@ -4,6 +4,7 @@
    ============================================================ */
 
 @import url('responsive-platform.css');
+@import url('fonts/inter-kanit-local.css'); /* ตัวอักษร Inter + IBM Plex Sans Thai (เก็บในเครื่อง) — ทุกหน้าที่ใช้ธีมนี้ได้ตัวอักษรเดียวกัน ไม่ต้องโหลดเองทีละหน้า */
 
 /* ---- IMPORT FONTS ---- */
 /* Google Fonts removed — fonts loaded locally via css/fonts/inter-kanit-local.css */
@@ -70,8 +71,8 @@
   --ptc-nav-h:   64px;     /* fixed navbar height           */
 
   /* --- Typography --- */
-  --ptc-font:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --ptc-font-th: 'Kanit', 'Inter', -apple-system, sans-serif;
+  --ptc-font:    'Inter', 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ptc-font-th: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif;
 
   /* --- Transition --- */
   --ptc-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

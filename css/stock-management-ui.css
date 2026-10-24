@@ -164,7 +164,7 @@ html.dark #rep-req-tbody tr.req-row-clickable:hover {
 }
 
 .stock-print-root {
-    font-family: 'Kanit', 'Sarabun', sans-serif;
+    font-family: 'Inter', 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
     color: #0f172a;
     background: #fff;
 }
