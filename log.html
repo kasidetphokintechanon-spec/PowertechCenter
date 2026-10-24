@@ -422,14 +422,17 @@ async function openTicket(id, keepScroll) {
     if (curId !== id) return;
     if (!l) { box.innerHTML = '<button class="back" onclick="closeTicket()"><i class="fa fa-arrow-left"></i> กลับ</button><div class="card empty">ไม่พบงานนี้ หรือไม่มีสิทธิ์ดู</div>'; return; }
     const b = board.find(x => x.id === id); if (b) b._st = l.status;
-    const [ev, cm, at, hist] = await Promise.all([
+    const [ev, cm, at, hist, reg] = await Promise.all([
         api({ action: 'get_ticket_events', log_id: id }).catch(() => ({})),
         api({ action: 'get_ticket_comments', ticket_id: id }).catch(() => ({})),
         api({ action: 'get', file: 'it_log_attachments', log_id: id }).catch(() => []),
         l.asset_id ? api({ action: 'get_asset_repair_history', asset_id: l.asset_id }).catch(() => []) : Promise.resolve([]),
+        // ช่องเครื่องบางงานเป็นข้อความที่พิมพ์เอง (เช่น "Notebook คุณ A") ไม่ใช่รหัสในทะเบียน → ถือว่ายังไม่ผูก จะได้มีปุ่มผูกเครื่อง
+        l.asset_id ? api({ action: 'search_assets', term: l.asset_id }).then(r => (Array.isArray(r) ? r : []).some(a => a.equipment_id === l.asset_id || a.asset_id === l.asset_id)).catch(() => true) : Promise.resolve(false),
     ]);
     if (curId !== id) return;
     if (!l.created_at) l.created_at = ((ev.events || []).find(e => e.event_type === 'CREATE') || {}).created_at;
+    l._reg = reg;
     renderWs(l, ev.events || [], cm.comments || [], Array.isArray(at) ? at : [], Array.isArray(hist) ? hist.filter(h => h.id !== id) : []);
     loadKb(l);
 }
@@ -488,10 +491,10 @@ function renderWs(l, events, comments, atts, hist) {
             ${phone ? `<a class="btn sm" href="tel:${esc(phone.replace(/[^0-9+]/g, ''))}"><i class="fa fa-phone"></i> โทร</a>` : ''}</div>${phone ? `<div class="muted" style="font-size:12.5px;margin-top:6px">${esc(phone)}</div>` : ''}</div>
         <div class="card"><h4>ช่างผู้รับผิดชอบ</h4><div class="person">${l.servicedBy ? `<span class="av">${esc(initials(l.servicedBy))}</span><div style="flex:1;min-width:0"><b>${esc(stripTitle(l.servicedBy))}${isMine(l) ? ' (ฉัน)' : ''}</b></div>` : '<div class="muted" style="flex:1;font-size:13px">ยังไม่มีผู้รับ</div>'}
             ${closed ? '' : `<button class="btn sm" onclick="assign(${id})">${l.servicedBy ? 'เปลี่ยน' : 'มอบให้…'}</button>`}</div></div>
-        <div class="card"><h4>เครื่อง</h4>${l.asset_id ? `<div class="person"><span class="av" style="background:var(--ptc-primary-light);color:var(--ptc-primary)"><i class="fa fa-laptop"></i></span><div><b>${esc(l.asset_id)}</b><span>${esc(field(l, /อุปกรณ์/) || '')}</span></div></div>
+        <div class="card"><h4>เครื่อง</h4>${l.asset_id && l._reg ? `<div class="person"><span class="av" style="background:var(--ptc-primary-light);color:var(--ptc-primary)"><i class="fa fa-laptop"></i></span><div style="flex:1;min-width:0"><b>${esc(l.asset_id)}</b><span>${esc(field(l, /อุปกรณ์/) || '')}</span></div><button class="btn sm" onclick="linkAsset(${id})" title="ผูกผิดเครื่อง">เปลี่ยน</button></div>
             <h4 style="margin-top:14px">ประวัติซ่อมเครื่องนี้</h4><div class="hist">${hist.length ? hist.slice(0, 6).map(h => `<a href="javascript:void(0)" onclick="openTicket(${jsArg(h.id)})"><span>${thD(h.date)}</span><b>${esc(titleOf(h))}${h.solution ? ' — ' + esc(String(h.solution).split('\n').pop().slice(0, 60)) : ''}</b></a>`).join('') : '<span class="muted">ไม่เคยแจ้งซ่อม</span>'}</div>`
             : `<div style="font-size:13px;font-weight:600;color:#b45309"><i class="fa fa-link-slash"></i> ยังไม่ผูกเครื่อง</div>
-              <div class="qa" style="grid-template-columns:90px 1fr;margin-top:6px">${field(l, /อุปกรณ์/) ? `<span>ผู้แจ้งบอก</span><b>${esc(field(l, /อุปกรณ์/))}</b>` : ''}${field(l, /ตำแหน่ง/) ? `<span>ที่ไหน</span><b>${esc(field(l, /ตำแหน่ง/))}</b>` : ''}</div>
+              <div class="qa" style="grid-template-columns:90px 1fr;margin-top:6px">${l.asset_id ? `<span>ที่กรอกไว้</span><b>${esc(l.asset_id)} <small class="muted">(ไม่มีในทะเบียน)</small></b>` : ''}${field(l, /อุปกรณ์/) ? `<span>ผู้แจ้งบอก</span><b>${esc(field(l, /อุปกรณ์/))}</b>` : ''}${field(l, /ตำแหน่ง/) ? `<span>ที่ไหน</span><b>${esc(field(l, /ตำแหน่ง/))}</b>` : ''}</div>
               <button class="btn sm" style="margin-top:8px" onclick="linkAsset(${id})"><i class="fa fa-link"></i> ผูกเครื่อง</button>`}</div>
         <div class="card" id="kb-card" style="display:none"><h4>คู่มือที่อาจช่วยได้</h4><div class="hist" id="kb-list"></div></div>
         ${procure.length ? `<div class="card"><h4>จัดซื้อ / ส่งซ่อม</h4>${procure.map(r => `<div class="qa" style="grid-template-columns:100px 1fr"><span>${r[0]}</span><b>${esc(r[1])}</b></div>`).join('')}</div>` : ''}
@@ -631,7 +634,7 @@ const DEVICE_TYPES = ['Computer', 'Printer', 'ASSET_REPAIR'];
 // เลือกเครื่องจากทะเบียน → รหัสเครื่อง · 'none' = ไม่เกี่ยวกับเครื่อง · null = กดกลับ
 async function pickAsset(l, mustPick) {
     let chosen = '';
-    const guess = (field(l, /อุปกรณ์/) || '').replace(/^(เครื่องของฉัน \(ยังไม่มีในระบบ\)|เครื่องอื่น \/ ไม่มีในรายการ)( — )?/, '').replace(/.*\(([^)]+)\)\s*$/, '$1').trim();
+    const guess = (l.asset_id ? String(l.asset_id).replace(/^(notebook|laptop|computer|pc|คอมพิวเตอร์|โน้ตบุ๊ก)\s*/i, '') : '') || (field(l, /อุปกรณ์/) || '').replace(/^(เครื่องของฉัน \(ยังไม่มีในระบบ\)|เครื่องอื่น \/ ไม่มีในรายการ)( — )?/, '').replace(/.*\(([^)]+)\)\s*$/, '$1').trim();
     const r = await ptcSwal().fire({
         title: 'ผูกเครื่องกับงานนี้', width: 'min(560px, 96vw)', showCancelButton: true, showDenyButton: true, focusConfirm: false,
         confirmButtonText: 'ผูกเครื่องนี้', denyButtonText: 'ไม่เกี่ยวกับเครื่อง', cancelButtonText: 'กลับ',
@@ -665,7 +668,8 @@ async function linkAsset(id) {
 }
 async function finish(id) {
     let l = await getTicket(id); if (!l) return;
-    if (DEVICE_TYPES.includes(l.type) && !l.asset_id) {
+    const inReg = l.asset_id ? await api({ action: 'search_assets', term: l.asset_id }).then(r => (Array.isArray(r) ? r : []).some(a => a.equipment_id === l.asset_id || a.asset_id === l.asset_id)).catch(() => true) : false;
+    if (DEVICE_TYPES.includes(l.type) && !inReg) {
         const v = await pickAsset(l, true);
         if (v === null) return;
         if (v !== 'none') { try { await updateItem(l, { asset_id: v }); l = await getTicket(id) || { ...l, asset_id: v }; } catch (e) { return ptcAlert('error', 'ผูกเครื่องไม่สำเร็จ', e.message); } }
