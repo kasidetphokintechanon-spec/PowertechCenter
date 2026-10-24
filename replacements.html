@@ -12,6 +12,7 @@
     <script src="js/vendor/sweetalert2.min.js"></script>
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script src="js/ptc-date.js?v=20261024"></script>
     <script src="js/doc-print.js?v=20261023"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
@@ -47,6 +48,8 @@ body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
 .next .lbl { font-weight:800; color:var(--ptc-text-2); margin-right:4px; }
 .chk { display:inline-flex; gap:5px; align-items:center; font-size:12.5px; } .chk.ok { color:#16a34a; font-weight:700; } .chk.no { color:#b45309; font-weight:700; }
 html.dark .chk.ok { color:#86efac; } html.dark .chk.no { color:#fbbf24; }
+/* ช่องบังคับ — ดอกจันแดงแบบเดียวกับหน้าแจ้งซ่อม */
+.req { color:var(--ptc-danger, #dc2626); font-weight:700; margin-left:2px; }
 .fx { text-align:left; display:grid; gap:10px; }
 .fx label { font-size:12.5px; font-weight:700; color:var(--ptc-text-2); display:block; margin-bottom:4px; }
 .fx input:not([type=checkbox]):not([type=radio]), .fx select, .fx textarea { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:8px 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13.5px; }
@@ -129,16 +132,16 @@ async function form(p, id) {
     const sel = new Set(p.reasons || []), h = p.repair_history;
     const v = (k) => esc(p[k] ?? '');
     const { isConfirmed, value } = await ptcSwal().fire({ title: id ? 'แก้ใบประเมิน' : 'ประเมินเครื่อง — ซ่อมไม่คุ้ม', width: 'min(720px,96vw)', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
-        html: `<div class="fx"><h4>เครื่อง</h4>
-            <div class="two"><div><label>เครื่อง</label><input id="f-an" value="${v('asset_name')}" placeholder="เช่น Notebook Lenovo ThinkPad E14"></div><div><label>รหัสเครื่อง</label><input id="f-ac" value="${v('asset_code')}"></div></div>
+        html: `<div class="fx"><p class="hint" style="margin:0"><span class="req" style="margin:0">*</span> = จำเป็นต้องกรอก</p><h4>เครื่อง</h4>
+            <div class="two"><div><label>เครื่อง<span class="req">*</span></label><input id="f-an" value="${v('asset_name')}" placeholder="เช่น Notebook Lenovo ThinkPad E14"></div><div><label>รหัสเครื่อง</label><input id="f-ac" value="${v('asset_code')}"></div></div>
             <div class="three"><div><label>S/N</label><input id="f-sn" value="${v('serial_number')}"></div><div><label>บริษัท</label><select id="f-co"><option value="">—</option>${['PTA', 'PT4', 'PTE'].map(c => `<option ${c === p.company ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div><label>ผู้ใช้เครื่อง</label><input id="f-un" value="${v('user_name')}"></div></div>
             <div class="three"><div><label>วันที่ซื้อ</label><input id="f-pd" type="date" value="${v('purchase_date')}"></div><div><label>ราคาซื้อ (บาท)</label><input id="f-pp" inputmode="decimal" value="${p.purchase_price ?? ''}"></div><div><label>อายุใช้งานตามหมวด (ปี)</label><input id="f-ul" type="number" min="0" value="${p.useful_life ?? ''}"></div></div>
             <p class="hint" id="f-age"></p>
             ${h ? `<p class="hint">ประวัติซ่อมเครื่องนี้: ${h.n} ครั้ง${h.cost ? ' · ค่าซ่อมรวม ' + baht(h.cost) : ''}</p>` : ''}
             <h4>ผลการตรวจ</h4>
             <div><label>อาการที่แจ้ง</label><textarea id="f-pb">${v('problem')}</textarea></div>
-            <div><label>สิ่งที่ตรวจพบ / เหตุผลที่ซ่อมไม่คุ้ม</label><textarea id="f-fd" placeholder="เช่น เมนบอร์ดลัดวงจร อะไหล่เลิกผลิต ร้านเสนอราคาซ่อม 9,500 บาท">${v('findings')}</textarea></div>
-            <div><label>สาเหตุ (เลือกได้หลายข้อ)</label><div class="rs">${rs.map(x => `<label><input type="checkbox" class="f-rs" value="${x.key}" ${sel.has(x.key) ? 'checked' : ''}> ${esc(x.t)}</label>`).join('')}</div></div>
+            <div><label>สิ่งที่ตรวจพบ / เหตุผลที่ซ่อมไม่คุ้ม<span class="req">*</span></label><textarea id="f-fd" placeholder="เช่น เมนบอร์ดลัดวงจร อะไหล่เลิกผลิต ร้านเสนอราคาซ่อม 9,500 บาท">${v('findings')}</textarea></div>
+            <div><label>สาเหตุ (เลือกได้หลายข้อ)<span class="req">*</span></label><div class="rs">${rs.map(x => `<label><input type="checkbox" class="f-rs" value="${x.key}" ${sel.has(x.key) ? 'checked' : ''}> ${esc(x.t)}</label>`).join('')}</div></div>
             <h4>เทียบค่าใช้จ่าย</h4>
             <div class="two"><div><label>ค่าซ่อมที่ประเมิน (บาท)</label><input id="f-rc" inputmode="decimal" value="${p.repair_cost ?? ''}"></div><div><label>ราคาเครื่องใหม่ (บาท)</label><input id="f-nc" inputmode="decimal" value="${p.new_cost ?? ''}"></div></div>
             <p class="hint" id="f-ratio"></p>
@@ -187,7 +190,7 @@ function editRp(id) { const r = L.data.find(x => x.id === id); if (r) form(r, id
 async function decide(id) {
     const r = L.data.find(x => x.id === id);
     const { isConfirmed, isDenied, value } = await ptcSwal().fire({ title: 'บันทึกผลอนุมัติ — ' + esc(r.code), showCancelButton: true, showDenyButton: true, confirmButtonText: 'อนุมัติ', denyButtonText: 'ไม่อนุมัติ', cancelButtonText: 'กลับ', focusConfirm: false,
-        html: `<div class="fx"><p class="hint" style="margin:0">ใส่ตามใบประเมินที่หัวหน้าเซ็นแล้ว</p><div class="two"><div><label>ผู้อนุมัติ</label><input id="d-who" placeholder="ชื่อ-ตำแหน่ง"></div><div><label>วันที่เซ็น</label><input id="d-on" type="date" value="${today()}"></div></div>
+        html: `<div class="fx"><p class="hint" style="margin:0">ใส่ตามใบประเมินที่หัวหน้าเซ็นแล้ว</p><div class="two"><div><label>ผู้อนุมัติ<span class="req">*</span></label><input id="d-who" placeholder="ชื่อ-ตำแหน่ง"></div><div><label>วันที่เซ็น<span class="req">*</span></label><input id="d-on" type="date" value="${today()}"></div></div>
             <div><label>หมายเหตุ (ไม่อนุมัติต้องใส่)</label><input id="d-note" placeholder="เช่น ให้ซ่อมต่อ / ใช้ต่อไปก่อน / อนุมัติงบ 25,000"></div></div>`,
         preConfirm: () => gid('d-who').value.trim() && gid('d-on').value ? { approver_name: gid('d-who').value, approved_on: gid('d-on').value, note: gid('d-note').value } : Swal.showValidationMessage('ใส่ชื่อผู้อนุมัติและวันที่'),
         preDeny: () => gid('d-who').value.trim() && gid('d-on').value && gid('d-note').value.trim() ? { approver_name: gid('d-who').value, approved_on: gid('d-on').value, note: gid('d-note').value } : Swal.showValidationMessage('ไม่อนุมัติ: ใส่ชื่อ วันที่ และเหตุผล') });
@@ -197,7 +200,7 @@ async function decide(id) {
 async function order(id) {
     const r = L.data.find(x => x.id === id);
     const { isConfirmed, value } = await ptcSwal().fire({ title: 'บันทึกสั่งซื้อ', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'กลับ', focusConfirm: false,
-        html: `<div class="fx"><div class="two"><div><label>เลข PR</label><input id="o-pr" value="${esc(r.pr_no || '')}"></div><div><label>เลข PO</label><input id="o-po" value="${esc(r.po_no || '')}"></div></div>
+        html: `<div class="fx"><p class="hint" style="margin:0">ใส่เลข PR หรือ PO อย่างน้อย 1 อย่าง<span class="req">*</span></p><div class="two"><div><label>เลข PR</label><input id="o-pr" value="${esc(r.pr_no || '')}"></div><div><label>เลข PO</label><input id="o-po" value="${esc(r.po_no || '')}"></div></div>
             <div class="two"><div><label>ผู้ขาย</label><input id="o-v" value="${esc(r.vendor || '')}"></div><div><label>คาดว่าได้ของ</label><input id="o-eta" type="date" value="${esc(r.eta_date || '')}"></div></div></div>`,
         preConfirm: () => gid('o-pr').value.trim() || gid('o-po').value.trim() ? { pr_no: gid('o-pr').value, po_no: gid('o-po').value, vendor: gid('o-v').value, eta_date: gid('o-eta').value } : Swal.showValidationMessage('ใส่เลข PR หรือ PO') });
     if (isConfirmed) step(id, 'order', value, true);

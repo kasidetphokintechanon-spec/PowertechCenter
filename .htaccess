@@ -9,6 +9,11 @@
     <FilesMatch "^favicon\.ico$">
         Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
+    # หน้าเว็บ (.html) — เดิมไม่มีหัวข้อนี้ เบราว์เซอร์จำหน้าเก่าไว้เอง ปิด-เปิดใหม่ยังเห็นของเก่าจนกด F5
+    # no-cache = เช็กกับเซิร์ฟเวอร์ทุกครั้ง (ไม่เปลี่ยนก็ได้ 304 กลับมา ไม่โหลดซ้ำ) · js/css ใช้ ?v= อยู่แล้ว
+    <FilesMatch "\.html?$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
 </IfModule>
 
 # TISAX: ของที่ไม่ใช่ส่วนของระบบ (ไฟล์สำรอง ฐานข้อมูล log สคริปต์ โค้ดพร้อมประวัติ) ห้ามเปิดผ่านเว็บ

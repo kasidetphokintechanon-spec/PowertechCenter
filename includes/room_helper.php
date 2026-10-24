@@ -236,7 +236,7 @@ function roomNotify($conn, $event, $title, $b, $extra = [], $force = false) {
     if ((!$ex && !$force) || !function_exists('sendNotify')) return;
     $when = date('d/m H:i', strtotime($b['start_at'])) . '–' . (date('Y-m-d', strtotime($b['start_at'])) === date('Y-m-d', strtotime($b['end_at'])) ? date('H:i', strtotime($b['end_at'])) : date('d/m H:i', strtotime($b['end_at'])));
     $lines = ["<b>{$title} — {$b['code']}</b>", "<b>ห้อง:</b> {$b['room_name']}", "<b>เวลา:</b> {$when} · {$b['attendees']} คน",
-        !empty($b['host']) ? "<b>ประชุมของ:</b> {$b['host']}" : '', !empty($b['has_guest']) ? "<b>แขกภายนอก:</b> {$b['guest_company']}" : '',
+        !empty($b['host']) ? "<b>ประธาน:</b> {$b['host']}" : '', !empty($b['has_guest']) ? "<b>แขกภายนอก:</b> {$b['guest_company']}" : '',
         "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : '') . ($b['contact'] ? " · {$b['contact']}" : ''),
         $ex ? "<b>เตรียม:</b> " . roomExtrasText($ex, $b['room_company'] ?? null) . ($b['extras_note'] ? " ({$b['extras_note']})" : '') : '<b>เตรียม:</b> -'];
     foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> {$v}";

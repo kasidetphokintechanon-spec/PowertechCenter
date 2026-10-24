@@ -7,7 +7,7 @@ $st->bind_param('i', $roomId); $st->execute();
 $room = $st->get_result()->fetch_assoc();
 if (!$room) throw new Exception('ไม่พบห้อง หรือห้องปิดใช้งานอยู่');
 $title = mb_substr(trim(strip_tags((string)($_POST['title'] ?? ''))), 0, 255);
-if (mb_strlen($title) < 2) throw new Exception('ใส่เรื่องที่ประชุม');
+if (mb_strlen($title) < 2) throw new Exception('ใส่หัวข้อการประชุม');
 $keeper = roomKeeps($conn, $roomId);
 [$start, $end] = roomCheckTime((string)($_POST['start'] ?? ''), (string)($_POST['end'] ?? ''), $keeper);
 roomCheckRules($conn, $room, $start, $end, $keeper);

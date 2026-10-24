@@ -15,6 +15,7 @@
     <script src="js/vendor/sweetalert2.min.js"></script>
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script src="js/ptc-date.js?v=20261024"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
@@ -45,6 +46,7 @@ html.dark .chip.on { color:#5eead4; }
 .tb { display:flex; gap:8px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--ptc-border); flex-wrap:wrap; }
 .tb .dte { font-size:14px; font-weight:800; min-width:170px; }
 .tb select { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); cursor:pointer; }
+.tb .pd-t { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); width:140px; }
 .tb .flt { display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--ptc-text-muted); }
 .tb input[type=date] { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); }
 .tl { overflow-x:auto; }
@@ -70,6 +72,8 @@ html.dark .ev.pick { background:rgba(245,158,11,.3); border-color:#f59e0b; color
 .legend { padding:8px 14px; font-size:11.5px; color:var(--ptc-text-muted); display:flex; gap:12px; flex-wrap:wrap; border-top:1px solid var(--ptc-border); }
 .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; vertical-align:-1px; margin-right:3px; }
 /* ฟอร์ม */
+/* ช่องบังคับ — ดอกจันแดงแบบเดียวกับหน้าแจ้งซ่อม */
+.req { color:var(--ptc-danger, #dc2626); font-weight:700; margin-left:2px; }
 .form { padding:14px 16px; position:sticky; top:74px; }
 .f { margin-top:11px; } .f label { display:block; font-size:12px; font-weight:700; color:var(--ptc-text-2); margin-bottom:5px; }
 .f input:not([type=checkbox]), .f select, .f textarea { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:8px 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13px; }
@@ -170,7 +174,7 @@ function clashOf() {
     const [s, e] = formRange();
     return D.bookings.find(b => b.room_id === BF.room_id && b.start_at < e && b.end_at > s);
 }
-// ค่าเริ่มต้น = ห้องของบริษัทตัวเอง (ทุกบริษัทจองได้ทุกห้อง — กดดูบริษัทอื่นได้)
+// ตัวกรองห้องตามบริษัท / ขนาด (ค่าเริ่มต้นทุกบริษัท — ตั้งใน loadDay)
 function rooms() { return D.rooms.filter(r => (!seatF || r.seats >= seatF) && (!coF || r.company === coF)); }
 function renderDay() {
     const now = new Date(), isToday = date === ymd(now), nowX = ((now.getHours() + now.getMinutes() / 60) - H0) / SPAN * 100;
@@ -194,18 +198,19 @@ function renderDay() {
     </div>
     <div class="card form">${room && room.photo ? `<img src="${esc(room.photo)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;margin-bottom:10px;background:var(--ptc-surface-2)" onerror="this.remove()">` : ''}${room ? `<h3 style="margin:0;font-size:15px">จอง ${esc(room.name)}</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">${esc([room.building, room.seats ? room.seats + ' คน' : '', room.equipment].filter(Boolean).join(' · '))}${room.contact_name ? `<br>ผู้ดูแลห้อง ${esc(room.contact_name)} ${esc(room.contact_phone || '')}` : ''}</p>`
             : '<h3 style="margin:0;font-size:15px">เลือกห้องก่อน</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">กดช่องว่างในตาราง หรือเลือกจากรายการ</p>'}
+        <p class="muted" style="font-size:11.5px;margin:6px 0 0"><span class="req" style="margin:0">*</span> = จำเป็นต้องกรอก</p>
         ${room && room.needs_approval ? '<div class="note" style="color:#d97706"><i class="fa fa-user-check"></i>ห้องนี้ต้องให้ผู้ดูแลห้องอนุมัติก่อนใช้</div>' : ''}
-        <div class="f"><label>ห้อง</label><select onchange="selRoom(+this.value)"><option value="">— เลือกห้อง —</option>${D.rooms.map(r => `<option value="${r.id}" ${r.id === BF.room_id ? 'selected' : ''}>${esc(r.name)}${r.seats ? ' (' + r.seats + ' คน)' : ''}</option>`).join('')}</select></div>
-        <div class="f"><label>เรื่อง</label><input id="f-title" value="${esc(BF.title)}" maxlength="255" placeholder="เช่น ประชุมแผนผลิต Q4" oninput="BF.title=this.value;syncBtn()"></div>
-        <div class="f rel"><label>ประชุมของ / ประธาน <span class="muted" style="font-weight:500">(ไม่บังคับ · ถ้าจองแทนผู้บริหาร)</span></label><div style="display:flex;gap:7px;align-items:center">${BF.host ? avatar(BF.host) : ''}<input id="f-host" value="${esc(BF.host)}" maxlength="255" autocomplete="off" placeholder="พิมพ์ชื่อแล้วเลือก · ว่างไว้ = ตัวคุณเอง" oninput="BF.host=this.value"></div></div>
-        <div class="f two"><div><label>วันที่เริ่ม</label><input type="date" value="${date}" onchange="if(this.value){if(BF.end_date&&BF.end_date<this.value)BF.end_date='';date=this.value;loadDay()}"></div><div><label>เวลาเริ่ม</label><input type="time" step="900" value="${BF.start}" onchange="BF.start=this.value;renderDay()"></div></div>
-        <div class="f two"><div><label>วันที่สิ้นสุด</label><input type="date" min="${date}" value="${BF.end_date && BF.end_date > date ? BF.end_date : date}" onchange="BF.end_date=this.value;renderDay()"></div><div><label>เวลาสิ้นสุด</label><input type="time" step="900" value="${BF.end}" onchange="BF.end=this.value;renderDay()"></div></div>
+        <div class="f"><label>ห้อง<span class="req">*</span></label><select onchange="selRoom(+this.value)"><option value="">— เลือกห้อง —</option>${D.rooms.map(r => `<option value="${r.id}" ${r.id === BF.room_id ? 'selected' : ''}>${esc(r.name)}${r.seats ? ' (' + r.seats + ' คน)' : ''}</option>`).join('')}</select></div>
+        <div class="f"><label>หัวข้อการประชุม<span class="req">*</span></label><input id="f-title" value="${esc(BF.title)}" maxlength="255" placeholder="เช่น ประชุมแผนผลิต Q4" oninput="BF.title=this.value;syncBtn()"></div>
+        <div class="f rel"><label>ประธานการประชุม <span class="muted" style="font-weight:500">(ไม่บังคับ · ใส่เมื่อจองแทนผู้บริหาร)</span></label><div style="display:flex;gap:7px;align-items:center">${BF.host ? avatar(BF.host) : ''}<input id="f-host" value="${esc(BF.host)}" maxlength="255" autocomplete="off" placeholder="พิมพ์ชื่อแล้วเลือก · ว่างไว้ = ตัวคุณเอง" oninput="BF.host=this.value"></div></div>
+        <div class="f two"><div><label>วันที่เริ่ม<span class="req">*</span></label><input type="date" value="${date}" onchange="if(this.value){if(BF.end_date&&BF.end_date<this.value)BF.end_date='';date=this.value;loadDay()}"></div><div><label>เวลาเริ่ม<span class="req">*</span></label><input type="time" step="900" value="${BF.start}" onchange="BF.start=this.value;renderDay()"></div></div>
+        <div class="f two"><div><label>วันที่สิ้นสุด<span class="req">*</span></label><input type="date" min="${date}" value="${BF.end_date && BF.end_date > date ? BF.end_date : date}" onchange="BF.end_date=this.value;renderDay()"></div><div><label>เวลาสิ้นสุด<span class="req">*</span></label><input type="time" step="900" value="${BF.end}" onchange="BF.end=this.value;renderDay()"></div></div>
         ${fe.slice(0, 10) !== fs.slice(0, 10) ? `<p class="muted" style="font-size:12px;margin:6px 0 0"><i class="fa fa-calendar-days"></i> จอง ${Math.round((toD(fe.slice(0, 10)) - toD(fs.slice(0, 10))) / 864e5) + 1} วัน: ${thD(fs)} ${BF.start} – ${thD(fe)} ${BF.end}</p>` : ''}
         <div class="f two"><div><label>จำนวนคน</label><input type="number" min="1" inputmode="numeric" value="${esc(BF.attendees)}" oninput="BF.attendees=this.value"></div><div><label>เบอร์ติดต่อ</label><input value="${esc(BF.contact)}" placeholder="ไม่บังคับ" oninput="BF.contact=this.value"></div></div>
         <div class="f"><label>ผู้เข้าร่วม <span class="muted" style="font-weight:500">(ไม่บังคับ)</span></label>${BF.plist.length ? `<div class="pchips">${BF.plist.map((p, i) => `<span>${avatar(p)}${esc(p)}<button type="button" onclick="BF.plist.splice(${i},1);renderDay()" aria-label="เอาออก">✕</button></span>`).join('')}</div>` : ''}
             <div class="rel" style="position:relative"><input id="f-part" autocomplete="off" placeholder="พิมพ์ชื่อแล้วเลือก หรือพิมพ์แผนก แล้วกด Enter"></div></div>
         <label style="display:flex;gap:7px;align-items:center;font-size:12.5px;margin-top:10px;cursor:pointer"><input type="checkbox" ${BF.has_guest ? 'checked' : ''} onchange="BF.has_guest=this.checked;renderDay()"> มีแขกภายนอก (ลูกค้า / หน่วยงานราชการ / ผู้รับเหมา)</label>
-        ${BF.has_guest ? `<div class="f" style="margin-top:6px"><input value="${esc(BF.guest_company)}" maxlength="255" placeholder="บริษัท / หน่วยงานของแขก เช่น สรรพากร, Toyota" oninput="BF.guest_company=this.value"></div>` : ''}
+        ${BF.has_guest ? `<div class="f" style="margin-top:6px"><label>บริษัท / หน่วยงานของแขก<span class="req">*</span></label><input value="${esc(BF.guest_company)}" maxlength="255" placeholder="บริษัท / หน่วยงานของแขก เช่น สรรพากร, Toyota" oninput="BF.guest_company=this.value"></div>` : ''}
         <div class="f"><label>ขอให้เตรียม (ไม่บังคับ)</label><div class="xs">${D.extras.filter(x => !room || (room.extras || []).includes(x.key)).map(x => `<button type="button" class="chip ${BF.extras.has(x.key) ? 'on' : ''}" onclick="togX('${x.key}')">${x.i} ${esc(x.t)}</button>`).join('')}</div></div>
         ${BF.extras.size ? `<div class="f"><input value="${esc(BF.note)}" placeholder="รายละเอียด เช่น อาหารกลางวัน 40 ชุด มังสวิรัติ 3" oninput="BF.note=this.value"></div>` : ''}
         <div class="f"><label>หมายเหตุ <span class="muted" style="font-weight:500">(ไม่บังคับ)</span></label><input value="${esc(BF.gnote)}" maxlength="500" placeholder="เช่น จัดโต๊ะแบบห้องเรียน" oninput="BF.gnote=this.value"></div>
@@ -282,7 +287,8 @@ function laneClick(ev, id) {
 function go(n) { date = addDays(date, n); loadDay(); }
 async function loadDay() {
     try { D = await api({ action: 'room_day', date }); D.extras.forEach(x => EXI[x.key] = x.i + ' ' + x.t); } catch (e) { gid('v-day').innerHTML = `<div class="card empty">${esc(e.message)}</div>`; return; }
-    if (coF === null) coF = D.rooms.some(r => r.company === S.company) ? S.company : '';
+    // ค่าเริ่มต้น = ทุกบริษัท (ทุกบริษัทจองได้ทุกห้อง — กรองเป็นบริษัทตัวเองแล้วไม่เห็นห้องที่ว่างของบริษัทอื่น)
+    if (coF === null) coF = '';
     const hr = t => parseInt(String(t || '').slice(0, 2), 10);
     if (D.rooms.length) { H0 = Math.min(...D.rooms.map(r => hr(r.open_from) || 7)); H1 = Math.max(...D.rooms.map(r => (hr(r.open_to) || 20) + (String(r.open_to).slice(3) > '00' ? 1 : 0))); SPAN = Math.max(1, H1 - H0); }
     gid('t-keep').style.display = D.can_manage ? '' : 'none';
@@ -291,7 +297,7 @@ async function loadDay() {
 async function book() {
     if (sending) return;
     const [s, e] = formRange(), c = clashOf();
-    const miss = [!BF.room_id && 'เลือกห้อง (กดช่องว่างในตาราง หรือเลือกจากรายการ)', BF.title.trim().length < 2 && 'ใส่เรื่องที่ประชุม', BF.has_guest && !BF.guest_company.trim() && 'ใส่บริษัท/หน่วยงานของแขก', e <= s && 'เวลาสิ้นสุดต้องหลังเวลาเริ่ม',
+    const miss = [!BF.room_id && 'เลือกห้อง (กดช่องว่างในตาราง หรือเลือกจากรายการ)', BF.title.trim().length < 2 && 'ใส่หัวข้อการประชุม', BF.has_guest && !BF.guest_company.trim() && 'ใส่บริษัท/หน่วยงานของแขก', e <= s && 'เวลาสิ้นสุดต้องหลังเวลาเริ่ม',
         c && `ช่วงเวลานี้ไม่ว่าง — ${c.booker_name} จองไว้ ${hm(c.start_at)}–${hm(c.end_at)}`].filter(Boolean);
     if (miss.length) { ptcAlert('warning', 'ยังจองไม่ได้', miss.join(' · ')); if (BF.room_id && BF.title.trim().length < 2) gid('f-title')?.focus(); return; }
     sending = true; syncBtn();
@@ -309,7 +315,7 @@ function showBk(id) {
     const b = D.bookings.find(x => x.id === id); if (!b) return;
     const room = D.rooms.find(r => r.id === b.room_id) || {};
     ptcSwal().fire({ title: esc(b.title), confirmButtonText: 'ปิด', showDenyButton: b.mine, denyButtonText: 'แก้ / ยกเลิก', html: `<div class="qa"><span>ห้อง</span><b>${esc(room.name || '')}</b><span>เวลา</span><b>${thD(b.start_at)} ${hm(b.start_at)} – ${b.end_at.slice(0, 10) !== b.start_at.slice(0, 10) ? thD(b.end_at) + ' ' : ''}${hm(b.end_at)}</b>
-        ${b.host ? `<span>ประชุมของ</span><b style="display:flex;gap:6px;align-items:center">${avatar(b.host)}${esc(b.host)}</b>` : ''}<span>ผู้จอง</span><b>${esc(b.booker_name)}</b><span>แผนก</span><b>${esc(b.department || '-')}</b><span>ติดต่อ</span><b>${esc(b.contact || '-')}</b><span>จำนวนคน</span><b>${b.attendees || '-'}</b>${b.participants ? `<span>ผู้เข้าร่วม</span><b style="display:flex;flex-wrap:wrap;gap:5px">${splitP(b.participants).map(n => `<span style="display:inline-flex;gap:5px;align-items:center;font-weight:500">${avatar(n)}${esc(n)}</span>`).join(' ')}</b>` : ''}${+b.has_guest ? `<span>แขกภายนอก</span><b>${esc(b.guest_company)}</b>` : ''}${b.note ? `<span>หมายเหตุ</span><b>${esc(b.note)}</b>` : ''}
+        ${b.host ? `<span>ประธาน</span><b style="display:flex;gap:6px;align-items:center">${avatar(b.host)}${esc(b.host)}</b>` : ''}<span>ผู้จอง</span><b>${esc(b.booker_name)}</b><span>แผนก</span><b>${esc(b.department || '-')}</b><span>ติดต่อ</span><b>${esc(b.contact || '-')}</b><span>จำนวนคน</span><b>${b.attendees || '-'}</b>${b.participants ? `<span>ผู้เข้าร่วม</span><b style="display:flex;flex-wrap:wrap;gap:5px">${splitP(b.participants).map(n => `<span style="display:inline-flex;gap:5px;align-items:center;font-weight:500">${avatar(n)}${esc(n)}</span>`).join(' ')}</b>` : ''}${+b.has_guest ? `<span>แขกภายนอก</span><b>${esc(b.guest_company)}</b>` : ''}${b.note ? `<span>หมายเหตุ</span><b>${esc(b.note)}</b>` : ''}
         ${b.extras.length ? `<span>ขอเตรียม</span><b>${esc(b.extras.map(k => EXI[k] || k).join(', '))}${b.prepared_at ? ' · ✓ เตรียมแล้ว' : ''}</b>` : ''}</div>` })
         .then(r => { if (r.isDenied) { tab('mine'); } });
 }
@@ -326,7 +332,7 @@ function rowHtml(b, keeper) {
         : keeper ? (b.extras.length ? (b.prepared_at ? `<button class="btn sm" onclick="prepared(${b.id})" title="กลับเป็น ยังไม่ได้เตรียมของ"><i class="fa fa-rotate-left"></i> กดผิด ยกเลิก</button>` : `<button class="btn ok" onclick="prepared(${b.id})"><i class="fa fa-check"></i> กดเมื่อเตรียมเสร็จ</button>`) : '')
         : !off ? `<button class="btn sm" onclick="editBk(${b.id})">แก้</button><button class="btn sm danger" onclick="cancelBk(${b.id})">ยกเลิก</button>` : '';
     return `<div class="row ${off && !keeper ? 'off' : ''}"><div class="dt"><b>${keeper ? hm(b.start_at) : d.getDate()}</b><span>${keeper ? hm(b.end_at) : d.toLocaleDateString('th-TH', { month: 'short' })}</span></div>
-        <div class="tx"><b>${keeper ? esc(b.room_name) + ' · ' : ''}${esc(b.title)}</b> ${tag}<div>${[keeper ? esc(b.department || '') : esc(b.room_name), b.host ? 'ประชุมของ ' + esc(b.host) : '', keeper ? esc(b.booker_name) : '', +b.has_guest ? '🤝 แขก ' + esc(b.guest_company) : '', keeper ? esc(b.contact || '') : '',
+        <div class="tx"><b>${keeper ? esc(b.room_name) + ' · ' : ''}${esc(b.title)}</b> ${tag}<div>${[keeper ? esc(b.department || '') : esc(b.room_name), b.host ? 'ประธาน ' + esc(b.host) : '', keeper ? esc(b.booker_name) : '', +b.has_guest ? '🤝 แขก ' + esc(b.guest_company) : '', keeper ? esc(b.contact || '') : '',
             (multi ? thD(b.start_at) + ' – ' + thD(b.end_at) + ' ' : '') + (keeper ? '' : hm(b.start_at) + '–' + hm(b.end_at)), b.attendees ? b.attendees + ' คน' : '', ['cancelled', 'rejected'].includes(b.status) ? esc(b.cancel_reason || '') : ''].filter(x => x && x.trim()).join(' · ')}</div>${b.host || b.participants ? `<div style="margin-top:5px;display:flex;gap:7px;align-items:center">${stack([b.host, ...splitP(b.participants)].filter((v, i, a) => v && a.indexOf(v) === i), 6)}${keeper && b.participants ? `<span>${esc(b.participants)}</span>` : ''}</div>` : ''}${b.note ? `<div style="margin-top:3px">หมายเหตุ: ${esc(b.note)}</div>` : ''}${ex}</div>${acts}</div>`;
 }
 function renderMine() {
@@ -339,9 +345,9 @@ async function loadMine() { try { mine = (await api({ action: 'room_my' })).data
 async function editBk(id) {
     const b = mine.find(x => x.id === id); if (!b) return;
     const { isConfirmed, value } = await ptcSwal().fire({ title: 'แก้การจอง', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
-        html: `<div class="fx"><div><label>เรื่อง</label><input id="e-t" value="${esc(b.title)}"></div><div class="two"><div><label>วันเริ่ม</label><input id="e-sd" type="date" value="${b.start_at.slice(0, 10)}"></div><div><label>เวลาเริ่ม</label><input id="e-st" type="time" step="900" value="${hm(b.start_at)}"></div></div>
-            <div class="two"><div><label>วันจบ</label><input id="e-ed" type="date" value="${b.end_at.slice(0, 10)}"></div><div><label>เวลาจบ</label><input id="e-et" type="time" step="900" value="${hm(b.end_at)}"></div></div>
-            <div class="two"><div><label>จำนวนคน</label><input id="e-n" type="number" min="1" value="${b.attendees || ''}"></div><div><label>ประชุมของ / ประธาน</label><input id="e-h" list="dl-people" autocomplete="off" value="${esc(b.host || '')}"></div></div>
+        html: `<div class="fx"><div><label>หัวข้อการประชุม<span class="req">*</span></label><input id="e-t" value="${esc(b.title)}"></div><div class="two"><div><label>วันที่เริ่ม</label><input id="e-sd" type="date" value="${b.start_at.slice(0, 10)}"></div><div><label>เวลาเริ่ม</label><input id="e-st" type="time" step="900" value="${hm(b.start_at)}"></div></div>
+            <div class="two"><div><label>วันที่สิ้นสุด</label><input id="e-ed" type="date" value="${b.end_at.slice(0, 10)}"></div><div><label>เวลาสิ้นสุด</label><input id="e-et" type="time" step="900" value="${hm(b.end_at)}"></div></div>
+            <div class="two"><div><label>จำนวนคน</label><input id="e-n" type="number" min="1" value="${b.attendees || ''}"></div><div><label>ประธานการประชุม</label><input id="e-h" list="dl-people" autocomplete="off" value="${esc(b.host || '')}"></div></div>
             <div><label>ผู้เข้าร่วม</label><input id="e-pa" value="${esc(b.participants || '')}" placeholder="คั่นด้วย ,"></div>
             <div class="two"><div><label>แขกภายนอก (บริษัท/หน่วยงาน)</label><input id="e-g" value="${esc(+b.has_guest ? b.guest_company : '')}" placeholder="ว่าง = ไม่มีแขก"></div><div><label>หมายเหตุ</label><input id="e-no" value="${esc(b.note || '')}"></div></div><p style="font-size:12px;color:var(--ptc-text-muted);margin:0">เปลี่ยนเวลาหลังผู้ดูแลเตรียมของแล้ว → ระบบแจ้งให้เตรียมใหม่</p></div>`,
         preConfirm: () => ({ title: gid('e-t').value.trim(), start: gid('e-sd').value + ' ' + gid('e-st').value, end: gid('e-ed').value + ' ' + gid('e-et').value, attendees: gid('e-n').value, host: gid('e-h').value, participants: gid('e-pa').value, has_guest: gid('e-g').value.trim() ? 1 : '', guest_company: gid('e-g').value, note: gid('e-no').value }) });
@@ -400,7 +406,7 @@ async function editRoom(id) {
     const j = window._RJ, r = j.rooms.find(x => x.id === id) || { name: '', building: '', seats: '', equipment: '', contact_name: '', contact_phone: '', note: '', is_active: 1, sort_order: 0, keepers: [] };
     const kIds = r.keepers.map(k => String(k.id));
     const { isConfirmed, value } = await ptcSwal().fire({ title: id ? 'แก้ห้อง' : 'เพิ่มห้อง', width: 'min(600px,96vw)', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
-        html: `<div class="fx"><div><label>ชื่อห้อง</label><input id="r-n" value="${esc(r.name)}"></div><div class="two"><div><label>ห้องของบริษัท</label><select id="r-c"><option value="">— ยังไม่ระบุ —</option>${['PTA', 'PT4', 'PTE'].filter(c => c === r.company || (j.companies || []).includes(c)).map(c => `<option ${c === r.company ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div><label>จุ (คน)</label><input id="r-s" type="number" min="0" value="${r.seats || ''}"></div></div>
+        html: `<div class="fx"><div><label>ชื่อห้อง<span class="req">*</span></label><input id="r-n" value="${esc(r.name)}"></div><div class="two"><div><label>ห้องของบริษัท</label><select id="r-c"><option value="">— ยังไม่ระบุ —</option>${['PTA', 'PT4', 'PTE'].filter(c => c === r.company || (j.companies || []).includes(c)).map(c => `<option ${c === r.company ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div><label>จุ (คน)</label><input id="r-s" type="number" min="0" value="${r.seats || ''}"></div></div>
             <div><label>ที่ตั้ง (ตึก/ชั้น)</label><input id="r-b" value="${esc(r.building || '')}"></div>
             <div><label>อุปกรณ์ในห้อง</label><input id="r-e" value="${esc(r.equipment || '')}" placeholder="เช่น ทีวี 65 นิ้ว, ไวท์บอร์ด, กล้องประชุม"></div>
             <div class="two"><div><label>ผู้ติดต่อ (แสดงให้ผู้จอง)</label><input id="r-cn" value="${esc(r.contact_name || '')}"></div><div><label>เบอร์</label><input id="r-cp" value="${esc(r.contact_phone || '')}"></div></div>

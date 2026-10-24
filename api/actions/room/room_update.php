@@ -9,7 +9,7 @@ $keeper = roomKeeps($conn, $b['room_id']);
 if (!$mine && !$keeper) throw new Exception('แก้ได้เฉพาะการจองของตัวเอง');
 if (!$keeper && strtotime($b['end_at']) < time()) throw new Exception('การจองนี้ผ่านไปแล้ว');
 $title = mb_substr(trim(strip_tags((string)($_POST['title'] ?? $b['title']))), 0, 255);
-if (mb_strlen($title) < 2) throw new Exception('ใส่เรื่องที่ประชุม');
+if (mb_strlen($title) < 2) throw new Exception('ใส่หัวข้อการประชุม');
 [$start, $end] = roomCheckTime((string)($_POST['start'] ?? $b['start_at']), (string)($_POST['end'] ?? $b['end_at']), $keeper);
 roomCheckRules($conn, ['company' => $b['room_company']], $start, $end, $keeper);
 $att = max(0, min(999, (int)($_POST['attendees'] ?? $b['attendees'])));

@@ -146,7 +146,7 @@ function carGet($conn, $id) {
 /** แถวที่ส่งหน้าเว็บ */
 function carRow($b) {
     foreach (['id', 'car_id', 'passengers', 'need_driver'] as $k) if (isset($b[$k])) $b[$k] = (int)$b[$k];
-    $b['driver_id'] = $b['driver_id'] !== null ? (int)$b['driver_id'] : null;
+    $b['driver_id'] = isset($b['driver_id']) ? (int)$b['driver_id'] : null;
     $b['mine'] = (string)$b['booker_id'] === (string)($_SESSION['user_id'] ?? '');
     return $b;
 }

@@ -15,6 +15,7 @@
     <script src="js/vendor/sweetalert2.min.js"></script>
     <script src="js/enterprise-swal.js?v=20261021b"></script>
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script src="js/ptc-date.js?v=20261024"></script>
     <script src="js/doc-print.js?v=20261023"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
@@ -46,6 +47,7 @@ html.dark .chip.on { color:#7dd3fc; }
 .tb { display:flex; gap:8px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--ptc-border); flex-wrap:wrap; }
 .tb .dte { font-size:14px; font-weight:800; min-width:170px; }
 .tb select, .tb input[type=date] { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); }
+.tb .pd-t { height:34px; border:1px solid var(--ptc-border); border-radius:8px; padding:0 8px; font:inherit; font-size:13px; background:var(--ptc-surface); color:var(--ptc-text); width:140px; }
 .tb .flt { display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--ptc-text-muted); }
 .tl { overflow-x:auto; }
 .tl-in { min-width:900px; }
@@ -57,13 +59,13 @@ html.dark .chip.on { color:#7dd3fc; }
 .lane { position:relative; height:50px; cursor:copy; background-image:repeating-linear-gradient(90deg, var(--ptc-border) 0, var(--ptc-border) 1px, transparent 1px, transparent calc(100% / var(--span, 14))); }
 .hd .lane { height:24px; cursor:default; background:none; }
 .hd .lane span { position:absolute; top:5px; font-size:11px; color:var(--ptc-text-muted); transform:translateX(-50%); }
-.ev { position:absolute; top:6px; bottom:6px; border-radius:7px; padding:3px 7px; font-size:11px; line-height:1.3; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#0c4a6e; background:#e0f2fe; border:1px solid #7dd3fc; cursor:pointer; }
+.ev { position:absolute; top:6px; bottom:6px; border-radius:7px; padding:3px 7px; font-size:11px; line-height:1.3; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#14532d; background:#dcfce7; border:1px solid #86efac; cursor:pointer; }
 .ev small { display:block; opacity:.75; overflow:hidden; text-overflow:ellipsis; }
 .ev.me { background:#dbeafe; border-color:#93c5fd; color:#1e3a8a; }
 .ev.pick { background:#fde68a; border-color:#f59e0b; color:#78350f; cursor:default; }
 .ev.wait { border-style:dashed; background:repeating-linear-gradient(135deg, #fef3c7 0 6px, #fffbeb 6px 12px); border-color:#f59e0b; color:#78350f; }
 .ev.key { background:var(--ptc-surface-2); border-color:var(--ptc-border); color:var(--ptc-text-2); }
-html.dark .ev { background:rgba(2,132,199,.28); border-color:rgba(125,211,252,.5); color:#e0f2fe; }
+html.dark .ev { background:rgba(22,163,74,.25); border-color:rgba(134,239,172,.45); color:#dcfce7; }
 html.dark .ev.me { background:rgba(37,99,235,.3); border-color:rgba(147,197,253,.5); color:#dbeafe; }
 html.dark .ev.pick { background:rgba(245,158,11,.3); border-color:#f59e0b; color:#fde68a; }
 html.dark .ev.wait { background:repeating-linear-gradient(135deg, rgba(245,158,11,.25) 0 6px, rgba(245,158,11,.12) 6px 12px); color:#fde68a; }
@@ -73,7 +75,37 @@ html.dark .ev.done { background:var(--ptc-surface-2); border-color:var(--ptc-bor
 .now { position:absolute; top:0; bottom:0; width:2px; background:#dc2626; pointer-events:none; }
 .legend { padding:8px 14px; font-size:11.5px; color:var(--ptc-text-muted); display:flex; gap:12px; flex-wrap:wrap; border-top:1px solid var(--ptc-border); }
 .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; vertical-align:-1px; margin-right:3px; }
+/* สลับ รายวัน / 7 วัน */
+.seg { display:inline-flex; border:1px solid var(--ptc-border); border-radius:8px; overflow:hidden; }
+.seg button { height:32px; padding:0 12px; border:0; background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+.seg button.on { background:#0284c7; color:#fff; }
+/* มุมมอง 7 วัน: แถว = รถ · คอลัมน์ = วัน · ช่องละ 2 ครึ่ง (เช้า / บ่าย) ตามที่ใช้จริง */
+.wk { overflow-x:auto; } .wk table { border-collapse:separate; border-spacing:0; width:100%; min-width:880px; table-layout:fixed; }
+.wk th, .wk td { border-bottom:1px solid var(--ptc-border); padding:6px; vertical-align:middle; }
+.wk thead th { font-size:12px; color:var(--ptc-text-2); font-weight:700; text-align:center; background:var(--ptc-surface); position:sticky; top:0; }
+.wk thead th small { display:block; font-weight:500; color:var(--ptc-text-muted); font-size:11px; }
+.wk thead th.today { color:#0284c7; } .wk thead th.today small { color:#0284c7; font-weight:700; }
+.wk thead th.we, .wk td.we { background:color-mix(in srgb, var(--ptc-surface-2) 60%, transparent); }
+.wk .car { text-align:left; width:150px; position:sticky; left:0; background:var(--ptc-surface); z-index:1; border-right:1px solid var(--ptc-border); font-size:12.5px; }
+.wk .car b { display:block; font-size:13px; } .wk .car small { color:var(--ptc-text-muted); font-size:11px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+.wk .day { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.wk .h { height:44px; border-radius:8px; border:1px solid var(--ptc-border); font:inherit; font-size:10.5px; line-height:1.25; padding:3px 4px; cursor:pointer; text-align:center; overflow:hidden; display:flex; flex-direction:column; justify-content:center; background:var(--ptc-surface); color:var(--ptc-text-muted); transition:transform .08s, box-shadow .08s; }
+.wk .h small { font-size:9.5px; opacity:.75; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wk .h.free { border-style:dashed; color:#15803d; background:color-mix(in srgb, #16a34a 5%, var(--ptc-surface)); }
+.wk .h.free:hover { transform:translateY(-1px); box-shadow:0 3px 8px rgba(15,23,42,.12); border-style:solid; border-color:#16a34a; background:color-mix(in srgb, #16a34a 12%, var(--ptc-surface)); }
+.wk .h.free:hover .lb::before { content:'+ จอง '; font-weight:800; }
+.wk .h.ok { background:#dcfce7; border-color:#86efac; color:#14532d; } .wk .h.me { background:#dbeafe; border-color:#93c5fd; color:#1e3a8a; }
+.wk .h.wait { border-style:dashed; border-color:#f59e0b; color:#78350f; background:repeating-linear-gradient(135deg, #fef3c7 0 6px, #fffbeb 6px 12px); }
+.wk .h.done { background:var(--ptc-surface-2); color:var(--ptc-text-muted); }
+.wk .h.past { opacity:.45; cursor:default; } .wk .h.past.free:hover { transform:none; box-shadow:none; }
+html.dark .wk .h.ok { background:rgba(22,163,74,.25); border-color:rgba(134,239,172,.45); color:#dcfce7; } html.dark .wk .h.me { background:rgba(37,99,235,.3); border-color:rgba(147,197,253,.5); color:#dbeafe; }
+html.dark .wk .h.wait { background:repeating-linear-gradient(135deg, rgba(245,158,11,.25) 0 6px, rgba(245,158,11,.12) 6px 12px); color:#fde68a; }
+html.dark .wk .h.free { color:#86efac; }
+.wk-help { display:flex; gap:10px; align-items:center; padding:10px 14px; font-size:12.5px; border-bottom:1px solid var(--ptc-border); background:color-mix(in srgb, #16a34a 6%, var(--ptc-surface)); color:var(--ptc-text-2); }
+.wk-help b { color:#15803d; } html.dark .wk-help b { color:#86efac; }
 /* ฟอร์ม */
+/* ช่องบังคับ — ดอกจันแดงแบบเดียวกับหน้าแจ้งซ่อม */
+.req { color:var(--ptc-danger, #dc2626); font-weight:700; margin-left:2px; }
 .form { padding:14px 16px; position:sticky; top:74px; }
 .f { margin-top:11px; } .f label { display:block; font-size:12px; font-weight:700; color:var(--ptc-text-2); margin-bottom:5px; }
 .f input:not([type=checkbox]), .f select, .f textarea { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:8px 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13px; }
@@ -117,6 +149,7 @@ html.dark .row .tx .pst.wait { color:#fbbf24; } html.dark .row .tx .pst.ok { col
   .wrap { padding-top:calc(44px + 12px) !important; }
   .ptc-nav-sub { display:none; }
   .tl-row { grid-template-columns:120px minmax(0,1fr); } .tl-in { min-width:760px; }
+  .wk table { min-width:700px; } .wk .car { width:96px; } .wk .car small { max-width:90px; } .wk .h { height:46px; font-size:10px; }
 }
 </style>
 </head>
@@ -144,11 +177,11 @@ const thD = s => toD(s).toLocaleDateString('th-TH', { day: 'numeric', month: 'sh
 // ข้อมูลเดิม: ออกรถเกือบทั้งหมด 07–14 น. กลับไม่เกิน 17–18 น. → ตาราง 06–20
 const H0 = 6, H1 = 20, SPAN = H1 - H0;
 
-let PEOPLE = [], S = {}, D = null, date = ymd(new Date()), coF = null, typeF = '', mine = [], sending = false;
+let mode = 'day', WK = null, PEOPLE = [], S = {}, D = null, date = ymd(new Date()), coF = null, typeF = '', mine = [], sending = false;
 const CO_C = { PTA: '#059669', PT4: '#dc2626', PTE: '#2563eb' };
 const coTag = c => c ? `<span class="pill" style="--c:${CO_C[c] || '#64748b'};font-size:10px;padding:1px 6px">${esc(c)}</span>` : '';
 // วันที่ออก = วันที่ดูอยู่ในตาราง (date) · end_date ว่าง = กลับวันเดียวกัน
-let BF = { car_id: 0, plist: [], rider: '', purpose: '', destination: '', start: '08:00', end: '12:00', end_date: '', passengers: '', need_driver: false, contact: '', note: '' };
+let BF = { car_id: 0, driver_id: '', plist: [], rider: '', purpose: '', destination: '', start: '08:00', end: '12:00', end_date: '', passengers: '', need_driver: null, contact: '', note: '' };
 // รุ่นที่มียี่ห้ออยู่แล้ว (ข้อมูลเดิม เช่น "BMW XM50e") ไม่ต้องใส่ยี่ห้อซ้ำ
 const carName = c => c.brand && c.name && String(c.name).toLowerCase().includes(String(c.brand).toLowerCase()) ? c.name : [c.brand, c.name].filter(Boolean).join(' ');
 const carLine = c => [c.car_type, c.seats ? c.seats + ' ที่นั่ง' : ''].filter(Boolean).join(' · ');
@@ -182,23 +215,25 @@ function renderDay() {
     const cos = [...new Set(D.cars.map(r => r.company).filter(Boolean))].sort();
     gid('v-day').innerHTML = !D.cars.length ? '<div class="card empty"><i class="fa fa-car"></i><br>ยังไม่มีรถในระบบ — ผู้ดูแลรถเพิ่มได้ที่แท็บ "ผู้ดูแลรถ"</div>' : `
     <div class="g2"><div class="card">
-        <div class="tb"><button class="btn" onclick="go(-1)" aria-label="วันก่อน">‹</button><span class="dte">${thDay(date)}</span><button class="btn" onclick="go(1)" aria-label="วันถัดไป">›</button>
+        <div class="tb"><div class="seg" role="tablist"><button class="${mode === 'day' ? 'on' : ''}" onclick="setMode('day')">รายวัน</button><button class="${mode === 'week' ? 'on' : ''}" onclick="setMode('week')">7 วัน</button></div><button class="btn" onclick="go(-1)" aria-label="วันก่อน">‹</button><span class="dte">${thDay(date)}</span><button class="btn" onclick="go(1)" aria-label="วันถัดไป">›</button>
             <button class="btn" onclick="date='${ymd(new Date())}';loadDay()">วันนี้</button><input type="date" value="${date}" onchange="date=this.value;loadDay()">
             <span style="flex:1"></span>${cos.length ? `<label class="flt">บริษัท<select onchange="coF=this.value;renderDay()">${[['', 'ทุกบริษัท'], ...cos.map(x => [x, 'รถของ ' + x])].map(([v, t]) => `<option value="${esc(v)}" ${(coF || '') === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : ''}
             ${types.length > 1 ? `<label class="flt">ประเภท<select onchange="typeF=this.value;renderDay()">${[['', 'ทุกประเภท'], ...types.map(x => [x, x])].map(([v, t]) => `<option value="${esc(v)}" ${typeF === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : ''}</div>
         <div class="tl"><div class="tl-in" style="--span:${SPAN}"><div class="tl-row hd"><div class="tl-rm" style="cursor:default"><small>รถ</small></div><div class="lane">${hours}</div></div>${lanes || '<div class="empty">ไม่มีรถตามที่เลือก</div>'}</div></div>
-        <div class="legend"><span><i style="background:#e0f2fe;border:1px solid #7dd3fc"></i>อนุมัติแล้ว</span><span><i style="background:#dbeafe;border:1px solid #93c5fd"></i>ของคุณ</span><span><i style="background:#fef3c7;border:1px dashed #f59e0b"></i>รออนุมัติ</span><span><i style="background:var(--ptc-surface-2);border:1px solid var(--ptc-border)"></i>🔑 รอคืนกุญแจ / ✓ คืนแล้ว</span><span><i style="background:#fde68a;border:1px solid #f59e0b"></i>ที่เลือก</span><span><i style="background:#dc2626;width:2px"></i>ตอนนี้</span><span>กดช่องว่าง = เลือกรถและเวลา · กดแถบ = ดูว่าใครจอง</span></div>
+        <div class="legend"><span><i style="background:#dcfce7;border:1px solid #86efac"></i>อนุมัติแล้ว</span><span><i style="background:#dbeafe;border:1px solid #93c5fd"></i>ของคุณ</span><span><i style="background:#fef3c7;border:1px dashed #f59e0b"></i>รออนุมัติ</span><span><i style="background:var(--ptc-surface-2);border:1px solid var(--ptc-border)"></i>🔑 รอคืนกุญแจ / ✓ คืนแล้ว</span><span><i style="background:#fde68a;border:1px solid #f59e0b"></i>ที่เลือก</span><span><i style="background:#dc2626;width:2px"></i>ตอนนี้</span><span>กดช่องว่าง = เลือกรถและเวลา · กดแถบ = ดูว่าใครจอง</span></div>
     </div>
     <div class="card form">${car && car.photo ? `<img src="${esc(car.photo)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;margin-bottom:10px;background:var(--ptc-surface-2)" onerror="this.remove()">` : ''}${car ? `<h3 style="margin:0;font-size:15px">จอง ${esc(car.plate)}</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">${esc([carName(car), carLine(car), car.color].filter(Boolean).join(' · '))}${car.note ? '<br>' + esc(car.note) : ''}</p>`
             : '<h3 style="margin:0;font-size:15px">เลือกรถก่อน</h3><p class="muted" style="font-size:12.5px;margin:3px 0 0">กดช่องว่างในตาราง หรือเลือกจากรายการ</p>'}
-        <div class="f"><label>รถ</label><select onchange="selCar(+this.value)"><option value="">— เลือกรถ —</option>${D.cars.map(r => `<option value="${r.id}" ${r.id === BF.car_id ? 'selected' : ''}>${esc(r.plate)} · ${esc(carName(r))}</option>`).join('')}</select></div>
+        <p class="muted" style="font-size:11.5px;margin:6px 0 0"><span class="req" style="margin:0">*</span> = จำเป็นต้องกรอก</p>
+        <div class="f"><label>รถ<span class="req">*</span></label><select onchange="selCar(+this.value)"><option value="">— เลือกรถ —</option>${D.cars.map(r => `<option value="${r.id}" ${r.id === BF.car_id ? 'selected' : ''}>${esc(r.plate)} · ${esc(carName(r))}</option>`).join('')}</select></div>
         <div class="f"><label>ช่วงเวลา</label><div class="xs">${[['08:00', '12:00', 'ช่วงเช้า 08–12'], ['13:00', '17:00', 'ช่วงบ่าย 13–17'], ['08:00', '17:00', 'ทั้งวัน 08–17']].map(([a, b, t]) => `<button type="button" class="chip ${BF.start === a && BF.end === b && !BF.end_date ? 'on' : ''}" onclick="BF.start='${a}';BF.end='${b}';BF.end_date='';renderDay()">${t}</button>`).join('')}</div></div>
-        <div class="f two"><div><label>วันที่ออก</label><input type="date" value="${date}" onchange="if(this.value){if(BF.end_date&&BF.end_date<this.value)BF.end_date='';date=this.value;loadDay()}"></div><div><label>เวลาออก</label><input type="time" step="900" value="${BF.start}" onchange="BF.start=this.value;renderDay()"></div></div>
-        <div class="f two"><div><label>วันที่คืน</label><input type="date" min="${date}" value="${BF.end_date && BF.end_date > date ? BF.end_date : date}" onchange="BF.end_date=this.value;renderDay()"></div><div><label>เวลาคืน</label><input type="time" step="900" value="${BF.end}" onchange="BF.end=this.value;renderDay()"></div></div>
-        <div class="f"><label>ไปทำอะไร</label><input id="f-purpose" value="${esc(BF.purpose)}" maxlength="255" placeholder="เช่น วางบิล BMW, ไปไปรษณีย์ + ธนาคาร" oninput="BF.purpose=this.value"></div>
-        <div class="f"><label>ไปที่</label><input value="${esc(BF.destination)}" maxlength="255" placeholder="เช่น BMW ระยอง, ไปรษณีย์ท่าสะอ้าน" oninput="BF.destination=this.value"></div>
+        <div class="f two"><div><label>วันที่ออก<span class="req">*</span></label><input type="date" value="${date}" onchange="if(this.value){if(BF.end_date&&BF.end_date<this.value)BF.end_date='';date=this.value;loadDay()}"></div><div><label>เวลาออก<span class="req">*</span></label><input type="time" step="900" value="${BF.start}" onchange="BF.start=this.value;renderDay()"></div></div>
+        <div class="f two"><div><label>วันที่คืน<span class="req">*</span></label><input type="date" min="${date}" value="${BF.end_date && BF.end_date > date ? BF.end_date : date}" onchange="BF.end_date=this.value;renderDay()"></div><div><label>เวลาคืน<span class="req">*</span></label><input type="time" step="900" value="${BF.end}" onchange="BF.end=this.value;renderDay()"></div></div>
+        <div class="f"><label>ไปทำอะไร<span class="req">*</span></label><input id="f-purpose" value="${esc(BF.purpose)}" maxlength="255" placeholder="เช่น วางบิล BMW, ไปไปรษณีย์ + ธนาคาร" oninput="BF.purpose=this.value"></div>
+        <div class="f"><label>ไปที่<span class="req">*</span></label><input value="${esc(BF.destination)}" maxlength="255" placeholder="เช่น BMW ระยอง, ไปรษณีย์ท่าสะอ้าน" oninput="BF.destination=this.value"></div>
         <div class="f" style="position:relative"><label>ผู้ใช้รถ <span class="muted" style="font-weight:500">(ถ้าจองให้คนอื่น)</span></label><div style="display:flex;gap:7px;align-items:center">${BF.rider ? avatar(BF.rider) : ''}<input id="f-rider" value="${esc(BF.rider)}" maxlength="255" autocomplete="off" placeholder="พิมพ์ชื่อแล้วเลือก · ว่างไว้ = ตัวคุณเอง" oninput="BF.rider=this.value"></div></div>
-        <div class="f"><label>คนขับ</label><div class="xs"><button type="button" class="chip ${!BF.need_driver ? 'on' : ''}" onclick="BF.need_driver=false;renderDay()">🧑 ขับเอง</button><button type="button" class="chip ${BF.need_driver ? 'on' : ''}" onclick="BF.need_driver=true;renderDay()">🧑‍✈️ ขอคนขับ</button></div></div>
+        <div class="f"><label>คนขับ<span class="req">*</span></label><div class="xs"><button type="button" class="chip ${BF.need_driver === false ? 'on' : ''}" onclick="BF.need_driver=false;BF.driver_id='';renderDay()">🧑 ขับเอง</button><button type="button" class="chip ${BF.need_driver ? 'on' : ''}" onclick="BF.need_driver=true;renderDay()">🧑‍✈️ ขอคนขับ</button></div>
+            ${BF.need_driver ? `<div style="margin-top:7px"><select id="f-drv" onchange="BF.driver_id=this.value">${drvOpts(BF.driver_id)}</select><p class="muted" style="font-size:11.5px;margin:4px 0 0">ไม่บังคับ · ผู้ดูแลรถยืนยันคนขับตอนอนุมัติ</p></div>` : ''}</div>
         <div class="f two"><div><label>จำนวนคนไป</label><input type="number" min="1" inputmode="numeric" value="${esc(BF.passengers)}" placeholder="รวมตัวคุณ" oninput="BF.passengers=this.value"></div><div><label>เบอร์ติดต่อ</label><input value="${esc(BF.contact)}" placeholder="ไม่บังคับ" oninput="BF.contact=this.value"></div></div>
         <div class="f"><label>ผู้ร่วมเดินทาง <span class="muted" style="font-weight:500">(ไม่บังคับ)</span></label>${BF.plist.length ? `<div class="pchips">${BF.plist.map((p, i) => `<span>${avatar(p)}${esc(p)}<button type="button" onclick="BF.plist.splice(${i},1);renderDay()" aria-label="เอาออก">✕</button></span>`).join('')}</div>` : ''}
             <div style="position:relative"><input id="f-part" autocomplete="off" placeholder="พิมพ์ชื่อแล้วเลือก แล้วกด Enter"></div></div>
@@ -208,12 +243,14 @@ function renderDay() {
         <div class="note info"><i class="fa fa-user-check"></i>ทุกใบต้องรอผู้ดูแลรถอนุมัติ — ดูสถานะได้ที่ "การจองของฉัน" และหน้าแรก</div>
         <button class="btn ok lg" id="send" style="width:100%;margin-top:12px" ${sending ? 'disabled' : ''} onclick="book()"><i class="fa fa-paper-plane"></i> ส่งคำขอจองรถ</button></div></div>`;
     wireSuggest();
+    if (BF.need_driver && !bad) loadFree(fs, fe);
 }
 const AV_C = ['#2563eb', '#0d9488', '#7c3aed', '#ea580c', '#db2777', '#0891b2', '#65a30d'];
 const splitP = s => String(s || '').split(/\s*,\s*/).filter(Boolean);
 function avatar(n) {
     const p = PEOPLE.find(x => x.n === n), t = ` title="${esc(n)}"`;
-    if (!p) return `<span class="pa ic"${t}><i class="fa fa-user" style="font-size:9px"></i></span>`;
+    // ไม่อยู่ในรายชื่อพนักงาน (เช่น คนขับ) → วงกลมตัวย่อชื่อ
+    if (!p) { const ini = String(n || '?').replace(/^(Mr\.?|Mrs\.?|Ms\.?|Miss|นาย|นางสาว|นาง)\s*/i, '').trim().split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2); return `<span class="pa" style="--c:#64748b"${t}>${esc(ini || '?')}</span>`; }
     const ini = p.n.replace(/^(Mr\.?|Mrs\.?|Ms\.?|Miss|นาย|นางสาว|นาง)\s*/i, '').split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2);
     const col = AV_C[[...p.n].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_C.length];
     return p.p ? `<img class="pa" src="${esc(p.p)}" alt=""${t} onerror="this.outerHTML='<span class=&quot;pa&quot; style=&quot;--c:${col}&quot;>${esc(ini)}</span>'">` : `<span class="pa" style="--c:${col}"${t}>${esc(ini)}</span>`;
@@ -237,6 +274,23 @@ function wireSuggest() {
     if (r && !r._sg) { r._sg = 1; suggest(r, v => { BF.rider = v; renderDay(); }); }
     if (p && !p._sg) { p._sg = 1; suggest(p, v => { if (!BF.plist.includes(v)) BF.plist.push(v); renderDay(); setTimeout(() => gid('f-part')?.focus(), 30); }); }
 }
+// คนขับว่างไหมในช่วงที่เลือก (จำไว้ต่อช่วงเวลา ไม่ถามซ้ำทุกครั้งที่วาด)
+const FREE = {};
+const drvLbl = x => esc(x.name) + (x.nickname ? ' (' + esc(x.nickname) + ')' : '') + ' — ' + (x.busy ? 'ติดงาน ' + hm(x.busy.start_at) + '–' + hm(x.busy.end_at) + ' ' + esc(x.busy.plate) : 'ว่าง');
+function drvOpts(sel, key) {
+    const ds = FREE[key || freeKey()];
+    if (key === 'bad' || (!key && formRange()[1] <= formRange()[0])) return '<option value="">ตั้งเวลาออก–คืนให้ถูกก่อน</option>';
+    return '<option value="">ให้ผู้ดูแลเลือกคนขับ</option>' + (ds ? ds.map(x => `<option value="${x.id}" ${x.busy ? 'disabled' : ''} ${String(x.id) === String(sel) && !x.busy ? 'selected' : ''}>${drvLbl(x)}</option>`).join('') : '<option disabled>กำลังโหลดรายชื่อคนขับ…</option>');
+}
+const freeKey = (s, e, ex) => { if (!s) [s, e] = formRange(); return s + '|' + e + '|' + (ex || ''); };
+async function loadFree(s, e, ex, selId, target) {
+    const k = freeKey(s, e, ex);
+    if (!FREE[k]) { try { FREE[k] = (await api({ action: 'car_driver_free', start: s, end: e, except: ex || '' })).drivers; } catch (_) { FREE[k] = null; const el = gid(target || 'f-drv'); if (el) el.innerHTML = '<option value="">โหลดรายชื่อคนขับไม่ได้ — ให้ผู้ดูแลเลือก</option>'; return; } }
+    const el = gid(target || 'f-drv'); if (!el) return;
+    el.innerHTML = drvOpts(selId ?? BF.driver_id, k);
+    // คนขับที่เลือกไว้ติดงานในช่วงใหม่ → ล้างค่า ให้ผู้ดูแลเลือกแทน
+    if (!target && BF.driver_id && !FREE[k].some(x => String(x.id) === String(BF.driver_id) && !x.busy)) BF.driver_id = '';
+}
 function selCar(id) { BF.car_id = id; renderDay(); if (innerWidth < 1000) document.querySelector('.form')?.scrollIntoView({ behavior: 'smooth' }); }
 function laneClick(ev, id) {
     const r = ev.currentTarget.getBoundingClientRect(), h = H0 + (ev.clientX - r.left) / r.width * SPAN;
@@ -251,35 +305,89 @@ function laneClick(ev, id) {
     setTimeout(() => gid('f-purpose')?.focus(), 50);
 }
 function go(n) { date = addDays(date, n); loadDay(); }
+function setMode(m) { mode = m; try { localStorage.setItem('car_view', m); } catch (_) {} m === 'week' ? loadWeek() : loadDay(); }
+// ── มุมมอง 7 วัน — ดูว่าคันไหนว่างวันไหน (ครึ่งเช้า / บ่าย) กดช่องว่างแล้วไปจองวันนั้นเลย ──
+const HALF = [['เช้า', 6, 12, '08:00', '12:00'], ['บ่าย', 12, 20, '13:00', '17:00']];
+const WD = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+async function loadWeek() {
+    try { WK = await api({ action: 'car_day', date, days: 7 }); } catch (e) { gid('v-day').innerHTML = `<div class="card empty">${esc(e.message)}</div>`; return; }
+    if (coF === null) coF = '';
+    gid('t-keep').style.display = WK.can_manage ? '' : 'none';
+    renderWeek();
+}
+function renderWeek() {
+    const days = Array.from({ length: 7 }, (_, i) => addDays(date, i)), now = new Date(), today = ymd(now);
+    const cs = WK.cars.filter(c => (!coF || c.company === coF) && (!typeF || c.car_type === typeF));
+    const rank = b => b.mine ? 0 : b.status === 'approved' ? 1 : b.status === 'pending' ? 2 : 3;
+    const cell = (c, d) => `<div class="day">${HALF.map(([t, a, z, s0, e0]) => {
+        const hs = new Date(d + 'T' + pad(a) + ':00:00'), he = new Date(d + 'T' + pad(z) + ':00:00');
+        const bs = WK.bookings.filter(b => b.car_id === c.id && toD(b.start_at) < he && toD(b.end_at) > hs).sort((x, y) => rank(x) - rank(y));
+        const past = he <= now;
+        if (!bs.length) return `<button class="h free ${past ? 'past' : ''}" ${past ? 'disabled' : `onclick="pickHalf(${c.id},'${d}','${s0}','${e0}')"`} title="${t} ${s0}–${e0} ว่าง"><span class="lb">ว่าง</span><small>${t}</small></button>`;
+        const b = bs[0], cls = b.mine ? 'me' : b.status === 'pending' ? 'wait' : ['returned', 'returning'].includes(b.status) ? 'done' : 'ok';
+        const tip = bs.map(x => `${hm(x.start_at)}–${hm(x.end_at)} ${x.destination || x.purpose} · ${x.rider_name || x.booker_name}${x.status === 'pending' ? ' (รออนุมัติ)' : ''}`).join('\n');
+        return `<button class="h ${cls} ${past ? 'past' : ''}" onclick="showBk(${b.id})" title="${esc(tip)}"><span>${b.status === 'pending' ? '🕓 ' : ''}${hm(b.start_at) < pad(a) + ':00' ? '…' : hm(b.start_at)}–${hm(b.end_at) > pad(z) + ':00' || b.end_at.slice(0, 10) > d ? '…' : hm(b.end_at)}${bs.length > 1 ? ' +' + (bs.length - 1) : ''}</span><small>${esc(b.destination || b.purpose)}</small></button>`;
+    }).join('')}</div>`;
+    const types = [...new Set(WK.cars.map(r => r.car_type).filter(Boolean))].sort(), cos = [...new Set(WK.cars.map(r => r.company).filter(Boolean))].sort();
+    gid('v-day').innerHTML = `<div class="card">
+        <div class="tb"><div class="seg" role="tablist"><button class="${mode === 'day' ? 'on' : ''}" onclick="setMode('day')">รายวัน</button><button class="${mode === 'week' ? 'on' : ''}" onclick="setMode('week')">7 วัน</button></div><button class="btn" onclick="date=addDays(date,-7);loadWeek()" aria-label="7 วันก่อน">‹</button><span class="dte">${thD(days[0] + ' 00:00')} – ${thD(days[6] + ' 00:00')}</span><button class="btn" onclick="date=addDays(date,7);loadWeek()" aria-label="7 วันถัดไป">›</button>
+            <button class="btn" onclick="date='${today}';loadWeek()">วันนี้</button>
+            <span style="flex:1"></span>${cos.length ? `<label class="flt">บริษัท<select onchange="coF=this.value;renderWeek()">${[['', 'ทุกบริษัท'], ...cos.map(x => [x, 'รถของ ' + x])].map(([v, t]) => `<option value="${esc(v)}" ${(coF || '') === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : ''}
+            ${types.length > 1 ? `<label class="flt">ประเภท<select onchange="typeF=this.value;renderWeek()">${[['', 'ทุกประเภท'], ...types.map(x => [x, x])].map(([v, t]) => `<option value="${esc(v)}" ${typeF === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : ''}</div>
+        <div class="wk-help"><i class="fa fa-hand-pointer" style="color:#16a34a"></i><span>ช่องที่ขึ้น <b>"ว่าง"</b> = รถว่าง ช่วงเช้า (08–12) / บ่าย (13–17) — <b>กดเพื่อจองได้เลย</b> · กดช่องสีเพื่อดูว่าใครจอง</span></div>
+        <div class="wk"><table><thead><tr><th class="car">รถ</th>${days.map(d => { const w = new Date(d + 'T00:00:00').getDay(); return `<th class="${d === today ? 'today' : ''} ${w === 0 || w === 6 ? 'we' : ''}">${WD[w]} ${+d.slice(8)}<small>${d === today ? 'วันนี้' : d === addDays(today, 1) ? 'พรุ่งนี้' : new Date(d + 'T00:00:00').toLocaleDateString('th-TH', { month: 'short' })}</small></th>`; }).join('')}</tr></thead>
+        <tbody>${cs.map(c => `<tr><td class="car"><b>${esc(c.plate)}</b><small>${coF ? '' : (c.company ? c.company + ' · ' : '')}${esc([carName(c), carLine(c)].filter(Boolean).join(' · '))}</small></td>${days.map(d => { const w = new Date(d + 'T00:00:00').getDay(); return `<td class="${w === 0 || w === 6 ? 'we' : ''}">${cell(c, d)}</td>`; }).join('')}</tr>`).join('') || `<tr><td colspan="8"><div class="empty">ไม่มีรถตามที่เลือก</div></td></tr>`}</tbody></table></div>
+        <div class="legend"><span><i style="background:#dcfce7;border:1px solid #86efac"></i>อนุมัติแล้ว</span><span><i style="background:#dbeafe;border:1px solid #93c5fd"></i>ของคุณ</span><span><i style="background:#fef3c7;border:1px dashed #f59e0b"></i>รออนุมัติ</span><span><i style="background:var(--ptc-surface-2);border:1px solid var(--ptc-border)"></i>คืนแล้ว</span><span><i style="border:1px dashed #16a34a"></i>ว่าง — กดจอง</span></div></div>`;
+}
+// กดช่องว่างในมุมมอง 7 วัน → ไปหน้ารายวันของวันนั้น เลือกรถ + ช่วงเวลาให้เลย เหลือแค่กรอกไปทำอะไร
+async function pickHalf(carId, d, s, e) {
+    mode = 'day'; date = d; BF.car_id = carId; BF.start = s; BF.end = e; BF.end_date = '';
+    await loadDay();
+    if (innerWidth < 1000) document.querySelector('.form')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => gid('f-purpose')?.focus(), 80);
+    ptcToast('info', 'เลือก ' + (WK.cars.find(c => c.id === carId)?.plate || '') + ' · ' + thD(d + ' 00:00') + ' ' + s + '–' + e, 'กรอก "ไปทำอะไร" แล้วส่งคำขอ');
+}
 async function loadDay() {
+    if (mode === 'week') return loadWeek();
     try { D = await api({ action: 'car_day', date }); } catch (e) { gid('v-day').innerHTML = `<div class="card empty">${esc(e.message)}</div>`; return; }
-    // ค่าเริ่มต้น = รถของบริษัทตัวเอง (ถ้ามี) — ทุกบริษัทจองรถทุกคันได้ กดดูบริษัทอื่นได้
-    if (coF === null) coF = D.cars.some(r => r.company === S.company) ? S.company : '';
+    // ค่าเริ่มต้น = ทุกบริษัท — มีรถกลางที่ทุกบริษัทจองได้ ถ้ากรองเป็นบริษัทตัวเองจะไม่เห็นรถกลาง
+    if (coF === null) coF = '';
     gid('t-keep').style.display = D.can_manage ? '' : 'none';
     renderDay();
 }
 async function book() {
     if (sending) return;
     const [s, e] = formRange(), c = clashOf();
-    const miss = [!BF.car_id && 'เลือกรถ (กดช่องว่างในตาราง หรือเลือกจากรายการ)', BF.purpose.trim().length < 2 && 'ใส่ว่าไปทำอะไร', !BF.destination.trim() && 'ใส่สถานที่ที่จะไป', e <= s && 'เวลาคืนต้องหลังเวลาออก',
+    const miss = [!BF.car_id && 'เลือกรถ (กดช่องว่างในตาราง หรือเลือกจากรายการ)', BF.purpose.trim().length < 2 && 'ใส่ว่าไปทำอะไร', BF.need_driver === null && 'เลือกว่า ขับเอง หรือ ขอคนขับ', !BF.destination.trim() && 'ใส่สถานที่ที่จะไป', e <= s && 'เวลาคืนต้องหลังเวลาออก',
         c && `ช่วงเวลานี้ไม่ว่าง — ${c.booker_name} จองไว้ ${hm(c.start_at)}–${hm(c.end_at)}`].filter(Boolean);
     if (miss.length) { ptcAlert('warning', 'ยังจองไม่ได้', miss.join(' · ')); if (BF.car_id && BF.purpose.trim().length < 2) gid('f-purpose')?.focus(); return; }
+    const car = D.cars.find(x => x.id === BF.car_id) || {}, dn = BF.driver_id && (Object.values(FREE).flat().find(x => x && String(x.id) === String(BF.driver_id)) || {});
+    const sameDay = s.slice(0, 10) === e.slice(0, 10), when = new Date(s.slice(0, 10) + 'T00:00:00').toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' }) + ' ' + hm(s) + '–' + (sameDay ? '' : thD(e) + ' ') + hm(e);
+    const drvBox = BF.need_driver
+        ? `<div style="border:2px solid #0284c7;background:color-mix(in srgb,#0284c7 9%,transparent);border-radius:10px;padding:12px;font-size:15px;font-weight:800;margin-top:10px">🧑‍✈️ ขอคนขับ${dn && dn.name ? ': ' + esc(dn.name) + (dn.nickname ? ' (' + esc(dn.nickname) + ')' : '') : ' — ให้ผู้ดูแลเลือก'}</div>`
+        : `<div style="border:2px solid #16a34a;background:color-mix(in srgb,#16a34a 9%,transparent);border-radius:10px;padding:12px;font-size:15px;font-weight:800;margin-top:10px">🧑 ขับเอง — คุณเป็นคนขับ<div style="font-size:12px;font-weight:500;margin-top:3px">ต้องการคนขับ? กด "กลับไปแก้" แล้วเลือก "ขอคนขับ"</div></div>`;
+    const ok = await ptcSwal().fire({ title: 'ตรวจสอบก่อนส่ง', confirmButtonText: 'ยืนยันส่งคำขอ', showCancelButton: true, cancelButtonText: 'กลับไปแก้', focusCancel: false,
+        html: `<div class="qa"><span>รถ</span><b>${esc(car.plate || '')} · ${esc(carName(car))}</b><span>วันเวลา</span><b>${esc(when)}</b><span>ไปทำอะไร</span><b>${esc(BF.purpose.trim())} → ${esc(BF.destination.trim())}</b>${BF.rider.trim() ? `<span>ผู้ใช้รถ</span><b>${esc(BF.rider.trim())}</b>` : ''}${BF.plist.length ? `<span>ร่วมเดินทาง</span><b>${esc(BF.plist.join(', '))}</b>` : ''}</div>${drvBox}` });
+    if (!ok.isConfirmed) return;
     sending = true; renderDay();
     try {
-        const j = await post({ action: 'car_book', car_id: BF.car_id, rider_name: BF.rider.trim(), purpose: BF.purpose.trim(), destination: BF.destination.trim(), start: s, end: e, passengers: BF.passengers, passenger_names: BF.plist.join(', '), need_driver: BF.need_driver ? 1 : '', contact: BF.contact, note: BF.note });
-        BF = { ...BF, plist: [], rider: '', purpose: '', destination: '', passengers: '', note: '', end_date: '', need_driver: false };
+        const j = await post({ action: 'car_book', car_id: BF.car_id, driver_id: BF.need_driver ? BF.driver_id : '', rider_name: BF.rider.trim(), purpose: BF.purpose.trim(), destination: BF.destination.trim(), start: s, end: e, passengers: BF.passengers, passenger_names: BF.plist.join(', '), need_driver: BF.need_driver ? 1 : '', contact: BF.contact, note: BF.note });
+        BF = { ...BF, driver_id: '', plist: [], rider: '', purpose: '', destination: '', passengers: '', note: '', end_date: '', need_driver: null };
         ptcAlert('success', 'ส่งคำขอแล้ว ' + j.code, 'รอผู้ดูแลรถอนุมัติ — ดูสถานะได้ที่ "การจองของฉัน" และหน้าแรก');
         await loadDay(); loadMine();
     } catch (er) { ptcAlert('error', 'จองไม่สำเร็จ', er.message); await loadDay(); }
     finally { sending = false; renderDay(); }
 }
+const who = (n, title) => n ? `<b style="display:flex;gap:6px;align-items:center">${avatar(n)}${esc(n)}${title ? ` <span class="muted" style="font-weight:500">${title}</span>` : ''}</b>` : '<b>-</b>';
 function showBk(id) {
-    const b = D.bookings.find(x => x.id === id); if (!b) return;
-    const car = D.cars.find(r => r.id === b.car_id) || {};
+    const src = (mode === 'week' && WK) ? WK : D;
+    const b = src.bookings.find(x => x.id === id); if (!b) return;
+    const car = src.cars.find(r => r.id === b.car_id) || {};
+    const [stl, stc] = stOf(b);
     const pl = splitP(b.passenger_names), inIt = pl.includes(S.display_name), canJoin = !b.mine && ['pending', 'approved'].includes(b.status) && toD(b.end_at) > new Date();
     ptcSwal().fire({ title: esc(b.purpose), confirmButtonText: 'ปิด', showDenyButton: b.mine || canJoin, denyButtonText: b.mine ? 'ดูการจองของฉัน' : inIt ? 'ออกจากการติดรถ' : 'ขอติดรถไปด้วย', html: `<div class="qa"><span>รถ</span><b>${esc(car.plate || '')} ${esc(carName(car))}</b><span>เวลา</span><b>${thD(b.start_at)} ${hm(b.start_at)} – ${b.end_at.slice(0, 10) !== b.start_at.slice(0, 10) ? thD(b.end_at) + ' ' : ''}${hm(b.end_at)}</b>
-        <span>ไปที่</span><b>${esc(b.destination || '-')}</b>${b.rider_name ? `<span>ผู้ใช้รถ</span><b>${esc(b.rider_name)}</b>` : ''}<span>ผู้จอง</span><b>${esc(b.booker_name)}</b><span>แผนก</span><b>${esc(b.department || '-')}</b><span>ติดต่อ</span><b>${esc(b.contact || '-')}</b>
-        <span>คนขับ</span><b>${b.need_driver ? esc(b.driver_name || 'ขอคนขับ') : 'ขับเอง'}</b>${pl.length ? `<span>ร่วมเดินทาง</span><b style="display:flex;flex-wrap:wrap;gap:4px">${pl.map(n => `<span class="ppl" style="font-weight:500">${avatar(n)}${esc(n)}</span>`).join('')}</b>` : ''}<span>สถานะ</span><b>${b.status === 'pending' ? 'รออนุมัติ' : b.status === 'returning' ? 'คืนรถแล้ว รอรับกุญแจ' : b.status === 'returned' ? 'คืนรถแล้ว' : 'อนุมัติแล้ว'}</b></div>` })
+        <span>ไปที่</span><b>${esc(b.destination || '-')}</b>${b.rider_name ? `<span>ผู้ใช้รถ</span>${who(b.rider_name)}` : ''}<span>ผู้จอง</span>${who(b.booker_name)}<span>แผนก</span><b>${esc(b.department || '-')}</b><span>ติดต่อ</span><b>${esc(b.contact || '-')}</b>
+        <span>คนขับ</span>${b.need_driver ? (b.driver_name ? who(b.driver_name, b.status === 'pending' ? '(ที่ขอไว้)' : '') : '<b>ขอคนขับ (รอผู้ดูแลเลือก)</b>') : '<b>ขับเอง</b>'}${pl.length ? `<span>ร่วมเดินทาง</span><b style="display:flex;flex-wrap:wrap;gap:4px">${pl.map(n => `<span class="ppl" style="font-weight:500">${avatar(n)}${esc(n)}</span>`).join('')}</b>` : ''}<span>สถานะ</span><b><span class="pill" style="--c:${stc};font-size:12px">${stl}</span></b></div>` })
         .then(r => { if (r.isDenied) b.mine ? tab('mine') : joinBk(b.id, inIt); });
 }
 
@@ -297,7 +405,7 @@ function stOf(b) {
 function rowHtml(b, keeper) {
     const now = new Date(), [lbl, col] = stOf(b), multi = b.end_at.slice(0, 10) !== b.start_at.slice(0, 10), d = toD(b.start_at);
     const live = ['pending', 'approved', 'returning'].includes(b.status), started = toD(b.start_at) <= new Date(now.getTime() + 36e5);
-    const drv = b.need_driver ? (b.driver_name ? '🧑‍✈️ คนขับ ' + esc(b.driver_name) + (b.driver_phone ? ' ' + esc(b.driver_phone) : '') : '🧑‍✈️ ขอคนขับ') : '🧑 ขับเอง';
+    const drv = b.need_driver ? (b.driver_name ? (b.status === 'pending' ? '🧑‍✈️ ขอคนขับ ' + esc(b.driver_name) : '🧑‍✈️ คนขับ ' + esc(b.driver_name) + (b.driver_phone ? ' ' + esc(b.driver_phone) : '')) : '🧑‍✈️ ขอคนขับ') : '🧑 ขับเอง';
     // สถานะเขียนเป็นประโยคแยกจากปุ่ม (บทเรียนจากหน้าห้องประชุม: คำบนปุ่มกับสถานะซ้ำกันแล้วงง)
     const pst = b.status === 'returning' ? `<div class="pst key"><i class="fa fa-key"></i>สถานะ: ${keeper ? 'คนจองคืนรถแล้ว — รอคุณรับกุญแจ' : 'คืนรถแล้ว — นำกุญแจไปคืนผู้ดูแลรถ'} <small>${b.returned_at ? hm(b.returned_at) : ''}${b.return_note ? ' · ' + esc(b.return_note) : ''}</small></div>`
         : b.status === 'approved' && toD(b.end_at) < now ? `<div class="pst bad"><i class="fa fa-clock"></i>สถานะ: เลยเวลาคืนแล้ว ยังไม่คืนรถ</div>`
@@ -311,6 +419,7 @@ function rowHtml(b, keeper) {
     else if (!keeper && b.status === 'approved' && started) acts = `<button class="btn ok" onclick="returnBk(${b.id})"><i class="fa fa-key"></i> คืนรถแล้ว</button>`;
     if (keeper && ['approved', 'returning'].includes(b.status)) acts += `<button class="btn sm" onclick="setDriver(${b.id})"><i class="fa fa-id-card"></i> ${b.driver_id ? 'เปลี่ยนคนขับ' : b.need_driver ? 'เลือกคนขับ' : 'ส่งคนขับ'}</button>`;
     // ออกรถแล้วไม่มีปุ่มยกเลิก (ทั้งคนจองและผู้ดูแล) — ต้องปิดด้วยการคืนกุญแจ ประวัติจะได้รู้ว่ากุญแจอยู่กับใคร
+    if (!keeper && b.mine && b.status === 'pending') acts += `<button class="btn sm" onclick="editBk(${b.id})"><i class="fa fa-pen"></i> แก้</button>`;
     if (['pending', 'approved'].includes(b.status) && !(b.status === 'approved' && started)) acts += `<button class="btn sm danger" onclick="cancelBk(${b.id},${keeper ? 1 : 0})">ยกเลิก</button>`;
     return `<div class="row ${!live && !keeper ? 'off' : ''}"><div class="dt"><b>${keeper ? hm(b.start_at) : d.getDate()}</b><span>${keeper ? hm(b.end_at) : d.toLocaleDateString('th-TH', { month: 'short' })}</span></div>
         <div class="tx"><b>${esc(b.plate)} · ${esc(b.purpose)}</b> <span class="pill" style="--c:${col}">${lbl}</span>
@@ -325,6 +434,32 @@ function renderMine() {
     gid('mine-cnt').textContent = live.length; gid('mine-cnt').style.display = live.length ? '' : 'none';
     gid('v-mine').innerHTML = `<div class="card">${mine.length ? mine.map(b => rowHtml(b)).join('') : '<div class="empty"><i class="fa fa-car"></i><br>ยังไม่มีการจอง — ไปที่ "ดูรถว่าง" เพื่อจอง</div>'}</div>
         <p class="muted" style="font-size:12px;margin-top:8px">ใช้รถเสร็จ: กด "คืนรถแล้ว" แล้วนำกุญแจไปคืนผู้ดูแลรถ — ใบจะปิดเมื่อผู้ดูแลรับกุญแจ · แสดงใบที่ยังไม่จบ และย้อนหลัง 90 วัน</p>`;
+}
+// แก้ใบจองระหว่างรออนุมัติ (กดผิด ขับเอง/ขอคนขับ เวลา ที่ไป) — อนุมัติแล้วแก้เองไม่ได้
+async function editBk(id) {
+    const b = mine.find(x => x.id === id); if (!b) return;
+    const d = s => String(s).slice(0, 10), t = s => String(s).slice(11, 16);
+    const { isConfirmed, value } = await ptcSwal().fire({ title: 'แก้การจอง ' + esc(b.code), width: 'min(620px,96vw)', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
+        html: `<div class="fx"><div><label>รถ<span class="req">*</span></label><select id="e-car">${D.cars.map(c => `<option value="${c.id}" ${c.id === b.car_id ? 'selected' : ''}>${esc(c.plate)} · ${esc(carName(c))}</option>`).join('')}</select></div>
+            <div class="two"><div><label>วันที่ออก<span class="req">*</span></label><input id="e-sd" type="date" value="${d(b.start_at)}"></div><div><label>เวลาออก<span class="req">*</span></label><input id="e-st" type="time" step="900" value="${t(b.start_at)}"></div></div>
+            <div class="two"><div><label>วันที่คืน<span class="req">*</span></label><input id="e-ed" type="date" value="${d(b.end_at)}"></div><div><label>เวลาคืน<span class="req">*</span></label><input id="e-et" type="time" step="900" value="${t(b.end_at)}"></div></div>
+            <div><label>ไปทำอะไร<span class="req">*</span></label><input id="e-pu" value="${esc(b.purpose)}"></div><div><label>ไปที่<span class="req">*</span></label><input id="e-de" value="${esc(b.destination || '')}"></div>
+            <div class="two"><div><label>คนขับ</label><select id="e-nd"><option value="">ขับเอง</option><option value="1" ${b.need_driver ? 'selected' : ''}>ขอคนขับ</option></select></div><div><label>คนขับที่ต้องการ</label><select id="e-drv"><option value="">ให้ผู้ดูแลเลือกคนขับ</option></select></div></div>
+            <div><label>ผู้ใช้รถ (ถ้าจองให้คนอื่น)</label><input id="e-ri" value="${esc(b.rider_name || '')}"></div>
+            <div class="two"><div><label>จำนวนคนไป</label><input id="e-px" type="number" min="1" value="${b.passengers || ''}"></div><div><label>เบอร์ติดต่อ</label><input id="e-ct" value="${esc(b.contact || '')}"></div></div>
+            <div><label>ผู้ร่วมเดินทาง</label><input id="e-pn" value="${esc(b.passenger_names || '')}" placeholder="คั่นด้วย ,"></div><div><label>หมายเหตุ</label><input id="e-no" value="${esc(b.note || '')}"></div></div>`,
+        didOpen: () => {
+            const range = () => [gid('e-sd').value + ' ' + gid('e-st').value + ':00', gid('e-ed').value + ' ' + gid('e-et').value + ':00'];
+            const sync = () => { const on = !!gid('e-nd').value; gid('e-drv').disabled = !on; if (on) { const [s, e] = range(); loadFree(s, e, id, gid('e-drv').value || b.driver_id || '', 'e-drv'); } };
+            ['e-nd', 'e-sd', 'e-st', 'e-ed', 'e-et'].forEach(k => gid(k).addEventListener('change', sync)); sync();
+        },
+        preConfirm: () => {
+            if (gid('e-pu').value.trim().length < 2 || !gid('e-de').value.trim()) return Swal.showValidationMessage('ใส่ว่าไปทำอะไร และไปที่ไหน');
+            return { car_id: gid('e-car').value, start: gid('e-sd').value + ' ' + gid('e-st').value, end: gid('e-ed').value + ' ' + gid('e-et').value, purpose: gid('e-pu').value, destination: gid('e-de').value,
+                need_driver: gid('e-nd').value, driver_id: gid('e-nd').value ? gid('e-drv').value : '', rider_name: gid('e-ri').value, passengers: gid('e-px').value, contact: gid('e-ct').value, passenger_names: gid('e-pn').value, note: gid('e-no').value };
+        } });
+    if (!isConfirmed) return;
+    try { await post({ action: 'car_update', id, ...value }); ptcToast('success', 'แก้การจองแล้ว', 'ยังรอผู้ดูแลรถอนุมัติ'); loadMine(); loadDay(); } catch (e) { ptcAlert('error', 'แก้ไม่สำเร็จ', e.message); }
 }
 async function joinBk(id, leave) {
     if (leave) { const r = await ptcSwal().fire({ title: 'ออกจากการติดรถ?', showCancelButton: true, confirmButtonText: 'ออก', cancelButtonText: 'กลับ' }); if (!r.isConfirmed) return; }
@@ -501,7 +636,7 @@ function renderFleet(j) {
 async function editCar(id) {
     const j = window._CJ, c = j.cars.find(x => x.id === id) || { plate: '', province: '', name: '', brand: '', car_type: '', seats: '', color: '', company: '', note: '', is_active: 1, sort_order: 0 };
     const { isConfirmed, value } = await ptcSwal().fire({ title: id ? 'แก้รถ' : 'เพิ่มรถ', width: 'min(600px,96vw)', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
-        html: `<div class="fx"><div class="two"><div><label>ทะเบียน</label><input id="c-p" value="${esc(c.plate)}" placeholder="เช่น 2ขข 3793"></div><div><label>รถของบริษัท</label><select id="c-c"><option value="">— ยังไม่ระบุ —</option>${['PTA', 'PT4', 'PTE'].filter(x => x === c.company || (j.companies || []).includes(x)).map(x => `<option ${x === c.company ? 'selected' : ''}>${x}</option>`).join('')}</select></div></div>
+        html: `<div class="fx"><div class="two"><div><label>ทะเบียน<span class="req">*</span></label><input id="c-p" value="${esc(c.plate)}" placeholder="เช่น 2ขข 3793"></div><div><label>รถของบริษัท</label><select id="c-c"><option value="">— ยังไม่ระบุ —</option>${['PTA', 'PT4', 'PTE'].filter(x => x === c.company || (j.companies || []).includes(x)).map(x => `<option ${x === c.company ? 'selected' : ''}>${x}</option>`).join('')}</select></div></div>
             <div class="two"><div><label>ยี่ห้อ</label><input id="c-b" value="${esc(c.brand || '')}" placeholder="เช่น Toyota"></div><div><label>รุ่น</label><input id="c-n" value="${esc(c.name || '')}" placeholder="เช่น Hilux Revo"></div></div>
             <div class="two"><div><label>ประเภท</label><input id="c-t" list="dl-ctype" value="${esc(c.car_type || '')}" placeholder="เช่น กระบะ, เก๋ง, VAN"><datalist id="dl-ctype">${['กระบะ', 'เก๋ง', 'SUV', 'VAN'].map(x => `<option value="${x}">`).join('')}</datalist></div><div><label>ที่นั่ง</label><input id="c-s" type="number" min="0" value="${c.seats || ''}"></div></div>
             <div class="two"><div><label>สี</label><input id="c-co" value="${esc(c.color || '')}"></div><div><label>ลำดับในตาราง</label><input id="c-o" type="number" value="${c.sort_order || 0}"></div></div>
@@ -521,7 +656,7 @@ async function editCar(id) {
 async function editDriver(id) {
     const d = window._CJ.drivers.find(x => +x.id === id) || { name: '', nickname: '', phone: '', company: '', is_active: 1 };
     const { isConfirmed, value } = await ptcSwal().fire({ title: id ? 'แก้คนขับ' : 'เพิ่มคนขับ', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
-        html: `<div class="fx"><div><label>ชื่อ-นามสกุล</label><input id="d-n" value="${esc(d.name)}"></div><div class="two"><div><label>ชื่อเล่น</label><input id="d-k" value="${esc(d.nickname || '')}"></div><div><label>เบอร์</label><input id="d-p" value="${esc(d.phone || '')}"></div></div>
+        html: `<div class="fx"><div><label>ชื่อ-นามสกุล<span class="req">*</span></label><input id="d-n" value="${esc(d.name)}"></div><div class="two"><div><label>ชื่อเล่น</label><input id="d-k" value="${esc(d.nickname || '')}"></div><div><label>เบอร์</label><input id="d-p" value="${esc(d.phone || '')}"></div></div>
             <div><label>บริษัท</label><select id="d-c"><option value="">— ไม่ระบุ —</option>${['PTA', 'PT4', 'PTE'].map(x => `<option ${x === d.company ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
             <label style="display:flex;gap:7px;align-items:center;font-weight:500"><input type="checkbox" id="d-a" ${+d.is_active ? 'checked' : ''}> ยังทำงานอยู่ (เลือกได้ตอนอนุมัติ)</label></div>`,
         preConfirm: () => gid('d-n').value.trim() ? { name: gid('d-n').value, nickname: gid('d-k').value, phone: gid('d-p').value, company: gid('d-c').value, is_active: gid('d-a').checked ? 1 : '' } : Swal.showValidationMessage('ใส่ชื่อ') });
@@ -545,11 +680,12 @@ function tab(t) {
     const qs = new URLSearchParams(location.search);
     if (/^\d{4}-\d{2}-\d{2}$/.test(qs.get('date') || '')) date = qs.get('date');
     api({ action: 'room_people' }).then(j => { PEOPLE = j.people || []; if (D && gid('v-day').style.display !== 'none' && !document.activeElement?.closest?.('.form')) renderDay(); }).catch(() => {});
-    await loadDay(); loadMine();
-    if (D?.can_manage) { try { const t = (await api({ action: 'car_board', view: 'pending' })).todo; setKeepCnt(t); if (!t.pending && (t.receive || t.overdue)) kv = 'active'; } catch (_) {} }
+    try { if (localStorage.getItem('car_view') === 'week') mode = 'week'; } catch (_) {}
+    await (mode === 'week' ? loadWeek() : loadDay()); loadMine();
+    if ((D || WK)?.can_manage) { try { const t = (await api({ action: 'car_board', view: 'pending' })).todo; setKeepCnt(t); if (!t.pending && (t.receive || t.overdue)) kv = 'active'; } catch (_) {} }
     tab(['mine', 'keep'].includes(qs.get('tab')) && (qs.get('tab') !== 'keep' || D?.can_manage) ? qs.get('tab') : 'day');
     // รีเฟรชตารางทุก 1 นาที — ไม่รีเฟรชตอนกำลังพิมพ์ในฟอร์ม
-    setInterval(() => { if (document.visibilityState === 'visible' && gid('v-day').style.display !== 'none' && !document.activeElement?.closest?.('.form')) loadDay(); }, 60000);
+    setInterval(() => { if (document.visibilityState === 'visible' && gid('v-day').style.display !== 'none' && !document.activeElement?.closest?.('.form')) (mode === 'week' ? loadWeek() : loadDay()); }, 60000);
 })();
 </script>
 <script src="js/nav-chip.js?v=20260707"></script>
