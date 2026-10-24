@@ -18,7 +18,7 @@
         { label: 'ประวัติการยืมของฉัน',   icon: 'fa-box-open',         color: '#d97706', href: 'loan.html?tab=mine' },
         { label: 'Daily Checklist',         icon: 'fa-clipboard-check',  color: '#16a34a', href: 'daily_checklist.html' },
         { label: 'Audit Log',               icon: 'fa-history',          color: '#64748b', href: 'audit_log.html' },
-        { label: 'Knowledge Base',          icon: 'fa-book-open',        color: '#f59e0b', href: 'kb.html' },
+        { label: 'ศูนย์ช่วยเหลือ / วิธีแก้ปัญหา', icon: 'fa-circle-question', color: '#059669', href: 'help.html' },
         { label: 'Stock Management',        icon: 'fa-boxes',            color: '#0ea5e9', href: 'stock_management.html' },
         { label: 'Routing แจ้งเตือน',     icon: 'fa-bell',             color: '#d97706', href: 'settings_notify.html' },
         { label: 'ตั้งค่าระบบ',           icon: 'fa-cog',              color: '#64748b', href: 'settings_system.html' },

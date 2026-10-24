@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คู่มือการใช้งาน - Powertech Center</title>
+    <title>ศูนย์ช่วยเหลือ - Powertech Center</title>
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
     <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
@@ -43,6 +43,40 @@ html.dark .tip { background:rgba(22,163,74,.1); border-color:rgba(22,163,74,.35)
 kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-border); border-bottom-width:2px; border-radius:5px; background:var(--ptc-surface-2); }
 .hidden-by-search { display:none; }
 .none { text-align:center; color:var(--ptc-text-muted); padding:30px; display:none; }
+/* ════ ศูนย์ช่วยเหลือ: รวมคู่มือ (วิธีใช้ระบบ) + คลังความรู้ (แก้ปัญหา IT) ไว้ทางเข้าเดียว — เดิมมี 2 เมนูชื่อคล้ายกัน คนไม่รู้จะกดอันไหน ════ */
+.tabs { max-width:1100px; margin:0 auto; padding:16px 16px 0; display:flex; gap:6px; flex-wrap:wrap; }
+.tabs button { height:38px; padding:0 16px; border-radius:9px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text-2); font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; display:inline-flex; gap:8px; align-items:center; }
+.tabs button.on { background:var(--ptc-text); border-color:var(--ptc-text); color:var(--ptc-surface); }
+.tabs button .n { font-size:11px; padding:0 6px; border-radius:99px; background:color-mix(in srgb, currentColor 18%, transparent); }
+.wrap { max-width:1100px; margin:0 auto; padding:18px 16px 0; }
+.card { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:12px; }
+.cats { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:8px; margin-bottom:18px; }
+.cats button { display:flex; gap:10px; align-items:center; text-align:left; padding:11px 12px; border-radius:10px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; cursor:pointer; }
+.cats button.on { border-color:var(--ptc-primary); box-shadow:inset 0 0 0 1px var(--ptc-primary); }
+.cats button i { width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:var(--ptc-primary-light); color:var(--ptc-primary); flex-shrink:0; }
+.cats b { display:block; font-size:13px; font-weight:600; } .cats small { font-size:11.5px; color:var(--ptc-text-muted); }
+.h4 { font-size:12px; font-weight:800; color:var(--ptc-text-muted); margin:0 0 8px; letter-spacing:.03em; }
+.arts a { display:flex; gap:12px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--ptc-border); color:var(--ptc-text); text-decoration:none; }
+.arts a:last-child { border-bottom:0; } .arts a:hover { background:var(--ptc-surface-2); }
+.arts a > i { color:var(--ptc-text-muted); } .arts a > i:last-child { margin-left:auto; font-size:11px; }
+.arts b { display:block; font-size:14px; font-weight:600; } .arts small { font-size:12px; color:var(--ptc-text-muted); }
+.tg { display:inline-block; font-size:11px; font-weight:700; padding:1px 8px; border-radius:99px; margin-right:6px; color:var(--c); background:color-mix(in srgb, var(--c) 13%, transparent); }
+.empty { padding:30px; text-align:center; color:var(--ptc-text-muted); font-size:13.5px; }
+.art { padding:22px 24px; } .art .bk { display:inline-flex; gap:6px; align-items:center; font-size:13px; color:var(--ptc-primary); text-decoration:none; margin-bottom:12px; }
+.art h1 { font-size:21px; margin:6px 0 6px; } .art .meta { font-size:12px; color:var(--ptc-text-muted); margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--ptc-border); }
+.kbc { line-height:1.8; font-size:14px; color:var(--ptc-text); overflow-wrap:anywhere; }
+.kbc h1 { font-size:19px; margin:22px 0 10px; } .kbc h2 { font-size:17px; margin:20px 0 8px; } .kbc h3 { font-size:15px; margin:16px 0 6px; }
+.kbc p { margin:0 0 12px; } .kbc ul, .kbc ol { padding-left:24px; margin:0 0 12px; } .kbc li { margin-bottom:4px; }
+.kbc code { background:var(--ptc-surface-2); border:1px solid var(--ptc-border); padding:1px 6px; border-radius:4px; font-size:12.5px; }
+.kbc pre { background:#0f172a; color:#e2e8f0; padding:14px 16px; border-radius:10px; overflow-x:auto; } .kbc pre code { background:none; border:0; color:inherit; padding:0; }
+.kbc blockquote { margin:0 0 12px; border-left:3px solid var(--ptc-primary); padding:8px 14px; background:var(--ptc-primary-light); border-radius:0 8px 8px 0; }
+.kbc img { max-width:100%; border-radius:10px; border:1px solid var(--ptc-border); margin:8px 0; } .kbc a { color:var(--ptc-primary); }
+.kbc table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:12px; } .kbc th, .kbc td { border:1px solid var(--ptc-border); padding:7px 10px; text-align:left; } .kbc th { background:var(--ptc-surface-2); }
+.notfound { max-width:1100px; margin:0 auto; padding:14px 16px 50px; }
+.notfound .card { padding:16px 20px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.notfound b { font-size:14.5px; } .notfound p { margin:2px 0 0; font-size:13px; color:var(--ptc-text-muted); } .notfound .go { margin:0 0 0 auto; }
+html.dark .tabs button.on { background:var(--ptc-primary); border-color:var(--ptc-primary); color:#fff; }
+@media (max-width:820px) { .wrap .art { padding:16px; } .notfound .go { margin-left:0; } }
 @media (max-width:820px) { .lay { grid-template-columns:minmax(0,1fr); } .toc { position:static; flex-direction:row; flex-wrap:wrap; } .toc small { display:none; } .toc a { padding:6px 10px; font-size:12.5px; } .top small { display:none; } }
 </style>
 </head>
@@ -50,10 +84,16 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
 <header class="top">
     <a class="bk" href="index.html" aria-label="กลับหน้าแรก"><i class="fa fa-arrow-left"></i></a>
     <div class="ic"><i class="fa fa-circle-question"></i></div>
-    <div><b>คู่มือการใช้งาน</b><small>สำหรับพนักงาน · อ่านทีละขั้น</small></div>
-    <input type="search" id="q" placeholder="ค้นหา เช่น ยกเลิก, เบิก, ห้องประชุม…" oninput="find(this.value)">
+    <div><b>ศูนย์ช่วยเหลือ</b><small>วิธีใช้ระบบ · แก้ปัญหา IT ด้วยตัวเอง</small></div>
+    <input type="search" id="q" placeholder="ค้นหา เช่น จองรถ, ปริ้นเตอร์, ลืมรหัส…" oninput="find(this.value)">
 </header>
-<div class="lay">
+<div class="tabs" id="tabs">
+    <button type="button" data-t="guide" onclick="setTab('guide')"><i class="fa fa-book-open"></i>วิธีใช้ระบบ</button>
+    <button type="button" data-t="kb" onclick="setTab('kb')"><i class="fa fa-screwdriver-wrench"></i>แก้ปัญหา IT ด้วยตัวเอง <span class="n" id="kb-n"></span></button>
+</div>
+<div class="wrap" id="v-res" style="display:none"></div>
+<div class="wrap" id="v-kb" style="display:none"></div>
+<div class="lay" id="v-guide">
 <nav class="toc" id="toc">
     <small>เริ่มต้น</small>
     <a href="#start"><i class="fa fa-house"></i>เริ่มใช้งาน</a>
@@ -64,7 +104,7 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     <a href="#rooms"><i class="fa fa-calendar-check"></i>จองห้องประชุม</a>
     <a href="#cars"><i class="fa fa-car-side"></i>จองรถ</a>
     <a href="#contact"><i class="fa fa-address-book"></i>หาเบอร์ / Contact List</a>
-    <a href="#kb"><i class="fa fa-book"></i>คลังความรู้</a>
+    <a href="#kb" onclick="setTab('kb');return false;"><i class="fa fa-book"></i>แก้ปัญหา IT ด้วยตัวเอง</a>
     <small>สำหรับผู้ดูแล</small>
     <a href="#keeper"><i class="fa fa-user-gear"></i>ผู้ดูแลสต็อก / ห้อง / รถ / ยืม-คืน</a>
     <a href="#faq"><i class="fa fa-comments"></i>คำถามที่พบบ่อย</a>
@@ -157,9 +197,9 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     <a class="go" href="directory.html"><i class="fa fa-arrow-right"></i>ไป Contact List</a>
 </section>
 
-<section class="sec" id="kb"><h2><span class="bd" style="background:#7c3aed"><i class="fa fa-book"></i></span>คลังความรู้</h2>
-    <p class="lead">วิธีแก้ปัญหาที่เจอบ่อย ลองทำเองได้ก่อนแจ้งซ่อม เช่น ปริ้นไม่ออก ลืมรหัส Wi-Fi</p>
-    <a class="go" href="kb.html"><i class="fa fa-arrow-right"></i>ไปคลังความรู้</a>
+<section class="sec" id="kb"><h2><span class="bd" style="background:#7c3aed"><i class="fa fa-book"></i></span>แก้ปัญหา IT ด้วยตัวเอง</h2>
+    <p class="lead">วิธีแก้ปัญหาที่เจอบ่อย ลองทำเองได้ก่อนแจ้งซ่อม เช่น ปริ้นไม่ออก ลืมรหัส Wi-Fi — ทีม IT เขียนเพิ่มเรื่อย ๆ</p>
+    <a class="go" href="help.html?tab=kb" onclick="setTab('kb');return false;"><i class="fa fa-arrow-right"></i>ดูบทความแก้ปัญหา</a>
 </section>
 
 <section class="sec" id="keeper"><h2><span class="bd" style="background:#475569"><i class="fa fa-user-gear"></i></span>สำหรับผู้ดูแล</h2>
@@ -200,16 +240,86 @@ kbd { font:inherit; font-size:12px; padding:1px 6px; border:1px solid var(--ptc-
     <details><summary>ทำไมเห็นแค่ของ/ห้องของบริษัทตัวเอง</summary><p>เบิกของได้เฉพาะของบริษัทที่คุณล็อกอิน ส่วนห้องประชุม ตารางเปิดมาเป็นห้องของบริษัทคุณก่อน กดปุ่ม "ทุกบริษัท" เพื่อดูห้องอื่น (จองได้ทุกห้อง)</p></details>
     <details><summary>ใครเห็นข้อมูลที่ฉันกรอกบ้าง</summary><p>ข้อมูลอยู่ในระบบภายในบริษัท เปิดได้เฉพาะคนที่ล็อกอิน และเห็นตามหน้าที่ เช่น ช่าง IT เห็นงานซ่อม ผู้ดูแลสต็อกเห็นใบเบิก (ตามมาตรฐาน TISAX)</p></details>
 </section>
-<div class="none" id="none">ไม่พบหัวข้อที่ค้นหา — ลองคำอื่น หรือแจ้งทีม IT</div>
 </main>
 </div>
+<div class="notfound"><div class="card"><div><b>ไม่เจอคำตอบ?</b><p>แจ้งทีม IT ได้เลย แนบรูปหน้าจอมาด้วยจะช่วยให้แก้ได้เร็วขึ้น</p></div><a class="go" href="request.html"><i class="fa fa-screwdriver-wrench"></i>แจ้งซ่อม IT</a></div></div>
+<script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
 <script>
-// ค้นหา: ซ่อนหัวข้อที่ไม่มีคำนั้น · แถบซ้ายไฮไลต์หัวข้อที่กำลังอ่าน
-function find(v) {
-    const q = v.trim().toLowerCase(); let n = 0;
-    document.querySelectorAll('main .sec').forEach(s => { const hit = !q || s.textContent.toLowerCase().includes(q); s.classList.toggle('hidden-by-search', !hit); n += hit; });
-    document.getElementById('none').style.display = n ? 'none' : 'block';
+const gid = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let tab = 'guide', KB = null, kbCat = 0;
+// sanitize:true กัน HTML/script ดิบในเนื้อบทความ (บางบทความสร้างอัตโนมัติจากใบแจ้งซ่อม)
+const md = window.showdown ? new showdown.Converter({ tables: true, tasklists: true, strikethrough: true, sanitize: true }) : null;
+
+function setTab(t, keepUrl) {
+    tab = t;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    gid('v-guide').style.display = t === 'guide' ? '' : 'none';
+    gid('v-kb').style.display = t === 'kb' ? '' : 'none';
+    if (!keepUrl) history.replaceState(null, '', t === 'kb' ? 'help.html?tab=kb' : 'help.html');
+    if (t === 'kb') renderKb();
+    if (gid('q').value.trim()) find(gid('q').value);
 }
+async function loadKb() {
+    if (KB) return KB;
+    try { const j = await (await fetch('api.php?action=get_kb_data')).json(); if (j.status !== 'success') throw 0; KB = j; }
+    catch (_) { KB = { categories: [], articles: [], failed: 1 }; }
+    gid('kb-n').textContent = KB.articles.length || '';
+    return KB;
+}
+const catOf = (a) => (KB.categories.find(c => +c.id === +a.category_id) || {});
+const artRow = (a, tag) => `<a href="help.html?tab=kb&id=${+a.id}" onclick="openArt(${+a.id});return false;"><i class="fa ${esc(catOf(a).icon || 'fa-file-lines')}"></i><span><b>${tag || ''}${esc(a.title)}</b><small>${esc(catOf(a).name || '')}${a.view_count ? ' · อ่าน ' + (+a.view_count) + ' ครั้ง' : ''}</small></span><i class="fa fa-chevron-right"></i></a>`;
+async function renderKb() {
+    if (!KB) gid('v-kb').innerHTML = '<div class="card empty">กำลังโหลด…</div>';
+    await loadKb();
+    if (KB.failed) { gid('v-kb').innerHTML = '<div class="card empty">โหลดบทความไม่สำเร็จ — ลองกด Ctrl+F5</div>'; return; }
+    const cnt = (id) => KB.articles.filter(a => +a.category_id === +id).length;
+    const cats = KB.categories.filter(c => cnt(c.id));
+    const list = KB.articles.filter(a => !kbCat || +a.category_id === kbCat);
+    gid('v-kb').innerHTML = `<div class="h4">หมวดหมู่</div><div class="cats">${cats.map(c => `<button type="button" class="${kbCat === +c.id ? 'on' : ''}" onclick="kbCat=${kbCat === +c.id ? 0 : +c.id};renderKb()"><i class="fa ${esc(c.icon || 'fa-folder')}"></i><span><b>${esc(c.name)}</b><small>${cnt(c.id)} บทความ</small></span></button>`).join('')}</div>
+        <div class="h4">${kbCat ? esc((KB.categories.find(c => +c.id === kbCat) || {}).name) + ` · <a href="#" onclick="kbCat=0;renderKb();return false;" style="color:var(--ptc-primary);font-weight:600">ดูทั้งหมด</a>` : 'อ่านบ่อยที่สุด'}</div>
+        <div class="card arts">${list.length ? list.map(a => artRow(a)).join('') : '<div class="empty">ยังไม่มีบทความ</div>'}</div>`;
+}
+async function openArt(id) {
+    setTab('kb', true); history.replaceState(null, '', 'help.html?tab=kb&id=' + id);
+    gid('q').value = ''; find('');
+    gid('v-kb').innerHTML = '<div class="card empty">กำลังโหลด…</div>'; window.scrollTo(0, 0);
+    try {
+        await loadKb();
+        const j = await (await fetch('api.php?action=get_kb_article_by_id&id=' + encodeURIComponent(id))).json();
+        if (j.status !== 'success') throw new Error(j.message || 'ไม่พบบทความ');
+        const a = j.article, d = a.updated_at ? new Date(String(a.updated_at).replace(' ', 'T')).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        gid('v-kb').innerHTML = `<div class="card art"><a class="bk" href="help.html?tab=kb" onclick="kbBack();return false;"><i class="fa fa-arrow-left"></i>บทความทั้งหมด</a>
+            <span class="tg" style="--c:#7c3aed">${esc(a.category_name || 'ทั่วไป')}</span><h1>${esc(a.title)}</h1>
+            <div class="meta">${[a.author_name ? 'เขียนโดย ' + esc(a.author_name) : '', d ? 'แก้ล่าสุด ' + d : '', 'อ่าน ' + (+a.view_count || 0) + ' ครั้ง'].filter(Boolean).join(' · ')}</div>
+            <div class="kbc">${md ? md.makeHtml(a.content || '') : '<pre>' + esc(a.content || '') + '</pre>'}</div></div>`;
+    } catch (e) { gid('v-kb').innerHTML = `<div class="card empty">${esc(e.message)}<br><a href="#" onclick="kbBack();return false;">กลับไปบทความทั้งหมด</a></div>`; }
+}
+function kbBack() { history.replaceState(null, '', 'help.html?tab=kb'); renderKb(); window.scrollTo(0, 0); }
+
+// ค้นหาช่องเดียว ได้ทั้งหัวข้อคู่มือและบทความแก้ปัญหา — แสดงรวมกัน มีป้ายบอกว่ามาจากไหน
+async function find(v) {
+    const q = v.trim().toLowerCase();
+    if (!q) { gid('v-res').style.display = 'none'; gid('tabs').style.display = ''; setVis(); return; }
+    await loadKb();
+    if (gid('q').value.trim().toLowerCase() !== q) return; // พิมพ์ต่อระหว่างโหลด
+    const g = [...document.querySelectorAll('main .sec')].filter(s => s.id !== 'kb' && s.textContent.toLowerCase().includes(q));
+    const k = KB.articles.filter(a => (a.title + ' ' + (a.content || '') + ' ' + (catOf(a).name || '')).toLowerCase().includes(q));
+    const gRow = (s) => `<a href="#${s.id}" onclick="goGuide('${s.id}');return false;"><i class="fa fa-book-open"></i><span><b><span class="tg" style="--c:#059669">วิธีใช้</span>${esc(s.querySelector('h2').textContent)}</b><small>${esc((s.querySelector('.lead') || {}).textContent || '')}</small></span><i class="fa fa-chevron-right"></i></a>`;
+    gid('tabs').style.display = 'none'; gid('v-guide').style.display = 'none'; gid('v-kb').style.display = 'none'; gid('v-res').style.display = '';
+    gid('v-res').innerHTML = `<div class="h4">ผลการค้นหา "${esc(v.trim())}" · ${g.length + k.length} รายการ</div><div class="card arts">${g.length + k.length ? g.map(gRow).join('') + k.map(a => artRow(a, '<span class="tg" style="--c:#7c3aed">แก้ปัญหา</span>')).join('') : '<div class="empty">ไม่พบ — ลองคำอื่น หรือกด "แจ้งซ่อม IT" ด้านล่าง</div>'}</div>`;
+}
+function setVis() { gid('v-guide').style.display = tab === 'guide' ? '' : 'none'; gid('v-kb').style.display = tab === 'kb' ? '' : 'none'; }
+function goGuide(id) { gid('q').value = ''; find(''); setTab('guide'); const el = gid(id); if (el) el.scrollIntoView({ block: 'start' }); }
+
+// เปิดตามลิงก์: help.html#rooms = คู่มือหัวข้อนั้น · ?tab=kb · ?id= บทความ (ลิงก์เก่า kb.html?id= ส่งมาที่นี่) · ?search=
+(function () {
+    const p = new URLSearchParams(location.search);
+    if (p.get('id')) openArt(p.get('id'));
+    else setTab(p.get('tab') === 'kb' ? 'kb' : 'guide', true);
+    if (p.get('search')) { gid('q').value = p.get('search'); find(p.get('search')); }
+    loadKb();
+})();
 const links = [...document.querySelectorAll('.toc a')];
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-80px 0px -60% 0px' });
 document.querySelectorAll('main .sec').forEach(s => io.observe(s));
