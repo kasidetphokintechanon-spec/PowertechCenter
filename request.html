@@ -44,6 +44,7 @@ body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
 .rq-btn.ghost { background:transparent; }
 .rq-btn.danger { color:#dc2626; }
 .rq-btn:disabled { opacity:.5; cursor:not-allowed; }
+.dev-g { grid-column:1 / -1; font-size:12px; font-weight:800; color:var(--ptc-text-muted); margin:6px 0 -2px; }
 .wz-foot .miss { margin-left:auto; font-size:12.5px; color:#b45309; font-weight:600; text-align:right; } .wz-foot .miss:empty { display:none; }
 html.dark .wz-foot .miss { color:#fbbf24; }
 
@@ -273,7 +274,7 @@ let wz = { step: 1, cat: -1, dev: null, devNote: '', bld: '', place: '', symptom
 
 // ══════════ แจ้งปัญหา (3 ขั้น) ══════════
 function devList() {
-    const list = myAssets.map(a => ({ key: 'a:' + (a.equipment_id || a.asset_id), code: a.equipment_id || a.asset_id || '', name: a.name || 'อุปกรณ์', mine: true, repairing: a.status === 'ส่งซ่อม' }));
+    const list = myAssets.map(a => ({ key: 'a:' + (a.equipment_id || a.asset_id), code: a.equipment_id || a.asset_id || '', name: a.name || 'อุปกรณ์', mine: a.mine !== false, user: a.custodian_type === 'department' ? 'ใช้ร่วมกันในแผนก' : (a.user_name || ''), repairing: a.status === 'ส่งซ่อม' }));
     if (wz.scanned && !list.some(d => d.code === wz.scanned)) list.unshift({ key: 'a:' + wz.scanned, code: wz.scanned, name: 'เครื่องที่สแกน QR', mine: false });
     return list;
 }
@@ -290,7 +291,7 @@ function devLabel() {
     if (!wz.dev) return '—';
     if (wz.dev === 'place') return 'จุด / สถานที่ (ไม่ใช่ที่เครื่อง)';
     if (wz.dev === 'shared') return 'เครื่องส่วนกลาง';
-    if (wz.dev === 'other') return 'เครื่องของฉัน (ยังไม่มีในระบบ)' + (wz.devNote.trim() ? ' — ' + wz.devNote.trim() : '');
+    if (wz.dev === 'other') return 'เครื่องอื่น / ไม่มีในรายการ' + (wz.devNote.trim() ? ' — ' + wz.devNote.trim() : '');
     const d = devList().find(x => x.key === wz.dev);
     return d ? `${d.name} (${d.code})` : '—';
 }
@@ -318,13 +319,17 @@ function renderForm() {
         } else {
             const ds = devList();
             const card = (key, icon, title, sub, cls = '') => `<button type="button" class="dev ${cls} ${wz.dev === key ? 'on' : ''}" onclick="wz.dev='${key}';renderForm()"><i class="fa ${icon}"></i><span class="tx"><b>${title}</b><span>${sub}</span></span>${wz.dev === key ? '<i class="fa fa-circle-check chk"></i>' : ''}</button>`;
-            body = `<h2 class="rq-h">เป็นที่เครื่องไหน หรือจุดไหน</h2><p class="rq-s">${ds.length ? 'ระบบดึงเครื่องที่อยู่ในชื่อคุณมาให้แล้ว' : 'ยังไม่มีเครื่องในชื่อคุณ — เลือกแบบอื่นได้'}</p><div class="wz-steps">${steps}</div>
+            const mineD = ds.filter(d => d.mine), deptD = ds.filter(d => !d.mine);
+            const devCard = d => card(d.key, devIcon(d), esc(d.name), esc(d.code) + (!d.mine && d.user ? ' · ' + esc(d.user) : '') + (d.repairing ? ' · กำลังส่งซ่อม' : ''));
+            const grp = t => `<div class="dev-g">${t}</div>`;
+            body = `<h2 class="rq-h">เป็นที่เครื่องไหน หรือจุดไหน</h2><p class="rq-s">${ds.length ? 'ระบบดึงเครื่องของคุณและของแผนกมาให้แล้ว' : 'ยังไม่มีเครื่องในชื่อคุณหรือแผนก — เลือกแบบอื่นได้'}</p><div class="wz-steps">${steps}</div>
             <div class="devs">
-                ${ds.map(d => card(d.key, devIcon(d), esc(d.name), esc(d.code) + (d.mine ? ' · ของฉัน' : '') + (d.repairing ? ' · กำลังส่งซ่อม' : ''))).join('')}
-                ${card('other', 'fa-circle-question', 'เครื่องของฉัน แต่ไม่มีในรายการ', 'ช่างจะผูกเครื่องให้ตอนเข้าไปดู')}
-                ${card('shared', 'fa-qrcode', 'เครื่องส่วนกลาง', 'ปริ้นเตอร์ห้อง เครื่องในไลน์ผลิต')}
+                ${mineD.length ? grp('เครื่องของฉัน') + mineD.map(devCard).join('') : ''}
+                ${deptD.length ? grp('เครื่องของแผนก ' + esc(S.primary_department || '')) + deptD.map(devCard).join('') : ''}
+                ${ds.length ? grp('อื่น ๆ') : ''}
+                ${card('other', 'fa-circle-question', 'เครื่องอื่น / ไม่มีในรายการ', 'เครื่องที่ไม่ขึ้นในรายการ เช่น ปริ้นเตอร์ส่วนกลาง เครื่องแผนกอื่น')}
                 ${card('place', 'fa-network-wired', 'ไม่ใช่ที่เครื่อง — เป็นที่จุด / สถานที่', 'สายแลนเสีย ปลั๊กแลนที่ผนัง WiFi ทั้งโซน', 'wide place')}
-            </div>${wz.dev === 'other' ? `<div class="fld"><label>รหัสบนสติกเกอร์ หรือชื่อเครื่อง <span style="font-weight:500;color:var(--ptc-text-muted)">(ไม่บังคับ — ไม่รู้ก็ข้ามได้)</span></label><input type="text" id="wz-devnote" value="${esc(wz.devNote)}" placeholder="เช่น PTA-NB-0142 หรือ Notebook Dell สีดำ" oninput="wz.devNote=this.value"></div>` : ''}${place}`;
+            </div>${wz.dev === 'other' ? `<div class="fld"><label>รหัสเครื่อง หรือเป็นเครื่องของใคร <span style="font-weight:500;color:var(--ptc-text-muted)">(ไม่บังคับ)</span></label><input type="text" id="wz-devnote" value="${esc(wz.devNote)}" placeholder="เช่น PTA-NB-0142 หรือ เครื่องคุณสมชาย" oninput="wz.devNote=this.value"></div>` : ''}${place}`;
         }
         body += `<div class="wz-foot"><button type="button" class="rq-btn" onclick="goStep(1)"><i class="fa fa-arrow-left"></i> ย้อนกลับ</button><span class="miss" id="wz-miss"></span><button type="button" class="rq-btn pri lg" id="wz-next" onclick="goStep(3)">ถัดไป <i class="fa fa-arrow-right"></i></button></div>`;
     } else if (wz.step === 3) {
@@ -380,7 +385,7 @@ function pickCat(i) {
     const c = CATS[i];
     // เลือกเครื่องให้ก่อนเฉพาะหมวดคอม (เครื่องในชื่อส่วนใหญ่เป็นโน้ตบุ๊ก) — หมวดอื่นอย่างปริ้นเตอร์ให้ผู้ใช้เลือกเอง ไม่งั้นได้เครื่องผิด
     if (!c[6] || (i !== 0 && !wz.scanned)) wz.dev = null;
-    else if (!wz.dev) { const d = devList()[0]; wz.dev = d ? d.key : null; }
+    else if (!wz.dev) { const d = devList().find(x => x.mine); wz.dev = d ? d.key : null; }
     renderForm();
 }
 function goStep(n) {

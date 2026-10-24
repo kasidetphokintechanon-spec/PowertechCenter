@@ -631,7 +631,7 @@ const DEVICE_TYPES = ['Computer', 'Printer', 'ASSET_REPAIR'];
 // เลือกเครื่องจากทะเบียน → รหัสเครื่อง · 'none' = ไม่เกี่ยวกับเครื่อง · null = กดกลับ
 async function pickAsset(l, mustPick) {
     let chosen = '';
-    const guess = (field(l, /อุปกรณ์/) || '').replace(/^เครื่องของฉัน \(ยังไม่มีในระบบ\)( — )?/, '').replace(/.*\(([^)]+)\)\s*$/, '$1').trim();
+    const guess = (field(l, /อุปกรณ์/) || '').replace(/^(เครื่องของฉัน \(ยังไม่มีในระบบ\)|เครื่องอื่น \/ ไม่มีในรายการ)( — )?/, '').replace(/.*\(([^)]+)\)\s*$/, '$1').trim();
     const r = await ptcSwal().fire({
         title: 'ผูกเครื่องกับงานนี้', width: 'min(560px, 96vw)', showCancelButton: true, showDenyButton: true, focusConfirm: false,
         confirmButtonText: 'ผูกเครื่องนี้', denyButtonText: 'ไม่เกี่ยวกับเครื่อง', cancelButtonText: 'กลับ',
