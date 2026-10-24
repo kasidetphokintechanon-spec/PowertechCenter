@@ -62,6 +62,7 @@ require_once __DIR__ . '/includes/access_helper.php';
 require_once __DIR__ . '/includes/stock_helper.php';
 require_once __DIR__ . '/includes/room_helper.php';
 require_once __DIR__ . '/includes/car_helper.php';
+require_once __DIR__ . '/includes/replace_helper.php';
 
 function getBasePermissionsForRole($role) {
     $role = $role ?: 'guest';
@@ -329,6 +330,8 @@ try {
         'room_prep' => ['room.manage'], 'room_prepared' => ['room.manage'], 'room_decide' => ['room.manage'], 'room_rules' => ['room.manage'], 'room_rooms' => ['room.manage'], 'room_save' => ['room.manage'], 'room_report' => ['room.manage'],
         // จองรถ — ผู้ดูแลรถ · ฝั่งพนักงาน (car_day/book/my/cancel/return) เช็กในตัว action
         'car_board' => ['car.manage'], 'car_decide' => ['car.manage'], 'car_receive' => ['car.manage'], 'car_cars' => ['car.manage'], 'car_save' => ['car.manage'], 'car_driver_save' => ['car.manage'], 'car_report' => ['car.manage'], 'car_log' => ['car.manage'], 'car_drivers_at' => ['car.manage'], 'car_set_driver' => ['car.manage'],
+        // ประเมินซ่อมไม่คุ้ม / ซื้อทดแทน — งาน IT (ทะเบียนทรัพย์สินก็ใช้ได้)
+        'rp_prefill' => ['it_log.access', 'asset.manage'], 'rp_save' => ['it_log.access', 'asset.manage'], 'rp_list' => ['it_log.access', 'asset.manage'], 'rp_step' => ['it_log.access', 'asset.manage'],
         'perm_people' => ['admin.manage_permissions'], 'perm_save' => ['admin.manage_permissions'],
         'loan_board' => ['loan.manage'], 'loan_decide' => ['loan.manage'], 'loan_handover' => ['loan.manage'], 'loan_return' => ['loan.manage'], 'loan_extend_decide' => ['loan.manage'], 'loan_history' => ['loan.manage'], 'save_line_webhook_secret' => ['settings.notifications'],
         'save_company_info' => ['admin.access_admin'], 'upload_company_logo' => ['admin.access_admin'],
@@ -369,7 +372,8 @@ try {
         'setup',
         'server_check',
         'room',
-        'car'
+        'car',
+        'replace'
     ];
 
     if (!empty($safeAction)) {

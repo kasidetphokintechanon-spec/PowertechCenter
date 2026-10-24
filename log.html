@@ -660,12 +660,19 @@ async function finish(id) {
 }
 async function unrepairable(id) {
     const l = await ticket(id); if (!l) return;
+    // ซ่อมไม่คุ้ม → ต่อไปทำใบประเมินขอซื้อทดแทน (replacements.html) งานซ่อมปิด แต่เรื่องเปลี่ยนเครื่องติดตามต่อที่นั่น
     const { value, isConfirmed } = await ptcSwal().fire({
         title: 'ซ่อมไม่ได้', input: 'textarea', inputPlaceholder: 'เหตุผล และข้อแนะนำ เช่น เมนบอร์ดเสีย แนะนำเปลี่ยนเครื่องใหม่',
+        html: '<label style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:13.5px;margin-top:4px"><input type="checkbox" id="ur-rp" checked> ซ่อมไม่คุ้ม — ทำใบประเมินขอซื้อทดแทนต่อ</label>',
         showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ยกเลิก', inputValidator: v => !v.trim() && 'กรุณาระบุเหตุผล',
+        preConfirm: v => ({ text: v, rp: document.getElementById('ur-rp')?.checked }),
     });
     if (!isConfirmed) return;
-    run('บันทึก', async () => { await updateItem(l, { status: 'Unrepairable', solution: addNote(l, 'ซ่อมไม่ได้: ' + value.trim()) }); await refreshAfter(id, 'บันทึกแล้ว'); });
+    run('บันทึก', async () => {
+        await updateItem(l, { status: 'Unrepairable', solution: addNote(l, 'ซ่อมไม่ได้: ' + value.text.trim()) });
+        if (value.rp) { location.href = 'replacements.html?ticket=' + encodeURIComponent(id); return; }
+        await refreshAfter(id, 'บันทึกแล้ว');
+    });
 }
 async function adminClose(id) {
     const { isConfirmed } = await ptcSwal().fire({ title: 'ปิดงานแทนผู้แจ้ง?', text: 'ใช้เมื่อผู้แจ้งยืนยันทางอื่นแล้ว เช่น โทรบอก', showCancelButton: true, confirmButtonText: 'ปิดงาน', cancelButtonText: 'ยกเลิก' });

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="icon" href="favicon.ico">
+    <meta name="theme-color" content="#475569">
+    <script src="js/favicon-version.js"></script>
+    <title>ซ่อมไม่คุ้ม / ซื้อทดแทน</title>
+    <link rel="stylesheet" href="css/fonts/inter-kanit-local.css">
+    <link rel="stylesheet" href="css/vendor/fontawesome.min.css"/>
+    <script src="js/vendor/sweetalert2.min.js"></script>
+    <script src="js/enterprise-swal.js?v=20261021b"></script>
+    <script src="js/ptc-swal-ui.js?v=20260530"></script>
+    <script src="js/doc-print.js?v=20261023"></script>
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
+    <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
+<style>
+/* ════ ซ่อมไม่คุ้ม / ซื้อทดแทน — ประเมิน → อนุมัติ → สั่งซื้อ → ได้เครื่องใหม่ → ปิด (ตัดจำหน่ายเครื่องเก่า) · สีจาก token design-system ════ */
+/* enterprise-theme ล็อกการเลื่อนทั้งหน้าบนจอกว้าง (ไว้ใช้กับหน้าที่มีเมนูซ้าย) — หน้านี้เลื่อนทั้งหน้าตามปกติ */
+html { overflow:auto !important; height:auto !important; } body { overflow:visible !important; height:auto !important; }
+body { background:var(--ptc-bg); color:var(--ptc-text); margin:0; }
+.wrap { max-width:1100px; margin:0 auto; padding:18px 16px 40px; }
+.card { background:var(--ptc-surface); border:1px solid var(--ptc-border); border-radius:10px; }
+.btn { height:34px; padding:0 12px; border-radius:8px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-weight:700; font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap; text-decoration:none; }
+.btn:hover { border-color:var(--ptc-primary); }
+.btn.ok { background:#16a34a; border-color:#16a34a; color:#fff; } .btn.pri { background:var(--ptc-primary); border-color:var(--ptc-primary); color:#fff; }
+.btn.sm { height:28px; padding:0 9px; font-size:12px; } .btn.danger { color:#dc2626; }
+.chip { padding:5px 11px; border-radius:99px; border:1px solid var(--ptc-border); background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.chip.on { border-color:var(--ptc-primary); background:var(--ptc-primary-light); color:var(--ptc-primary); }
+.pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; color:var(--c); background:color-mix(in srgb, var(--c) 13%, transparent); }
+.muted { color:var(--ptc-text-muted); }
+.empty { padding:34px 14px; text-align:center; color:var(--ptc-text-muted); font-size:13px; }
+.top { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+.rp { padding:14px 16px; border-bottom:1px solid var(--ptc-border); } .rp:last-child { border-bottom:0; }
+.rp-h { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .rp-h b { font-size:14.5px; }
+.rp-sub { font-size:12.5px; color:var(--ptc-text-muted); margin-top:3px; }
+.facts { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; margin-top:10px; }
+.facts div { border:1px solid var(--ptc-border); border-radius:8px; padding:7px 10px; } .facts span { display:block; font-size:11px; color:var(--ptc-text-muted); } .facts b { font-size:13.5px; }
+.facts .bad b { color:#dc2626; }
+.tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; } .tags span { font-size:11.5px; padding:2px 8px; border-radius:6px; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); color:var(--ptc-text-2); }
+/* แถบขั้นตอน 5 ขั้น */
+.steps { display:flex; gap:4px; margin-top:12px; } .steps i { flex:1; height:5px; border-radius:3px; background:var(--ptc-border); } .steps i.on { background:var(--ptc-primary); } .steps.off i.on { background:#94a3b8; }
+.steplbl { display:flex; font-size:10.5px; color:var(--ptc-text-muted); margin-top:3px; } .steplbl span { flex:1; }
+.next { margin-top:12px; padding:10px 12px; border-radius:9px; background:var(--ptc-surface-2); border:1px solid var(--ptc-border); display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12.5px; }
+.next .lbl { font-weight:800; color:var(--ptc-text-2); margin-right:4px; }
+.chk { display:inline-flex; gap:5px; align-items:center; font-size:12.5px; } .chk.ok { color:#16a34a; font-weight:700; } .chk.no { color:#b45309; font-weight:700; }
+html.dark .chk.ok { color:#86efac; } html.dark .chk.no { color:#fbbf24; }
+.fx { text-align:left; display:grid; gap:10px; }
+.fx label { font-size:12.5px; font-weight:700; color:var(--ptc-text-2); display:block; margin-bottom:4px; }
+.fx input:not([type=checkbox]):not([type=radio]), .fx select, .fx textarea { width:100%; box-sizing:border-box; border:1px solid var(--ptc-border); border-radius:8px; padding:8px 10px; background:var(--ptc-surface); color:var(--ptc-text); font:inherit; font-size:13.5px; }
+.fx textarea { min-height:64px; resize:vertical; }
+.fx .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .fx .three { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.fx .rs { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; } .fx .rs label { font-weight:500; display:flex; gap:7px; align-items:center; margin:0; }
+.fx .hint { font-size:12px; color:var(--ptc-text-muted); margin:3px 0 0; } .fx .hint.bad { color:#dc2626; font-weight:700; }
+.fx h4 { margin:6px 0 -2px; font-size:12.5px; color:var(--ptc-text-muted); text-transform:none; border-bottom:1px solid var(--ptc-border); padding-bottom:4px; }
+@media (max-width:640px) { .wrap { padding:12px 10px 30px; } .fx .two, .fx .three, .fx .rs { grid-template-columns:1fr; } .ptc-nav-sub { display:none; } }
+</style>
+</head>
+<body>
+<nav class="ptc-nav">
+    <a href="log.html" class="nav-back" title="กลับงานช่าง IT"><i class="fa fa-arrow-left"></i></a>
+    <div class="ptc-nav-brand"><div class="ptc-nav-icon" style="background:#475569"><i class="fa fa-arrows-rotate"></i></div>
+        <div><div class="ptc-nav-title">ซ่อมไม่คุ้ม / ซื้อทดแทน</div><div class="ptc-nav-sub">ประเมิน → อนุมัติ → สั่งซื้อ → ได้เครื่องใหม่ → ตัดจำหน่ายเครื่องเก่า</div></div></div>
+    <div id="nav-user-area" style="margin-left:auto"></div>
+</nav>
+<main class="wrap"><div class="top" id="top"></div><div id="list" class="card"><div class="empty">กำลังโหลด…</div></div></main>
+
+<script>
+const gid = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const baht = n => n === null || n === undefined || n === '' ? '-' : '฿' + Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 });
+const thD = s => s ? new Date(String(s).slice(0, 10) + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+const ageTxt = m => m === null || m === undefined ? '-' : (m >= 12 ? Math.floor(m / 12) + ' ปี' + (m % 12 ? ' ' + m % 12 + ' เดือน' : '') : m + ' เดือน');
+const ratio = r => r.repair_cost && r.new_cost ? Math.round(r.repair_cost / r.new_cost * 100) : null;
+const today = () => new Date().toISOString().slice(0, 10);
+const CO_C = { PTA: '#059669', PT4: '#dc2626', PTE: '#2563eb' };
+const ST_C = { pending: '#d97706', approved: '#2563eb', ordered: '#7c3aed', received: '#0891b2', closed: '#16a34a', rejected: '#64748b' };
+const STEP = { pending: 1, approved: 2, ordered: 3, received: 4, closed: 5, rejected: 1 };
+let S = {}, L = { data: [], reasons: [] }, view = 'open';
+const RS = () => Object.fromEntries(L.reasons.map(x => [x.key, x.t]));
+
+async function api(p) { const j = await (await fetch('api.php?' + new URLSearchParams(p), { cache: 'no-store' })).json(); if (j.status !== 'success') throw new Error(j.message || 'โหลดไม่สำเร็จ'); return j; }
+async function post(o) { const fd = new FormData(); Object.entries(o).forEach(([k, v]) => fd.append(k, v ?? '')); const j = await (await fetch('api.php', { method: 'POST', body: fd })).json(); if (j.status !== 'success') throw new Error(j.message || 'ไม่สำเร็จ'); return j; }
+
+function renderTop() {
+    gid('top').innerHTML = [['open', 'ต้องทำต่อ'], ['done', 'ปิดแล้ว / ไม่อนุมัติ'], ['all', 'ทั้งหมด']].map(([k, t]) => `<button class="chip ${view === k ? 'on' : ''}" onclick="view='${k}';load()">${t}</button>`).join('')
+        + `<span style="flex:1"></span><button class="btn pri" onclick="newFromAsset()"><i class="fa fa-plus"></i> ประเมินเครื่อง</button>`;
+}
+// ขั้นถัดไปของแต่ละใบ — ปุ่มเดียวที่ต้องกด + ลิงก์ไประบบที่เกี่ยวข้อง (ยืมเครื่องสำรอง / ใบติดตั้ง / พาสปอร์ตเครื่อง)
+function nextHtml(r) {
+    const loan = !r.loaner && ['pending', 'approved', 'ordered'].includes(r.status) && r.recommendation === 'replace' ? `<a class="btn sm" href="borrow_management.html" target="_blank"><i class="fa fa-right-left"></i> ให้ยืมเครื่องสำรองระหว่างรอ</a>` : '';
+    const retired = ['ตัดจำหน่าย', 'เลิกใช้งาน'].includes(r.asset_status);
+    if (r.status === 'pending') return `<span class="lbl">ขั้นถัดไป:</span> พิมพ์ใบประเมินให้หัวหน้าเซ็น แล้วบันทึกผล
+        <button class="btn sm" onclick="printRp(${r.id})"><i class="fa fa-print"></i> พิมพ์ใบประเมิน</button><button class="btn sm" onclick="editRp(${r.id})"><i class="fa fa-pen"></i> แก้</button><button class="btn sm ok" onclick="decide(${r.id})"><i class="fa fa-signature"></i> บันทึกผลอนุมัติ</button>${loan}`;
+    if (r.status === 'approved' && r.recommendation === 'retire') return `<span class="lbl">ขั้นถัดไป:</span> ตัดจำหน่ายเครื่องเก่า แล้วปิดเรื่อง ${oldAsset(r, retired)}<button class="btn sm ok" onclick="step(${r.id},'close')"><i class="fa fa-flag-checkered"></i> ปิดเรื่อง</button>`;
+    if (r.status === 'approved') return `<span class="lbl">ขั้นถัดไป:</span> สั่งซื้อ <button class="btn sm ok" onclick="order(${r.id})"><i class="fa fa-cart-shopping"></i> บันทึกเลข PR / PO</button><button class="btn sm" onclick="receive(${r.id})"><i class="fa fa-box-open"></i> ได้เครื่องใหม่แล้ว</button>${loan}`;
+    if (r.status === 'ordered') return `<span class="lbl">รอของ:</span> ${esc([r.pr_no && 'PR ' + r.pr_no, r.po_no && 'PO ' + r.po_no, r.vendor, r.eta_date && 'คาดว่าได้ ' + thD(r.eta_date)].filter(Boolean).join(' · '))}
+        <button class="btn sm ok" onclick="receive(${r.id})"><i class="fa fa-box-open"></i> ได้เครื่องใหม่แล้ว</button><button class="btn sm" onclick="order(${r.id})"><i class="fa fa-pen"></i> แก้เลข PR/PO</button>${loan}`;
+    if (r.status === 'received') return `<span class="lbl">ขั้นถัดไป:</span>
+        <a class="btn sm" href="setup.html?${new URLSearchParams({ asset: r.new_asset_code || '', company: r.company || '' })}" target="_blank"><i class="fa fa-laptop-medical"></i> ใบติดตั้ง / มอบเครื่องใหม่ (${esc(r.new_asset_code)})</a>
+        ${oldAsset(r, retired)}<button class="btn sm ok" onclick="step(${r.id},'close')"><i class="fa fa-flag-checkered"></i> ปิดเรื่อง</button>`;
+    if (r.status === 'rejected') return `<span class="lbl">ไม่อนุมัติ:</span> ${esc(r.decision_note || '')} <span class="muted">· ${esc(r.approver_name || '')} ${thD(r.approved_on)}</span>`;
+    return `<span class="lbl">ปิดแล้ว:</span> ${esc([r.new_asset_code && 'เครื่องใหม่ ' + r.new_asset_code, retired ? 'เครื่องเก่าตัดจำหน่ายแล้ว' : r.close_note, r.closed_by, r.closed_at && thD(r.closed_at)].filter(Boolean).join(' · '))}`;
+}
+const oldAsset = (r, retired) => r.asset_db_id ? (retired ? `<span class="chk ok"><i class="fa fa-circle-check"></i> เครื่องเก่าตัดจำหน่ายแล้ว</span>`
+    : `<a class="btn sm" href="admin.html?tab=it_assets&asset=${r.asset_db_id}" target="_blank"><i class="fa fa-passport"></i> ตัดจำหน่ายเครื่องเก่า (ล้างข้อมูล)</a><span class="chk no"><i class="fa fa-circle-exclamation"></i> ยังไม่ตัดจำหน่าย</span>`) : '';
+function render() {
+    const rs = RS();
+    gid('list').innerHTML = L.data.length ? L.data.map(r => {
+        const pc = ratio(r), over = r.age_months !== null && r.useful_life && r.age_months >= r.useful_life * 12;
+        return `<div class="rp"><div class="rp-h"><b>${esc(r.asset_name || r.asset_code)}</b><span class="muted" style="font-size:12.5px">${esc(r.asset_code || '')}</span>${r.company ? `<span class="pill" style="--c:${CO_C[r.company] || '#64748b'}">${esc(r.company)}</span>` : ''}
+            <span class="pill" style="--c:${ST_C[r.status]}">${esc(r.status_th)}</span><span class="pill" style="--c:#64748b">${r.recommendation === 'replace' ? 'เสนอซื้อทดแทน' : 'เสนอตัดจำหน่าย'}</span><span style="flex:1"></span><span class="muted" style="font-size:12px">${esc(r.code)}${r.ticket_id ? ' · งานซ่อม ' + esc(r.ticket_id) : ''}</span></div>
+            <div class="rp-sub">${esc([r.user_name, r.department].filter(Boolean).join(' · '))} · ประเมินโดย ${esc(r.assessed_by || '-')} ${thD(r.assessed_at)}</div>
+            <div class="tags">${r.reasons.map(k => `<span>${esc(rs[k] || k)}</span>`).join('')}</div>
+            <div class="facts"><div class="${over ? 'bad' : ''}"><span>อายุเครื่อง${r.useful_life ? ' (ใช้งานได้ ' + r.useful_life + ' ปี)' : ''}</span><b>${ageTxt(r.age_months)}</b></div><div><span>ราคาซื้อเดิม</span><b>${baht(r.purchase_price)}</b></div>
+                <div><span>ค่าซ่อม (ประเมิน)</span><b>${baht(r.repair_cost)}</b></div><div><span>ราคาเครื่องใหม่</span><b>${baht(r.new_cost)}</b></div><div class="${pc !== null && pc >= 50 ? 'bad' : ''}"><span>ค่าซ่อม ÷ เครื่องใหม่</span><b>${pc === null ? '-' : pc + '%'}</b></div></div>
+            <div class="steps ${r.status === 'rejected' ? 'off' : ''}">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= STEP[r.status] ? 'on' : ''}"></i>`).join('')}</div>
+            <div class="steplbl"><span>ประเมิน</span><span>อนุมัติ</span><span>สั่งซื้อ</span><span>ได้เครื่องใหม่</span><span>ปิด</span></div>
+            <div class="next">${nextHtml(r)}${r.status !== 'pending' ? `<span style="flex:1"></span><button class="btn sm" onclick="printRp(${r.id})" title="พิมพ์ใบประเมินซ้ำ"><i class="fa fa-print"></i></button>` : ''}</div></div>`;
+    }).join('') : `<div class="empty"><i class="fa fa-arrows-rotate"></i><br>${view === 'open' ? 'ไม่มีเรื่องค้าง — ประเมินจากงานซ่อมได้ที่ปุ่ม "ซ่อมไม่ได้" ในงานช่าง IT หรือกด "ประเมินเครื่อง"' : 'ยังไม่มีรายการ'}</div>`;
+}
+async function load() { renderTop(); try { L = await api({ action: 'rp_list', view }); } catch (e) { gid('list').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; } render(); }
+
+// ── ใบประเมิน (สร้าง / แก้) ──
+async function form(p, id) {
+    const rs = L.reasons.length ? L.reasons : (await api({ action: 'rp_list', view: 'none' })).reasons;
+    const sel = new Set(p.reasons || []), h = p.repair_history;
+    const v = (k) => esc(p[k] ?? '');
+    const { isConfirmed, value } = await ptcSwal().fire({ title: id ? 'แก้ใบประเมิน' : 'ประเมินเครื่อง — ซ่อมไม่คุ้ม', width: 'min(720px,96vw)', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'ปิด', focusConfirm: false,
+        html: `<div class="fx"><h4>เครื่อง</h4>
+            <div class="two"><div><label>เครื่อง</label><input id="f-an" value="${v('asset_name')}" placeholder="เช่น Notebook Lenovo ThinkPad E14"></div><div><label>รหัสเครื่อง</label><input id="f-ac" value="${v('asset_code')}"></div></div>
+            <div class="three"><div><label>S/N</label><input id="f-sn" value="${v('serial_number')}"></div><div><label>บริษัท</label><select id="f-co"><option value="">—</option>${['PTA', 'PT4', 'PTE'].map(c => `<option ${c === p.company ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div><label>ผู้ใช้เครื่อง</label><input id="f-un" value="${v('user_name')}"></div></div>
+            <div class="three"><div><label>วันที่ซื้อ</label><input id="f-pd" type="date" value="${v('purchase_date')}"></div><div><label>ราคาซื้อ (บาท)</label><input id="f-pp" inputmode="decimal" value="${p.purchase_price ?? ''}"></div><div><label>อายุใช้งานตามหมวด (ปี)</label><input id="f-ul" type="number" min="0" value="${p.useful_life ?? ''}"></div></div>
+            <p class="hint" id="f-age"></p>
+            ${h ? `<p class="hint">ประวัติซ่อมเครื่องนี้: ${h.n} ครั้ง${h.cost ? ' · ค่าซ่อมรวม ' + baht(h.cost) : ''}</p>` : ''}
+            <h4>ผลการตรวจ</h4>
+            <div><label>อาการที่แจ้ง</label><textarea id="f-pb">${v('problem')}</textarea></div>
+            <div><label>สิ่งที่ตรวจพบ / เหตุผลที่ซ่อมไม่คุ้ม</label><textarea id="f-fd" placeholder="เช่น เมนบอร์ดลัดวงจร อะไหล่เลิกผลิต ร้านเสนอราคาซ่อม 9,500 บาท">${v('findings')}</textarea></div>
+            <div><label>สาเหตุ (เลือกได้หลายข้อ)</label><div class="rs">${rs.map(x => `<label><input type="checkbox" class="f-rs" value="${x.key}" ${sel.has(x.key) ? 'checked' : ''}> ${esc(x.t)}</label>`).join('')}</div></div>
+            <h4>เทียบค่าใช้จ่าย</h4>
+            <div class="two"><div><label>ค่าซ่อมที่ประเมิน (บาท)</label><input id="f-rc" inputmode="decimal" value="${p.repair_cost ?? ''}"></div><div><label>ราคาเครื่องใหม่ (บาท)</label><input id="f-nc" inputmode="decimal" value="${p.new_cost ?? ''}"></div></div>
+            <p class="hint" id="f-ratio"></p>
+            <h4>ข้อเสนอ</h4>
+            <div class="two"><div><label>เสนอให้</label><select id="f-rec"><option value="replace" ${p.recommendation !== 'retire' ? 'selected' : ''}>ซื้อเครื่องทดแทน</option><option value="retire" ${p.recommendation === 'retire' ? 'selected' : ''}>ตัดจำหน่าย ไม่ซื้อทดแทน</option></select></div><div><label>ต้องการใช้ภายในวันที่</label><input id="f-nb" type="date" value="${v('need_by')}"></div></div>
+            <div><label>สเปกเครื่องใหม่ที่แนะนำ</label><textarea id="f-ns" placeholder="เช่น Notebook Core i5 / RAM 16GB / SSD 512GB">${v('new_spec')}</textarea></div>
+            <div><label>เครื่องสำรองที่ให้ยืมระหว่างรอ (ถ้ามี)</label><input id="f-lo" value="${v('loaner')}" placeholder="เช่น LN-2610-004 · Notebook สำรอง IT-NB-SP02"></div></div>`,
+        didOpen: () => {
+            const calc = () => {
+                const pd = gid('f-pd').value, ul = +gid('f-ul').value, rc = +String(gid('f-rc').value).replace(/,/g, ''), nc = +String(gid('f-nc').value).replace(/,/g, '');
+                const m = pd ? Math.max(0, Math.round((Date.now() - new Date(pd + 'T00:00:00')) / (30.44 * 864e5))) : null;
+                gid('f-age').className = 'hint' + (m !== null && ul && m >= ul * 12 ? ' bad' : ''); gid('f-age').textContent = m === null ? 'ไม่มีวันที่ซื้อ — ใส่เพื่อคำนวณอายุเครื่อง' : 'อายุเครื่อง ' + ageTxt(m) + (ul ? (m >= ul * 12 ? ' · เกินอายุใช้งาน ' + ul + ' ปีแล้ว' : ' · ยังไม่ถึงอายุใช้งาน ' + ul + ' ปี') : '');
+                const pc = rc && nc ? Math.round(rc / nc * 100) : null;
+                gid('f-ratio').className = 'hint' + (pc !== null && pc >= 50 ? ' bad' : ''); gid('f-ratio').textContent = pc === null ? 'ใส่ทั้งสองช่องเพื่อเทียบ — ทั่วไปค่าซ่อมเกิน 50% ของเครื่องใหม่ถือว่าไม่คุ้ม' : 'ค่าซ่อมเท่ากับ ' + pc + '% ของราคาเครื่องใหม่' + (pc >= 50 ? ' — ไม่คุ้มซ่อม' : ' — ยังต่ำกว่า 50% ควรระบุเหตุผลอื่นประกอบ');
+            };
+            ['f-pd', 'f-ul', 'f-rc', 'f-nc'].forEach(k => gid(k).addEventListener('input', calc)); calc();
+        },
+        preConfirm: () => {
+            const rsv = [...document.querySelectorAll('.f-rs:checked')].map(x => x.value);
+            if (!gid('f-an').value.trim() && !gid('f-ac').value.trim()) return Swal.showValidationMessage('ระบุเครื่อง');
+            if (gid('f-fd').value.trim().length < 5) return Swal.showValidationMessage('ใส่สิ่งที่ตรวจพบ / เหตุผล');
+            if (!rsv.length) return Swal.showValidationMessage('เลือกสาเหตุอย่างน้อย 1 ข้อ');
+            return { id: id || '', ticket_id: p.ticket_id || '', asset_db_id: p.asset_db_id || '', asset_name: gid('f-an').value, asset_code: gid('f-ac').value, serial_number: gid('f-sn').value, company: gid('f-co').value, user_name: gid('f-un').value, department: p.department || '',
+                purchase_date: gid('f-pd').value, purchase_price: gid('f-pp').value, useful_life: gid('f-ul').value, problem: gid('f-pb').value, findings: gid('f-fd').value, reasons: JSON.stringify(rsv),
+                repair_cost: gid('f-rc').value, new_cost: gid('f-nc').value, recommendation: gid('f-rec').value, new_spec: gid('f-ns').value, need_by: gid('f-nb').value, loaner: gid('f-lo').value };
+        } });
+    if (!isConfirmed) return null;
+    try { const j = await post({ action: 'rp_save', ...value }); ptcToast('success', 'บันทึกใบประเมินแล้ว', 'พิมพ์ให้หัวหน้าเซ็น แล้วกด "บันทึกผลอนุมัติ"'); view = 'open'; await load(); return j.id; } catch (e) { ptcAlert('error', 'บันทึกไม่สำเร็จ', e.message); return null; }
+}
+async function newFromTicket(tid) {
+    try {
+        const j = await api({ action: 'rp_prefill', ticket: tid });
+        if (j.existing) { ptcToast('info', 'งานนี้มีใบประเมินแล้ว', j.existing.code); return; }
+        const id = await form(j.prefill);
+        if (id) printRp(id);
+    } catch (e) { ptcAlert('error', 'เปิดใบประเมินไม่ได้', e.message); }
+}
+async function newFromAsset() {
+    const { isConfirmed, value } = await ptcSwal().fire({ title: 'ประเมินเครื่อง', input: 'text', inputLabel: 'รหัสเครื่องในทะเบียน (เว้นว่าง = กรอกเอง)', inputPlaceholder: 'เช่น PTA-MIS-NB-2512-004', showCancelButton: true, confirmButtonText: 'ต่อไป', cancelButtonText: 'ปิด' });
+    if (!isConfirmed) return;
+    try { const j = await api({ action: 'rp_prefill', asset: (value || '').trim() }); form(j.prefill); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+}
+function editRp(id) { const r = L.data.find(x => x.id === id); if (r) form(r, id); }
+
+// ── เลื่อนขั้น ──
+async function decide(id) {
+    const r = L.data.find(x => x.id === id);
+    const { isConfirmed, isDenied, value } = await ptcSwal().fire({ title: 'บันทึกผลอนุมัติ — ' + esc(r.code), showCancelButton: true, showDenyButton: true, confirmButtonText: 'อนุมัติ', denyButtonText: 'ไม่อนุมัติ', cancelButtonText: 'กลับ', focusConfirm: false,
+        html: `<div class="fx"><p class="hint" style="margin:0">ใส่ตามใบประเมินที่หัวหน้าเซ็นแล้ว</p><div class="two"><div><label>ผู้อนุมัติ</label><input id="d-who" placeholder="ชื่อ-ตำแหน่ง"></div><div><label>วันที่เซ็น</label><input id="d-on" type="date" value="${today()}"></div></div>
+            <div><label>หมายเหตุ (ไม่อนุมัติต้องใส่)</label><input id="d-note" placeholder="เช่น ให้ซ่อมต่อ / ใช้ต่อไปก่อน / อนุมัติงบ 25,000"></div></div>`,
+        preConfirm: () => gid('d-who').value.trim() && gid('d-on').value ? { approver_name: gid('d-who').value, approved_on: gid('d-on').value, note: gid('d-note').value } : Swal.showValidationMessage('ใส่ชื่อผู้อนุมัติและวันที่'),
+        preDeny: () => gid('d-who').value.trim() && gid('d-on').value && gid('d-note').value.trim() ? { approver_name: gid('d-who').value, approved_on: gid('d-on').value, note: gid('d-note').value } : Swal.showValidationMessage('ไม่อนุมัติ: ใส่ชื่อ วันที่ และเหตุผล') });
+    if (!isConfirmed && !isDenied) return;
+    step(id, isDenied ? 'reject' : 'approve', value, true);
+}
+async function order(id) {
+    const r = L.data.find(x => x.id === id);
+    const { isConfirmed, value } = await ptcSwal().fire({ title: 'บันทึกสั่งซื้อ', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'กลับ', focusConfirm: false,
+        html: `<div class="fx"><div class="two"><div><label>เลข PR</label><input id="o-pr" value="${esc(r.pr_no || '')}"></div><div><label>เลข PO</label><input id="o-po" value="${esc(r.po_no || '')}"></div></div>
+            <div class="two"><div><label>ผู้ขาย</label><input id="o-v" value="${esc(r.vendor || '')}"></div><div><label>คาดว่าได้ของ</label><input id="o-eta" type="date" value="${esc(r.eta_date || '')}"></div></div></div>`,
+        preConfirm: () => gid('o-pr').value.trim() || gid('o-po').value.trim() ? { pr_no: gid('o-pr').value, po_no: gid('o-po').value, vendor: gid('o-v').value, eta_date: gid('o-eta').value } : Swal.showValidationMessage('ใส่เลข PR หรือ PO') });
+    if (isConfirmed) step(id, 'order', value, true);
+}
+async function receive(id) {
+    const { isConfirmed, value } = await ptcSwal().fire({ title: 'ได้เครื่องใหม่แล้ว', input: 'text', inputLabel: 'รหัสเครื่องใหม่ในทะเบียนทรัพย์สิน', inputPlaceholder: 'ลงทะเบียนเครื่องใหม่ก่อน แล้วใส่รหัสที่นี่', showCancelButton: true, confirmButtonText: 'บันทึก', cancelButtonText: 'กลับ', inputValidator: v => !v.trim() && 'ใส่รหัสเครื่องใหม่',
+        footer: '<a href="admin.html?tab=it_assets" target="_blank">ไปลงทะเบียนเครื่องใหม่</a>' });
+    if (isConfirmed) step(id, 'receive', { new_asset_code: value.trim() }, true);
+}
+async function step(id, st, extra, confirmed) {
+    let body = extra || {};
+    if (st === 'close' && !confirmed) {
+        const r = L.data.find(x => x.id === id), retired = ['ตัดจำหน่าย', 'เลิกใช้งาน'].includes(r.asset_status);
+        const res = await ptcSwal().fire({ title: 'ปิดเรื่อง?', html: retired || !r.asset_db_id ? '<p style="font-size:13.5px;margin:0">ผู้ใช้ได้เครื่องใหม่ และเครื่องเก่าจัดการเรียบร้อยแล้ว</p>' : '<p style="font-size:13.5px;margin:0 0 8px;color:#b45309">เครื่องเก่ายังไม่ได้ตัดจำหน่าย — ถ้าจะเก็บไว้ ใส่ว่าเก็บไว้ทำอะไร</p>',
+            input: 'text', inputPlaceholder: retired || !r.asset_db_id ? 'หมายเหตุ (ไม่บังคับ)' : 'เช่น เก็บเป็นอะไหล่ / เครื่องสำรอง IT', showCancelButton: true, confirmButtonText: 'ปิดเรื่อง', cancelButtonText: 'กลับ' });
+        if (!res.isConfirmed) return; body = { note: (res.value || '').trim() };
+    }
+    try { await post({ action: 'rp_step', id, step: st, ...body }); ptcToast('success', { approve: 'บันทึกอนุมัติแล้ว', reject: 'บันทึกไม่อนุมัติแล้ว', order: 'บันทึกสั่งซื้อแล้ว', receive: 'บันทึกได้เครื่องใหม่แล้ว', close: 'ปิดเรื่องแล้ว' }[st]); load(); }
+    catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+}
+
+// ── ใบประเมิน (A4) — ให้หัวหน้าเซ็นอนุมัติ ──
+async function printRp(id) {
+    let r = L.data.find(x => x.id === id);
+    if (!r) { try { r = (await api({ action: 'rp_list', id })).data[0]; } catch (_) {} } if (!r) return;
+    const rs = RS(), e = DocPrint.esc, pc = ratio(r);
+    const box = (on, t) => `<span style="display:inline-block;margin:0 14px 3px 0">${on ? '☑' : '☐'} ${e(t)}</span>`;
+    const cost = `<table class="dp-tbl"><tbody><tr><td>ราคาซื้อเดิม</td><td style="text-align:right">${baht(r.purchase_price)}</td><td>อายุเครื่อง</td><td style="text-align:right">${ageTxt(r.age_months)}${r.useful_life ? ` / ใช้งานได้ ${r.useful_life} ปี` : ''}</td></tr>
+        <tr><td>ค่าซ่อมที่ประเมิน</td><td style="text-align:right">${baht(r.repair_cost)}</td><td>ราคาเครื่องใหม่</td><td style="text-align:right">${baht(r.new_cost)}</td></tr>
+        <tr><td colspan="2"><b>ค่าซ่อม ÷ ราคาเครื่องใหม่</b></td><td colspan="2" style="text-align:right"><b>${pc === null ? '-' : pc + '%'}</b></td></tr></tbody></table>`;
+    DocPrint.preview({ company: r.company || S.company || 'PTA', formKey: 'replace_assess', docNo: r.code, dateText: thD(r.assessed_at), classified: true,
+        title: { th: 'ใบประเมินการซ่อม / ขอซื้อทดแทน', en: 'Repair Assessment & Replacement Request', color: '#475569' },
+        info: [['เครื่อง', r.asset_name], ['รหัสเครื่อง', r.asset_code || '-'], ['S/N', r.serial_number || '-'], ['งานซ่อม', r.ticket_id || '-'], ['ผู้ใช้เครื่อง', [r.user_name, r.department].filter(Boolean).join(' · ') || '-'], ['วันที่ซื้อ', thD(r.purchase_date)]],
+        blocks: [DocPrint.section('อาการที่แจ้ง / Reported problem', e(r.problem || '-'), { clamp: 3 }),
+            DocPrint.section('ผลการตรวจ / Findings', e(r.findings), { clamp: 5 }),
+            DocPrint.section('สาเหตุที่ซ่อมไม่คุ้ม / Reasons', L.reasons.map(x => box(r.reasons.includes(x.key), x.t)).join(''), { html: true }),
+            DocPrint.section('เทียบค่าใช้จ่าย / Cost comparison', cost, { html: true }),
+            DocPrint.section('ข้อเสนอ / Recommendation', box(r.recommendation === 'replace', 'ซื้อเครื่องทดแทน') + box(r.recommendation === 'retire', 'ตัดจำหน่าย ไม่ซื้อทดแทน')
+                + (r.new_spec ? `<div style="margin-top:4px"><b>สเปกที่แนะนำ:</b> ${e(r.new_spec)}</div>` : '') + (r.need_by ? `<div><b>ต้องการใช้ภายใน:</b> ${thD(r.need_by)}</div>` : '') + (r.loaner ? `<div><b>เครื่องสำรองระหว่างรอ:</b> ${e(r.loaner)}</div>` : '')
+                + '<div style="margin-top:4px;color:#64748b">เครื่องเก่าจะล้างข้อมูลก่อนตัดจำหน่าย ตามนโยบายความปลอดภัยข้อมูล (TISAX)</div>', { html: true }),
+            DocPrint.section('ผลการพิจารณา / Decision', box(false, 'อนุมัติ') + box(false, 'ไม่อนุมัติ') + '<div style="margin-top:6px">หมายเหตุ ........................................................................................................</div>', { html: true })],
+        sigs: [{ role: 'ผู้ประเมิน (IT) / Assessed by', name: r.assessed_by || '' }, { role: 'ผู้ใช้ / หัวหน้าแผนก', name: '' }, { role: 'ผู้อนุมัติ / Approved by', name: '' }] });
+}
+
+(async function init() {
+    try { S = await (await fetch('api.php?action=check_session', { cache: 'no-store' })).json(); } catch (_) {}
+    if (!S.loggedin) { location.href = 'login.html?returnUrl=' + encodeURIComponent(location.pathname.split('/').pop() + location.search); return; }
+    await load();
+    // มาจากปุ่ม "ซ่อมไม่คุ้ม" ในงานช่าง IT → เปิดใบประเมินของงานนั้นเลย
+    const t = new URLSearchParams(location.search).get('ticket');
+    if (t) { history.replaceState(null, '', location.pathname); newFromTicket(t); }
+})();
+</script>
+<script src="js/nav-chip.js?v=20260707"></script>
+</body>
+</html>

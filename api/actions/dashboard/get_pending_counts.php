@@ -1,7 +1,7 @@
 <?php
 // api/actions/dashboard/get_pending_counts.php
 
-$room_pending = 0; $room_prep = 0; $car_todo = 0; $stock_pending = 0; $loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
+$room_pending = 0; $room_prep = 0; $car_todo = 0; $rp_todo = 0; $stock_pending = 0; $loan_count = 0; $repair_count = 0; $booking_count = 0; $stock_low = 0; $users_no_role = 0; $kb_draft_count = 0; $sc_missing = 0;
 
 try {
     if (isset($conn) && $conn instanceof mysqli) {
@@ -26,6 +26,15 @@ try {
         }
 
         // จองห้อง/รถ ย้ายไปใช้ roomsys / carsys แล้ว — booking คงไว้เป็น 0 ให้หน้าที่ยังอ่านค่านี้ไม่พัง
+
+        // ซื้อทดแทน: ใบที่ IT ต้องทำต่อ (บันทึกผลอนุมัติ / สั่งซื้อ / ปิดเรื่อง) — ไม่นับ "สั่งซื้อแล้ว" ที่รอของอยู่
+        if (function_exists('_initReplaceTables') && (($role ?? '') === 'admin' || hasPermission($conn, 'it_log.access') || hasPermission($conn, 'asset.manage'))) {
+            _initReplaceTables($conn);
+            [$rw, $rpp] = scopeSql('company', userCompanies($conn));
+            $st = $conn->prepare("SELECT COUNT(*) FROM it_replacements WHERE status IN ('pending','approved','received') AND (company IS NULL OR company = ''" . preg_replace('/^\s*AND\s*/', ' OR ', $rw) . ")");
+            if ($rpp) $st->bind_param(str_repeat('s', count($rpp)), ...$rpp);
+            $st->execute(); $rp_todo = (int)$st->get_result()->fetch_row()[0];
+        }
 
         // จองรถ: รออนุมัติ + รอรับกุญแจ + เลยเวลาคืน (เฉพาะรถของบริษัทที่ดูแล)
         if (function_exists('carCanManage') && carCanManage($conn)) {
@@ -102,6 +111,7 @@ echo json_encode([
     'room_pending'       => $room_pending,
     'room_prep'          => $room_prep,
     'car_todo'           => $car_todo,
+    'rp_todo'            => $rp_todo,
     // backward-compat keys
     'loan'               => $loan_count,
     'repair'             => $repair_count,
