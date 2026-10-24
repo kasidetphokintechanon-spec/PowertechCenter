@@ -166,16 +166,38 @@ function carKeeperTodo($conn) {
 }
 
 /** LINE/Telegram ไปกลุ่มของบริษัทเจ้าของรถ (ผู้ดูแลรถคันนั้น) */
-function carNotify($conn, $event, $title, $b, $extra = [], $ref = null) {
+function carNotify($conn, $event, $title, $b, $extra = [], $ref = null, $path = 'cars.html?tab=keep', $label = 'เปิดดู / จัดการ') {
     if (!function_exists('sendNotify') || !$b) return;
     $sameDay = date('Y-m-d', strtotime($b['start_at'])) === date('Y-m-d', strtotime($b['end_at']));
     $when = date('d/m H:i', strtotime($b['start_at'])) . '–' . ($sameDay ? date('H:i', strtotime($b['end_at'])) : date('d/m H:i', strtotime($b['end_at'])));
     $lines = ["<b>{$title} — {$b['code']}</b>", "<b>รถ:</b> " . carLabel($b), "<b>เวลา:</b> {$when}", "<b>ไปทำอะไร:</b> {$b['purpose']}",
-        !empty($b['destination']) ? "<b>ไปที่:</b> {$b['destination']}" : '', "<b>คนขับ:</b> " . ((int)$b['need_driver'] ? ($b['driver_name'] ?? '') ?: 'ขอคนขับ (ยังไม่ได้เลือก)' : 'ขับเอง'),
+        !empty($b['destination']) ? "<b>ไปที่:</b> {$b['destination']}" : '', "<b>คนขับ:</b> " . ((int)$b['need_driver'] ? (!empty($b['driver_name']) ? ($b['status'] === 'pending' ? 'ขอ ' . $b['driver_name'] : $b['driver_name']) : 'ขอคนขับ (ยังไม่ได้เลือก)') : 'ขับเอง'),
         !empty($b['rider_name']) ? "<b>ผู้ใช้รถ:</b> {$b['rider_name']}" : '',
-        "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : '') . ($b['contact'] ? " · {$b['contact']}" : '')];
+        "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : ''), (int)$b['passengers'] > 1 ? "<b>จำนวนคน:</b> {$b['passengers']} คน" : ''];
     foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> {$v}";
-    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['car_company'] ?? '') ?: ($b['company'] ?: null), $ref);
+    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['car_company'] ?? '') ?: ($b['company'] ?: null), $ref, function_exists('notifyLink') ? notifyLink($conn, $path, $label) : null);
+}
+
+/** ความด่วนจากเวลาออกรถ — ข้อมูลเดิม: ครึ่งหนึ่งจองวันเดียวกับที่ใช้ อนุมัติช้า = ออกรถไม่ทัน */
+function carUrgency($start) {
+    $min = (int)round((strtotime($start) - time()) / 60);
+    if ($min <= 0) return '⚡ ถึงเวลาออกแล้ว';
+    if ($min <= 120) return "⚡ ออกอีก {$min} นาที";
+    if (date('Y-m-d', strtotime($start)) === date('Y-m-d')) return 'วันนี้ ' . date('H:i', strtotime($start));
+    if (date('Y-m-d', strtotime($start)) === date('Y-m-d', strtotime('+1 day'))) return 'พรุ่งนี้ ' . date('H:i', strtotime($start));
+    return '';
+}
+
+/**
+ * แจ้งกลุ่มคนขับเมื่อได้งาน/เปลี่ยนงานที่ออกภายใน 24 ชม. — สรุป 16:00 ไม่ทันงานที่จองวันเดียวกัน
+ * $prev = ชื่อคนขับเดิม (ตอนเปลี่ยนคน) · ใบที่ออกเกิน 24 ชม. รอสรุปงานคนขับ 16:00 ตามปกติ
+ */
+function carNotifyDriverJob($conn, $b, $prev = null) {
+    if (!$b || strtotime($b['start_at']) > time() + 86400 || strtotime($b['end_at']) < time()) return;
+    if (!$b['driver_id'] && !$prev) return;
+    $when = carUrgency($b['start_at']) ?: date('d/m H:i', strtotime($b['start_at']));
+    if (!$b['driver_id']) { carNotify($conn, 'car_driver_job', "🧑‍✈️ ยกเลิกงานคนขับ — {$prev} ไม่ต้องไป", $b, ['เดิมเป็นงานของ' => $prev], null, 'cars.html', 'ดูตารางรถ'); return; }
+    carNotify($conn, 'car_driver_job', "🧑‍✈️ งานคนขับ {$b['driver_name']} — {$when}", $b, ['เปลี่ยนจาก' => $prev], null, 'cars.html', 'ดูตารางรถ');
 }
 
 /**
@@ -238,6 +260,6 @@ function _cronCarDaily($conn) {
         if ($pend) $lines[] = '<b>🕓 ยังรออนุมัติ:</b> ' . count($pend) . ' ใบ';
         $lines[] = '<b>ทั้งหมด:</b>';
         foreach ($rows as $b) $lines[] = '• ' . $tm($b) . " {$b['plate']} — {$b['purpose']}" . ($b['destination'] ? " → {$b['destination']}" : '') . ' · ' . $who($b) . ' · ' . ((int)$b['need_driver'] ? ($b['driver_name'] ?: 'ขอคนขับ') : 'ขับเอง');
-        sendNotify($conn, implode("\n", $lines), 'car_daily', $co ?: null, $ref);
+        sendNotify($conn, implode("\n", $lines), 'car_daily', $co ?: null, $ref, notifyLink($conn, 'cars.html', 'ดูตารางรถ 7 วัน'));
     }
 }

@@ -23,4 +23,5 @@ if ($ok) {
 }
 $u->execute();
 if ($u->affected_rows < 1) throw new Exception('ใบจองนี้ถูกเปลี่ยนไปแล้ว');
+if ($ok && $driver) carNotifyDriverJob($conn, carGet($conn, $b['id']));
 echo json_encode(['status' => 'success']);

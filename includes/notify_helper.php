@@ -110,8 +110,9 @@ function notifyAlreadySent($conn, $event, $ref) {
  * @param string      $message   HTML message (Telegram) — LINE จะ parse auto
  * @param string      $event     e.g. 'stock_new', 'it_repair'
  * @param string|null $company   'PTA'|'PT4'|'PTE'|null
+ * @param array|null  $link      ['url' => ..., 'label' => ...] ปุ่มท้ายข้อความ (สร้างด้วย notifyLink())
  */
-function sendNotify($conn, $message, $event, $company = null, $ref = null) {
+function sendNotify($conn, $message, $event, $company = null, $ref = null, $link = null) {
     _initNotifyChannelsTable($conn);
     preg_match('/<b>(.*?)<\/b>/', $message, $_tm);
     $title = trim(strip_tags($_tm[1] ?? $event));
@@ -145,9 +146,9 @@ function sendNotify($conn, $message, $event, $company = null, $ref = null) {
         $matchCount++;
         $r = [false, 'ประเภทกลุ่มไม่รู้จัก'];
         if ($ch['channel_type'] === 'telegram') {
-            $r = _notifySendTelegram($ch['token'], $ch['dest_id'], $message);
+            $r = _notifySendTelegram($ch['token'], $ch['dest_id'], $message . ($link ? "\n\n<a href=\"" . htmlspecialchars($link['url']) . "\">" . htmlspecialchars($link['label']) . '</a>' : ''));
         } elseif ($ch['channel_type'] === 'line') {
-            $r = _notifySendLine($ch['token'], $ch['dest_id'], $message, $event);
+            $r = _notifySendLine($ch['token'], $ch['dest_id'], $message, $event, $link);
         }
         _notifyLog($conn, $event, $ref, $title, (int)$ch['id'], $ch['name'], $r[0] ? 1 : 0, $r[0] ? null : $r[1]);
     }
@@ -156,6 +157,20 @@ function sendNotify($conn, $message, $event, $company = null, $ref = null) {
         error_log("[Notify] NO MATCH for event='{$event}' company='" . ($company ?: 'any') . "' — notification not sent");
         _notifyLog($conn, $event, $ref, $title, null, null, 2, 'ไม่มีกลุ่มรับเรื่องนี้');
     }
+}
+
+/**
+ * ลิงก์ปุ่มท้ายข้อความ — ใช้ลิงก์ภายนอก (ตั้งในหน้าตั้งค่า "ลิงก์สำรอง" ชุดเดียวกับ QR สติกเกอร์) เปิดจากมือถือนอกบริษัทได้
+ * หน้าในระบบต้องล็อกอินก่อนเสมอ ข้อมูลไม่หลุด (TISAX)
+ */
+function notifyLink($conn, $path, $label) {
+    static $base = null;
+    if ($base === null) {
+        $r = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'asset_scan_url_backup' LIMIT 1");
+        $base = rtrim((string)(($r ? $r->fetch_row()[0] : '') ?: 'https://powertecha.myqnapcloud.com:8081/PowertechCenter'), '/');
+    }
+    // LINE ยอมเฉพาะ https
+    return preg_match('#^https://#i', $base) ? ['url' => $base . '/' . ltrim($path, '/'), 'label' => $label] : null;
 }
 
 // ── SEND VIA TELEGRAM ─────────────────────────────────────────────────
@@ -183,7 +198,7 @@ function _notifySendTelegram($token, $chat_id, $message) {
 }
 
 // ── SEND VIA LINE MESSAGING API ───────────────────────────────────────
-function _notifySendLine($token, $dest_id, $message, $event = 'general') {
+function _notifySendLine($token, $dest_id, $message, $event = 'general', $link = null) {
     // สี header ตาม event type
     $colorMap = [
         'it_repair'     => '#EF454D',
@@ -210,6 +225,8 @@ function _notifySendLine($token, $dest_id, $message, $event = 'general') {
         'car_daily'     => '#0F172A',
         'car_pending_soon' => '#D97706',
         'car_key_overdue'  => '#DC2626',
+        'car_driver_job'   => '#0369A1',
+        'room_daily'    => '#0F172A',
         'it_user_reply' => '#7C3AED',
         'it_overdue'    => '#DC2626',
         'it_daily_summary' => '#0F172A',
@@ -319,6 +336,9 @@ function _notifySendLine($token, $dest_id, $message, $event = 'general') {
             'type'     => 'flex',
             'altText'  => $title,
             'contents' => ['type' => 'bubble', 'body' => ['type' => 'box', 'layout' => 'vertical', 'contents' => $contents]]
+                // ปุ่มกดเข้าไปจัดการ — ไม่ต้องไปหาหน้าเอง (ลิงก์ต้องล็อกอินก่อนเหมือนเดิม)
+                + ($link ? ['footer' => ['type' => 'box', 'layout' => 'vertical', 'contents' => [['type' => 'button', 'style' => 'primary', 'height' => 'sm', 'color' => $color,
+                    'action' => ['type' => 'uri', 'label' => mb_substr($link['label'], 0, 20), 'uri' => $link['url']]]]]] : [])
         ]]
     ];
 

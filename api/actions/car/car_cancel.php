@@ -13,5 +13,6 @@ $by = carActor();
 $u = $conn->prepare("UPDATE cr_bookings SET status = 'cancelled', cancelled_at = NOW(), cancelled_by = ?, cancel_reason = ? WHERE id = ? AND status IN ('pending','approved')");
 $u->bind_param('ssi', $by, $reason, $b['id']); $u->execute();
 if ($u->affected_rows < 1) throw new Exception('ใบจองนี้ถูกเปลี่ยนไปแล้ว');
-carNotify($conn, 'car_cancel', '↩️ ยกเลิกการจองรถ', $b, ['โดย' => $by, 'เหตุผล' => $reason]);
+// มีคนขับแล้ว → หัวข้อบอกคนขับเลยว่าไม่ต้องไป
+carNotify($conn, 'car_cancel', '↩️ ยกเลิกการจองรถ' . ($b['status'] === 'approved' && $b['driver_name'] ? " — {$b['driver_name']} ไม่ต้องไป" : ''), $b, ['โดย' => $by, 'เหตุผล' => $reason]);
 echo json_encode(['status' => 'success']);

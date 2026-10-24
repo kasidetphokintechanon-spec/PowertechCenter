@@ -237,9 +237,43 @@ function roomNotify($conn, $event, $title, $b, $extra = [], $force = false) {
     $when = date('d/m H:i', strtotime($b['start_at'])) . '–' . (date('Y-m-d', strtotime($b['start_at'])) === date('Y-m-d', strtotime($b['end_at'])) ? date('H:i', strtotime($b['end_at'])) : date('d/m H:i', strtotime($b['end_at'])));
     $lines = ["<b>{$title} — {$b['code']}</b>", "<b>ห้อง:</b> {$b['room_name']}", "<b>เวลา:</b> {$when} · {$b['attendees']} คน",
         !empty($b['host']) ? "<b>ประธาน:</b> {$b['host']}" : '', !empty($b['has_guest']) ? "<b>แขกภายนอก:</b> {$b['guest_company']}" : '',
-        "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : '') . ($b['contact'] ? " · {$b['contact']}" : ''),
+        "<b>ผู้จอง:</b> {$b['booker_name']}" . ($b['department'] ? " · {$b['department']}" : ''),
         $ex ? "<b>เตรียม:</b> " . roomExtrasText($ex, $b['room_company'] ?? null) . ($b['extras_note'] ? " ({$b['extras_note']})" : '') : '<b>เตรียม:</b> -'];
     foreach ($extra as $k => $v) if ($v !== null && $v !== '') $lines[] = "<b>{$k}:</b> {$v}";
     // ส่งตามบริษัทเจ้าของห้อง (กลุ่มผู้ดูแลห้องนั้น) ไม่ใช่บริษัทผู้จอง — คน PT4 จองห้อง PTA ต้องเตือนผู้ดูแล PTA
-    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['room_company'] ?? '') ?: ($b['company'] ?: null));
+    sendNotify($conn, implode("\n", array_filter($lines)), $event, ($b['room_company'] ?? '') ?: ($b['company'] ?: null), null,
+        function_exists('notifyLink') ? notifyLink($conn, 'rooms.html?tab=keep', ($b['status'] ?? '') === 'pending' ? 'เปิดดู / อนุมัติ' : 'เปิดดู / เตรียมของ') : null);
+}
+
+/**
+ * สรุปเช้าผู้ดูแลห้องประชุม (07:00–09:00 วันทำงาน · วันละครั้งต่อบริษัท) — ห้องไหนต้องเตรียมอะไรวันนี้ + รออนุมัติ
+ * แทนการแจ้งทุกการจอง (กลุ่มรก) · ไม่มีอะไรต้องทำ = ไม่ส่ง
+ */
+function _cronRoomDaily($conn) {
+    _initRoomTables($conn);
+    $today = date('Y-m-d'); $from = "$today 00:00:00"; $to = date('Y-m-d', strtotime('+1 day')) . ' 00:00:00';
+    $st = $conn->prepare("SELECT b.*, r.name AS room_name, r.company AS room_company FROM rm_bookings b JOIN rm_rooms r ON r.id = b.room_id
+        WHERE (b.status = 'booked' AND b.start_at < ? AND b.end_at > ?) OR (b.status = 'pending' AND b.end_at > NOW()) ORDER BY b.start_at");
+    $st->bind_param('ss', $to, $from); $st->execute();
+    $by = [];
+    foreach ($st->get_result()->fetch_all(MYSQLI_ASSOC) as $b) $by[(string)$b['room_company']][] = $b;
+    $dTh = (int)date('j') . '/' . date('m') . '/' . (date('Y') + 543);
+    foreach ($by as $co => $rows) {
+        $ref = "$today:" . ($co ?: '-');
+        if (notifyAlreadySent($conn, 'room_daily', $ref)) continue;
+        $prep = array_filter($rows, fn($b) => $b['status'] === 'booked' && $b['extras'] !== '' && $b['extras'] !== null && !$b['prepared_at']);
+        $pend = array_filter($rows, fn($b) => $b['status'] === 'pending');
+        if (!$prep && !$pend) continue;
+        $all = count(array_filter($rows, fn($b) => $b['status'] === 'booked'));
+        $tm = fn($b) => date('H:i', strtotime($b['start_at'])) . '–' . date('H:i', strtotime($b['end_at']));
+        $lines = ["<b>☀️ ห้องประชุมวันนี้ {$dTh}" . ($co ? " ({$co})" : '') . ' — ต้องเตรียม ' . count($prep) . ' ห้อง</b>'];
+        if ($prep) {
+            $lines[] = '<b>ต้องเตรียม:</b>';
+            foreach ($prep as $b) $lines[] = '• ' . $tm($b) . " {$b['room_name']} — " . roomExtrasText(array_filter(explode(',', $b['extras'])), $co ?: null)
+                . ($b['extras_note'] ? " ({$b['extras_note']})" : '') . ((int)$b['attendees'] ? " · {$b['attendees']} คน" : '') . ((int)$b['has_guest'] && $b['guest_company'] ? " · แขก {$b['guest_company']}" : '');
+        }
+        if ($pend) $lines[] = '<b>รออนุมัติ:</b> ' . count($pend) . ' ใบ';
+        $lines[] = "<b>การจองวันนี้ทั้งหมด:</b> {$all} รายการ";
+        sendNotify($conn, implode("\n", $lines), 'room_daily', $co ?: null, $ref, function_exists('notifyLink') ? notifyLink($conn, 'rooms.html?tab=keep', 'เปิดหน้าผู้ดูแลห้อง') : null);
+    }
 }

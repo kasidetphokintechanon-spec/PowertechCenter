@@ -13,4 +13,5 @@ if ($driver) {
 // ใบที่ขอคนขับ เอาคนขับออกได้ (กลับเป็น "ยังไม่ได้เลือก") — ขึ้นเตือนในงานคนขับให้จัดใหม่
 $u = $conn->prepare("UPDATE cr_bookings SET driver_id = ? WHERE id = ? AND status IN ('approved','returning')");
 $u->bind_param('ii', $driver, $b['id']); $u->execute();
+if ((int)$driver !== (int)$b['driver_id']) carNotifyDriverJob($conn, carGet($conn, $b['id']), $b['driver_name'] ?: null);
 echo json_encode(['status' => 'success']);
