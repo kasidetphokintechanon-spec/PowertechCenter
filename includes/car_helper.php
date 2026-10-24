@@ -204,7 +204,7 @@ function carNotifyDriverJob($conn, $b, $prev = null) {
  * แจ้งเตือนตามเวลา (เรียกจาก _checkNotifyCrons ทุก 5 นาที) · กันส่งซ้ำด้วย notify_log (event + ref)
  *   car_daily        16:00–18:00 งานคนขับ + ใบจองของวันทำงานถัดไป แยกกลุ่มตามบริษัทเจ้าของรถ (วันละครั้งต่อบริษัท)
  *   car_pending_soon อีกไม่ถึง 1 ชม. จะออกรถ แต่ยังไม่อนุมัติ (ต่อใบ ครั้งเดียว) — ระบบเดิมมีใบที่ไม่มีใครกดหลายร้อยใบ
- *   car_key_overdue  เลยเวลาคืน 1 ชม. แล้วยังไม่รับกุญแจ (ต่อใบ ครั้งเดียว · ส่งเฉพาะ 07–20 น.)
+ *   car_key_overdue  เลยเวลาคืน 30 นาที แล้วยังไม่รับกุญแจ (คืนช้าไม่กี่นาทีเป็นเรื่องปกติ — เตือนตรงเวลากลุ่มจะรก) (ต่อใบ ครั้งเดียว · ส่งเฉพาะ 07–20 น.)
  */
 function _cronCars($conn) {
     _initCarTables($conn);
@@ -218,12 +218,12 @@ function _cronCars($conn) {
         carNotify($conn, 'car_pending_soon', '⏳ ใกล้เวลาออกรถ — ยังไม่อนุมัติ', $b, ['ออกรถ' => $min > 0 ? "อีก {$min} นาที" : 'ถึงเวลาแล้ว'], $b['code']);
     }
     if ($hm < '07:00' || $hm >= '20:00') return;
-    foreach ($ids("SELECT id FROM cr_bookings WHERE status IN ('approved','returning') AND end_at < NOW() - INTERVAL 1 HOUR") as $id) {
+    foreach ($ids("SELECT id FROM cr_bookings WHERE status IN ('approved','returning') AND end_at < NOW() - INTERVAL 30 MINUTE") as $id) {
         $b = carGet($conn, (int)$id);
         if (!$b || notifyAlreadySent($conn, 'car_key_overdue', $b['code'])) continue;
-        $late = (int)round((time() - strtotime($b['end_at'])) / 3600);
+        $lm = (int)round((time() - strtotime($b['end_at'])) / 60); $late = intdiv($lm, 60);
         carNotify($conn, 'car_key_overdue', '🔑 เลยเวลาคืนรถ — ยังไม่รับกุญแจ', $b,
-            ['สถานะ' => $b['status'] === 'returning' ? 'คนจองกดคืนแล้ว รอผู้ดูแลรับกุญแจ' : 'ยังไม่คืนรถ', 'เลยมา' => $late >= 24 ? round($late / 24) . ' วัน' : "{$late} ชม."], $b['code']);
+            ['สถานะ' => $b['status'] === 'returning' ? 'คนจองกดคืนแล้ว รอผู้ดูแลรับกุญแจ' : 'ยังไม่คืนรถ', 'เลยมา' => $late >= 24 ? round($late / 24) . ' วัน' : ($late ? "{$late} ชม." : "{$lm} นาที")], $b['code'], 'cars.html?tab=keep&view=active', 'รับกุญแจคืน');
     }
 }
 

@@ -17,7 +17,7 @@
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
     <script src="js/vendor/qrcode.min.js"></script>
     <script src="js/doc-print.js?v=20261023"></script>
-    <script src="js/ticket-print.js?v=20261022b"></script>
+    <script src="js/ticket-print.js?v=20261024a"></script>
     <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/enterprise-theme.css?v=20261021">
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
@@ -262,7 +262,7 @@ const CATS = [
 const BUILDINGS = ['F4', 'F5', 'F6', 'F7', 'F8', 'F16-17', 'F20', 'PTE สำนักงาน'];
 const URG = [['ปกติ', 'ทั่วไป', 'sla_normal'], ['ด่วน', 'ด่วน', 'sla_urgent'], ['ด่วนที่สุด', 'ทำงานไม่ได้เลย', 'sla_critical']];
 const WHEN = ['วันนี้', 'เมื่อวาน', 'หลายวันแล้ว', 'เป็น ๆ หาย ๆ'];
-const STATUS_TH = { 'Pending': 'รอรับเรื่อง', 'Received': 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม', 'Waiting for Parts': 'รออะไหล่', 'Waiting Parts': 'รออะไหล่', 'Parts Received': 'ได้อะไหล่แล้ว', 'Waiting for User': 'รอคุณตอบกลับ', 'Sent to Vendor': 'ส่งซ่อมภายนอก', 'Temporary Fix': 'แก้ชั่วคราว', 'PR Submitted': 'ขอซื้อ (PR)', 'PO Issued': 'สั่งซื้อแล้ว (PO)', 'Awaiting Confirmation': 'รอคุณยืนยัน', 'Completed': 'เสร็จแล้ว', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิก' };
+const STATUS_TH = { 'Pending': 'รอรับเรื่อง', 'Received': 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม', 'Waiting for Parts': 'รออะไหล่', 'Waiting Parts': 'รออะไหล่', 'Parts Received': 'ได้อะไหล่แล้ว', 'Waiting for User': 'รอคุณตอบกลับ', 'Sent to Vendor': 'ส่งซ่อมภายนอก', 'Temporary Fix': 'แก้ชั่วคราว', 'PR Submitted': 'ขอซื้อ (PR)', 'PO Issued': 'สั่งซื้อแล้ว (PO)', 'Awaiting Confirmation': 'รอคุณยืนยัน', 'Completed': 'เสร็จแล้ว', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิกแล้ว' };
 const STATUS_C = { 'Pending': '#2563eb', 'Received': '#2563eb', 'Awaiting Confirmation': '#7c3aed', 'Waiting for User': '#dc2626', 'Completed': '#16a34a', 'Unrepairable': '#64748b', 'Cancelled': '#64748b' };
 const CLOSED = ['Completed', 'Cancelled', 'Unrepairable'];
 

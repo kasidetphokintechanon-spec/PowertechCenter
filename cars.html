@@ -103,6 +103,12 @@ html.dark .wk .h.wait { background:repeating-linear-gradient(135deg, rgba(245,15
 html.dark .wk .h.free { color:#86efac; }
 .wk-help { display:flex; gap:10px; align-items:center; padding:10px 14px; font-size:12.5px; border-bottom:1px solid var(--ptc-border); background:color-mix(in srgb, #16a34a 6%, var(--ptc-surface)); color:var(--ptc-text-2); }
 .wk-help b { color:#15803d; } html.dark .wk-help b { color:#86efac; }
+/* แถบเมนูผู้ดูแล — แบ่ง 3 กลุ่ม: ต้องทำ (เด่นสุด) · ดูตาราง · จัดการ (ชิดขวา จาง) */
+.kt { display:flex; gap:10px 18px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+.kg { display:flex; gap:6px; align-items:center; flex-wrap:wrap; } .kg > b { font-size:11px; color:var(--ptc-text-muted); font-weight:700; margin-right:2px; }
+.kg .chip .n { min-width:18px; height:18px; border-radius:9px; background:var(--ptc-border); color:var(--ptc-text-2); font-size:11px; display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
+.kg .chip.todo { border-color:#f59e0b; } .kg .chip.todo .n { background:#d97706; color:#fff; }
+.kg.mng .chip { background:transparent; color:var(--ptc-text-2); }
 /* ฟอร์ม */
 /* ช่องบังคับ — ดอกจันแดงแบบเดียวกับหน้าแจ้งซ่อม */
 .req { color:var(--ptc-danger, #dc2626); font-weight:700; margin-left:2px; }
@@ -127,6 +133,12 @@ html.dark .wk .h.free { color:#86efac; }
 .dt b { display:block; font-size:17px; line-height:1.15; } .dt span { font-size:11px; color:var(--ptc-text-muted); }
 .row .tx { flex:1; min-width:220px; } .row .tx b { font-size:14px; } .row .tx div { font-size:12.5px; color:var(--ptc-text-muted); overflow-wrap:anywhere; }
 .row.off { opacity:.55; }
+/* รายละเอียดฝั่งผู้ดูแล: หัวข้อเทาเล็ก + เนื้อหาสีเข้ม — เดิมเป็นบรรทัดเทาต่อกันด้วย · แยกไม่ออกว่าอันไหนคืออะไร */
+.row .tx .kv { display:flex; flex-wrap:wrap; gap:3px 16px; margin-top:5px; color:var(--ptc-text); font-size:12.5px; }
+.kl { font-style:normal; color:var(--ptc-text-muted); font-size:11.5px; margin-right:5px; white-space:nowrap; }
+.sumt { width:100%; border-collapse:collapse; font-size:13px; text-align:left; margin-bottom:10px; }
+.sumt td { padding:5px 0; border-bottom:1px solid var(--ptc-border); vertical-align:top; color:var(--ptc-text); }
+.sumt td:first-child { width:96px; color:var(--ptc-text-muted); font-size:12px; }
 .acts { display:flex; gap:6px; flex-wrap:wrap; }
 .pst { margin-top:6px; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:6px; }
 .row .tx .pst.wait { color:#b45309; } .row .tx .pst.ok { color:#15803d; } .row .tx .pst.bad { color:#dc2626; } .row .tx .pst.key { color:#0369a1; } .pst small { font-weight:500; color:var(--ptc-text-muted); }
@@ -326,7 +338,7 @@ function renderWeek() {
         if (!bs.length) return `<button class="h free ${past ? 'past' : ''}" ${past ? 'disabled' : `onclick="pickHalf(${c.id},'${d}','${s0}','${e0}')"`} title="${t} ${s0}–${e0} ว่าง"><span class="lb">ว่าง</span><small>${t}</small></button>`;
         const b = bs[0], cls = b.mine ? 'me' : b.status === 'pending' ? 'wait' : ['returned', 'returning'].includes(b.status) ? 'done' : 'ok';
         const tip = bs.map(x => `${hm(x.start_at)}–${hm(x.end_at)} ${x.destination || x.purpose} · ${x.rider_name || x.booker_name}${x.status === 'pending' ? ' (รออนุมัติ)' : ''}`).join('\n');
-        return `<button class="h ${cls} ${past ? 'past' : ''}" onclick="showBk(${b.id})" title="${esc(tip)}"><span>${b.status === 'pending' ? '🕓 ' : ''}${hm(b.start_at) < pad(a) + ':00' ? '…' : hm(b.start_at)}–${hm(b.end_at) > pad(z) + ':00' || b.end_at.slice(0, 10) > d ? '…' : hm(b.end_at)}${bs.length > 1 ? ' +' + (bs.length - 1) : ''}</span><small>${esc(b.destination || b.purpose)}</small></button>`;
+        return `<button class="h ${cls} ${past ? 'past' : ''}" onclick="showBk(${b.id})" title="${esc(tip)}"><span>${b.status === 'pending' ? '🕓 ' : ''}${(() => { const st = b.start_at.slice(0, 10) < d || hm(b.start_at) < pad(a) + ':00' ? '…' : hm(b.start_at), en = b.end_at.slice(0, 10) > d || hm(b.end_at) > pad(z) + ':00' ? '…' : hm(b.end_at); return st === '…' && en === '…' ? 'ทั้งช่วง' : st === '…' ? 'ถึง ' + en : en === '…' ? st + ' เป็นต้นไป' : st + '–' + en; })()}${bs.length > 1 ? ' +' + (bs.length - 1) : ''}</span><small>${esc(b.destination || b.purpose)}</small></button>`;
     }).join('')}</div>`;
     const types = [...new Set(WK.cars.map(r => r.car_type).filter(Boolean))].sort(), cos = [...new Set(WK.cars.map(r => r.company).filter(Boolean))].sort();
     gid('v-day').innerHTML = `<div class="card">
@@ -392,40 +404,46 @@ function showBk(id) {
 }
 
 // ── สถานะใบจอง (ใช้ทั้งการจองของฉัน และผู้ดูแลรถ) ──
-function stOf(b) {
-    const now = new Date(), started = toD(b.start_at) <= new Date(now.getTime() + 36e5), late = toD(b.end_at) < now;
+// keeper: คำต่างกันตามคนดู — "รอรับกุญแจ" ฝั่งคนจองอ่านแล้วนึกว่าตัวเองต้องไปรับกุญแจ
+function stOf(b, keeper) {
+    const now = new Date(), late = toD(b.end_at) < now;
     if (b.status === 'pending') return ['รออนุมัติ', '#d97706'];
     if (b.status === 'rejected') return ['ไม่อนุมัติ', '#dc2626'];
-    if (b.status === 'cancelled') return ['ยกเลิก', '#64748b'];
+    if (b.status === 'cancelled') return ['ยกเลิกแล้ว', '#64748b'];
     if (b.status === 'returned') return ['คืนแล้ว', '#64748b'];
-    if (b.status === 'returning') return ['รอรับกุญแจ', '#0891b2'];
+    if (b.status === 'returning') return [keeper ? 'รอรับกุญแจคืน' : 'แจ้งคืนแล้ว', '#0891b2'];
     if (late) return ['เลยเวลาคืน', '#dc2626'];
-    return started ? ['กำลังใช้รถ', '#2563eb'] : ['อนุมัติแล้ว', '#16a34a'];
+    // ช่วง 1 ชม. ก่อนออก ผู้ดูแลต้องเตรียมส่งกุญแจ แต่ยังไม่ใช่ "กำลังใช้"
+    if (toD(b.start_at) <= now) return ['กำลังใช้รถ', '#2563eb'];
+    return toD(b.start_at) <= new Date(now.getTime() + 36e5) ? ['ใกล้ออกรถ', '#2563eb'] : ['อนุมัติแล้ว', '#16a34a'];
 }
+// รายละเอียดแบบ หัวข้อ + เนื้อหา (ค่าว่างไม่แสดง) — ค่าที่ส่งเข้ามาต้อง escape แล้ว
+const kvs = pairs => `<div class="kv">${pairs.filter(p => p[1] && String(p[1]).trim()).map(([k, v]) => `<span><i class="kl">${k}</i>${v}</span>`).join('')}</div>`;
 function rowHtml(b, keeper) {
-    const now = new Date(), [lbl, col] = stOf(b), multi = b.end_at.slice(0, 10) !== b.start_at.slice(0, 10), d = toD(b.start_at);
+    const now = new Date(), [lbl, col] = stOf(b, keeper), multi = b.end_at.slice(0, 10) !== b.start_at.slice(0, 10), d = toD(b.start_at);
     const live = ['pending', 'approved', 'returning'].includes(b.status), started = toD(b.start_at) <= new Date(now.getTime() + 36e5);
     const drv = b.need_driver ? (b.driver_name ? (b.status === 'pending' ? '🧑‍✈️ ขอคนขับ ' + esc(b.driver_name) : '🧑‍✈️ คนขับ ' + esc(b.driver_name) + (b.driver_phone ? ' ' + esc(b.driver_phone) : '')) : '🧑‍✈️ ขอคนขับ') : '🧑 ขับเอง';
     // สถานะเขียนเป็นประโยคแยกจากปุ่ม (บทเรียนจากหน้าห้องประชุม: คำบนปุ่มกับสถานะซ้ำกันแล้วงง)
     const pst = b.status === 'returning' ? `<div class="pst key"><i class="fa fa-key"></i>สถานะ: ${keeper ? 'คนจองคืนรถแล้ว — รอคุณรับกุญแจ' : 'คืนรถแล้ว — นำกุญแจไปคืนผู้ดูแลรถ'} <small>${b.returned_at ? hm(b.returned_at) : ''}${b.return_note ? ' · ' + esc(b.return_note) : ''}</small></div>`
         : b.status === 'approved' && toD(b.end_at) < now ? `<div class="pst bad"><i class="fa fa-clock"></i>สถานะ: เลยเวลาคืนแล้ว ยังไม่คืนรถ</div>`
-        : b.status === 'approved' && started ? `<div class="pst ok"><i class="fa fa-car-side"></i>สถานะ: กำลังใช้รถ${keeper ? '' : ' — ใช้เสร็จกด "คืนรถแล้ว" แล้วนำกุญแจไปคืน'}</div>`
+        : b.status === 'approved' && started ? `<div class="pst ok"><i class="fa fa-car-side"></i>สถานะ: ${toD(b.start_at) <= now ? 'กำลังใช้รถ' + (keeper ? '' : ' — ใช้เสร็จ นำกุญแจไปคืนผู้ดูแลรถ (ผู้ดูแลกดรับคืนในระบบ)') : 'ใกล้ออกรถ ' + hm(b.start_at) + (keeper ? ' — เตรียมส่งกุญแจ' : ' — ไปรับกุญแจที่ผู้ดูแลรถ')}</div>`
         : b.status === 'returned' ? `<div class="pst ok"><i class="fa fa-circle-check"></i>สถานะ: รับกุญแจคืนแล้ว <small>${esc([b.received_by, b.received_at ? thD(b.received_at) + ' ' + hm(b.received_at) : ''].filter(Boolean).join(' · '))}</small></div>`
         : ['rejected', 'cancelled'].includes(b.status) && b.cancel_reason ? `<div class="pst bad"><i class="fa fa-circle-info"></i>เหตุผล: ${esc(b.cancel_reason)}</div>` : '';
     let acts = '';
     if (b.joined) return `<div class="row ${!live ? 'off' : ''}"><div class="dt"><b>${d.getDate()}</b><span>${d.toLocaleDateString('th-TH', { month: 'short' })}</span></div><div class="tx"><b>${esc(b.plate)} · ${esc(b.purpose)}</b> <span class="pill" style="--c:${col}">${lbl}</span> <span class="pill" style="--c:#7c3aed">ติดรถไปด้วย</span><div>${[esc(b.destination || ''), 'ของ ' + esc(b.booker_name), hm(b.start_at) + '–' + hm(b.end_at), drv].filter(Boolean).join(' · ')}</div></div><div class="acts">${live && b.status !== 'returning' ? `<button class="btn sm danger" onclick="joinBk(${b.id},true)">ออกจากการติดรถ</button>` : ''}</div></div>`;
     if (keeper && b.status === 'pending') acts = `<button class="btn ok" onclick="decideBk(${b.id},'approve')"><i class="fa fa-check"></i> อนุมัติ</button><button class="btn danger" onclick="decideBk(${b.id},'reject')">ไม่อนุมัติ</button>`;
     else if (keeper && (b.status === 'returning' || (b.status === 'approved' && started))) acts = `<button class="btn ok" onclick="receiveBk(${b.id})"><i class="fa fa-key"></i> รับกุญแจคืนแล้ว</button>`;
-    else if (!keeper && b.status === 'approved' && started) acts = `<button class="btn ok" onclick="returnBk(${b.id})"><i class="fa fa-key"></i> คืนรถแล้ว</button>`;
+    else if (!keeper && b.status === 'approved' && started) acts = `<button class="btn sm" onclick="returnBk(${b.id})" title="ใช้เมื่อผู้ดูแลไม่อยู่ — ฝากกุญแจไว้แล้วแจ้งในระบบ"><i class="fa fa-key"></i> แจ้งคืนรถ (ผู้ดูแลไม่อยู่)</button>`;
     if (keeper && ['approved', 'returning'].includes(b.status)) acts += `<button class="btn sm" onclick="setDriver(${b.id})"><i class="fa fa-id-card"></i> ${b.driver_id ? 'เปลี่ยนคนขับ' : b.need_driver ? 'เลือกคนขับ' : 'ส่งคนขับ'}</button>`;
     // ออกรถแล้วไม่มีปุ่มยกเลิก (ทั้งคนจองและผู้ดูแล) — ต้องปิดด้วยการคืนกุญแจ ประวัติจะได้รู้ว่ากุญแจอยู่กับใคร
     if (!keeper && b.mine && b.status === 'pending') acts += `<button class="btn sm" onclick="editBk(${b.id})"><i class="fa fa-pen"></i> แก้</button>`;
     if (['pending', 'approved'].includes(b.status) && !(b.status === 'approved' && started)) acts += `<button class="btn sm danger" onclick="cancelBk(${b.id},${keeper ? 1 : 0})">ยกเลิก</button>`;
     return `<div class="row ${!live && !keeper ? 'off' : ''}"><div class="dt"><b>${keeper ? hm(b.start_at) : d.getDate()}</b><span>${keeper ? hm(b.end_at) : d.toLocaleDateString('th-TH', { month: 'short' })}</span></div>
         <div class="tx"><b>${esc(b.plate)} · ${esc(b.purpose)}</b> <span class="pill" style="--c:${col}">${lbl}</span>
-            <div>${[esc(b.destination || ''), keeper ? (b.rider_name ? 'ผู้ใช้รถ ' + esc(b.rider_name) + ' (จองโดย ' + esc(b.booker_name) + ')' : esc(b.booker_name)) + (b.department ? ' · ' + esc(b.department) : '') : esc(b.car_name || '') + (b.rider_name ? ' · จองให้ ' + esc(b.rider_name) : ''), keeper ? esc(b.contact || '') : '',
-                (multi ? thD(b.start_at) + ' – ' + thD(b.end_at) + ' ' : '') + (keeper ? '' : hm(b.start_at) + '–' + hm(b.end_at)), b.passengers ? b.passengers + ' คน' : '', drv].filter(x => x && x.trim()).join(' · ')}</div>
-            ${b.passenger_names ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;align-items:center">ร่วมเดินทาง:&nbsp;${splitP(b.passenger_names).map(n => `<span class="ppl">${avatar(n)}${esc(n)}</span>`).join('')}</div>` : ''}${b.note ? `<div style="margin-top:3px">หมายเหตุ: ${esc(b.note)}</div>` : ''}${pst}</div><div class="acts">${acts}</div></div>`;
+            ${keeper ? kvs([['ไปที่', esc(b.destination || '')], ['ผู้ใช้รถ', esc(b.rider_name || b.booker_name)], ['จองโดย', b.rider_name ? esc(b.booker_name) : ''], ['แผนก', esc(b.department || '')], ['โทร', esc(b.contact || '')],
+                ['วันที่', multi ? thD(b.start_at) + ' – ' + thD(b.end_at) : ''], ['จำนวน', b.passengers ? b.passengers + ' คน' : ''], ['คนขับ', drv.replace(/^\S+ /, '')]])
+              : `<div>${[esc(b.destination || ''), esc(b.car_name || '') + (b.rider_name ? ' · จองให้ ' + esc(b.rider_name) : ''), (multi ? thD(b.start_at) + ' – ' + thD(b.end_at) + ' ' : '') + hm(b.start_at) + '–' + hm(b.end_at), b.passengers ? b.passengers + ' คน' : '', drv].filter(x => x && x.trim()).join(' · ')}</div>`}
+            ${b.passenger_names ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;align-items:center"><i class="kl">ร่วมเดินทาง</i>${splitP(b.passenger_names).map(n => `<span class="ppl">${avatar(n)}${esc(n)}</span>`).join('')}</div>` : ''}${b.note ? `<div style="margin-top:3px;color:var(--ptc-text)"><i class="kl">หมายเหตุ</i>${esc(b.note)}</div>` : ''}${pst}</div><div class="acts">${acts}</div></div>`;
 }
 
 // ── การจองของฉัน ──
@@ -433,7 +451,7 @@ function renderMine() {
     const live = mine.filter(b => ['pending', 'approved', 'returning'].includes(b.status));
     gid('mine-cnt').textContent = live.length; gid('mine-cnt').style.display = live.length ? '' : 'none';
     gid('v-mine').innerHTML = `<div class="card">${mine.length ? mine.map(b => rowHtml(b)).join('') : '<div class="empty"><i class="fa fa-car"></i><br>ยังไม่มีการจอง — ไปที่ "ดูรถว่าง" เพื่อจอง</div>'}</div>
-        <p class="muted" style="font-size:12px;margin-top:8px">ใช้รถเสร็จ: กด "คืนรถแล้ว" แล้วนำกุญแจไปคืนผู้ดูแลรถ — ใบจะปิดเมื่อผู้ดูแลรับกุญแจ · แสดงใบที่ยังไม่จบ และย้อนหลัง 90 วัน</p>`;
+        <p class="muted" style="font-size:12px;margin-top:8px">ใช้รถเสร็จ: นำกุญแจไปคืนผู้ดูแลรถ — ผู้ดูแลกดรับคืน ใบจะปิดเอง · ผู้ดูแลไม่อยู่: ฝากกุญแจไว้แล้วกด "แจ้งคืนรถ" · แสดงใบที่ยังไม่จบ และย้อนหลัง 90 วัน</p>`;
 }
 // แก้ใบจองระหว่างรออนุมัติ (กดผิด ขับเอง/ขอคนขับ เวลา ที่ไป) — อนุมัติแล้วแก้เองไม่ได้
 async function editBk(id) {
@@ -473,9 +491,9 @@ async function cancelBk(id, keeper) {
     try { await post({ action: 'car_cancel', id, reason: (value || '').trim() }); ptcToast('success', 'ยกเลิกแล้ว', 'รถว่างให้คนอื่นจองได้แล้ว'); loadMine(); loadDay(); if (keeper) loadKeep(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
 }
 async function returnBk(id) {
-    const { isConfirmed, value } = await ptcSwal().fire({ title: 'คืนรถแล้ว?', html: '<p style="margin:0 0 8px;font-size:13.5px">กดแล้ว <b>นำกุญแจไปคืนผู้ดูแลรถ</b> — ใบจะปิดเมื่อผู้ดูแลรับกุญแจ</p>', input: 'text', inputPlaceholder: 'หมายเหตุ เช่น น้ำมันเหลือครึ่งถัง, ไฟเตือนขึ้น (ไม่บังคับ)', showCancelButton: true, confirmButtonText: 'คืนรถแล้ว', cancelButtonText: 'ยังไม่คืน' });
+    const { isConfirmed, value } = await ptcSwal().fire({ title: 'แจ้งคืนรถ', html: '<p style="margin:0 0 8px;font-size:13.5px">ใช้เมื่อ<b>ผู้ดูแลรถไม่อยู่</b> — ฝากกุญแจไว้แล้วแจ้ง ระบบส่ง LINE บอกผู้ดูแลให้มารับกุญแจ<br>ถ้าผู้ดูแลอยู่ ยื่นกุญแจให้เลย ไม่ต้องกดปุ่มนี้</p>', input: 'text', inputPlaceholder: 'กุญแจฝากไว้ที่ไหน / หมายเหตุ เช่น น้ำมันเหลือครึ่งถัง', showCancelButton: true, confirmButtonText: 'แจ้งคืนรถ', cancelButtonText: 'ยกเลิก' });
     if (!isConfirmed) return;
-    try { await post({ action: 'car_return', id, note: (value || '').trim() }); ptcToast('success', 'สถานะ: คืนรถแล้ว — รอรับกุญแจ', 'นำกุญแจไปคืนผู้ดูแลรถ'); loadMine(); loadDay(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
+    try { await post({ action: 'car_return', id, note: (value || '').trim() }); ptcToast('success', 'สถานะ: แจ้งคืนแล้ว', 'นำกุญแจไปคืนผู้ดูแลรถ'); loadMine(); loadDay(); } catch (e) { ptcAlert('error', 'ไม่สำเร็จ', e.message); }
 }
 
 // ── ผู้ดูแลรถ ──
@@ -483,8 +501,9 @@ let kv = 'pending', K = null, KC = { pending: 0, receive: 0, overdue: 0 };
 // ตัวเลขแท็บผู้ดูแล = ตัวเลขบนเมนูซ้าย (รออนุมัติ + รอรับกุญแจ + เลยเวลาคืน) ใช้ที่มาเดียวกันจะได้ไม่ขัดกัน
 function setKeepCnt(t) { if (t) KC = t; const n = KC.pending + KC.receive + KC.overdue; gid('keep-cnt').textContent = n; gid('keep-cnt').style.display = n ? '' : 'none'; }
 function keepTabs() {
-    const act = KC.receive + KC.overdue;
-    return `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">${[['pending', 'รออนุมัติ' + (KC.pending ? ' (' + KC.pending + ')' : '')], ['active', 'ใช้รถอยู่ / รับกุญแจคืน' + (act ? ' (' + act + ')' : '')], ['today', 'วันนี้'], ['tomorrow', 'พรุ่งนี้'], ['week', '7 วันข้างหน้า'], ['report', 'รายงาน'], ['cars', 'รถ'], ['drivers', 'คนขับ']].map(([k, t]) => `<button class="chip ${kv === k ? 'on' : ''}" onclick="kv='${k}';loadKeep()">${t}</button>`).join('')}</div>`;
+    const btn = ([k, t, n]) => `<button class="chip ${kv === k ? 'on' : ''} ${n ? 'todo' : ''}" data-kv="${k}" onclick="kv='${k}';loadKeep()">${t}${n !== undefined ? ` <span class="n">${n}</span>` : ''}</button>`;
+    const grp = (label, items, cls) => `<div class="kg ${cls || ''}"><b>${label}</b>${items.map(btn).join('')}</div>`;
+    return `<div class="kt">${grp('ต้องทำ', [['pending', 'รออนุมัติ', KC.pending], ['active', 'รับกุญแจคืน', KC.receive + KC.overdue]])}${grp('ดูตาราง', [['today', 'วันนี้'], ['tomorrow', 'พรุ่งนี้'], ['week', '7 วัน']])}<span style="flex:1"></span>${grp('จัดการ', [['report', 'รายงาน'], ['cars', 'รถ'], ['drivers', 'คนขับ']], 'mng')}</div>`;
 }
 async function loadKeep() {
     gid('v-keep').innerHTML = keepTabs() + '<div class="card empty">กำลังโหลด…</div>';
@@ -498,7 +517,7 @@ async function loadKeep() {
     const todo = b => b.status === 'pending' || b.status === 'returning' || (b.status === 'approved' && toD(b.end_at) < now);
     const rank = b => todo(b) ? 0 : ['approved'].includes(b.status) ? 1 : 2;
     K.data.slice().sort((a, b) => rank(a) - rank(b) || a.start_at.localeCompare(b.start_at)).forEach(b => { const k = kv === 'pending' ? b.start_at.slice(0, 10) : (b.start_at.slice(0, 10) < d0 ? d0 : b.start_at.slice(0, 10)); (byDay[k] = byDay[k] || []).push(b); });
-    const empty = { pending: 'ไม่มีใบจองรออนุมัติ', active: 'ไม่มีรถที่ออกอยู่ตอนนี้' }[kv] || 'ไม่มีการจองรถของบริษัทที่คุณดูแล';
+    const empty = { pending: 'ไม่มีใบจองรออนุมัติ', active: 'ไม่มีรถที่ต้องรับกุญแจคืน — รถที่ออกอยู่ / เลยเวลาคืน จะขึ้นที่นี่' }[kv] || 'ไม่มีการจองรถของบริษัทที่คุณดูแล';
     // วันนี้ / พรุ่งนี้: สรุปให้ธุรการพิมพ์ติดบอร์ด หรือคัดลอกไปโพสต์ในกลุ่ม LINE
     const dj = ['today', 'tomorrow'].includes(kv) ? driverJobs() : null;
     const drvCard = dj ? `<div class="card" style="margin-bottom:10px"><div style="padding:11px 14px;font-weight:800;font-size:13.5px;border-bottom:1px solid var(--ptc-border);display:flex;gap:8px;align-items:center"><i class="fa fa-id-card" style="color:#0284c7"></i>งานคนขับ${kv === 'today' ? 'วันนี้' : 'พรุ่งนี้'}
@@ -528,7 +547,10 @@ async function pickDriver(b, title, okText) {
     try { ds = (await api({ action: 'car_drivers_at', id: b.id })).drivers; } catch (e) { ptcAlert('error', 'โหลดรายชื่อคนขับไม่ได้', e.message); return null; }
     const free = ds.filter(x => !x.busy).length;
     const r = await ptcSwal().fire({ title: esc(title), showCancelButton: true, confirmButtonText: okText, cancelButtonText: 'กลับ', focusConfirm: false,
-        html: `<div class="fx"><p style="margin:0;font-size:13px">${esc(b.purpose)} · ${thD(b.start_at)} ${hm(b.start_at)}–${hm(b.end_at)}<br>${b.need_driver ? '<b style="color:#d97706">ผู้จองขอคนขับ</b>' : 'ผู้จองขับเอง'} · คนขับว่าง ${free}/${ds.length} คน</p>
+        html: `<div class="fx"><table class="sumt">${[['วันเวลา', thD(b.start_at) + ' ' + hm(b.start_at) + ' – ' + (b.end_at.slice(0, 10) !== b.start_at.slice(0, 10) ? thD(b.end_at) + ' ' : '') + hm(b.end_at)], ['ไปทำอะไร', esc(b.purpose)], ['ไปที่', esc(b.destination || '')],
+                ['ผู้ใช้รถ', esc(b.rider_name || b.booker_name) + (b.department ? ' <span class="kl">· ' + esc(b.department) + '</span>' : '')], ['จองโดย', b.rider_name ? esc(b.booker_name) : ''], ['โทร', esc(b.contact || '')],
+                ['จำนวน', b.passengers ? b.passengers + ' คน' : ''], ['ร่วมเดินทาง', esc(b.passenger_names || '')], ['หมายเหตุ', esc(b.note || '')]].filter(r => r[1]).map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>
+            <p style="margin:0;font-size:13px">${b.need_driver ? '<b style="color:#d97706">ผู้จองขอคนขับ</b>' : 'ผู้จองขับเอง'} · คนขับว่าง ${free}/${ds.length} คน</p>
             <div><label>คนขับ</label><select id="d-drv"><option value="">${b.need_driver ? '— เลือกคนขับ —' : 'ไม่ใช้คนขับ (ขับเอง)'}</option>${ds.map(x => `<option value="${x.id}" ${x.busy ? 'disabled' : ''} ${x.id === b.driver_id ? 'selected' : ''}>${esc(x.name)}${x.nickname ? ' (' + esc(x.nickname) + ')' : ''} — ${x.busy ? 'ติดงาน ' + hm(x.busy.start_at) + '–' + hm(x.busy.end_at) + ' ' + esc(x.busy.plate) : 'ว่าง'}</option>`).join('')}</select></div></div>`,
         preConfirm: () => { const v = gid('d-drv').value; if (b.need_driver && free && !v) return Swal.showValidationMessage('เลือกคนขับ'); return v; } });
     return r.isConfirmed ? (r.value || '') : null;
@@ -683,6 +705,7 @@ function tab(t) {
     try { if (localStorage.getItem('car_view') === 'week') mode = 'week'; } catch (_) {}
     await (mode === 'week' ? loadWeek() : loadDay()); loadMine();
     if ((D || WK)?.can_manage) { try { const t = (await api({ action: 'car_board', view: 'pending' })).todo; setKeepCnt(t); if (!t.pending && (t.receive || t.overdue)) kv = 'active'; } catch (_) {} }
+    if (['pending', 'active', 'today', 'tomorrow', 'week', 'report', 'cars', 'drivers'].includes(qs.get('view'))) kv = qs.get('view');
     tab(['mine', 'keep'].includes(qs.get('tab')) && (qs.get('tab') !== 'keep' || D?.can_manage) ? qs.get('tab') : 'day');
     // รีเฟรชตารางทุก 1 นาที — ไม่รีเฟรชตอนกำลังพิมพ์ในฟอร์ม
     setInterval(() => { if (document.visibilityState === 'visible' && gid('v-day').style.display !== 'none' && !document.activeElement?.closest?.('.form')) (mode === 'week' ? loadWeek() : loadDay()); }, 60000);

@@ -380,7 +380,7 @@ body.index-page-root .home2 { max-width: 1320px; }
 body.index-page-root .home2 .welcome-title { font-size: 1.35rem; font-weight: 800; }
 body.index-page-root .h2-msearch { display: none; }
 
-body.index-page-root .h2-quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 12px 0 18px; }
+body.index-page-root .h2-quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; margin: 12px 0 18px; }
 body.index-page-root .h2-qa { display: flex; align-items: center; gap: 11px; padding: 12px 14px; min-width: 0; background: var(--ptc-surface); border: 1px solid var(--ptc-border); border-radius: 10px; color: var(--ptc-text); text-decoration: none; transition: border-color .12s, box-shadow .12s; }
 body.index-page-root .h2-qa:hover { border-color: var(--ptc-primary); box-shadow: var(--ptc-shadow-sm); }
 body.index-page-root .h2-qa > i { width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--card-tone-soft, var(--ptc-primary-light)); color: var(--card-tone-text, var(--ptc-primary)); border: 1px solid var(--card-tone-border, transparent); }
@@ -431,6 +431,16 @@ body.index-page-root .h2-kp span { font-size: 10.5px; color: var(--ptc-text-mute
 body.index-page-root .h2-job { display: block; padding: 11px 14px; border-bottom: 1px solid var(--ptc-border); text-decoration: none; color: var(--ptc-text); }
 body.index-page-root .h2-job:hover { background: var(--ptc-surface-2); }
 body.index-page-root .h2-job:last-child { border-bottom: 0; }
+body.index-page-root .h2-ic { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
+body.index-page-root .h2-sec { padding: 9px 14px 3px; font-size: 11px; font-weight: 700; color: var(--ptc-text-muted); background: var(--ptc-surface-2); border-bottom: 1px solid var(--ptc-border); }
+html.dark body.index-page-root .h2-ic { background: color-mix(in srgb, var(--c) 22%, transparent); }
+body.index-page-root .h2-rcv { display: flex; gap: 8px; align-items: center; margin-top: 5px; font-size: 12px; color: var(--ptc-text-2); }
+body.index-page-root .h2-rcv > span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.index-page-root .h2-rcv b { color: var(--ptc-text); font-weight: 600; }
+body.index-page-root .h2-rcv button { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; height: 26px; min-height: 0; line-height: 1; padding: 0 9px; border-radius: 6px; border: 1px solid #16a34a; background: transparent; color: #15803d; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+body.index-page-root .h2-rcv button:hover { background: #16a34a; color: #fff; }
+html.dark body.index-page-root .h2-rcv button { color: #4ade80; border-color: #22c55e; }
+html.dark body.index-page-root .h2-rcv button:hover { background: #16a34a; color: #fff; }
 body.index-page-root .h2-job-top { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 body.index-page-root .h2-job-top b { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 body.index-page-root .h2-pill { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; white-space: nowrap; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }

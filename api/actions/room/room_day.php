@@ -11,12 +11,14 @@ foreach ($rooms as &$r) {
     $rl = roomRules($conn, $r['company']); $r['open_from'] = $rl['open_from']; $r['open_to'] = $rl['open_to'];
 }
 unset($r);
-$from = $date . ' 00:00:00'; $to = date('Y-m-d', strtotime($date . ' +1 day')) . ' 00:00:00';
+// days=7 = มุมมอง 7 วัน
+$days = max(1, min(14, (int)($_GET['days'] ?? 1)));
+$from = $date . ' 00:00:00'; $to = date('Y-m-d', strtotime("$date +$days day")) . ' 00:00:00';
 $st = $conn->prepare("SELECT id, code, room_id, title, start_at, end_at, attendees, booker_id, booker_name, department, contact, extras, prepared_at, status, host, participants, has_guest, guest_company, note FROM rm_bookings
     WHERE status IN ('booked','pending') AND start_at < ? AND end_at > ? ORDER BY start_at");
 $st->bind_param('ss', $to, $from); $st->execute();
 $book = array_map('roomRow', $st->get_result()->fetch_all(MYSQLI_ASSOC));
 $extras = [];
 foreach ($allEx as $k => $v) $extras[] = ['key' => $k, 't' => $v['t'], 'i' => $v['i']];
-echo json_encode(['status' => 'success', 'date' => $date, 'now' => date('Y-m-d H:i:s'), 'rooms' => $rooms, 'bookings' => $book, 'extras' => $extras,
+echo json_encode(['status' => 'success', 'date' => $date, 'days' => $days, 'now' => date('Y-m-d H:i:s'), 'rooms' => $rooms, 'bookings' => $book, 'extras' => $extras,
     'can_manage' => roomCanManage($conn)], JSON_UNESCAPED_UNICODE);

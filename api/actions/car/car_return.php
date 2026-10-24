@@ -9,5 +9,5 @@ $note = mb_substr(trim(strip_tags((string)($_POST['note'] ?? ''))), 0, 500);
 $u = $conn->prepare("UPDATE cr_bookings SET status = 'returning', returned_at = NOW(), return_note = ? WHERE id = ? AND status = 'approved'");
 $u->bind_param('si', $note, $b['id']); $u->execute();
 if ($u->affected_rows < 1) throw new Exception('ใบจองนี้ถูกเปลี่ยนไปแล้ว');
-carNotify($conn, 'car_return', '🔑 คืนรถ — รอรับกุญแจ', $b, ['หมายเหตุ' => $note]);
+carNotify($conn, 'car_return', '🔑 คืนรถ — รอรับกุญแจ', $b, ['หมายเหตุ' => $note], null, 'cars.html?tab=keep&view=active', 'รับกุญแจคืน');
 echo json_encode(['status' => 'success']);

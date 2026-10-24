@@ -20,7 +20,7 @@
     <script src="js/ptc-swal-ui.js?v=20260530"></script>
     <script src="js/vendor/qrcode.min.js"></script>
     <script src="js/doc-print.js?v=20261023"></script>
-    <script src="js/ticket-print.js?v=20261022b"></script>
+    <script src="js/ticket-print.js?v=20261024a"></script>
     <script>(function(){const t=localStorage.getItem('theme')||'light';if(t==='dark')document.documentElement.classList.add('dark','dark-theme');})();</script>
 <style>
 /* ════ งานช่าง IT — บอร์ดคิวงาน + หน้างาน + ค้นหางานทั้งหมด · สีจาก token design-system (ธีมมืดเปลี่ยนตามเอง) ════ */
@@ -241,7 +241,7 @@ const thD = v => { const d = toDate(v); return !d || isNaN(d) ? esc(v || '') : d
 const localDate = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const nowStamp = () => new Date().toLocaleString('th-TH', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-const STATUS_TH = { 'Pending': 'รอรับเรื่อง', 'Received': 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม', 'Waiting for Parts': 'รออะไหล่', 'Waiting Parts': 'รออะไหล่', 'Parts Received': 'ได้อะไหล่แล้ว', 'Waiting for User': 'รอผู้แจ้งตอบ', 'Sent to Vendor': 'ส่งซ่อมภายนอก', 'Temporary Fix': 'แก้ชั่วคราว', 'PR Submitted': 'ขอซื้อ (PR)', 'PO Issued': 'สั่งซื้อแล้ว (PO)', 'Awaiting Confirmation': 'รอผู้แจ้งยืนยัน', 'Completed': 'เสร็จแล้ว', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิก' };
+const STATUS_TH = { 'Pending': 'รอรับเรื่อง', 'Received': 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม', 'Waiting for Parts': 'รออะไหล่', 'Waiting Parts': 'รออะไหล่', 'Parts Received': 'ได้อะไหล่แล้ว', 'Waiting for User': 'รอผู้แจ้งตอบ', 'Sent to Vendor': 'ส่งซ่อมภายนอก', 'Temporary Fix': 'แก้ชั่วคราว', 'PR Submitted': 'ขอซื้อ (PR)', 'PO Issued': 'สั่งซื้อแล้ว (PO)', 'Awaiting Confirmation': 'รอผู้แจ้งยืนยัน', 'Completed': 'เสร็จแล้ว', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิกแล้ว' };
 const STATUS_C = { 'Pending': '#2563eb', 'Received': '#2563eb', 'In Progress': '#d97706', 'Waiting for User': '#dc2626', 'Awaiting Confirmation': '#7c3aed', 'Completed': '#16a34a', 'Unrepairable': '#64748b', 'Cancelled': '#64748b', 'Sent to Vendor': '#0f766e', 'PR Submitted': '#0284c7', 'PO Issued': '#0284c7' };
 const CLOSED = ['Completed', 'Cancelled', 'Unrepairable'];
 const PARTS = ['PR Submitted', 'PO Issued', 'Waiting for Parts', 'Waiting Parts', 'Sent to Vendor'];

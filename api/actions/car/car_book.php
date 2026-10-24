@@ -40,5 +40,5 @@ try {
     $conn->commit();
 } catch (Throwable $e) { $conn->rollback(); throw $e; }
 $u = carUrgency($start);
-carNotify($conn, 'car_book', '🚗 ขออนุมัติใช้รถ' . ($u ? " · {$u}" : ''), carGet($conn, $id), [], null, 'cars.html?tab=keep', 'เปิดดู / อนุมัติ');
+carNotify($conn, 'car_book', '🚗 ขออนุมัติใช้รถ' . ($u ? " · {$u}" : ''), carGet($conn, $id), [], null, 'cars.html?tab=keep&view=pending', 'เปิดดู / อนุมัติ');
 echo json_encode(['status' => 'success', 'id' => $id, 'code' => $code, 'over_seats' => $car['seats'] > 0 && $pax > $car['seats']]);

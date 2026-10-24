@@ -192,7 +192,17 @@ try {
         $st->execute();
         foreach ($st->get_result()->fetch_all(MYSQLI_ASSOC) as $r) { $r['id'] = (int)$r['id']; $r['need_driver'] = (int)$r['need_driver']; $myCars[] = $r; }
     }
-    if (carCanManage($conn)) $carTodo = carKeeperTodo($conn);
+    if (carCanManage($conn)) {
+        $carTodo = carKeeperTodo($conn);
+        // รถที่ต้องรับกุญแจคืน (สูงสุด 3) — กดรับคืนได้จากหน้าแรกเลย: คนจองกดแจ้งคืนแล้ว → เลยเวลาคืน → ออกอยู่
+        [$cw, $cp] = carScopeSql($conn);
+        $st = $conn->prepare("SELECT b.id, b.code, b.end_at, b.status, b.booker_name, b.rider_name, c.plate FROM cr_bookings b JOIN cr_cars c ON c.id = b.car_id
+            WHERE (b.status = 'returning' OR (b.status = 'approved' AND b.start_at <= NOW() + INTERVAL 1 HOUR)){$cw}
+            ORDER BY b.status = 'returning' DESC, b.end_at < NOW() DESC, b.end_at LIMIT 3");
+        if ($cp) $st->bind_param(str_repeat('s', count($cp)), ...$cp);
+        $st->execute();
+        $carTodo['receive_list'] = array_map(fn($r) => ['id' => (int)$r['id'], 'plate' => $r['plate'], 'who' => $r['rider_name'] ?: $r['booker_name'], 'end_at' => $r['end_at'], 'status' => $r['status']], $st->get_result()->fetch_all(MYSQLI_ASSOC));
+    }
 } catch (Throwable $e) {
     error_log('[get_home_dashboard] cars: ' . $e->getMessage());
 }

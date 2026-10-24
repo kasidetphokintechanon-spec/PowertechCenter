@@ -11,7 +11,7 @@
         Pending: 'รอรับเรื่อง', Received: 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม',
         'Waiting for Parts': 'รออะไหล่', 'Temporary Fix': 'แก้ชั่วคราว',
         'PR Submitted': 'ส่ง PR', 'PO Issued': 'ออก PO', 'Parts Received': 'ได้อะไหล่',
-        'Awaiting Confirmation': 'รอยืนยัน', Completed: 'เสร็จสิ้น', Cancelled: 'ยกเลิก', Unrepairable: 'ซ่อมไม่ได้'
+        'Awaiting Confirmation': 'รอยืนยัน', Completed: 'เสร็จสิ้น', Cancelled: 'ยกเลิกแล้ว', Unrepairable: 'ซ่อมไม่ได้'
     };
     const STATUS_DOT = {
         Pending: '#f59e0b', Received: '#d97706', 'In Progress': '#3b82f6',
@@ -247,11 +247,14 @@
         const myOpen = mineReq.filter((l) => !['Completed', 'Cancelled', 'Unrepairable'].includes(l.status)).length;
         const myBadge = $('myTicketBadge');
         if (myBadge) { myBadge.textContent = myOpen; myBadge.classList.toggle('hidden', !myOpen); }
+        // ตัวเลข 4 ช่องต้องตรงกับรายการข้างล่าง (เดิมนับแค่ใบแจ้งซ่อมที่ตัวเองแจ้ง → ผู้ดูแลเห็น 0 ทั้งที่มีงานเต็ม)
+        const techJobs = ticketList.length - mineReq.length;
+        const carJobs = cp + Math.max(((ctodo && ctodo.receive_list) || []).length, cr + co); // นับแบบเดียวกับกล่องรถ (รวมรถที่ใกล้คืน)
         const kp = [
-            ['รอรับเรื่อง', mineReq.filter((l) => l.status === 'Pending').length, 'var(--ptc-orange, #ea580c)'],
-            ['กำลังดำเนินการ', mineReq.filter((l) => l.status !== 'Pending' && l.status !== 'Awaiting Confirmation').length, 'var(--ptc-primary, #2563eb)'],
-            ['รอคุณยืนยัน', mineReq.filter((l) => l.status === 'Awaiting Confirmation').length, 'var(--ptc-success, #16a34a)'],
-            ['ยืมอยู่', loanList.length, 'var(--ptc-purple, #7c3aed)'],
+            ['ต้องจัดการ', carJobs + rp + rq + techJobs, 'var(--ptc-orange, #ea580c)'],
+            ['แจ้งซ่อม', myOpen, 'var(--ptc-primary, #2563eb)'],
+            ['ยืม / เบิก', loanList.length + stockList.length, 'var(--ptc-purple, #7c3aed)'],
+            ['การจอง', roomList.length + carList.length, 'var(--ptc-success, #16a34a)'],
         ];
         const head = '<div class="h2-panel-h">งานของฉัน<a href="request.html?tab=tickets">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a></div>' +
             '<div class="h2-kp">' + kp.map((k) => '<div><b style="color:' + k[2] + '">' + k[1] + '</b><span>' + k[0] + '</span></div>').join('') + '</div>';
@@ -264,31 +267,55 @@
         const steps = (n, cls) => '<div class="h2-steps ' + (cls || '') + '">' + [1, 2, 3, 4, 5].map((i) => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
         const shortName = (v) => String(v || '').replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|นาย|นาง|นางสาว)\s*/i, '').split(' ')[0];
         const jobs = [];
+        // แบ่ง 2 ส่วน: งานที่ต้องจัดการ (ผู้ดูแล/ช่าง) · รายการของฉัน (ที่ตัวเองจอง/แจ้ง/ยืม)
+        // รายการของฉันเรียงตามความด่วน: 0 = ต้องลงมือเอง · 1 = ใกล้ถึง/กำลังใช้ · 2 = รอคนอื่น — ไม่ใช่เรียงตามประเภท (ของด่วนจมอยู่ล่างได้)
+        const keep = [], mine = [];
+        const IC = { car: ['fa-car-side', '#16a34a'], room: ['fa-calendar-check', '#0d9488'], fix: ['fa-wrench', '#2563eb'], loan: ['fa-right-left', '#ea580c'], stock: ['fa-box', '#7c3aed'] };
+        const ic = (k) => '<i class="h2-ic fas ' + IC[k][0] + '" style="--c:' + IC[k][1] + '"></i>';
+        const addMine = (pri, html) => mine.push([pri, mine.length, html]);
+        // ผู้ดูแลมือใหม่ไม่รู้ว่ากล่องนี้กดเข้าไปอนุมัติได้
+        const HINT = ' · <span style="color:var(--ptc-primary,#2563eb);font-weight:600">กดเพื่อเปิดดู ›</span>';
         // ผู้ดูแลรถ: รออนุมัติ / รอรับกุญแจ / เลยเวลาคืน — คนจองส่วนใหญ่จองวันเดียวกับที่ใช้ อนุมัติช้า = ออกรถไม่ทัน
-        if (cp + cr + co) {
-            jobs.push('<a class="h2-job" href="cars.html?tab=keep"><div class="h2-job-top"><b>รถที่คุณดูแล</b>' +
+        // รับกุญแจคืนได้จากหน้าแรกเลย (งานที่ผู้ดูแลทำบ่อยสุด) — แยกทีละคัน + ยืนยันก่อน กันกดผิดคัน · อนุมัติยังต้องเข้าหน้าผู้ดูแล (ต้องดูรายละเอียด/เลือกคนขับ)
+        const rl = (ctodo && ctodo.receive_list) || [];
+        if (rl.length) {
+            const now = new Date(), hm = (s) => String(s).slice(11, 16);
+            const rows = rl.map((x) => {
+                const late = new Date(String(x.end_at).replace(' ', 'T')) < now;
+                const note = x.status === 'returning' ? 'แจ้งคืนแล้ว รอรับกุญแจ' : late ? '<span style="color:#dc2626;font-weight:700">เลยเวลาคืน</span>' : 'คืน ' + hm(x.end_at);
+                return '<div class="h2-rcv"><span><b>' + esc(x.plate) + '</b> · ' + esc(shortName(x.who)) + ' · ' + note + '</span>' +
+                    '<button type="button" data-rcv="' + x.id + '" data-lbl="' + esc(x.plate + ' จาก ' + x.who) + '"><i class="fas fa-key"></i> รับคืน</button></div>';
+            }).join('');
+            // หัวกล่องหน้าตาเดียวกับกล่องห้องประชุม (กดไปหน้าผู้ดูแล) — ปุ่มรับคืนเป็นแถวเล็กข้างใต้ ไม่ให้แย่งสายตา
+            const nRcv = Math.max(rl.length, cr + co);
+            keep.push('<div class="h2-job" id="car-rcv"><a href="cars.html?tab=keep' + (cp ? '' : '&view=active') + '" style="display:block;color:inherit;text-decoration:none"><div class="h2-job-top">' + ic('car') + '<b>รถที่คุณดูแล</b>' +
+                '<span class="h2-pill" style="--c:#d97706">' + (cp + nRcv) + ' งาน</span></div>' +
+                '<div class="h2-job-sub" style="margin-bottom:2px">' + [cp ? 'รออนุมัติ ' + cp : '', 'รับกุญแจคืน ' + nRcv].filter(Boolean).join(' · ') + (nRcv > rl.length ? ' (แสดง ' + rl.length + ')' : '') + HINT + '</div></a>' + rows + '</div>');
+        } else if (cp + cr + co) {
+            keep.push('<a class="h2-job" href="cars.html?tab=keep"><div class="h2-job-top">' + ic('car') + '<b>รถที่คุณดูแล</b>' +
                 '<span class="h2-pill" style="--c:#d97706">' + (cp + cr + co) + ' งาน</span></div>' +
-                '<div class="h2-job-sub">' + [cp ? 'รออนุมัติ ' + cp : '', cr ? 'รอรับกุญแจคืน ' + cr : '', co ? 'เลยเวลาคืน ' + co : ''].filter(Boolean).join(' · ') + '</div></a>');
+                '<div class="h2-job-sub">' + [cp ? 'รออนุมัติ ' + cp : '', cr ? 'รอรับกุญแจคืน ' + cr : '', co ? 'เลยเวลาคืน ' + co : ''].filter(Boolean).join(' · ') + HINT + '</div></a>');
         }
         // ผู้ดูแลห้องประชุม: งานที่ต้องจัดการขึ้นก่อน (อนุมัติช้า = คนจองไม่รู้ว่าได้ห้องไหม)
         if (rp + rq) {
-            jobs.push('<a class="h2-job" href="rooms.html?tab=keep"><div class="h2-job-top"><b>ห้องประชุมที่คุณดูแล</b>' +
+            keep.push('<a class="h2-job" href="rooms.html?tab=keep"><div class="h2-job-top">' + ic('room') + '<b>ห้องประชุมที่คุณดูแล</b>' +
                 '<span class="h2-pill" style="--c:#d97706">' + (rp + rq) + ' งาน</span></div>' +
-                '<div class="h2-job-sub">' + [rp ? 'รออนุมัติ ' + rp : '', rq ? 'ต้องเตรียมของวันนี้ ' + rq : ''].filter(Boolean).join(' · ') + '</div></a>');
+                '<div class="h2-job-sub">' + [rp ? 'รออนุมัติ ' + rp : '', rq ? 'ต้องเตรียมของวันนี้ ' + rq : ''].filter(Boolean).join(' · ') + HINT + '</div></a>');
         }
         ticketList.slice(0, 5).forEach((l) => {
-            const lbl = STATUS_LABEL[l.status] || l.status;
-            const dot = STATUS_DOT[l.status] || '#94a3b8';
             const isTech = String(l.servicedById ?? '') === uidMe;
+            const lbl = l.status === 'Awaiting Confirmation' ? (isTech ? 'รอผู้แจ้งยืนยัน' : 'รอคุณยืนยัน') : (STATUS_LABEL[l.status] || l.status);
+            const dot = STATUS_DOT[l.status] || '#94a3b8';
             const who = l.status === 'Awaiting Confirmation' && !isTech ? 'กดยืนยันปิดงานได้เลย'
                 : isTech ? 'คุณเป็นช่างที่รับผิดชอบ' : (l.servicedBy ? 'ช่าง ' + esc(shortName(l.servicedBy)) : 'ยังไม่มีช่างรับเรื่อง');
-            jobs.push('<a class="h2-job" href="request.html?tab=tickets"><div class="h2-job-top"><b>' + esc(l.problem || ('งานซ่อม ' + l.id)) + '</b>' +
+            const html = '<a class="h2-job" href="request.html?tab=tickets"><div class="h2-job-top">' + ic('fix') + '<b>' + esc(l.problem || ('งานซ่อม ' + l.id)) + '</b>' +
                 '<span class="h2-pill" style="--c:' + dot + '">' + esc(lbl) + '</span></div>' +
-                '<div class="h2-job-sub">' + esc(l.id) + ' · ' + who + '</div>' + steps(STEP[l.status] || 3) + '</a>');
+                '<div class="h2-job-sub">' + esc(l.id) + ' · ' + who + '</div>' + steps(STEP[l.status] || 3) + '</a>';
+            if (isTech) keep.push(html); else addMine(l.status === 'Awaiting Confirmation' ? 0 : 2, html);
         });
         loanList.forEach((l) => {
             const pending = l.loan_status === 'Pending', ready = l.loan_status === 'Approved';
-            jobs.push('<a class="h2-job" href="loan.html?tab=mine"><div class="h2-job-top"><b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
+            addMine(ready ? 0 : pending ? 2 : 1, '<a class="h2-job" href="loan.html?tab=mine"><div class="h2-job-top">' + ic('loan') + '<b>ยืม ' + esc(l.asset_name || '-') + '</b>' +
                 '<span class="h2-pill" style="--c:' + (pending ? '#d97706' : ready ? '#2563eb' : '#7c3aed') + '">' + (pending ? 'รออนุมัติ' : ready ? 'รอรับของ' : 'ยืมอยู่') + '</span></div>' +
                 '<div class="h2-job-sub">' + (pending ? 'รอ IT อนุมัติ' : ready ? 'อนุมัติแล้ว ไปรับของที่ห้อง IT' : (l.end_date ? 'คืนภายใน ' + esc(l.end_date) : 'ยืมระยะยาว')) + '</div>' + steps(pending ? 2 : ready ? 3 : 5, pending || ready ? '' : 'loan') + '</a>');
         });
@@ -296,7 +323,7 @@
         const SSTEP = { pending: 1, approved: 2, ready: 3 }, SC = { pending: '#d97706', approved: '#2563eb', ready: '#0891b2' };
         const SSUB = { pending: 'รอผู้ดูแลสต็อกอนุมัติ', approved: 'อนุมัติแล้ว กำลังจัดของ', ready: 'ของพร้อมแล้ว — ไปรับที่ผู้ดูแลสต็อก' };
         stockList.forEach((r) => {
-            jobs.push('<a class="h2-job" href="stock_request.html?tab=mine"><div class="h2-job-top"><b>เบิก ' + esc(r.items || r.type_th) + '</b>' +
+            addMine(r.status === 'ready' ? 0 : 2, '<a class="h2-job" href="stock_request.html?tab=mine"><div class="h2-job-top">' + ic('stock') + '<b>เบิก ' + esc(r.items || r.type_th) + '</b>' +
                 '<span class="h2-pill" style="--c:' + (SC[r.status] || '#64748b') + '">' + esc(r.status_th) + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(r.code) + ' · ' + esc(SSUB[r.status] || '') + '</div>' + steps(SSTEP[r.status] || 1) + '</a>');
         });
@@ -312,23 +339,27 @@
             const st = b.status === 'rejected' ? ['ไม่อนุมัติ', '#dc2626', 'เหตุผล: ' + (b.cancel_reason || '-')]
                 : b.status === 'pending' ? ['รออนุมัติ', '#d97706', 'รอผู้ดูแลห้องอนุมัติ']
                 : [b.needs_approval ? 'อนุมัติแล้ว' : 'จองแล้ว', b.needs_approval ? '#16a34a' : '#0d9488', b.extras ? (b.prepared_at ? '✓ ผู้ดูแลเตรียมของแล้ว' : 'รอผู้ดูแลเตรียมของ') : ''];
-            jobs.push('<a class="h2-job" href="rooms.html?tab=mine"><div class="h2-job-top"><b>ห้อง ' + esc(b.room_name) + ' · ' + esc(b.title) + '</b>' +
+            addMine(b.status === 'rejected' ? 0 : b.status === 'pending' ? 2 : 1, '<a class="h2-job" href="rooms.html?tab=mine"><div class="h2-job-top">' + ic('room') + '<b>' + esc(b.room_name) + ' · ' + esc(b.title) + '</b>' +
                 '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + (st[2] ? ' · ' + esc(st[2]) : '') + '</div></a>');
         });
         // จองรถ: ไม่อนุมัติ / รอคืนกุญแจ / อนุมัติแล้ว (พร้อมคนขับ) / รออนุมัติ
         carList.forEach((b) => {
             const st = b.status === 'rejected' ? ['ไม่อนุมัติ', '#dc2626', 'เหตุผล: ' + (b.cancel_reason || '-')]
-                : b.status === 'returning' ? ['รอรับกุญแจ', '#0891b2', 'นำกุญแจไปคืนผู้ดูแลรถ']
-                : b.status === 'approved' && new Date(String(b.end_at).replace(' ', 'T')) < today ? ['เลยเวลาคืน', '#dc2626', 'ใช้เสร็จแล้วกด "คืนรถแล้ว" แล้วนำกุญแจไปคืน']
-                : b.status === 'approved' && new Date(String(b.start_at).replace(' ', 'T')) <= today ? ['กำลังใช้รถ', '#2563eb', 'ใช้เสร็จกด "คืนรถแล้ว"']
+                : b.status === 'returning' ? ['แจ้งคืนแล้ว', '#0891b2', 'นำกุญแจไปคืนผู้ดูแลรถ']
+                : b.status === 'approved' && new Date(String(b.end_at).replace(' ', 'T')) < today ? ['เลยเวลาคืน', '#dc2626', 'นำกุญแจไปคืนผู้ดูแลรถ']
+                : b.status === 'approved' && new Date(String(b.start_at).replace(' ', 'T')) <= today ? ['กำลังใช้รถ', '#2563eb', 'ใช้เสร็จ นำกุญแจไปคืนผู้ดูแลรถ']
                 : b.status === 'approved' ? ['อนุมัติแล้ว', '#16a34a', b.need_driver ? (b.driver_name ? 'คนขับ ' + b.driver_name : 'รอเลือกคนขับ') : 'ขับเอง']
                 : ['รออนุมัติ', '#d97706', 'รอผู้ดูแลรถอนุมัติ'];
-            jobs.push('<a class="h2-job" href="cars.html?tab=mine"><div class="h2-job-top"><b>รถ ' + esc(b.plate) + ' · ' + esc(b.purpose) + '</b>' +
+            addMine(['ไม่อนุมัติ', 'เลยเวลาคืน', 'แจ้งคืนแล้ว', 'กำลังใช้รถ'].includes(st[0]) ? 0 : st[0] === 'อนุมัติแล้ว' ? 1 : 2, '<a class="h2-job" href="cars.html?tab=mine"><div class="h2-job-top">' + ic('car') + '<b>' + esc(b.plate) + ' · ' + esc(b.purpose) + '</b>' +
                 '<span class="h2-pill" style="--c:' + st[1] + '">' + st[0] + '</span></div>' +
                 '<div class="h2-job-sub">' + esc(when(b.start_at, b.end_at)) + ' · ' + esc(st[2]) + '</div></a>');
         });
         const more = ticketList.length > 5 ? '<a class="h2-more" href="request.html?tab=tickets">ดูอีก ' + (ticketList.length - 5) + ' งาน</a>' : '';
+        mine.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        // คนทั่วไปมีแค่ "รายการของฉัน" → ไม่ต้องมีหัวข้อ · หัวข้อขึ้นเฉพาะตอนมีทั้ง 2 ส่วน
+        const both = keep.length && mine.length, sec = (t) => both ? '<div class="h2-sec">' + t + '</div>' : '';
+        jobs.push(keep.length ? sec('ต้องจัดการ') + keep.join('') : '', mine.length ? sec('รายการของฉัน') + mine.map((m) => m[2]).join('') : '');
         container.innerHTML = head + jobs.join('') + more;
     }
 
@@ -725,6 +756,37 @@
         }
     }
 
+    // หน้าแรกไม่โหลดตัวทำหน้าต่างยืนยัน (ให้หน้าเปิดเร็ว) — โหลดเฉพาะตอนกดรับกุญแจครั้งแรก
+    let swalReady = null;
+    function loadSwal() {
+        if (window.ptcSwal) return Promise.resolve();
+        if (swalReady) return swalReady;
+        const add = (src) => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+        swalReady = add('js/vendor/sweetalert2.min.js').then(() => add('js/enterprise-swal.js?v=20261021b')).then(() => add('js/ptc-swal-ui.js?v=20260530'));
+        return swalReady;
+    }
+    function wireCarReceive() {
+        const box = document.getElementById('car-rcv');
+        if (!box || box._w) return;
+        box._w = 1;
+        box.addEventListener('click', async (e) => {
+            const b = e.target.closest('[data-rcv]'); if (!b) return;
+            try { await loadSwal(); } catch (_) { if (!confirm('รับกุญแจ ' + b.dataset.lbl + ' คืนแล้ว?')) return; }
+            if (window.ptcSwal) {
+                const r = await ptcSwal().fire({ title: 'รับกุญแจคืนแล้ว?', text: b.dataset.lbl, showCancelButton: true, confirmButtonText: 'รับกุญแจคืนแล้ว', cancelButtonText: 'กลับ' });
+                if (!r.isConfirmed) return;
+            }
+            b.disabled = true;
+            try {
+                const fd = new FormData(); fd.append('action', 'car_receive'); fd.append('id', b.dataset.rcv);
+                const j = await (await fetch(API, { method: 'POST', body: fd })).json();
+                if (j.status !== 'success') throw new Error(j.message || 'ไม่สำเร็จ');
+                window.ptcToast ? ptcToast('success', 'รับกุญแจคืนแล้ว', b.dataset.lbl) : null;
+                boot();
+            } catch (er) { b.disabled = false; window.ptcAlert ? ptcAlert('error', 'รับคืนไม่สำเร็จ', er.message) : alert(er.message); }
+        });
+    }
+
     async function boot() {
         showStatusMessage('กำลังโหลด', 'เตรียมข้อมูลแดชบอร์ด...', true);
         try {
@@ -737,6 +799,7 @@
             renderKpi(data.kpi || {});
             renderMyStatus(data.my_tickets, data.my_loans, data.my_stock, data.my_rooms, data.room_todo, data.my_cars, data.car_todo);
             roomTodo = data.room_todo; carTodo = data.car_todo;
+            wireCarReceive();
 
             renderServices(data.services || []);
             renderNotifList(data.kpi || {});

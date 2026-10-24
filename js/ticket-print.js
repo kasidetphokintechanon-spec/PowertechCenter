@@ -10,7 +10,7 @@
         'Pending': 'รอรับเรื่อง', 'Received': 'รับเรื่องแล้ว', 'In Progress': 'กำลังซ่อม', 'Waiting for Parts': 'รออะไหล่',
         'Waiting Parts': 'รออะไหล่', 'Parts Received': 'ได้อะไหล่แล้ว', 'Waiting for User': 'รอผู้แจ้งตอบกลับ',
         'Sent to Vendor': 'ส่งซ่อมภายนอก', 'Temporary Fix': 'แก้ชั่วคราว', 'PR Submitted': 'ขอซื้อ (PR)', 'PO Issued': 'สั่งซื้อ (PO)',
-        'Awaiting Confirmation': 'รอผู้แจ้งยืนยัน', 'Completed': 'เสร็จสิ้น', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิก',
+        'Awaiting Confirmation': 'รอผู้แจ้งยืนยัน', 'Completed': 'เสร็จสิ้น', 'Unrepairable': 'ซ่อมไม่ได้', 'Cancelled': 'ยกเลิกแล้ว',
     };
     const DOC = {
         request:    { th: 'ใบแจ้งซ่อม',  en: 'Service Request',            color: '#2563eb' },
